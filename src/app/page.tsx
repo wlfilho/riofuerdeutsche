@@ -15,7 +15,9 @@ import {
   CalendarDays,
   User,
   Menu,
-  X
+  X,
+  Instagram,
+  Youtube
 } from "lucide-react";
 
 // NOTE: Using native img tags to avoid Remote Patterns config issues in Next.js dynamically
@@ -111,6 +113,16 @@ export default function Home() {
                 <Phone className="h-6 w-6 text-rio-green" />
                 <span>+55 (21) 99999-9999</span>
               </a>
+              <div className="flex gap-4 mt-2">
+                <a href="https://instagram.com/riofuerdeutsche" target="_blank" rel="noopener noreferrer" className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-full text-gray-600 hover:text-rio-green hover:bg-gray-100 transition-all">
+                  <Instagram className="h-[22px] w-[22px]" />
+                  <span className="sr-only">Instagram</span>
+                </a>
+                <a href="https://youtube.com/@riofuerdeutsche" target="_blank" rel="noopener noreferrer" className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-full text-gray-600 hover:text-rio-green hover:bg-gray-100 transition-all">
+                  <Youtube className="h-6 w-6" />
+                  <span className="sr-only">YouTube</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -122,7 +134,7 @@ export default function Home() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1483729558449-99ef09a8c325?q=80&w=2070&auto=format&fit=crop')",
+            backgroundImage: "url('/images/rio-background.webp')",
           }}
         >
           {/* Gradient Overlay for Text Readability */}
@@ -134,8 +146,8 @@ export default function Home() {
           <FadeIn direction="up">
             <div className="max-w-2xl space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-medium">
-                <ShieldCheck className="w-4 h-4 text-rio-yellow" />
-                <span>Offizielle & Zertifizierte Guides in Rio</span>
+                <HeartHandshake className="w-4 h-4 text-rio-yellow" />
+                <span>Dein deutschsprachiger Guide in Rio</span>
               </div>
 
               <h1 className="text-5xl lg:text-7xl font-heading font-bold text-white leading-[1.1] tracking-tight text-shadow-hero">
@@ -182,8 +194,8 @@ export default function Home() {
                 icon: ShieldCheck,
                 color: "text-rio-green",
                 bg: "bg-rio-green/10",
-                title: "Sicher & Zertifiziert",
-                desc: "Wir legen höchsten Wert auf deine Sicherheit. Als offiziell registrierte Tourguides kennen wir die absolut sicheren Routen."
+                title: "Absolut Sicher",
+                desc: "Wir legen höchsten Wert auf deine Sicherheit. Als Einheimische kennen wir die sicheren Routen und besten Zeiten für jeden Ort."
               },
               {
                 icon: CheckCircle2,
@@ -227,38 +239,43 @@ export default function Home() {
                 title: "Die Klassiker (Corcovado & Zuckerhut)",
                 duration: "8 Stunden",
                 desc: "Christusstatue, Zuckerhut, Selarón-Treppe & das historische Zentrum an einem Tag.",
-                img: "https://images.unsplash.com/photo-1590077428593-a55bb07c4665?q=80&w=2014&auto=format&fit=crop"
+                img: "/images/rio-klassiker.webp"
               },
               {
                 title: "Favela Tour Authentisch & Sicher",
                 duration: "4 Stunden",
                 desc: "Ein respektvoller Einblick in die Kultur der Favelas (z.B. Rocinha oder Vidigal).",
-                img: "https://images.unsplash.com/photo-1628100778619-3c32fc93910c?q=80&w=2070&auto=format&fit=crop"
+                img: "/images/rio-favela.webp"
               },
               {
                 title: "Tropischer Regenwald & Strände",
                 duration: "6 Stunden",
                 desc: "Tijuca-Nationalpark mit Wasserfällen und versteckte Traumstrände Rios.",
-                img: "https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?q=80&w=2126&auto=format&fit=crop"
+                img: "/images/rio-natur.webp"
               }
             ].map((tour, i) => (
-              <FadeIn key={i} delay={i * 0.15} direction="up" className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300">
-                <div className="relative h-64 overflow-hidden">
-                  <div className="absolute inset-0 bg-gray-900 group-hover:bg-opacity-20 transition-all z-10 opacity-0"></div>
-                  <img src={tour.img} alt={tour.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
-                  <div className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-rio-green flex items-center gap-1">
-                    <CalendarDays className="w-3 h-3" />
-                    {tour.duration}
+              <FadeIn key={i} delay={i * 0.15} direction="up">
+                <Link
+                  href="#kontakt"
+                  className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300 h-full"
+                >
+                  <div className="relative h-64 overflow-hidden">
+                    <div className="absolute inset-0 bg-gray-900 group-hover:bg-opacity-20 transition-all z-10 opacity-0"></div>
+                    <img src={tour.img} alt={tour.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                    <div className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-rio-green flex items-center gap-1">
+                      <CalendarDays className="w-3 h-3" />
+                      {tour.duration}
+                    </div>
                   </div>
-                </div>
-                <div className="p-8 flex flex-col flex-grow">
-                  <h4 className="text-xl font-bold font-heading text-gray-900 mb-3 line-clamp-2">{tour.title}</h4>
-                  <p className="text-gray-600 mb-6 flex-grow">{tour.desc}</p>
-                  <Link href="#kontakt" className="inline-flex items-center gap-2 text-rio-green font-semibold group-hover:-translate-y-0.5 transition-transform mt-auto">
-                    Details anfragen
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
+                  <div className="p-8 flex flex-col flex-grow">
+                    <h4 className="text-xl font-bold font-heading text-gray-900 mb-3 line-clamp-2">{tour.title}</h4>
+                    <p className="text-gray-600 mb-6 flex-grow">{tour.desc}</p>
+                    <div className="inline-flex items-center gap-2 text-rio-green font-semibold group-hover:-translate-y-0.5 transition-transform mt-auto">
+                      Details anfragen
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </Link>
               </FadeIn>
             ))}
           </div>
@@ -273,41 +290,44 @@ export default function Home() {
               <div className="absolute -top-6 -left-6 w-32 h-32 bg-rio-yellow/20 rounded-full blur-2xl"></div>
               <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-rio-green/10 rounded-full blur-3xl"></div>
               <img
-                src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=2070&auto=format&fit=crop"
+                src="/images/rio-cristo.webp"
                 alt="Rio de Janeiro Tour"
-                className="relative z-10 w-full rounded-tr-[80px] rounded-bl-[80px] rounded-tl-3xl rounded-br-3xl shadow-2xl"
+                className="relative z-10 w-full aspect-square object-cover object-left rounded-tr-[80px] rounded-bl-[80px] rounded-tl-3xl rounded-br-3xl shadow-2xl"
               />
-              <div className="absolute bottom-8 -left-8 bg-white p-5 rounded-2xl shadow-xl z-20 hidden md:flex items-center gap-4">
-                <div className="bg-rio-yellow/20 p-3 rounded-full">
-                  <Star className="text-rio-yellow w-8 h-8 fill-current" />
-                </div>
-                <div>
-                  <p className="font-bold text-2xl text-gray-900">5.0 / 5</p>
-                  <p className="text-sm text-gray-500 font-medium">Auf TripAdvisor</p>
-                </div>
-              </div>
             </FadeIn>
 
             <FadeIn direction="right" className="lg:w-1/2 space-y-6">
-              <h2 className="text-rio-green font-semibold tracking-wide uppercase text-sm mb-2">Über Uns</h2>
+              <h2 className="text-rio-green font-semibold tracking-wide uppercase text-sm mb-2">Über Mich</h2>
               <h3 className="text-3xl md:text-5xl font-heading font-bold text-gray-900 leading-tight">
-                Leidenschaft für Rio <br />in deiner Sprache
+                Hallo, ich bin <span className="text-rio-blue">Will!</span>
               </h3>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Willkommen bei <strong>Rio für Deutsche</strong>! Unser Ziel ist es, dir das wahre Rio de Janeiro zu zeigen. Abseits klassischer Touristenfallen und mit einer guten Mischung aus den Must-Sees und versteckten Insider-Tipps der echten &quot;Cariocas&quot;.
+                Als gebürtiger Carioca kenne ich Rio de Janeiro wie meine Westentasche. Von den berühmten Sehenswürdigkeiten bis zu den versteckten Juwelen, die nur Einheimische kennen – ich zeige Ihnen alles!
               </p>
-              <p className="text-lg text-gray-600 leading-relaxed mb-8">
-                Mit unserem zertifizierten Team aus deutschsprachigen Guides kannst du dich entspannen und diese pulsierende Stadt absolut sicher, authentisch und unterhaltsam erleben. Wir kümmern uns um Fahrten, Tickets und die perfekte Route!
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Ich spreche fließend Deutsch und liebe es, meine Leidenschaft für meine Heimatstadt mit Besuchern aus deutschsprachigen Ländern zu teilen. Mit mir erleben Sie Rio ohne Sprachbarrieren.
               </p>
 
-              <ul className="space-y-4 pt-4">
-                {['Abholung ab deinem Hotel / Hafen', 'Komfortable & klimatisierte Fahrzeuge', '100% Flexibilität bei Ablauf und Tempo'].map((li, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-rio-green shrink-0" />
-                    <span className="text-gray-700 font-medium">{li}</span>
-                  </li>
-                ))}
-              </ul>
+              <blockquote className="border-l-4 border-rio-yellow pl-4 py-2 my-6">
+                <p className="text-xl italic font-medium text-gray-800">
+                  &quot;Ich zeige Ihnen nicht nur Sehenswürdigkeiten, sondern auch die Seele Rios.&quot;
+                </p>
+              </blockquote>
+
+              <div className="flex flex-wrap gap-3 pt-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100/80 text-gray-800 text-sm font-medium">
+                  <MapPin className="w-4 h-4 text-rio-blue" />
+                  <span>Lokaler Guide</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100/80 text-gray-800 text-sm font-medium">
+                  <HeartHandshake className="w-4 h-4 text-rio-blue" />
+                  <span>Deutschsprachig</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100/80 text-gray-800 text-sm font-medium">
+                  <User className="w-4 h-4 text-rio-blue" />
+                  <span>Carioca</span>
+                </div>
+              </div>
             </FadeIn>
           </div>
         </div>
@@ -343,7 +363,7 @@ export default function Home() {
 
       {/* CALL TO ACTION */}
       <section id="kontakt" className="py-24 relative overflow-hidden bg-rio-green">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1483729558449-99ef09a8c325?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay opacity-10"></div>
+        <div className="absolute inset-0 bg-[url('/images/rio-background.webp')] bg-cover bg-center mix-blend-overlay opacity-10"></div>
         <div className="relative max-w-4xl mx-auto px-5 text-center">
           <FadeIn direction="up">
             <h2 className="text-3xl md:text-5xl font-heading font-bold text-white mb-6">Lust auf Rio bekommen?</h2>
@@ -372,7 +392,27 @@ export default function Home() {
                 <MapPin className="h-6 w-6 text-rio-yellow" />
                 <span>Rio<span className="text-rio-blue">FürDeutsche</span></span>
               </Link>
-              <p className="text-sm">Deine offiziellen, deutschsprachigen Tourguides in der wunderbaren Stadt Rio de Janeiro.</p>
+              <p className="text-sm mb-6">Dein deutschsprachiger Insider Guide in der wunderbaren Stadt Rio de Janeiro.</p>
+              <div className="flex items-center gap-3">
+                <a
+                  href="https://instagram.com/riofuerdeutsche"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-rio-green hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-rio-green shadow-lg"
+                >
+                  <Instagram className="h-[20px] w-[20px]" />
+                  <span className="sr-only">Instagram</span>
+                </a>
+                <a
+                  href="https://youtube.com/@riofuerdeutsche"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-rio-green hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-rio-green shadow-lg"
+                >
+                  <Youtube className="h-[20px] w-[20px]" />
+                  <span className="sr-only">YouTube</span>
+                </a>
+              </div>
             </div>
             <div>
               <h4 className="text-white font-bold mb-4">Quick Links</h4>
@@ -389,7 +429,7 @@ export default function Home() {
                 <li>Rio de Janeiro, Brasilien</li>
                 <li>WhatsApp: +55 (21) 99999-9999</li>
                 <li>Email: kontakt@riofuerdeutsche.example</li>
-                <li className="pt-2">Offizieller CADASTUR Registrierter Guide</li>
+                <li className="pt-2 text-rio-yellow">Dein Buddy in Rio!</li>
               </ul>
             </div>
           </div>
