@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthLayout from "@/components/AuthLayout";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function LoginPage() {
@@ -71,7 +71,7 @@ export default function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-6">
                 <AnimatePresence mode="wait">
                     {message && (
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
@@ -99,7 +99,7 @@ export default function LoginPage() {
                                     Bestätigungslink erneut senden
                                 </button>
                             )}
-                        </motion.div>
+                        </m.div>
                     )}
                 </AnimatePresence>
 

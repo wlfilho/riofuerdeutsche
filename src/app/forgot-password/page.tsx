@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import AuthLayout from "@/components/AuthLayout";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { Loader2, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 
 export default function ForgotPasswordPage() {
@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
             <form onSubmit={handleReset} className="space-y-6">
                 <AnimatePresence mode="wait">
                     {message && (
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
                                 <AlertCircle className="h-5 w-5 shrink-0" />
                             )}
                             <span className="leading-tight">{message.text}</span>
-                        </motion.div>
+                        </m.div>
                     )}
                 </AnimatePresence>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, MapPin } from "lucide-react";
 
@@ -22,7 +22,7 @@ export default function AuthLayout({
                 </Link>
             </div>
 
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -41,9 +41,9 @@ export default function AuthLayout({
                         {subtitle}
                     </p>
                 )}
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
@@ -52,7 +52,7 @@ export default function AuthLayout({
                 <div className="bg-white py-8 px-4 shadow-2xl shadow-rio-green/5 border border-gray-100 sm:rounded-3xl sm:px-10">
                     {children}
                 </div>
-            </motion.div>
+            </m.div>
         </div>
     );
 }
