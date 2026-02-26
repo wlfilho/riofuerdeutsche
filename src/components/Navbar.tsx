@@ -17,9 +17,11 @@ const navLinks = [
     {
         label: "Touren & Ausflüge",
         subLinks: [
-            { href: "/touren/klassiker", label: "Klassiker Tour" },
-            { href: "#", label: "Favela Tour (In Kürze)", disabled: true },
-            { href: "#", label: "Natur & Strände (In Kürze)", disabled: true },
+            { href: "/touren/klassiker", label: "🗺️ Klassiker Tour" },
+            { href: "#", label: "🏘️ Favela Tour", disabled: true },
+            { href: "#", label: "🌙 Rio by Night", disabled: true },
+            { href: "#", label: "🎉 Karneval Tour", disabled: true },
+            { href: "#", label: "🎯 Individuelle Tour", disabled: true },
         ],
     },
     { href: "/#ueber-uns", label: "Über Uns" },
