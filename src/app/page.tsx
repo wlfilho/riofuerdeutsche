@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
 import {
   ArrowRight,
@@ -13,8 +14,6 @@ import {
   CheckCircle2,
   CalendarDays,
   User,
-  Instagram,
-  Youtube,
 } from "lucide-react";
 
 // JSON-LD structured data for Google rich results
@@ -99,6 +98,7 @@ const tours = [
     desc: "Christusstatue, Zuckerhut, Selarón-Treppe & das historische Zentrum an einem Tag.",
     img: "/images/rio-klassiker.webp",
     alt: "Corcovado und Zuckerhut Tour in Rio de Janeiro",
+    link: "/touren/klassiker",
   },
   {
     title: "Favela Tour Authentisch & Sicher",
@@ -106,6 +106,7 @@ const tours = [
     desc: "Ein respektvoller Einblick in die Kultur der Favelas (z.B. Rocinha oder Vidigal).",
     img: "/images/rio-favela.webp",
     alt: "Authentische Favela Tour in Rio de Janeiro",
+    link: "#kontakt",
   },
   {
     title: "Tropischer Regenwald & Strände",
@@ -113,6 +114,7 @@ const tours = [
     desc: "Tijuca-Nationalpark mit Wasserfällen und versteckte Traumstrände Rios.",
     img: "/images/rio-natur.webp",
     alt: "Tijuca Nationalpark und Strände Tour in Rio de Janeiro",
+    link: "#kontakt",
   },
 ];
 
@@ -260,7 +262,7 @@ export default function Home() {
                   </p>
                 </FadeIn>
                 <FadeIn direction="right">
-                  <Link href="#kontakt" className="group inline-flex items-center gap-2 text-rio-blue font-medium hover:text-rio-blue/80 transition-colors">
+                  <Link href="/touren/klassiker" className="group inline-flex items-center gap-2 text-rio-blue font-medium hover:text-rio-blue/80 transition-colors">
                     Alle Touren ansehen
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
@@ -271,7 +273,7 @@ export default function Home() {
                 {tours.map((tour, i) => (
                   <FadeIn key={i} delay={i * 0.15} direction="up">
                     <Link
-                      href="#kontakt"
+                      href={tour.link}
                       className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300 h-full"
                     >
                       <div className="relative h-64 overflow-hidden">
@@ -292,7 +294,7 @@ export default function Home() {
                         <h3 className="text-xl font-bold font-heading text-gray-900 mb-3 line-clamp-2">{tour.title}</h3>
                         <p className="text-gray-600 mb-6 flex-grow">{tour.desc}</p>
                         <div className="inline-flex items-center gap-2 text-rio-green font-semibold group-hover:-translate-y-0.5 transition-transform mt-auto">
-                          Details anfragen
+                          {tour.link === "#kontakt" ? "Details anfragen" : "Zur Tour"}
                           <ArrowRight className="w-4 h-4" />
                         </div>
                       </div>
@@ -412,64 +414,7 @@ export default function Home() {
         </main>
 
         {/* FOOTER */}
-        <footer className="bg-gray-900 text-gray-400 py-12">
-          <div className="max-w-7xl mx-auto px-5 lg:px-8">
-            <div className="grid md:grid-cols-3 gap-8 mb-8 pb-8 border-b border-gray-800">
-              <div>
-                <Link href="/" className="font-heading font-black text-2xl tracking-tight text-white flex items-center gap-2 mb-4">
-                  <MapPin className="h-6 w-6 text-rio-yellow" />
-                  <span>Rio<span className="text-rio-blue">FürDeutsche</span></span>
-                </Link>
-                <p className="text-sm mb-6">Dein deutschsprachiger Insider Guide in der wunderbaren Stadt Rio de Janeiro.</p>
-                <div className="flex items-center gap-3">
-                  <a
-                    href="https://instagram.com/riofuerdeutsche"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-rio-green hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-rio-green shadow-lg"
-                  >
-                    <Instagram className="h-[20px] w-[20px]" />
-                    <span className="sr-only">Instagram</span>
-                  </a>
-                  <a
-                    href="https://youtube.com/@riofuerdeutsche"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-rio-green hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-rio-green shadow-lg"
-                  >
-                    <Youtube className="h-[20px] w-[20px]" />
-                    <span className="sr-only">YouTube</span>
-                  </a>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-white font-bold mb-4">Quick Links</h3>
-                <ul className="space-y-2 text-sm">
-                  <li><a href="#touren" className="hover:text-white transition-colors">Touren & Preise</a></li>
-                  <li><a href="#ueber-uns" className="hover:text-white transition-colors">Über Uns</a></li>
-                  <li><a href="#vorteile" className="hover:text-white transition-colors">Warum Wir?</a></li>
-                  <li><a href="#kontakt" className="hover:text-white transition-colors">Kontakt</a></li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-white font-bold mb-4">Kontakt</h3>
-                <ul className="space-y-2 text-sm">
-                  <li>Rio de Janeiro, Brasilien</li>
-                  <li>WhatsApp: +57 314 870 4374</li>
-                  <li>Email: kontakt@riofuerdeutsche.example</li>
-                  <li className="pt-2 text-rio-yellow">Dein Buddy in Rio!</li>
-                </ul>
-              </div>
-            </div>
-            <div className="flex flex-col md:flex-row justify-between items-center text-xs">
-              <p>&copy; {new Date().getFullYear()} Rio für Deutsche. Alle Rechte vorbehalten.</p>
-              <div className="flex gap-4 mt-4 md:mt-0">
-                <a href="#" className="hover:text-white transition-colors">Impressum</a>
-                <a href="#" className="hover:text-white transition-colors">Datenschutz</a>
-              </div>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </>
   );
