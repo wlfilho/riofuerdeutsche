@@ -131,6 +131,13 @@ export default function KlassikerTourPage() {
                 {/* SEÇÃO C — Grade de Atrações */}
                 <section className="py-20 bg-gray-50 border-t border-gray-100">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up" className="mb-12">
+                            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                                Die schönsten Sehenswürdigkeiten Rios —{" "}
+                                <span className="text-rio-green">auf einen Blick</span>
+                            </h2>
+                            <p className="text-gray-500 mt-3 text-lg">12 Highlights, von weltbekannten Ikonen bis zu versteckten Geheimtipps.</p>
+                        </FadeIn>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {attractions.map((attr, index) => (
                                 <FadeIn key={index} delay={index * 0.1} direction="up" className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 group flex flex-col h-full">
@@ -189,6 +196,13 @@ export default function KlassikerTourPage() {
                 {/* SEÇÃO E — Programas Sugeridos */}
                 <section className="py-20 bg-rio-sand/30 border-t border-gray-100 pb-28">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up" className="mb-12">
+                            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                                Fertige Tagesprogramme —{" "}
+                                <span className="text-rio-green">direkt buchbar</span>
+                            </h2>
+                            <p className="text-gray-500 mt-3 text-lg">6 kuratierte Vorschläge für jeden Reisestil. Oder ich stelle dir ein individuelles Programm zusammen.</p>
+                        </FadeIn>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {programs.map((program, index) => (
                                 <FadeIn key={index} delay={index * 0.15} direction="up" className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative group overflow-hidden">
