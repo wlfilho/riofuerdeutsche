@@ -29,7 +29,7 @@ const jsonLd = {
       url: "https://riofuerdeutsche.de",
       telephone: "+573148704374",
       email: "kontakt@riofuerdeutsche.example",
-      image: "https://riofuerdeutsche.de/images/rio-background.webp",
+      image: "/images/rio-background.webp",
       address: {
         "@type": "PostalAddress",
         addressLocality: "Rio de Janeiro",
@@ -114,7 +114,7 @@ const tours = [
     desc: "Tijuca-Nationalpark mit Wasserfällen und versteckte Traumstrände Rios.",
     img: "/images/rio-natur.webp",
     alt: "Tijuca Nationalpark und Strände Tour in Rio de Janeiro",
-    link: "#kontakt",
+    link: "/touren/natur-und-straende",
   },
 ];
 
@@ -313,7 +313,7 @@ export default function Home() {
                   <div className="absolute -top-6 -left-6 w-32 h-32 bg-rio-yellow/20 rounded-full blur-2xl"></div>
                   <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-rio-green/10 rounded-full blur-3xl"></div>
                   <Image
-                    src="/images/rio-cristo.webp"
+                    src="/images/cristo.webp"
                     alt="Christusstatue in Rio de Janeiro – Sicht aus der Nähe während einer Tour"
                     width={600}
                     height={600}
