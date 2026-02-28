@@ -96,7 +96,7 @@ const tours = [
     title: "Die Klassiker (Corcovado & Zuckerhut)",
     duration: "8 Stunden",
     desc: "Christusstatue, Zuckerhut, Selarón-Treppe & das historische Zentrum an einem Tag.",
-    img: "/images/rio-klassiker.webp",
+    img: "/images/home-pao-de-acucar.webp",
     alt: "Corcovado und Zuckerhut Tour in Rio de Janeiro",
     link: "/touren/klassiker",
   },
@@ -313,11 +313,12 @@ export default function Home() {
                   <div className="absolute -top-6 -left-6 w-32 h-32 bg-rio-yellow/20 rounded-full blur-2xl"></div>
                   <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-rio-green/10 rounded-full blur-3xl"></div>
                   <Image
-                    src="/images/cristo.webp"
+                    src="/images/rio-cristo.webp"
                     alt="Christusstatue in Rio de Janeiro – Sicht aus der Nähe während einer Tour"
                     width={600}
                     height={600}
                     className="relative z-10 w-full aspect-square object-cover object-left rounded-tr-[80px] rounded-bl-[80px] rounded-tl-3xl rounded-br-3xl shadow-2xl"
+                    style={{ objectPosition: "0% 80%" }}
                   />
                 </FadeIn>
 
