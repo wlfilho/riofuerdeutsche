@@ -10,6 +10,7 @@ import {
     Activity,
     CalendarDays,
 } from "lucide-react";
+import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
     title: "Natur & Strände in Rio de Janeiro — Wanderungen, Regenwald und geheime Strände | RioFürDeutsche",
@@ -219,6 +220,9 @@ export default function NaturTourPage() {
                         </div>
                     </div>
                 </section>
+
+                {/* SEÇÃO C.2 — Interne Linkagem */}
+                <AndereTouren currentSlug="natur-und-straende" />
 
                 {/* SEÇÃO D — CTA Final */}
                 <section className="py-24 relative overflow-hidden bg-rio-green">

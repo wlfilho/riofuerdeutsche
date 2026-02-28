@@ -22,6 +22,8 @@ const navLinks = [
             { href: "#", label: "🏘️ Favela Tour", disabled: true },
             { href: "#", label: "🌙 Rio by Night", disabled: true },
             { href: "#", label: "🎉 Karneval Tour", disabled: true },
+            { href: "#", label: "⚽ Fußball Tour", disabled: true },
+            { href: "#", label: "🗺️ Tagesausflüge", disabled: true },
             { href: "#", label: "🎯 Individuelle Tour", disabled: true },
         ],
     },
