@@ -7,10 +7,11 @@ interface Tour {
     emoji: string;
     title: string;
     description: string;
-    badge: string;
+    badges: string[];
     link: string;
     isExternal?: boolean;
     isComingSoon?: boolean;
+    comingSoonLabel?: string;
 }
 
 const allTours: Tour[] = [
@@ -19,7 +20,7 @@ const allTours: Tour[] = [
         emoji: "🏔️",
         title: "Klassiker Tour in Rio de Janeiro",
         description: "Die schönsten Sehenswürdigkeiten Rios an einem Tag — von Corcovado bis Arpoador.",
-        badge: "~8 Stunden",
+        badges: ["~8 Stunden", "12 Highlights"],
         link: "/touren/klassiker"
     },
     {
@@ -27,7 +28,7 @@ const allTours: Tour[] = [
         emoji: "🌿",
         title: "Natur & Strände in Rio de Janeiro",
         description: "Regenwald-Wanderungen, Gipfeltouren und versteckte Strände — Rios wilde Seite.",
-        badge: "3–8 Stunden",
+        badges: ["3–8 Stunden", "9 Highlights"],
         link: "/touren/natur-und-straende"
     },
     {
@@ -35,16 +36,26 @@ const allTours: Tour[] = [
         emoji: "🏘️",
         title: "Favela Tour in Rio de Janeiro",
         description: "Ein respektvoller Einblick in die Kultur der Favelas — authentisch und sicher.",
-        badge: "2–3 Stunden",
+        badges: ["2–3 Stunden", "2 Highlights"],
         link: "/touren/favela-tour",
         isComingSoon: false
+    },
+    {
+        slug: "kultur-geschichte",
+        emoji: "🏛️",
+        title: "Kultur & Geschichte Tour in Rio de Janeiro",
+        description: "Museen, historische Gebäude und die faszinierende Geschichte Rios — vom kolonialen Zentrum bis Praça Mauá.",
+        badges: ["4–6 Stunden", "10 Highlights"],
+        link: "https://wa.me/573148704374?text=Hallo! Ich interessiere mich für eine Kultur & Geschichte Tour in Rio. Kannst du mir mehr erzählen?",
+        isComingSoon: true,
+        comingSoonLabel: "Bald verfügbar"
     },
     {
         slug: "night",
         emoji: "🌙",
         title: "Nachtleben in Rio de Janeiro",
         description: "Samba, Lapa und das pulsierende Nachtleben Rios — erlebe die Stadt nach Sonnenuntergang.",
-        badge: "Bald verfügbar",
+        badges: ["3–4 Stunden", "Nachtleben"],
         link: "/#kontakt",
         isComingSoon: true
     },
@@ -53,7 +64,7 @@ const allTours: Tour[] = [
         emoji: "🎉",
         title: "Karneval Tour in Rio de Janeiro",
         description: "Das größte Fest der Welt hautnah erleben — ich zeige dir den echten Karneval von Rio.",
-        badge: "Bald verfügbar",
+        badges: ["4–6 Stunden", "Karneval"],
         link: "/#kontakt",
         isComingSoon: true
     },
@@ -62,7 +73,7 @@ const allTours: Tour[] = [
         emoji: "⚽",
         title: "Fußball Tour in Rio de Janeiro",
         description: "Maracanã, Museen und echte Fußball-Leidenschaft — erlebe Rio wie ein Fan.",
-        badge: "Bald verfügbar",
+        badges: ["3–4 Stunden", "Fußball"],
         link: "/#kontakt",
         isComingSoon: true
     },
@@ -71,7 +82,7 @@ const allTours: Tour[] = [
         emoji: "🗺️",
         title: "Tagesausflüge ab Rio de Janeiro",
         description: "Búzios, Ilha Grande, Paraty, Petrópolis und mehr — traumhafte Ausflüge rund um Rio.",
-        badge: "Bald verfügbar",
+        badges: ["Ganztägig", "Ab Rio"],
         link: "/#kontakt",
         isComingSoon: true
     },
@@ -80,7 +91,7 @@ const allTours: Tour[] = [
         emoji: "🎯",
         title: "Individuelle Tour in Rio de Janeiro",
         description: "Dein Wunschtag in Rio — du bestimmst die Orte, ich plane den perfekten Tag.",
-        badge: "Auf Anfrage",
+        badges: ["Flexibel", "Auf Anfrage"],
         link: "https://wa.me/573148704374?text=Hallo! Ich möchte eine individuelle Tour in Rio planen...",
         isExternal: true
     }
@@ -110,14 +121,18 @@ export default function AndereTouren({ currentSlug }: { currentSlug: string }) {
 
                                 <div className="flex justify-between items-start mb-4">
                                     <span className="text-3xl">{tour.emoji}</span>
-                                    <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-md 
-                                        ${tour.isComingSoon
-                                            ? 'bg-gray-200 text-gray-500'
-                                            : tour.slug === 'individuell'
-                                                ? 'bg-blue-50 text-blue-600'
-                                                : 'bg-rio-sand text-rio-green'}`}>
-                                        {tour.badge}
-                                    </span>
+                                    <div className="flex flex-wrap gap-1.5 justify-end max-w-[70%]">
+                                        {tour.isComingSoon && (
+                                            <span className="bg-gray-200 text-gray-500 text-[9px] font-bold px-2 py-0.5 rounded border border-gray-200 uppercase tracking-wider whitespace-nowrap">
+                                                {tour.comingSoonLabel || "In Kürze"}
+                                            </span>
+                                        )}
+                                        {tour.badges.map((badge) => (
+                                            <span key={badge} className="bg-white/90 px-2 py-0.5 rounded-full text-[9px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider whitespace-nowrap">
+                                                {badge}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 <h3 className="text-xl font-bold font-heading text-gray-900 mb-2">{tour.title}</h3>

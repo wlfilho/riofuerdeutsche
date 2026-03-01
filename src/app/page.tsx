@@ -88,13 +88,21 @@ const jsonLd = {
       touristType: "Deutschsprachige Touristen",
       provider: { "@id": "https://riofuerdeutsche.de/#business" },
     },
+    {
+      "@type": "TouristTrip",
+      name: "Kultur & Geschichte Tour in Rio de Janeiro",
+      description: "Museen, historische Gebäude und die faszinierende Geschichte Rios.",
+      touristType: "Deutschsprachige Touristen",
+      provider: { "@id": "https://riofuerdeutsche.de/#business" },
+    },
   ],
 };
 
 const tours = [
   {
     title: "Die Klassiker (Corcovado & Zuckerhut)",
-    duration: "8 Stunden",
+    duration: "~8 Stunden",
+    highlights: "12 Highlights",
     desc: "Christusstatue, Zuckerhut, Selarón-Treppe & das historische Zentrum an einem Tag.",
     img: "/images/home-pao-de-acucar.webp",
     alt: "Corcovado und Zuckerhut Tour in Rio de Janeiro",
@@ -102,7 +110,8 @@ const tours = [
   },
   {
     title: "Favela Tour Authentisch & Sicher",
-    duration: "4 Stunden",
+    duration: "2–3 Stunden",
+    highlights: "2 Highlights",
     desc: "Ein respektvoller Einblick in die Kultur der Favelas (z.B. Rocinha oder Vidigal).",
     img: "/images/rio-favela.webp",
     alt: "Authentische Favela Tour in Rio de Janeiro",
@@ -110,11 +119,22 @@ const tours = [
   },
   {
     title: "Tropischer Regenwald & Strände",
-    duration: "6 Stunden",
+    duration: "3–8 Stunden",
+    highlights: "9 Highlights",
     desc: "Tijuca-Nationalpark mit Wasserfällen und versteckte Traumstrände Rios.",
     img: "/images/rio-natur.webp",
     alt: "Tijuca Nationalpark und Strände Tour in Rio de Janeiro",
     link: "/touren/natur-und-straende",
+  },
+  {
+    title: "Kultur & Geschichte Tour (In Kürze)",
+    duration: "4–6 Stunden",
+    highlights: "10 Highlights",
+    desc: "Museen, historische Gebäude und die faszinierende Geschichte Rios — von der Kolonialzeit bis heute.",
+    img: "",
+    alt: "Kultur und Geschichte Tour in Rio de Janeiro",
+    link: "https://wa.me/573148704374?text=Hallo! Ich interessiere mich für eine Kultur & Geschichte Tour in Rio. Kannst du mir mehr erzählen?",
+    isComingSoon: true,
   },
 ];
 
@@ -270,37 +290,60 @@ export default function Home() {
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {tours.map((tour, i) => (
-                  <FadeIn key={i} delay={i * 0.15} direction="up">
-                    <Link
-                      href={tour.link}
-                      className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300 h-full"
-                    >
-                      <div className="relative h-64 overflow-hidden">
-                        <div className="absolute inset-0 bg-gray-900 group-hover:bg-opacity-20 transition-all z-10 opacity-0"></div>
-                        <Image
-                          src={tour.img}
-                          alt={tour.alt}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                        />
-                        <div className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-rio-green flex items-center gap-1">
-                          <CalendarDays className="w-3 h-3" />
-                          {tour.duration}
+                {tours.map((tour, i) => {
+                  const isComingSoon = (tour as any).isComingSoon;
+                  const CardWrapper = isComingSoon ? 'a' : Link;
+                  const wrapperProps = isComingSoon
+                    ? { href: tour.link, target: "_blank", rel: "noopener noreferrer" }
+                    : { href: tour.link };
+
+                  return (
+                    <FadeIn key={i} delay={i * 0.15} direction="up">
+                      <CardWrapper
+                        {...(wrapperProps as any)}
+                        className={`group flex flex-col rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border transition-all duration-300 h-full ${isComingSoon ? 'bg-gray-100/50 border-gray-200 opacity-90' : 'bg-white border-gray-100'
+                          }`}
+                      >
+                        <div className={`relative h-64 overflow-hidden ${isComingSoon ? 'bg-gray-200/50 flex items-center justify-center' : ''}`}>
+                          {!isComingSoon && (
+                            <div className="absolute inset-0 bg-gray-900 group-hover:bg-opacity-20 transition-all z-10 opacity-0"></div>
+                          )}
+                          {tour.img ? (
+                            <Image
+                              src={tour.img}
+                              alt={tour.alt}
+                              fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                              className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                            />
+                          ) : (
+                            <span className="text-5xl grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">🏛️</span>
+                          )}
+                          <div className="absolute top-4 right-4 z-20 flex flex-wrap gap-2 justify-end">
+                            {isComingSoon && (
+                              <div className="bg-gray-500/80 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-white border border-gray-400/30 uppercase tracking-wider">
+                                In Kürze
+                              </div>
+                            )}
+                            {[tour.duration, tour.highlights].map((badge) => (
+                              <div key={badge} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
+                                {badge}
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                      <div className="p-8 flex flex-col flex-grow">
-                        <h3 className="text-xl font-bold font-heading text-gray-900 mb-3 line-clamp-2">{tour.title}</h3>
-                        <p className="text-gray-600 mb-6 flex-grow">{tour.desc}</p>
-                        <div className="inline-flex items-center gap-2 text-rio-green font-semibold group-hover:-translate-y-0.5 transition-transform mt-auto">
-                          {tour.link === "#kontakt" ? "Details anfragen" : "Zur Tour"}
-                          <ArrowRight className="w-4 h-4" />
+                        <div className="p-8 flex flex-col flex-grow">
+                          <h3 className="text-xl font-bold font-heading text-gray-900 mb-3 line-clamp-2">{tour.title}</h3>
+                          <p className="text-gray-600 mb-6 flex-grow">{tour.desc}</p>
+                          <div className="inline-flex items-center gap-2 text-rio-green font-semibold group-hover:-translate-y-0.5 transition-transform mt-auto">
+                            {isComingSoon ? "Details anfragen" : "Zur Tour"}
+                            <ArrowRight className="w-4 h-4" />
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  </FadeIn>
-                ))}
+                      </CardWrapper>
+                    </FadeIn>
+                  );
+                })}
               </div>
             </div>
           </section>

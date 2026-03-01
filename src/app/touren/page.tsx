@@ -112,7 +112,7 @@ export default function TourenPage() {
                                             className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                                         />
                                         <div className="absolute top-4 right-4 z-20 flex flex-wrap gap-2 justify-end">
-                                            {['~8 Stunden', '12 Highlights', '6 Programme'].map((badge) => (
+                                            {['~8 Stunden', '12 Highlights'].map((badge) => (
                                                 <div key={badge} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
                                                     {badge}
                                                 </div>
@@ -147,7 +147,7 @@ export default function TourenPage() {
                                             className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                                         />
                                         <div className="absolute top-4 right-4 z-20 flex flex-wrap gap-2 justify-end">
-                                            {['3–8 Stunden', '9 Highlights', 'Alle Schwierigkeitsgrade'].map((badge) => (
+                                            {['3–8 Stunden', '9 Highlights'].map((badge) => (
                                                 <div key={badge} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
                                                     {badge}
                                                 </div>
@@ -182,7 +182,7 @@ export default function TourenPage() {
                                             className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                                         />
                                         <div className="absolute top-4 right-4 z-20 flex flex-wrap gap-2 justify-end">
-                                            {['2–3 Stunden', '2 Highlights', 'Respektvoll & Sicher'].map((badge) => (
+                                            {['2–3 Stunden', '2 Highlights'].map((badge) => (
                                                 <div key={badge} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
                                                     {badge}
                                                 </div>
@@ -211,35 +211,47 @@ export default function TourenPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[
                                 {
-                                    emoji: "🌙",
+                                    emoji: "�️",
+                                    title: "Kultur & Geschichte Tour in Rio de Janeiro",
+                                    desc: "Museen, historische Gebäude und die faszinierende Geschichte Rios — vom kolonialen Zentrum bis zur modernen Praça Mauá.",
+                                    msg: "Hallo! Ich interessiere mich für eine Kultur & Geschichte Tour in Rio. Kannst du mir mehr erzählen?",
+                                    badges: ["4–6 Stunden", "10 Highlights"]
+                                },
+                                {
+                                    emoji: "�🌙",
                                     title: "Rio by Night — Nachtleben in Rio de Janeiro",
                                     desc: "Samba in Lapa, Cocktails in Leblon und das pulsierende Nachtleben Rios — erlebe die Stadt nach Sonnenuntergang.",
                                     msg: "Hallo! Ich interessiere mich für eine Rio by Night Tour. Kannst du mir mehr erzählen?",
-                                    href: undefined as string | undefined
+                                    href: undefined as string | undefined,
+                                    badges: ["3–4 Stunden", "Nachtleben"]
                                 },
                                 {
                                     emoji: "🎉",
                                     title: "Karneval Tour in Rio de Janeiro",
                                     desc: "Das größte Fest der Welt hautnah erleben — Sambódromo, Blocos de Rua und die beste Karnevalsstimmung mit einem echten Carioca.",
-                                    msg: "Hallo! Ich interessiere mich für eine Karneval Tour in Rio. Kannst du mir mehr erzählen?"
+                                    msg: "Hallo! Ich interessiere mich für eine Karneval Tour in Rio. Kannst du mir mehr erzählen?",
+                                    badges: ["4–6 Stunden", "Karneval"]
                                 },
                                 {
                                     emoji: "⚽",
                                     title: "Fußball Tour in Rio de Janeiro",
                                     desc: "Maracanã, Fußball-Museen und echte Leidenschaft — erlebe Rio wie ein Fan und spüre die Begeisterung der Cariocas.",
-                                    msg: "Hallo! Ich interessiere mich für eine Fußball Tour in Rio. Kannst du mir mehr erzählen?"
+                                    msg: "Hallo! Ich interessiere mich für eine Fußball Tour in Rio. Kannst du mir mehr erzählen?",
+                                    badges: ["3–4 Stunden", "Fußball"]
                                 },
                                 {
                                     emoji: "🗺️",
                                     title: "Tagesausflüge ab Rio de Janeiro",
                                     desc: "Búzios, Ilha Grande, Paraty, Petrópolis und mehr — traumhafte Ausflüge rund um Rio, perfekt für einen Extra-Tag.",
-                                    msg: "Hallo! Ich interessiere mich für einen Tagesausflug ab Rio. Kannst du mir mehr erzählen?"
+                                    msg: "Hallo! Ich interessiere mich für einen Tagesausflug ab Rio. Kannst du mir mehr erzählen?",
+                                    badges: ["Ganztägig", "Ab Rio"]
                                 },
                                 {
                                     emoji: "🎯",
                                     title: "Individuelle Tour in Rio de Janeiro",
                                     desc: "Dein Wunschtag in Rio — du bestimmst die Orte und das Tempo, ich plane den perfekten Tag für dich.",
-                                    msg: "Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?"
+                                    msg: "Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?",
+                                    badges: ["Flexibel", "Auf Anfrage"]
                                 }
                             ].map((tour, i) => (
                                 <FadeIn key={i} delay={0.1 * i} direction="up" className="flex flex-col h-full">
@@ -250,6 +262,13 @@ export default function TourenPage() {
                                         >
                                             <div className="flex items-center justify-between mb-4">
                                                 <span className="text-3xl">{tour.emoji}</span>
+                                                <div className="flex flex-wrap gap-1.5 justify-end max-w-[70%]">
+                                                    {(tour as any).badges?.map((badge: string) => (
+                                                        <span key={badge} className="bg-white/90 px-2 py-0.5 rounded-full text-[9px] font-black text-rio-green border border-rio-green/10 uppercase tracking-tighter whitespace-nowrap">
+                                                            {badge}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
                                             <h3 className="text-xl font-bold font-heading text-gray-900 mb-3 group-hover:text-rio-green transition-colors">
                                                 {tour.title}
@@ -270,9 +289,16 @@ export default function TourenPage() {
                                         >
                                             <div className="flex items-center justify-between mb-4">
                                                 <span className="text-3xl">{tour.emoji}</span>
-                                                <span className="bg-gray-200 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded border border-gray-200 uppercase tracking-wider">
-                                                    In Kürze
-                                                </span>
+                                                <div className="flex flex-wrap gap-1.5 justify-end max-w-[70%]">
+                                                    <span className="bg-gray-200 text-gray-500 text-[9px] font-bold px-2 py-0.5 rounded border border-gray-200 uppercase tracking-wider whitespace-nowrap">
+                                                        In Kürze
+                                                    </span>
+                                                    {(tour as any).badges?.map((badge: string) => (
+                                                        <span key={badge} className="bg-white/90 px-2 py-0.5 rounded-full text-[9px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider whitespace-nowrap">
+                                                            {badge}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
                                             <h3 className="text-xl font-bold font-heading text-gray-900 mb-3 group-hover:text-rio-green transition-colors">
                                                 {tour.title}
@@ -353,14 +379,18 @@ export default function TourenPage() {
                                 <div className="columns-1 sm:columns-2 lg:columns-4 gap-x-8 gap-y-4 space-y-4 text-left">
                                     {[
                                         "Arcos da Lapa", "Arraial do Cabo", "Blocos de Rua", "Botanischer Garten",
-                                        "Botafogo", "Búzios", "Cristo Redentor (Corcovado)", "Escadaria Selarón",
+                                        "Botafogo", "Búzios", "Catedral Metropolitana", "CCBB (Centro Cultural Banco do Brasil)",
+                                        "Confeitaria Colombo", "Cristo Redentor (Corcovado)", "Escadaria Selarón",
                                         "Estádio Nilton Santos", "Ilha Grande", "Lagoa Rodrigo de Freitas",
-                                        "Lapa", "Leblon", "Maracanã (Stadion & Museum)", "Mirante Dona Marta",
-                                        "Morro Dois Irmãos", "Museu do Flamengo", "Niterói", "Paraty", "Parque Lage",
+                                        "Lapa", "Leblon", "MAC (Niterói)", "MAM (Museu de Arte Moderna)",
+                                        "Maracanã (Stadion & Museum)", "Mirante Dona Marta", "Morro Dois Irmãos",
+                                        "Museu de Arte do Rio (MAR)", "Museu do Amanhã", "Museu do Flamengo",
+                                        "Museu Nacional de Belas Artes", "Paraty", "Parque Lage",
                                         "Pedra Bonita", "Pedra da Gávea", "Pedra do Arpoador", "Petrópolis",
-                                        "Pico da Tijuca", "Praia de Grumari", "Praia Vermelha", "Prainha", "Rocinha",
-                                        "Sambódromo", "Santa Teresa", "São Januário (Vasco)", "Tijuca-Regenwald",
-                                        "Urca", "Vidigal", "Zuckerhut (Pão de Açúcar)"
+                                        "Pico da Tijuca", "Praia de Grumari", "Praia Vermelha", "Prainha",
+                                        "Real Gabinete Português de Leitura", "Rocinha",
+                                        "Sambódromo", "Santa Teresa", "São Januário (Vasco)", "Teatro Municipal",
+                                        "Tijuca-Regenwald", "Urca", "Vidigal", "Zuckerhut (Pão de Açúcar)"
                                     ].map((item) => (
                                         <div key={item} className="break-inside-avoid mb-4">
                                             <Link
