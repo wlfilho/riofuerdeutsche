@@ -92,6 +92,412 @@ export default function TourenPage() {
                         </FadeIn>
                     </div>
                 </section>
+
+                {/* SEÇÃO C — Alle Touren & Ausflüge */}
+                <section className="py-20 bg-gray-50 border-t border-gray-100">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up" className="mb-12">
+                            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                                Alle Touren & Ausflüge in Rio de Janeiro — <br className="hidden sm:block" />
+                                <span className="text-rio-green">dein Überblick</span>
+                            </h2>
+                        </FadeIn>
+
+                        {/* Cards Disponíveis (Páginas prontas) */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                            {/* Card 1 — Klassiker Tour */}
+                            <FadeIn direction="up" delay={0.1}>
+                                <div className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300 h-full">
+                                    <div className="relative h-64 lg:h-80 overflow-hidden">
+                                        <Image
+                                            src="/images/home-pao-de-acucar.webp"
+                                            alt="Klassiker Tour in Rio de Janeiro"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                        />
+                                        <div className="absolute top-4 right-4 z-20 flex flex-wrap gap-2 justify-end">
+                                            {['~8 Stunden', '12 Highlights', '6 Programme'].map((badge) => (
+                                                <div key={badge} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
+                                                    {badge}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="p-8 flex flex-col flex-grow">
+                                        <h3 className="text-2xl font-bold font-heading text-gray-900 mb-3">
+                                            🏔️ Klassiker Tour in Rio de Janeiro
+                                        </h3>
+                                        <p className="text-gray-600 mb-8 flex-grow leading-relaxed">
+                                            Die schönsten Sehenswürdigkeiten Rios an einem Tag — von Corcovado über den Zuckerhut bis zum Sonnenuntergang am Arpoador. 12 Highlights, 6 fertige Tagesprogramme.
+                                        </p>
+                                        <Link
+                                            href="/touren/klassiker"
+                                            className="inline-flex items-center gap-2 text-rio-green font-bold group-hover:translate-x-1 transition-transform"
+                                        >
+                                            Mehr erfahren <ChevronRight className="w-4 h-4" />
+                                        </Link>
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            {/* Card 2 — Natur & Strände */}
+                            <FadeIn direction="up" delay={0.2}>
+                                <div className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300 h-full">
+                                    <div className="relative h-64 lg:h-80 overflow-hidden">
+                                        <Image
+                                            src="/images/natur-und-straende.webp"
+                                            alt="Natur & Strände in Rio de Janeiro"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                        />
+                                        <div className="absolute top-4 right-4 z-20 flex flex-wrap gap-2 justify-end">
+                                            {['3–8 Stunden', '9 Highlights', 'Alle Schwierigkeitsgrade'].map((badge) => (
+                                                <div key={badge} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
+                                                    {badge}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="p-8 flex flex-col flex-grow">
+                                        <h3 className="text-2xl font-bold font-heading text-gray-900 mb-3">
+                                            🌿 Natur & Strände in Rio de Janeiro
+                                        </h3>
+                                        <p className="text-gray-600 mb-8 flex-grow leading-relaxed">
+                                            Regenwald-Wanderungen, Gipfeltouren und versteckte Strände — Rios wilde Seite abseits der Touristenpfade. Von leicht bis anspruchsvoll.
+                                        </p>
+                                        <Link
+                                            href="/touren/natur-und-straende"
+                                            className="inline-flex items-center gap-2 text-rio-green font-bold group-hover:translate-x-1 transition-transform"
+                                        >
+                                            Mehr erfahren <ChevronRight className="w-4 h-4" />
+                                        </Link>
+                                    </div>
+                                </div>
+                            </FadeIn>
+                        </div>
+
+                        {/* Cards "In Kürze" */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[
+                                {
+                                    emoji: "🏘️",
+                                    title: "Favela Tour in Rio de Janeiro",
+                                    desc: "Ein respektvoller Einblick in die Kultur und den Alltag der Favelas — authentisch und sicher mit lokalem Guide.",
+                                    msg: "Hallo! Ich interessiere mich für eine Favela Tour in Rio. Kannst du mir mehr erzählen?"
+                                },
+                                {
+                                    emoji: "🌙",
+                                    title: "Rio by Night — Nachtleben in Rio de Janeiro",
+                                    desc: "Samba in Lapa, Cocktails in Leblon und das pulsierende Nachtleben Rios — erlebe die Stadt nach Sonnenuntergang.",
+                                    msg: "Hallo! Ich interessiere mich für eine Rio by Night Tour. Kannst du mir mehr erzählen?"
+                                },
+                                {
+                                    emoji: "🎉",
+                                    title: "Karneval Tour in Rio de Janeiro",
+                                    desc: "Das größte Fest der Welt hautnah erleben — Sambódromo, Blocos de Rua und die beste Karnevalsstimmung mit einem echten Carioca.",
+                                    msg: "Hallo! Ich interessiere mich für eine Karneval Tour in Rio. Kannst du mir mehr erzählen?"
+                                },
+                                {
+                                    emoji: "⚽",
+                                    title: "Fußball Tour in Rio de Janeiro",
+                                    desc: "Maracanã, Fußball-Museen und echte Leidenschaft — erlebe Rio wie ein Fan und spüre die Begeisterung der Cariocas.",
+                                    msg: "Hallo! Ich interessiere mich für eine Fußball Tour in Rio. Kannst du mir mehr erzählen?"
+                                },
+                                {
+                                    emoji: "🗺️",
+                                    title: "Tagesausflüge ab Rio de Janeiro",
+                                    desc: "Búzios, Ilha Grande, Paraty, Petrópolis und mehr — traumhafte Ausflüge rund um Rio, perfekt für einen Extra-Tag.",
+                                    msg: "Hallo! Ich interessiere mich für einen Tagesausflug ab Rio. Kannst du mir mehr erzählen?"
+                                },
+                                {
+                                    emoji: "🎯",
+                                    title: "Individuelle Tour in Rio de Janeiro",
+                                    desc: "Dein Wunschtag in Rio — du bestimmst die Orte und das Tempo, ich plane den perfekten Tag für dich.",
+                                    msg: "Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?"
+                                }
+                            ].map((tour, i) => (
+                                <FadeIn key={i} delay={0.1 * i} direction="up" className="flex flex-col h-full">
+                                    <a
+                                        href={`https://wa.me/573148704374?text=${encodeURIComponent(tour.msg)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="group p-8 rounded-3xl bg-gray-100/50 border border-gray-200 hover:border-rio-yellow hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col h-full"
+                                    >
+                                        <div className="flex items-center justify-between mb-4">
+                                            <span className="text-3xl">{tour.emoji}</span>
+                                            <span className="bg-gray-200 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded border border-gray-200 uppercase tracking-wider">
+                                                In Kürze
+                                            </span>
+                                        </div>
+                                        <h3 className="text-xl font-bold font-heading text-gray-900 mb-3 group-hover:text-rio-green transition-colors">
+                                            {tour.title}
+                                        </h3>
+                                        <p className="text-gray-500 text-sm mb-6 flex-grow leading-relaxed">
+                                            {tour.desc}
+                                        </p>
+                                        <div className="flex items-center gap-2 text-rio-green font-bold text-sm">
+                                            Details anfragen <ChevronRight className="w-4 h-4" />
+                                        </div>
+                                    </a>
+                                </FadeIn>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* SEÇÃO D — Trust / Warum Guide */}
+                <section className="py-24 bg-rio-green relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[url('/images/rio-background.webp')] bg-cover bg-center mix-blend-overlay opacity-10"></div>
+                    <div className="relative z-10 max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up" className="text-center mb-16">
+                            <h2 className="text-3xl lg:text-5xl font-heading font-black text-white leading-tight">
+                                Warum eine geführte Tour <br className="hidden sm:block" />
+                                <span className="text-rio-yellow">in Rio de Janeiro?</span>
+                            </h2>
+                        </FadeIn>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {[
+                                {
+                                    emoji: "🛡️",
+                                    title: "Sicherheit an erster Stelle",
+                                    text: "Rio ist eine wunderschöne Stadt — aber man muss wissen, wo man sicher unterwegs ist. Als Einheimischer kenne ich jede Ecke und sorge dafür, dass du dich nie unsicher fühlst."
+                                },
+                                {
+                                    emoji: "🇩🇪",
+                                    title: "Komplett auf Deutsch",
+                                    text: "Ich habe in Deutschland gelebt und spreche fließend Deutsch. Keine Sprachbarrieren, keine Missverständnisse — du bekommst alle Insider-Tipps in deiner Muttersprache."
+                                },
+                                {
+                                    emoji: "💡",
+                                    title: "Echtes Insider-Wissen",
+                                    text: "Vergiss die typischen Touristenfallen. Als gebürtiger Carioca zeige ich dir die Orte, die nur Einheimische kennen — von versteckten Aussichtspunkten bis zu den besten Restaurants."
+                                },
+                                {
+                                    emoji: "🎯",
+                                    title: "Flexibel & individuell",
+                                    text: "Jede Tour wird an deine Wünsche angepasst. Ob Tempo, Interessen oder spontane Änderungen — dein Tag, deine Regeln. Ich plane, du genießt."
+                                }
+                            ].map((item, i) => (
+                                <FadeIn key={i} delay={0.15 * i} direction="up" className="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl group hover:bg-white/20 transition-all duration-300">
+                                    <div className="text-4xl mb-6 group-hover:scale-110 transition-transform duration-300 inline-block">
+                                        {item.emoji}
+                                    </div>
+                                    <h3 className="text-xl font-bold font-heading text-rio-yellow mb-4">
+                                        {item.title}
+                                    </h3>
+                                    <p className="text-rio-sand/90 leading-relaxed text-sm">
+                                        {item.text}
+                                    </p>
+                                </FadeIn>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* SEÇÃO E — Listagem de Pontos Turísticos por Categoria */}
+                <section className="py-24 bg-white border-t border-gray-100">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up" className="mb-16">
+                            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                                Alle Sehenswürdigkeiten & Erlebnisse in Rio de Janeiro
+                            </h2>
+                            <p className="text-gray-500 mt-4 text-lg max-w-2xl leading-relaxed">
+                                Entdecke Rio de Janeiro nach Kategorien — von weltberühmten Ikonen bis zu exklusiven lokalen Geheimtipps.
+                            </p>
+                        </FadeIn>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
+                            {/* Categoria 1 — Klassiker */}
+                            <FadeIn direction="up" delay={0.1}>
+                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
+                                    �️ Klassiker — Sehenswürdigkeiten
+                                </h3>
+                                <ul className="space-y-3">
+                                    {[
+                                        "Cristo Redentor (Corcovado)", "Zuckerhut (Pão de Açúcar)", "Escadaria Selarón",
+                                        "Santa Teresa", "Mirante Dona Marta", "Pedra do Arpoador",
+                                        "Botanischer Garten", "Parque Lage", "Lagoa Rodrigo de Freitas",
+                                        "Urca", "Arcos da Lapa"
+                                    ].map((item) => (
+                                        <li key={item}>
+                                            <Link
+                                                href="#kontakt"
+                                                title={item}
+                                                className="text-rio-blue hover:text-rio-green transition-colors hover:underline decoration-2 underline-offset-4"
+                                            >
+                                                {item}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </FadeIn>
+
+                            {/* Categoria 2 — Natur & Strände */}
+                            <FadeIn direction="up" delay={0.2}>
+                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
+                                    �🌿 Natur & Strände
+                                </h3>
+                                <ul className="space-y-3">
+                                    {[
+                                        "Tijuca-Regenwald", "Pico da Tijuca", "Pedra Bonita",
+                                        "Pedra da Gávea", "Morro Dois Irmãos", "Praia Vermelha",
+                                        "Prainha", "Praia de Grumari", "Botanischer Garten"
+                                    ].map((item) => (
+                                        <li key={item}>
+                                            <Link
+                                                href="#kontakt"
+                                                title={item}
+                                                className="text-rio-green hover:text-rio-blue transition-colors hover:underline decoration-2 underline-offset-4"
+                                            >
+                                                {item}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </FadeIn>
+
+                            {/* Categoria 3 — Favela Touren */}
+                            <FadeIn direction="up" delay={0.3}>
+                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
+                                    🏘️ Favela Touren
+                                </h3>
+                                <ul className="space-y-3">
+                                    {["Rocinha", "Vidigal"].map((item) => (
+                                        <li key={item}>
+                                            <Link
+                                                href="#kontakt"
+                                                title={item}
+                                                className="text-rio-blue hover:text-rio-green transition-colors hover:underline decoration-2 underline-offset-4"
+                                            >
+                                                {item}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </FadeIn>
+
+                            {/* Categoria 4 — Fußball */}
+                            <FadeIn direction="up" delay={0.15}>
+                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
+                                    ⚽ Fußball in Rio de Janeiro
+                                </h3>
+                                <ul className="space-y-3">
+                                    {[
+                                        "Maracanã (Stadion & Museum)", "Museu do Flamengo",
+                                        "São Januário (Vasco)", "Estádio Nilton Santos (Botafogo)"
+                                    ].map((item) => (
+                                        <li key={item}>
+                                            <Link
+                                                href="#kontakt"
+                                                title={item}
+                                                className="text-rio-green hover:text-rio-blue transition-colors hover:underline decoration-2 underline-offset-4"
+                                            >
+                                                {item}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </FadeIn>
+
+                            {/* Categoria 5 — Nightlife */}
+                            <FadeIn direction="up" delay={0.25}>
+                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
+                                    🌙 Nightlife in Rio de Janeiro
+                                </h3>
+                                <ul className="space-y-3">
+                                    {["Lapa", "Leblon", "Botafogo"].map((item) => (
+                                        <li key={item}>
+                                            <Link
+                                                href="#kontakt"
+                                                title={item}
+                                                className="text-rio-blue hover:text-rio-green transition-colors hover:underline decoration-2 underline-offset-4"
+                                            >
+                                                {item}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </FadeIn>
+
+                            {/* Categoria 6 — Karneval */}
+                            <FadeIn direction="up" delay={0.35}>
+                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
+                                    🎉 Karneval in Rio de Janeiro
+                                </h3>
+                                <ul className="space-y-3">
+                                    {["Sambódromo", "Blocos de Rua"].map((item) => (
+                                        <li key={item}>
+                                            <Link
+                                                href="#kontakt"
+                                                title={item}
+                                                className="text-rio-green hover:text-rio-blue transition-colors hover:underline decoration-2 underline-offset-4"
+                                            >
+                                                {item}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </FadeIn>
+
+                            {/* Categoria 7 — Tagesausflüge */}
+                            <FadeIn direction="up" delay={0.4}>
+                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
+                                    🗺️ Tagesausflüge ab Rio de Janeiro
+                                </h3>
+                                <ul className="space-y-3">
+                                    {[
+                                        "Búzios", "Ilha Grande", "Paraty", "Petrópolis",
+                                        "Niterói", "Arraial do Cabo"
+                                    ].map((item) => (
+                                        <li key={item}>
+                                            <Link
+                                                href="#kontakt"
+                                                title={item}
+                                                className="text-rio-blue hover:text-rio-green transition-colors hover:underline decoration-2 underline-offset-4"
+                                            >
+                                                {item}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </FadeIn>
+                        </div>
+                    </div>
+                </section>
+
+                {/* SEÇÃO F — CTA Final */}
+                <section className="py-24 relative overflow-hidden bg-rio-green">
+                    <div className="absolute inset-0 bg-[url('/images/rio-background.webp')] bg-cover bg-center mix-blend-overlay opacity-10"></div>
+                    <div className="relative max-w-4xl mx-auto px-5 text-center">
+                        <FadeIn direction="up">
+                            <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6">
+                                Dein Wunschtag in Rio — <br className="hidden sm:block" />
+                                <span className="text-rio-yellow">ich plane ihn für dich.</span>
+                            </h2>
+                            <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
+                                Schreib mir auf WhatsApp und wir stellen gemeinsam dein perfektes Programm zusammen.
+                            </p>
+                            <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                <a
+                                    href="https://wa.me/573148704374"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
+                                >
+                                    <Phone className="w-5 h-5" />
+                                    WhatsApp an uns
+                                </a>
+                                <Link
+                                    href="/#kontakt"
+                                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
+                                >
+                                    Zum Kontaktformular
+                                </Link>
+                            </div>
+                        </FadeIn>
+                    </div>
+                </section>
             </main>
 
             <Footer />
