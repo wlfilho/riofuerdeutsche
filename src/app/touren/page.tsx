@@ -295,174 +295,40 @@ export default function TourenPage() {
                     </div>
                 </section>
 
-                {/* SEÇÃO E — Listagem de Pontos Turísticos por Categoria */}
-                <section className="py-24 bg-white border-t border-gray-100">
-                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
-                        <FadeIn direction="up" className="mb-16">
-                            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                {/* SEÇÃO E — Listagem Completa de Pontos Turísticos */}
+                <section className="py-20 bg-white border-t border-gray-100">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8 text-center">
+                        <FadeIn direction="up">
+                            <h2 className="text-3xl lg:text-4xl font-heading font-black text-gray-900 mb-12">
                                 Alle Sehenswürdigkeiten & Erlebnisse in Rio de Janeiro
                             </h2>
-                            <p className="text-gray-500 mt-4 text-lg max-w-2xl leading-relaxed">
-                                Entdecke Rio de Janeiro nach Kategorien — von weltberühmten Ikonen bis zu exklusiven lokalen Geheimtipps.
-                            </p>
+
+                            <div className="max-w-6xl mx-auto px-5 lg:px-8">
+                                <div className="columns-1 sm:columns-2 lg:columns-4 gap-x-8 gap-y-4 space-y-4 text-left">
+                                    {[
+                                        "Arcos da Lapa", "Arraial do Cabo", "Blocos de Rua", "Botanischer Garten",
+                                        "Botafogo", "Búzios", "Cristo Redentor (Corcovado)", "Escadaria Selarón",
+                                        "Estádio Nilton Santos", "Ilha Grande", "Lagoa Rodrigo de Freitas",
+                                        "Lapa", "Leblon", "Maracanã (Stadion & Museum)", "Mirante Dona Marta",
+                                        "Morro Dois Irmãos", "Museu do Flamengo", "Niterói", "Paraty", "Parque Lage",
+                                        "Pedra Bonita", "Pedra da Gávea", "Pedra do Arpoador", "Petrópolis",
+                                        "Pico da Tijuca", "Praia de Grumari", "Praia Vermelha", "Prainha", "Rocinha",
+                                        "Sambódromo", "Santa Teresa", "São Januário (Vasco)", "Tijuca-Regenwald",
+                                        "Urca", "Vidigal", "Zuckerhut (Pão de Açúcar)"
+                                    ].map((item) => (
+                                        <div key={item} className="break-inside-avoid mb-4">
+                                            <Link
+                                                href="#kontakt"
+                                                title={item}
+                                                className="text-rio-green font-bold hover:underline decoration-2 underline-offset-4 transition-all text-sm lg:text-base leading-relaxed"
+                                            >
+                                                {item}
+                                            </Link>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </FadeIn>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
-                            {/* Categoria 1 — Klassiker */}
-                            <FadeIn direction="up" delay={0.1}>
-                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
-                                    �️ Klassiker — Sehenswürdigkeiten
-                                </h3>
-                                <ul className="space-y-3">
-                                    {[
-                                        "Cristo Redentor (Corcovado)", "Zuckerhut (Pão de Açúcar)", "Escadaria Selarón",
-                                        "Santa Teresa", "Mirante Dona Marta", "Pedra do Arpoador",
-                                        "Botanischer Garten", "Parque Lage", "Lagoa Rodrigo de Freitas",
-                                        "Urca", "Arcos da Lapa"
-                                    ].map((item) => (
-                                        <li key={item}>
-                                            <Link
-                                                href="#kontakt"
-                                                title={item}
-                                                className="text-rio-blue hover:text-rio-green transition-colors hover:underline decoration-2 underline-offset-4"
-                                            >
-                                                {item}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </FadeIn>
-
-                            {/* Categoria 2 — Natur & Strände */}
-                            <FadeIn direction="up" delay={0.2}>
-                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
-                                    �🌿 Natur & Strände
-                                </h3>
-                                <ul className="space-y-3">
-                                    {[
-                                        "Tijuca-Regenwald", "Pico da Tijuca", "Pedra Bonita",
-                                        "Pedra da Gávea", "Morro Dois Irmãos", "Praia Vermelha",
-                                        "Prainha", "Praia de Grumari", "Botanischer Garten"
-                                    ].map((item) => (
-                                        <li key={item}>
-                                            <Link
-                                                href="#kontakt"
-                                                title={item}
-                                                className="text-rio-green hover:text-rio-blue transition-colors hover:underline decoration-2 underline-offset-4"
-                                            >
-                                                {item}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </FadeIn>
-
-                            {/* Categoria 3 — Favela Touren */}
-                            <FadeIn direction="up" delay={0.3}>
-                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
-                                    🏘️ Favela Touren
-                                </h3>
-                                <ul className="space-y-3">
-                                    {["Rocinha", "Vidigal"].map((item) => (
-                                        <li key={item}>
-                                            <Link
-                                                href="#kontakt"
-                                                title={item}
-                                                className="text-rio-blue hover:text-rio-green transition-colors hover:underline decoration-2 underline-offset-4"
-                                            >
-                                                {item}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </FadeIn>
-
-                            {/* Categoria 4 — Fußball */}
-                            <FadeIn direction="up" delay={0.15}>
-                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
-                                    ⚽ Fußball in Rio de Janeiro
-                                </h3>
-                                <ul className="space-y-3">
-                                    {[
-                                        "Maracanã (Stadion & Museum)", "Museu do Flamengo",
-                                        "São Januário (Vasco)", "Estádio Nilton Santos (Botafogo)"
-                                    ].map((item) => (
-                                        <li key={item}>
-                                            <Link
-                                                href="#kontakt"
-                                                title={item}
-                                                className="text-rio-green hover:text-rio-blue transition-colors hover:underline decoration-2 underline-offset-4"
-                                            >
-                                                {item}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </FadeIn>
-
-                            {/* Categoria 5 — Nightlife */}
-                            <FadeIn direction="up" delay={0.25}>
-                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
-                                    🌙 Nightlife in Rio de Janeiro
-                                </h3>
-                                <ul className="space-y-3">
-                                    {["Lapa", "Leblon", "Botafogo"].map((item) => (
-                                        <li key={item}>
-                                            <Link
-                                                href="#kontakt"
-                                                title={item}
-                                                className="text-rio-blue hover:text-rio-green transition-colors hover:underline decoration-2 underline-offset-4"
-                                            >
-                                                {item}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </FadeIn>
-
-                            {/* Categoria 6 — Karneval */}
-                            <FadeIn direction="up" delay={0.35}>
-                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
-                                    🎉 Karneval in Rio de Janeiro
-                                </h3>
-                                <ul className="space-y-3">
-                                    {["Sambódromo", "Blocos de Rua"].map((item) => (
-                                        <li key={item}>
-                                            <Link
-                                                href="#kontakt"
-                                                title={item}
-                                                className="text-rio-green hover:text-rio-blue transition-colors hover:underline decoration-2 underline-offset-4"
-                                            >
-                                                {item}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </FadeIn>
-
-                            {/* Categoria 7 — Tagesausflüge */}
-                            <FadeIn direction="up" delay={0.4}>
-                                <h3 className="text-xl font-bold font-heading text-gray-900 mb-6 flex items-center gap-2">
-                                    🗺️ Tagesausflüge ab Rio de Janeiro
-                                </h3>
-                                <ul className="space-y-3">
-                                    {[
-                                        "Búzios", "Ilha Grande", "Paraty", "Petrópolis",
-                                        "Niterói", "Arraial do Cabo"
-                                    ].map((item) => (
-                                        <li key={item}>
-                                            <Link
-                                                href="#kontakt"
-                                                title={item}
-                                                className="text-rio-blue hover:text-rio-green transition-colors hover:underline decoration-2 underline-offset-4"
-                                            >
-                                                {item}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </FadeIn>
-                        </div>
                     </div>
                 </section>
 
