@@ -244,10 +244,12 @@ export default function KlassikerTourPage() {
                                     <span>Privattouren auf Deutsch · 8 Stunden · 3–4 Highlights pro Tag</span>
                                 </div>
 
-                                <h1 className="text-4xl lg:text-5xl xl:text-6xl font-heading font-black text-white leading-[1.15] tracking-tight">
-                                    Rio de Janeiro entdecken: <br />
-                                    <span className="text-rio-yellow text-3xl lg:text-4xl xl:text-5xl font-bold">Die schönsten Sehenswürdigkeiten mit einem echten Carioca</span>
+                                <h1 className="text-4xl lg:text-[clamp(28px,3.5vw,52px)] font-heading font-black text-white leading-[1.15] tracking-tight whitespace-normal lg:whitespace-nowrap">
+                                    Rio de Janeiro entdecken
                                 </h1>
+                                <p className="text-xl lg:text-2xl xl:text-3xl font-bold text-rio-yellow mt-4">
+                                    Die schönsten Sehenswürdigkeiten mit einem echten Carioca
+                                </p>
 
                                 <div className="pt-6">
                                     <a
@@ -267,22 +269,24 @@ export default function KlassikerTourPage() {
 
                 {/* SEÇÃO B — Texto Introdutório (Atrações) */}
                 <section className="py-20 lg:py-28 bg-white">
-                    <div className="max-w-4xl mx-auto px-5 lg:px-8">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up">
-                            <article className="prose prose-lg prose-gray max-w-none text-gray-600 space-y-6 leading-relaxed">
-                                <p className="text-xl lg:text-2xl font-light text-gray-900 leading-snug">
+                            <div className="max-w-[800px] mx-auto space-y-8 text-left">
+                                <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
                                     Rio de Janeiro ist eine der visuell beeindruckendsten Städte der Welt — eine Stadt, die man nicht einfach &bdquo;besucht&ldquo;, sondern die man erlebt.
                                 </p>
-                                <p>
-                                    Der Corcovado mit dem Christus-Erlöser, der Zuckerhut, der Strand von Ipanema: Das sind die Postkarten-Bilder, die jeder kennt. Aber Rio hat noch viel mehr zu bieten.
-                                </p>
-                                <p>
-                                    Als geborener Carioca zeige ich dir nicht nur die klassischen Highlights, sondern auch die Orte, die du in keinem Reiseführer findest: den Aussichtspunkt Mirante Dona Marta mit dem besten Blick auf die Stadt, die farbenfrohe Escadaria Selarón im Herzen von Lapa, das romantische Künstlerviertel Santa Teresa — und noch einige mehr.
-                                </p>
-                                <p className="font-medium text-gray-900 pt-4 border-t border-gray-100">
+                                <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
+                                    <p>
+                                        Der Corcovado mit dem Christus-Erlöser, der Zuckerhut, der Strand von Ipanema: Das sind die Postkarten-Bilder, die jeder kennt. Aber Rio hat noch viel mehr zu bieten.
+                                    </p>
+                                    <p>
+                                        Als geborener Carioca zeige ich dir nicht nur die klassischen Highlights, sondern auch die Orte, die du in keinem Reiseführer findest: den Aussichtspunkt Mirante Dona Marta mit dem besten Blick auf die Stadt, die farbenfrohe Escadaria Selarón im Herzen von Lapa, das romantische Künstlerviertel Santa Teresa — und noch einige mehr.
+                                    </p>
+                                </div>
+                                <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
                                     Unten findest du eine Auswahl der schönsten Sehenswürdigkeiten Rios — von weltbekannten Ikonen bis zu versteckten Geheimtipps, die nur Einheimische kennen.
                                 </p>
-                            </article>
+                            </div>
                         </FadeIn>
                     </div>
                 </section>

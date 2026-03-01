@@ -131,13 +131,15 @@ export default function NaturTourPage() {
                             <div className="max-w-3xl space-y-6">
                                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium">
                                     <CalendarDays className="w-4 h-4 text-rio-yellow" />
-                                    <span>Tropische Abenteuer · Wanderungen · Geheime Strände</span>
+                                    <span>Privattouren auf Deutsch · 3–8 Stunden · 9 Highlights</span>
                                 </div>
 
-                                <h1 className="text-4xl lg:text-5xl xl:text-6xl font-heading font-black text-white leading-[1.15] tracking-tight">
-                                    Rios wilde Seite: <br />
-                                    <span className="text-rio-yellow text-3xl lg:text-4xl xl:text-5xl font-bold">Regenwald, Berge und versteckte Strände</span>
+                                <h1 className="text-4xl lg:text-[clamp(32px,4vw,52px)] font-heading font-black text-white leading-[1.15] tracking-tight whitespace-normal lg:whitespace-nowrap">
+                                    Rios wilde Seite
                                 </h1>
+                                <p className="text-xl lg:text-2xl xl:text-3xl font-bold text-rio-yellow mt-4">
+                                    Regenwald, Berge und versteckte Strände
+                                </p>
 
                                 <div className="pt-6">
                                     <a
@@ -157,19 +159,21 @@ export default function NaturTourPage() {
 
                 {/* SEÇÃO B — Texto Introdutório */}
                 <section className="py-20 lg:py-28 bg-white">
-                    <div className="max-w-4xl mx-auto px-5 lg:px-8">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up">
-                            <article className="prose prose-lg prose-gray max-w-none text-gray-600 space-y-6 leading-relaxed">
-                                <p className="text-xl lg:text-2xl font-light text-gray-900 leading-snug">
+                            <div className="max-w-[800px] mx-auto space-y-8 text-left">
+                                <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
                                     Rio de Janeiro ist mehr als Copacabana und Christus-Statue. Hinter den berühmten Stränden verbirgt sich eine wilde, unberührte Natur, die selbst viele Besucher nie zu sehen bekommen: der größte urbane Regenwald der Welt, dramatische Granitgipfel mit atemberaubenden Aussichten, versteckte Wasserfälle und einsame Strände, die nur Einheimische kennen.
                                 </p>
-                                <p>
-                                    Als gebürtiger Carioca kenne ich die Wanderwege, Geheimpfade und Naturjuwelen Rios wie meine Westentasche. Ob eine leichte Wanderung durch den Tijuca-Regenwald, eine anspruchsvolle Gipfeltour auf die Pedra da Gávea oder ein entspannter Tag an den wilden Stränden von Prainha und Grumari — ich zeige dir das grüne, abenteuerliche Rio abseits der Touristenpfade.
-                                </p>
-                                <p className="font-medium text-gray-900 pt-4 border-t border-gray-100">
+                                <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
+                                    <p>
+                                        Als gebürtiger Carioca kenne ich die Wanderwege, Geheimpfade und Naturjuwelen Rios wie meine Westentasche. Ob eine leichte Wanderung durch den Tijuca-Regenwald, eine anspruchsvolle Gipfeltour auf die Pedra da Gávea oder ein entspannter Tag an den wilden Stränden von Prainha und Grumari — ich zeige dir das grüne, abenteuerliche Rio abseits der Touristenpfade.
+                                    </p>
+                                </div>
+                                <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
                                     Die Touren variieren je nach Ziel zwischen 3 und 8 Stunden. Schreib mir einfach, was dich am meisten interessiert, und ich stelle die perfekte Natur-Tour für dich zusammen.
                                 </p>
-                            </article>
+                            </div>
                         </FadeIn>
                     </div>
                 </section>

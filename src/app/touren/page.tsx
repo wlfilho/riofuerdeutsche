@@ -42,17 +42,13 @@ export default function TourenPage() {
                             </nav>
 
                             <div className="max-w-3xl space-y-6">
-                                {/* Badges */}
-                                <div className="flex flex-wrap gap-2">
-                                    {['Stadttouren', 'Natur & Abenteuer', 'Tagesausflüge', 'Auf Deutsch'].map((tag) => (
-                                        <div key={tag} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] lg:text-xs font-bold tracking-[0.05em] uppercase">
-                                            {tag}
-                                        </div>
-                                    ))}
+                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium">
+                                    <CalendarDays className="w-4 h-4 text-rio-yellow" />
+                                    <span>Privattouren auf Deutsch · Alle Touren im Überblick</span>
                                 </div>
 
-                                <h1 className="text-4xl lg:text-5xl xl:text-6xl font-heading font-black text-white leading-[1.15] tracking-tight">
-                                    Geführte Touren und Ausflüge in Rio de Janeiro
+                                <h1 className="text-4xl lg:text-[clamp(32px,3.8vw,52px)] font-heading font-black text-white leading-[1.15] tracking-tight whitespace-normal lg:whitespace-nowrap">
+                                    Geführte Touren und Ausflüge in <span className="whitespace-nowrap">Rio de Janeiro</span>
                                 </h1>
                                 <p className="text-xl lg:text-2xl xl:text-3xl font-bold text-rio-yellow mt-4">
                                     Sicher, authentisch und komplett auf Deutsch
@@ -104,7 +100,7 @@ export default function TourenPage() {
                         </FadeIn>
 
                         {/* Cards Disponíveis (Páginas prontas) */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                             {/* Card 1 — Klassiker Tour */}
                             <FadeIn direction="up" delay={0.1}>
                                 <div className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300 h-full">
@@ -174,22 +170,52 @@ export default function TourenPage() {
                                     </div>
                                 </div>
                             </FadeIn>
+
+                            {/* Card 3 — Favela Tour */}
+                            <FadeIn direction="up" delay={0.3}>
+                                <div className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300 h-full">
+                                    <div className="relative h-64 lg:h-80 overflow-hidden">
+                                        <Image
+                                            src="/images/rio-favela.webp"
+                                            alt="Favela Tour in Rio de Janeiro"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                        />
+                                        <div className="absolute top-4 right-4 z-20 flex flex-wrap gap-2 justify-end">
+                                            {['2–3 Stunden', '2 Highlights', 'Respektvoll & Sicher'].map((badge) => (
+                                                <div key={badge} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
+                                                    {badge}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="p-8 flex flex-col flex-grow">
+                                        <h3 className="text-2xl font-bold font-heading text-gray-900 mb-3">
+                                            🏘️ Favela Tour in Rio de Janeiro
+                                        </h3>
+                                        <p className="text-gray-600 mb-8 flex-grow leading-relaxed">
+                                            Ein respektvoller Einblick in die Kultur und den Alltag der Favelas — authentisch und sicher mit lokalem Guide. Besuche Rocinha und The Maze.
+                                        </p>
+                                        <Link
+                                            href="/touren/favela-tour"
+                                            className="inline-flex items-center gap-2 text-rio-green font-bold group-hover:translate-x-1 transition-transform"
+                                        >
+                                            Mehr erfahren <ChevronRight className="w-4 h-4" />
+                                        </Link>
+                                    </div>
+                                </div>
+                            </FadeIn>
                         </div>
 
                         {/* Cards "In Kürze" */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[
                                 {
-                                    emoji: "🏘️",
-                                    title: "Favela Tour in Rio de Janeiro",
-                                    desc: "Ein respektvoller Einblick in die Kultur und den Alltag der Favelas — authentisch und sicher mit lokalem Guide.",
-                                    msg: "Hallo! Ich interessiere mich für eine Favela Tour in Rio. Kannst du mir mehr erzählen?"
-                                },
-                                {
                                     emoji: "🌙",
                                     title: "Rio by Night — Nachtleben in Rio de Janeiro",
                                     desc: "Samba in Lapa, Cocktails in Leblon und das pulsierende Nachtleben Rios — erlebe die Stadt nach Sonnenuntergang.",
-                                    msg: "Hallo! Ich interessiere mich für eine Rio by Night Tour. Kannst du mir mehr erzählen?"
+                                    msg: "Hallo! Ich interessiere mich für eine Rio by Night Tour. Kannst du mir mehr erzählen?",
+                                    href: undefined as string | undefined
                                 },
                                 {
                                     emoji: "🎉",
@@ -217,28 +243,48 @@ export default function TourenPage() {
                                 }
                             ].map((tour, i) => (
                                 <FadeIn key={i} delay={0.1 * i} direction="up" className="flex flex-col h-full">
-                                    <a
-                                        href={`https://wa.me/573148704374?text=${encodeURIComponent(tour.msg)}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="group p-8 rounded-3xl bg-gray-100/50 border border-gray-200 hover:border-rio-yellow hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col h-full"
-                                    >
-                                        <div className="flex items-center justify-between mb-4">
-                                            <span className="text-3xl">{tour.emoji}</span>
-                                            <span className="bg-gray-200 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded border border-gray-200 uppercase tracking-wider">
-                                                In Kürze
-                                            </span>
-                                        </div>
-                                        <h3 className="text-xl font-bold font-heading text-gray-900 mb-3 group-hover:text-rio-green transition-colors">
-                                            {tour.title}
-                                        </h3>
-                                        <p className="text-gray-500 text-sm mb-6 flex-grow leading-relaxed">
-                                            {tour.desc}
-                                        </p>
-                                        <div className="flex items-center gap-2 text-rio-green font-bold text-sm">
-                                            Details anfragen <ChevronRight className="w-4 h-4" />
-                                        </div>
-                                    </a>
+                                    {tour.href ? (
+                                        <Link
+                                            href={tour.href}
+                                            className="group p-8 rounded-3xl bg-white border border-gray-200 hover:border-rio-yellow hover:shadow-xl transition-all duration-300 flex flex-col h-full"
+                                        >
+                                            <div className="flex items-center justify-between mb-4">
+                                                <span className="text-3xl">{tour.emoji}</span>
+                                            </div>
+                                            <h3 className="text-xl font-bold font-heading text-gray-900 mb-3 group-hover:text-rio-green transition-colors">
+                                                {tour.title}
+                                            </h3>
+                                            <p className="text-gray-500 text-sm mb-6 flex-grow leading-relaxed">
+                                                {tour.desc}
+                                            </p>
+                                            <div className="flex items-center gap-2 text-rio-green font-bold text-sm">
+                                                Mehr erfahren <ChevronRight className="w-4 h-4" />
+                                            </div>
+                                        </Link>
+                                    ) : (
+                                        <a
+                                            href={`https://wa.me/573148704374?text=${encodeURIComponent(tour.msg || "")}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="group p-8 rounded-3xl bg-gray-100/50 border border-gray-200 hover:border-rio-yellow hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col h-full"
+                                        >
+                                            <div className="flex items-center justify-between mb-4">
+                                                <span className="text-3xl">{tour.emoji}</span>
+                                                <span className="bg-gray-200 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded border border-gray-200 uppercase tracking-wider">
+                                                    In Kürze
+                                                </span>
+                                            </div>
+                                            <h3 className="text-xl font-bold font-heading text-gray-900 mb-3 group-hover:text-rio-green transition-colors">
+                                                {tour.title}
+                                            </h3>
+                                            <p className="text-gray-500 text-sm mb-6 flex-grow leading-relaxed">
+                                                {tour.desc}
+                                            </p>
+                                            <div className="flex items-center gap-2 text-rio-green font-bold text-sm">
+                                                Details anfragen <ChevronRight className="w-4 h-4" />
+                                            </div>
+                                        </a>
+                                    )}
                                 </FadeIn>
                             ))}
                         </div>

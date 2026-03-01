@@ -31,13 +31,13 @@ const allTours: Tour[] = [
         link: "/touren/natur-und-straende"
     },
     {
-        slug: "favela",
+        slug: "favela-tour",
         emoji: "🏘️",
         title: "Favela Tour in Rio de Janeiro",
         description: "Ein respektvoller Einblick in die Kultur der Favelas — authentisch und sicher.",
-        badge: "Bald verfügbar",
-        link: "/#kontakt",
-        isComingSoon: true
+        badge: "2–3 Stunden",
+        link: "/touren/favela-tour",
+        isComingSoon: false
     },
     {
         slug: "night",

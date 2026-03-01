@@ -106,7 +106,7 @@ const tours = [
     desc: "Ein respektvoller Einblick in die Kultur der Favelas (z.B. Rocinha oder Vidigal).",
     img: "/images/rio-favela.webp",
     alt: "Authentische Favela Tour in Rio de Janeiro",
-    link: "#kontakt",
+    link: "/touren/favela-tour",
   },
   {
     title: "Tropischer Regenwald & Strände",

@@ -20,7 +20,7 @@ const navLinks = [
         subLinks: [
             { href: "/touren/klassiker", label: "🏔️ Klassiker Tour" },
             { href: "/touren/natur-und-straende", label: "🌿 Natur & Strände" },
-            { href: "#", label: "🏘️ Favela Tour", disabled: true },
+            { href: "/touren/favela-tour", label: "🏘️ Favela Tour" },
             { href: "#", label: "🏘️ Rio by Night", disabled: true },
             { href: "#", label: "🎉 Karneval Tour", disabled: true },
             { href: "#", label: "⚽ Fußball Tour", disabled: true },
