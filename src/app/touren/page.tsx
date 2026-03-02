@@ -218,11 +218,11 @@ export default function TourenPage() {
                                     badges: ["4–6 Stunden", "10 Highlights"]
                                 },
                                 {
-                                    emoji: "�🌙",
+                                    emoji: "🌙",
                                     title: "Rio by Night — Nachtleben in Rio de Janeiro",
                                     desc: "Samba in Lapa, Cocktails in Leblon und das pulsierende Nachtleben Rios — erlebe die Stadt nach Sonnenuntergang.",
                                     msg: "Hallo! Ich interessiere mich für eine Rio by Night Tour. Kannst du mir mehr erzählen?",
-                                    href: undefined as string | undefined,
+                                    href: "/touren/by-night",
                                     badges: ["3–4 Stunden", "Nachtleben"]
                                 },
                                 {

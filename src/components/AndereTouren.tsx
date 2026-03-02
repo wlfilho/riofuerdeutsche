@@ -53,11 +53,11 @@ const allTours: Tour[] = [
     {
         slug: "night",
         emoji: "🌙",
-        title: "Nachtleben in Rio de Janeiro",
+        title: "Rio by Night — Nachtleben in Rio de Janeiro",
         description: "Samba, Lapa und das pulsierende Nachtleben Rios — erlebe die Stadt nach Sonnenuntergang.",
         badges: ["3–4 Stunden", "Nachtleben"],
-        link: "/#kontakt",
-        isComingSoon: true
+        link: "/touren/by-night",
+        isComingSoon: false
     },
     {
         slug: "karneval",

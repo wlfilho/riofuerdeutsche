@@ -22,7 +22,7 @@ const navLinks = [
             { href: "/touren/natur-und-straende", label: "🌿 Natur & Strände" },
             { href: "/touren/favela-tour", label: "🏘️ Favela Tour" },
             { href: "/touren/kultur-und-geschichte", label: "🏛️ Kultur & Geschichte", disabled: true },
-            { href: "#", label: "🌙 Rio by Night", disabled: true },
+            { href: "/touren/by-night", label: "🌙 Rio by Night" },
             { href: "#", label: "🎉 Karneval Tour", disabled: true },
             { href: "#", label: "⚽ Fußball Tour", disabled: true },
             { href: "#", label: "🗺️ Tagesausflüge", disabled: true },
