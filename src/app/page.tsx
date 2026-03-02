@@ -6,13 +6,10 @@ import FadeIn from "@/components/FadeIn";
 import {
   ArrowRight,
   MapPin,
-  ShieldCheck,
   Camera,
   Star,
   HeartHandshake,
   Phone,
-  CheckCircle2,
-  CalendarDays,
   User,
 } from "lucide-react";
 
@@ -156,29 +153,6 @@ const reviews = [
   },
 ];
 
-const features = [
-  {
-    icon: HeartHandshake,
-    color: "text-rio-blue",
-    bg: "bg-rio-blue/10",
-    title: "100% Deutschsprachig",
-    desc: "Keine Sprachbarrieren! Unsere Guides sprechen fließend Deutsch und kennen die brasilianische Kultur bis ins Detail.",
-  },
-  {
-    icon: ShieldCheck,
-    color: "text-rio-green",
-    bg: "bg-rio-green/10",
-    title: "Absolut Sicher",
-    desc: "Wir legen höchsten Wert auf deine Sicherheit. Als Einheimische kennen wir die sicheren Routen und besten Zeiten für jeden Ort.",
-  },
-  {
-    icon: CheckCircle2,
-    color: "text-rio-yellow",
-    bg: "bg-rio-yellow/20",
-    title: "Maßgeschneiderte Touren",
-    desc: "Keine Massenabfertigung. Wir kreieren individuelle Erlebnisse, genau nach deinen Wünschen und in deinem Tempo.",
-  },
-];
 
 export default function Home() {
   return (
@@ -251,23 +225,53 @@ export default function Home() {
 
           {/* WHY US SECTION */}
           <section id="vorteile" className="py-24 bg-white" aria-labelledby="vorteile-heading">
-            <div className="max-w-7xl mx-auto px-5 lg:px-8">
-              <FadeIn direction="up" className="text-center max-w-2xl mx-auto mb-16">
-                <h2 id="vorteile-heading" className="text-rio-green font-semibold tracking-wide uppercase text-sm mb-3">Warum mit uns?</h2>
-                <p className="text-3xl md:text-4xl font-heading font-bold text-gray-900">Dein perfekter Urlaub in besten Händen</p>
+            <div className="max-w-5xl mx-auto px-5 lg:px-8">
+              <FadeIn direction="up" className="text-center mb-12">
+                <h2 id="vorteile-heading" className="text-4xl md:text-5xl font-heading font-bold text-gray-900 tracking-tight mb-3">
+                  WARUM RIOFÜRDEUTSCHE?
+                </h2>
+                <p className="text-xl md:text-2xl font-heading font-semibold text-rio-green mb-6">
+                  Dein Rio-Urlaub in den besten Händen
+                </p>
+                <p className="text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                  Persönliche deutschsprachige Begleitung, eigene Fahrzeuge mit Fahrer, flexible Routen und ein Service, der keine Wünsche offen lässt. Wir planen deinen Rio-Urlaub bis ins kleinste Detail, damit du ihn sicher und sorgenfrei genießen kannst. Bei uns bekommst du nicht nur einen erstklassigen Service, sondern ein unvergessliches Rio-Erlebnis.
+                </p>
               </FadeIn>
 
-              <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-                {features.map((feature, i) => (
-                  <FadeIn key={i} delay={i * 0.15} direction="up" className="p-8 rounded-3xl bg-gray-50 border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${feature.bg} mb-6`}>
-                      <feature.icon className={`w-7 h-7 ${feature.color}`} />
+              <FadeIn direction="up" delay={0.1}>
+                <div className="grid sm:grid-cols-2 gap-x-12 gap-y-6 mb-12">
+                  {[
+                    { emoji: "🎯", text: "100 % auf Rio de Janeiro spezialisiert" },
+                    { emoji: "🇩🇪", text: "Deutschsprachige Begleitung durch einen echten Carioca" },
+                    { emoji: "🚗", text: "Eigene Fahrzeuge mit Fahrer für maximalen Komfort" },
+                    { emoji: "🛡️", text: "Sicherheit an erster Stelle – sichere Routen und beste Zeiten" },
+                    { emoji: "✨", text: "Individueller Service, von der Beratung bis zur Tour" },
+                    { emoji: "💬", text: "Schnelle Erreichbarkeit per WhatsApp und E-Mail" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start gap-4">
+                      <span className="text-2xl leading-none mt-0.5 shrink-0">{item.emoji}</span>
+                      <span className="text-gray-900 font-bold text-base leading-snug">{item.text}</span>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                    <p className="text-gray-600 leading-relaxed">{feature.desc}</p>
-                  </FadeIn>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </FadeIn>
+
+              <FadeIn direction="up" delay={0.2}>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                  <Link
+                    href="/touren"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-green text-white rounded-full font-bold text-base hover:bg-rio-green/90 hover:scale-[1.02] transition-all shadow-lg"
+                  >
+                    TOUREN ANSEHEN
+                  </Link>
+                  <Link
+                    href="/unterkunft/beratung"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-rio-green text-rio-green rounded-full font-bold text-base hover:bg-rio-green/5 transition-all"
+                  >
+                    BERATUNG BUCHEN
+                  </Link>
+                </div>
+              </FadeIn>
             </div>
           </section>
 
@@ -371,15 +375,15 @@ export default function Home() {
                     Hallo, ich bin <span className="text-rio-blue">Will!</span>
                   </p>
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    Als gebürtiger Carioca kenne ich Rio de Janeiro wie meine Westentasche. Von den berühmten Sehenswürdigkeiten bis zu den versteckten Juwelen, die nur Einheimische kennen – ich zeige Ihnen alles!
+                    Geboren und aufgewachsen in Rio, habe ich an der Köln International School of Design studiert und spreche fließend Deutsch. Ich kenne beide Welten: die deutsche Mentalität und das Leben als Carioca. Und genau das macht den Unterschied.
                   </p>
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    Ich spreche fließend Deutsch und liebe es, meine Leidenschaft für meine Heimatstadt mit Besuchern aus deutschsprachigen Ländern zu teilen. Mit mir erleben Sie Rio ohne Sprachbarrieren.
+                    In den meisten Fällen begleite ich dich persönlich. Wenn ich bereits mit einer Gruppe unterwegs bin, übernehmen erfahrene Partner-Guides meines Vertrauens – mit der gleichen Leidenschaft für Rio und dem gleichen Anspruch an Sicherheit.
                   </p>
 
                   <blockquote className="border-l-4 border-rio-yellow pl-4 py-2 my-6">
                     <p className="text-xl italic font-medium text-gray-800">
-                      &quot;Ich zeige Ihnen nicht nur Sehenswürdigkeiten, sondern auch die Seele Rios.&quot;
+                      &quot;Kein Vermittler, keine Agentur dazwischen. Du buchst direkt bei einem Carioca, der deine Sprache spricht und deine Stadt kennt.&quot;
                     </p>
                   </blockquote>
 
@@ -397,6 +401,56 @@ export default function Home() {
                       <span>Carioca</span>
                     </div>
                   </div>
+                </FadeIn>
+              </div>
+            </div>
+          </section>
+
+          {/* RIO ERLEBEN SECTION */}
+          <section id="rio-erleben" className="py-24 bg-gray-50" aria-labelledby="rio-erleben-heading">
+            <div className="max-w-4xl mx-auto px-5 lg:px-8">
+              <FadeIn direction="up" className="text-center mb-14">
+                <h2 id="rio-erleben-heading" className="text-3xl md:text-4xl font-heading font-bold text-gray-900 leading-tight mb-4">
+                  Rio de Janeiro erleben –{" "}
+                  <span className="text-rio-green">sicher, authentisch und auf Deutsch</span>
+                </h2>
+              </FadeIn>
+
+              <div className="space-y-6">
+                <FadeIn direction="up" delay={0.1}>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    Du träumst von Rio de Janeiro? Vom Blick auf die Stadt vom Zuckerhut, dem Cristo Redentor bei Sonnenaufgang, den legendären Stränden von Ipanema und Copacabana oder einem echten Fußballspiel im Maracanã? Dann bist du bei RioFürDeutsche genau richtig.
+                  </p>
+                </FadeIn>
+
+                <FadeIn direction="up" delay={0.15}>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    Bei uns erlebst du Rio so, wie es nur ein Einheimischer zeigen kann – ob auf unserer Klassiker Tour zu den großen Sehenswürdigkeiten, einer Favela Tour mit echtem Einblick, einer Natur- und Strandtour zu den schönsten Küsten, einer Kultur- und Geschichtstour durch die Seele der Stadt, einer unvergesslichen Karneval Tour, beim Rio by Night oder bei einem Fußballerlebnis im Stadion. Du kannst aus unseren Touren wählen oder dir eine komplett individuelle Tour zusammenstellen – ganz nach deinen Wünschen.
+                  </p>
+                </FadeIn>
+
+                <FadeIn direction="up" delay={0.2}>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    Alle Touren finden in unseren eigenen Fahrzeugen mit Fahrer statt – bequem, sicher und ohne Stress. Wir bieten außerdem einen Flughafen-Transfer direkt zu deiner Unterkunft an, damit deine Reise entspannt beginnt.
+                  </p>
+                </FadeIn>
+
+                <FadeIn direction="up" delay={0.25}>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    Sicherheit ist uns besonders wichtig. Wir wissen, dass viele deutsche Reisende sich Sorgen machen, wenn es um Rio geht. Deshalb begleiten wir dich nicht nur vor Ort, sondern beraten dich auch vorab – zum Beispiel mit unserer persönlichen Unterkunftsberatung per Videocall, damit du von Anfang an im richtigen und sicheren Viertel landest.
+                  </p>
+                </FadeIn>
+
+                <FadeIn direction="up" delay={0.3}>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    In den meisten Fällen begleite ich dich persönlich. Wenn ich bereits mit einer Gruppe unterwegs bin, übernehmen erfahrene Partner-Guides meines Vertrauens – mit der gleichen Leidenschaft für Rio und dem gleichen Anspruch an Sicherheit.
+                  </p>
+                </FadeIn>
+
+                <FadeIn direction="up" delay={0.35}>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    Kein Vermittler, keine Agentur dazwischen. Bei RioFürDeutsche buchst du direkt bei einem Carioca, der deine Sprache spricht und deine Stadt kennt.
+                  </p>
                 </FadeIn>
               </div>
             </div>
