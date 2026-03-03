@@ -18,35 +18,35 @@ export const metadata = {
 const nightExperiences = [
     {
         name: "Lapa",
-        image: "https://images.unsplash.com/photo-1551009175-15bdf9dcb580?w=600&h=400&fit=crop&q=80",
+        image: "/images/lapa-by-night.webp",
         desc: "Lapa ist das pulsierende Herz des Nachtlebens von Rio. Unter den berühmten Arcos da Lapa findest du Samba-Clubs, Live-Musik-Bars und eine Energie, die ihresgleichen sucht. Freitag- und Samstagnacht verwandeln sich die Straßen in eine riesige Open-Air-Party.",
         tip: "Die besten Samba-Clubs sind die kleinen, unscheinbaren Lokale in den Seitenstraßen — nicht die großen Touristenlokale an der Hauptstraße. Ich zeige dir, wo die Cariocas wirklich tanzen.",
         badges: ["Samba & Live-Musik", "Freitag & Samstag"]
     },
     {
         name: "Leblon",
-        image: "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=600&h=400&fit=crop&q=80",
+        image: "/images/leblon-by-night.webp",
         desc: "Leblon ist das elegante Gegenstück zu Lapa. Hier findest du stilvolle Cocktailbars, gehobene Restaurants und eine entspannte Atmosphäre. Das Viertel gilt als eines der sichersten in Rio und ist perfekt für einen genussvollen Abend mit guten Drinks und noch besserem Essen.",
         tip: "Die Straße Dias Ferreira ist die Gastro-Meile von Leblon — auf wenigen hundert Metern reihen sich die besten Restaurants und Bars aneinander. Reservierung empfohlen!",
         badges: ["Cocktails & Restaurants", "Gehoben & sicher"]
     },
     {
         name: "Botafogo",
-        image: "https://images.unsplash.com/photo-1598977123118-4e30ba3c4f5b?w=600&h=400&fit=crop&q=80",
+        image: "/images/botafogo-by-night.webp",
         desc: "Botafogo ist die kreative Seele des Carioca-Nachtlebens. Craft-Beer-Bars, alternative Kulturräume, Vinyl-Läden mit DJ-Sets und eine junge, lokale Szene, die weit weg vom Touristentrubel feiert. Hier erlebst du das authentischste Nachtleben Rios.",
         tip: "Die Gegend rund um die Rua Nelson Mandela und Rua Voluntários da Pátria hat die höchste Dichte an coolen Bars in ganz Rio. Perfekt für einen Bar-Hopping-Abend.",
         badges: ["Craft Beer & Alternative Szene", "Lokal & authentisch"]
     },
     {
         name: "Copacabana",
-        image: "https://images.unsplash.com/photo-1548963670-aaaa8f73a5e3?w=600&h=400&fit=crop&q=80",
+        image: "/images/quiosque-copacabana-by-night.webp",
         desc: "Copacabana bei Nacht hat einen ganz besonderen Charme. Die beleuchtete Strandpromenade, Bars direkt am Meer und das bunte Treiben auf der Avenida Atlântica schaffen eine einzigartige Atmosphäre. Von entspannten Kiosks am Strand bis zu Live-Musik in historischen Bars — Copa hat für jeden etwas.",
         tip: "Der Kiosk am Posto 6 ist der perfekte Ort für ein kaltes Bier mit Blick auf den beleuchteten Strand. Danach geht's weiter in die Seitenstraßen, wo die lokalen Bars versteckt sind.",
         badges: ["Strandpromenade & Bars", "Klassisch & lebendig"]
     },
     {
         name: "Santa Teresa",
-        image: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=600&h=400&fit=crop&q=80",
+        image: "/images/santa-teresa-by-night.webp",
         desc: "Santa Teresa thront auf einem Hügel über der Stadt und bietet das romantischste Nachtleben Rios. Kleine Bars mit Aussicht, Kunstgalerien die abends öffnen und eine bohème Atmosphäre, die an europäische Altstädte erinnert — nur mit tropischem Flair und einem Panoramablick über Rio.",
         tip: "Der Largo do Guimarães ist das Zentrum des Nachtlebens in Santa Teresa. Starte dort mit einem Caipirinha und lass dich durch die Gassen treiben — du wirst überrascht sein, was du findest.",
         badges: ["Rooftop-Bars & Kunst", "Romantisch & bohème"]
