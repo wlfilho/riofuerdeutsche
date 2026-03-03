@@ -66,7 +66,7 @@ export default function RioByNightPage() {
                 <section className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden bg-gray-900 border-b-4 border-rio-yellow">
                     <div className="absolute inset-0 z-0">
                         <Image
-                            src="https://images.unsplash.com/photo-1516834611397-8d633eaec5c0?w=1920&h=800&fit=crop&q=80"
+                            src="/images/lapa-by-night-bg.webp"
                             alt="Rio by Night — Nachtleben in Rio de Janeiro"
                             fill
                             priority
