@@ -18,21 +18,21 @@ export const metadata = {
 const karnevalExperiences = [
     {
         name: "Sambódromo",
-        image: "https://images.unsplash.com/photo-1551966775-a4ddc8df052b?w=600&h=400&fit=crop&q=80",
+        image: "/images/carnival Sambodramo 2026.webp",
         desc: "Das Sambódromo ist die Hauptbühne des Karnevals in Rio — hier treten die besten Samba-Schulen der Stadt in einem spektakulären Wettbewerb gegeneinander an. Tausende Tänzer, aufwendige Kostüme, riesige Festwagen und Samba-Musik, die durch die ganze Arena hallt. Ein Erlebnis, das man einmal im Leben gesehen haben muss.",
         tip: "Die Desfiles der Grupo Especial (Sonntag und Montag) sind die Highlights, aber die Grupo de Acesso am Freitag und Samstag ist günstiger und fast genauso beeindruckend. Ich helfe dir bei den Tickets und erkläre dir alles vor Ort.",
         badges: ["Sonntag & Montag", "Hauptevent"]
     },
     {
         name: "Blocos de Rua",
-        image: "https://images.unsplash.com/photo-1581456495146-65a71b2c8e52?w=600&h=400&fit=crop&q=80",
+        image: "/images/bloco-de-rua.webp",
         desc: "Die Blocos de Rua sind das Herz und die Seele des Karnevals für die Cariocas. Hunderte Straßenfeste verteilt über die ganze Stadt — von riesigen Blocos mit hunderttausenden Teilnehmern bis zu kleinen, lokalen Feiern in den Vierteln. Hier erlebst du den echten, ungefilterten Karneval, gemeinsam mit den Einheimischen.",
         tip: "Die großen Blocos wie Cordão do Bola Preta sind legendär, aber die kleinen Blocos in den Vierteln sind oft entspannter und sicherer. Ich zeige dir die besten für deinen Geschmack — und sorge dafür, dass du sicher feierst.",
         badges: ["Tagsüber", "Kostenlos & offen"]
     },
     {
         name: "Ensaios — Proben der Samba-Schulen",
-        image: "https://images.unsplash.com/photo-1541456286246-3a68793e2174?w=600&h=400&fit=crop&q=80",
+        image: "/images/ensaio-escola-de-samba.webp",
         desc: "Wochen vor dem offiziellen Karneval öffnen die großen Samba-Schulen ihre Tore für öffentliche Proben — die Ensaios. Hier erlebst du die Energie des Karnevals hautnah, tanzt mitten unter den Sambistas und spürst den Rhythmus der Bateria. Weniger Touristen, mehr Authentizität und eine Atmosphäre, die viele Besucher als noch intensiver als den Karneval selbst beschreiben.",
         tip: "Die Ensaios der Mangueira und der Salgueiro sind besonders mitreißend. Der Eintritt kostet meist nur R$ 30–50 und die Stimmung ist unglaublich. Ich begleite dich hin und sorge dafür, dass du das volle Erlebnis genießen kannst.",
         badges: ["Wochen vor Karneval", "Ab R$ 30"]
@@ -52,13 +52,13 @@ export default function KarnevalTourPage() {
                 <section className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden bg-gray-900 border-b-4 border-rio-yellow">
                     <div className="absolute inset-0 z-0">
                         <Image
-                            src="https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=1920&h=800&fit=crop&q=80"
+                            src="/images/bloco-background.webp"
                             alt="Karneval Tour in Rio de Janeiro — Sambódromo und Blocos de Rua"
                             fill
                             priority
                             fetchPriority="high"
                             quality={90}
-                            className="object-cover object-center"
+                            className="object-cover object-[center_30%]"
                         />
                         <div className="absolute inset-0 bg-black/60"></div>
                     </div>
