@@ -230,7 +230,8 @@ export default function TourenPage() {
                                     title: "Karneval Tour in Rio de Janeiro",
                                     desc: "Das größte Fest der Welt hautnah erleben — Sambódromo, Blocos de Rua und die beste Karnevalsstimmung mit einem echten Carioca.",
                                     msg: "Hallo! Ich interessiere mich für eine Karneval Tour in Rio. Kannst du mir mehr erzählen?",
-                                    badges: ["4–6 Stunden", "Karneval"]
+                                    href: "/touren/karneval-tour",
+                                    badges: ["Saisonal", "Karneval"]
                                 },
                                 {
                                     emoji: "⚽",

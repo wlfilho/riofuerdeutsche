@@ -64,9 +64,9 @@ const allTours: Tour[] = [
         emoji: "🎉",
         title: "Karneval Tour in Rio de Janeiro",
         description: "Das größte Fest der Welt hautnah erleben — ich zeige dir den echten Karneval von Rio.",
-        badges: ["4–6 Stunden", "Karneval"],
-        link: "/#kontakt",
-        isComingSoon: true
+        badges: ["Saisonal", "Karneval"],
+        link: "/touren/karneval-tour",
+        isComingSoon: false
     },
     {
         slug: "fussball",
