@@ -1,0 +1,24 @@
+# RioFürDeutsche.de - Robots.txt Configuration
+# Last updated: March 2026
+
+# Allow all search engines to crawl and index everything
+User-agent: *
+Allow: /
+
+# Specific rules for Google (optional, but good practice)
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+# Block bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+# Sitemap location (create this after)
+Sitemap: https://riofuerdeutsche.de/sitemap.xml
