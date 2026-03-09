@@ -235,11 +235,26 @@ export default function TourenPage() {
                                     badges: ["Saisonal", "Karneval"]
                                 },
                                 {
+                                    emoji: "☔",
+                                    title: "Regentage in Rio de Janeiro",
+                                    desc: "Regen in Rio? Kein Problem! Museen, Gastronomie, Indoor-Aktivitäten und kulturelle Erlebnisse — damit kein Tag verloren geht.",
+                                    msg: "Hallo! Es regnet in Rio und ich suche nach Indoor-Aktivitäten. Kannst du mir helfen?",
+                                    badges: ["Flexibel", "Indoor-Erlebnisse"]
+                                },
+                                {
                                     emoji: "⚽",
                                     title: "Fußball Tour in Rio de Janeiro",
                                     desc: "Maracanã, Fußball-Museen und echte Leidenschaft — erlebe Rio wie ein Fan und spüre die Begeisterung der Cariocas.",
                                     msg: "Hallo! Ich interessiere mich für eine Fußball Tour in Rio. Kannst du mir mehr erzählen?",
+                                    href: "/touren/fussball",
                                     badges: ["3–4 Stunden", "Fußball"]
+                                },
+                                {
+                                    emoji: "🧗",
+                                    title: "Sport & Abenteuer in Rio de Janeiro",
+                                    desc: "Surfen, Paragliding, Stand-up Paddle, Klettern und mehr — Rio de Janeiro ist ein Paradies für Abenteurer und Sportbegeisterte.",
+                                    msg: "Hallo! Ich interessiere mich für Sport- und Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?",
+                                    badges: ["3–8 Stunden", "Adrenalin & Natur"]
                                 },
                                 {
                                     emoji: "🗺️",

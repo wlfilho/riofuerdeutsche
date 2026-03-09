@@ -52,5 +52,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: "yearly",
             priority: 0.8,
         },
+        {
+            url: `${baseUrl}/touren/fussball`,
+            lastModified: new Date("2026-03-09"),
+            changeFrequency: "monthly",
+            priority: 0.8,
+        },
+        // Em breve — páginas ainda não criadas
+        // { url: `${baseUrl}/touren/regentage`, lastModified: new Date("2026-03-09"), changeFrequency: "monthly", priority: 0.3 },
+        // { url: `${baseUrl}/touren/sport-und-abenteuer`, lastModified: new Date("2026-03-09"), changeFrequency: "monthly", priority: 0.3 },
     ];
 }
