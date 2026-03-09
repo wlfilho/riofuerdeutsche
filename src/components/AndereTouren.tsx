@@ -46,9 +46,8 @@ const allTours: Tour[] = [
         title: "Kultur & Geschichte Tour in Rio de Janeiro",
         description: "Museen, historische Gebäude und die faszinierende Geschichte Rios — vom kolonialen Zentrum bis Praça Mauá.",
         badges: ["4–6 Stunden", "10 Highlights"],
-        link: "https://wa.me/573148704374?text=Hallo! Ich interessiere mich für eine Kultur & Geschichte Tour in Rio. Kannst du mir mehr erzählen?",
-        isComingSoon: true,
-        comingSoonLabel: "Bald verfügbar"
+        link: "/touren/kultur-und-geschichte",
+        isComingSoon: false
     },
     {
         slug: "night",

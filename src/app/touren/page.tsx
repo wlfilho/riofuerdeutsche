@@ -215,6 +215,7 @@ export default function TourenPage() {
                                     title: "Kultur & Geschichte Tour in Rio de Janeiro",
                                     desc: "Museen, historische Gebäude und die faszinierende Geschichte Rios — vom kolonialen Zentrum bis zur modernen Praça Mauá.",
                                     msg: "Hallo! Ich interessiere mich für eine Kultur & Geschichte Tour in Rio. Kannst du mir mehr erzählen?",
+                                    href: "/touren/kultur-und-geschichte",
                                     badges: ["4–6 Stunden", "10 Highlights"]
                                 },
                                 {

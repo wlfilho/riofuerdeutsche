@@ -17,6 +17,8 @@ export const metadata = {
     description: "Erlebe die Favelas von Rio de Janeiro respektvoll und sicher mit einem lokalen Guide. Rocinha, The Maze und authentische Einblicke in Kultur und Alltag — komplett auf Deutsch."
 };
 
+const estimatedTourDuration = "2–3 Stunden";
+
 const favelaExperiences = [
     {
         name: "Rocinha",
@@ -76,7 +78,7 @@ export default function FavelaTourPage() {
                             <div className="max-w-3xl space-y-6">
                                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium">
                                     <CalendarDays className="w-4 h-4 text-rio-yellow" />
-                                    <span>Privattouren auf Deutsch · 2–3 Stunden · 2 Highlights</span>
+                                    <span>Privattouren auf Deutsch · {estimatedTourDuration} · {favelaExperiences.length} Highlights</span>
                                 </div>
 
                                 <h1 className="text-4xl lg:text-[clamp(32px,3.5vw,52px)] font-heading font-black text-white leading-[1.15] tracking-tight whitespace-normal lg:whitespace-nowrap">

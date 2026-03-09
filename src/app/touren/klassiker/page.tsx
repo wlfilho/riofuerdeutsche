@@ -24,6 +24,8 @@ export const metadata = {
     description: "Entdecken Sie Rios schönste Sehenswürdigkeiten auf einer privaten Tagestour auf Deutsch. Corcovado, Zuckerhut, Escadaria Selarón und mehr — 8 Stunden, 3–4 Highlights, ein unvergesslicher Tag."
 };
 
+const estimatedTourDuration = "8 Stunden";
+
 const attractions = [
     {
         name: "Christus-Erlöser (Corcovado)",
@@ -241,7 +243,7 @@ export default function KlassikerTourPage() {
                             <div className="max-w-3xl space-y-6">
                                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium">
                                     <CalendarDays className="w-4 h-4 text-rio-yellow" />
-                                    <span>Privattouren auf Deutsch · 8 Stunden · 3–4 Highlights pro Tag</span>
+                                    <span>Privattouren auf Deutsch · {estimatedTourDuration} · {attractions.length} Highlights</span>
                                 </div>
 
                                 <h1 className="text-4xl lg:text-[clamp(28px,3.5vw,52px)] font-heading font-black text-white leading-[1.15] tracking-tight whitespace-normal lg:whitespace-nowrap">

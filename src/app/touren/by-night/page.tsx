@@ -15,6 +15,8 @@ export const metadata = {
     description: "Erlebe das Nachtleben von Rio de Janeiro sicher und authentisch — Samba in Lapa, Cocktails in Leblon, Craft-Biere in Botafogo. Dein Carioca-Guide zeigt dir die besten Spots, komplett auf Deutsch."
 };
 
+const estimatedTourDuration = "3–4 Stunden";
+
 const nightExperiences = [
     {
         name: "Lapa",
@@ -90,7 +92,7 @@ export default function RioByNightPage() {
                             <div className="max-w-3xl space-y-6">
                                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium">
                                     <CalendarDays className="w-4 h-4 text-rio-yellow" />
-                                    <span>Privattouren auf Deutsch · 3–4 Stunden · 5 Erlebnisse</span>
+                                    <span>Privattouren auf Deutsch · {estimatedTourDuration} · {nightExperiences.length} Highlights</span>
                                 </div>
 
                                 <h1 className="text-4xl lg:text-[clamp(32px,3.5vw,52px)] font-heading font-black text-white leading-[1.15] tracking-tight whitespace-normal lg:whitespace-nowrap">
