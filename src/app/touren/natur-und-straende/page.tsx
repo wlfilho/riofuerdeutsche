@@ -227,11 +227,8 @@ export default function NaturTourPage() {
                     </div>
                 </section>
 
-                {/* SEÇÃO C.2 — Interne Linkagem */}
-                <AndereTouren currentSlug="natur-und-straende" />
-
                 {/* SEÇÃO D — CTA Final */}
-                <section className="py-24 relative overflow-hidden bg-rio-green">
+                <section className="py-24 relative overflow-hidden bg-rio-green border-t-4 border-rio-yellow">
                     <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?w=1920&h=800&fit=crop&q=80')] bg-cover bg-center mix-blend-overlay opacity-10"></div>
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
@@ -262,6 +259,9 @@ export default function NaturTourPage() {
                         </FadeIn>
                     </div>
                 </section>
+
+                {/* SEÇÃO C.2 — Interne Linkagem */}
+                <AndereTouren currentSlug="natur-und-straende" />
             </main>
 
             <Footer />

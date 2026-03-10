@@ -428,7 +428,7 @@ export default function TourenPage() {
                 </section>
 
                 {/* SEÇÃO F — CTA Final */}
-                <section className="py-24 relative overflow-hidden bg-rio-green">
+                <section className="py-24 relative overflow-hidden bg-rio-green border-t-4 border-rio-yellow">
                     <div className="absolute inset-0 bg-[url('/images/rio-background.webp')] bg-cover bg-center mix-blend-overlay opacity-10"></div>
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
