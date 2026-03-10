@@ -27,7 +27,7 @@ const navLinks = [
             { href: "#", label: "☔ Regentage in Rio", disabled: true },
             { href: "/touren/fussball", label: "⚽ Fußball Tour" },
             { href: "#", label: "🧗 Sport & Abenteuer", disabled: true },
-            { href: "#", label: "🗺️ Tagesausflüge", disabled: true },
+            { href: "/touren/tagesausfluege", label: "🗺️ Tagesausflüge" },
             { href: "#", label: "🎯 Individuelle Tour", disabled: true },
         ],
     },

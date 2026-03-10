@@ -261,6 +261,7 @@ export default function TourenPage() {
                                     title: "Tagesausflüge ab Rio de Janeiro",
                                     desc: "Búzios, Ilha Grande, Paraty, Petrópolis und mehr — traumhafte Ausflüge rund um Rio, perfekt für einen Extra-Tag.",
                                     msg: "Hallo! Ich interessiere mich für einen Tagesausflug ab Rio. Kannst du mir mehr erzählen?",
+                                    href: "/touren/tagesausfluege",
                                     badges: ["Ganztägig", "Ab Rio"]
                                 },
                                 {

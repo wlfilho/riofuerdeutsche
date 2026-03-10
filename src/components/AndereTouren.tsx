@@ -99,13 +99,13 @@ const allTours: Tour[] = [
         comingSoonLabel: "Bald verfügbar"
     },
     {
-        slug: "ausfluege",
+        slug: "tagesausfluege",
         emoji: "🗺️",
         title: "Tagesausflüge ab Rio de Janeiro",
         description: "Búzios, Ilha Grande, Paraty, Petrópolis und mehr — traumhafte Ausflüge rund um Rio.",
         badges: ["Ganztägig", "Ab Rio"],
-        link: "/#kontakt",
-        isComingSoon: true
+        link: "/touren/tagesausfluege",
+        isComingSoon: false
     },
     {
         slug: "individuell",
