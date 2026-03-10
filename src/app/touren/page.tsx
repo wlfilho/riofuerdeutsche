@@ -254,6 +254,7 @@ export default function TourenPage() {
                                     title: "Sport & Abenteuer in Rio de Janeiro",
                                     desc: "Surfen, Paragliding, Stand-up Paddle, Klettern und mehr — Rio de Janeiro ist ein Paradies für Abenteurer und Sportbegeisterte.",
                                     msg: "Hallo! Ich interessiere mich für Sport- und Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?",
+                                    href: "/touren/sport-und-abenteuer",
                                     badges: ["3–8 Stunden", "Adrenalin & Natur"]
                                 },
                                 {

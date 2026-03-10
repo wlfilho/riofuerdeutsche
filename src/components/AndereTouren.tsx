@@ -93,10 +93,8 @@ const allTours: Tour[] = [
         title: "Sport & Abenteuer in Rio de Janeiro",
         description: "Surfen, Paragliding, Stand-up Paddle, Klettern und mehr — Rio de Janeiro ist ein Paradies für Abenteurer und Sportbegeisterte.",
         badges: ["3–8 Stunden", "Adrenalin & Natur"],
-        link: "https://wa.me/573148704374?text=Hallo! Ich interessiere mich für Sport- und Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?",
-        isExternal: true,
-        isComingSoon: true,
-        comingSoonLabel: "Bald verfügbar"
+        link: "/touren/sport-und-abenteuer",
+        isComingSoon: false
     },
     {
         slug: "tagesausfluege",

@@ -26,7 +26,7 @@ const navLinks = [
             { href: "/touren/karneval-tour", label: "🎉 Karneval Tour" },
             { href: "#", label: "☔ Regentage in Rio", disabled: true },
             { href: "/touren/fussball", label: "⚽ Fußball Tour" },
-            { href: "#", label: "🧗 Sport & Abenteuer", disabled: true },
+            { href: "/touren/sport-und-abenteuer", label: "🧗 Sport & Abenteuer" },
             { href: "/touren/tagesausfluege", label: "🗺️ Tagesausflüge" },
             { href: "#", label: "🎯 Individuelle Tour", disabled: true },
         ],
