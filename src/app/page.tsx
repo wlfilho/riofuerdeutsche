@@ -311,9 +311,9 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-5 lg:px-8">
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                 <FadeIn direction="left" className="max-w-2xl">
-                  <h2 id="touren-heading" className="text-rio-green font-semibold tracking-wide uppercase text-sm mb-3">Ausflüge & Highlights</h2>
+                  <h2 id="touren-heading" className="text-rio-green font-semibold tracking-wide uppercase text-sm mb-3">Touren & Ausflüge in Rio de Janeiro</h2>
                   <p className="text-3xl md:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                    Die beliebtesten Touren <br />für unsere Gäste
+                    Geführte Touren in Rio de Janeiro
                   </p>
                 </FadeIn>
                 <FadeIn direction="right">
