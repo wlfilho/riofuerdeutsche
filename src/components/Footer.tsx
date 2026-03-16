@@ -46,8 +46,8 @@ export default function Footer() {
                         <h3 className="text-white font-bold mb-4">Kontakt</h3>
                         <ul className="space-y-2 text-sm">
                             <li>Rio de Janeiro, Brasilien</li>
-                            <li>WhatsApp: +57 314 870 4374</li>
-                            <li>Email: lantelmew@gmail.com</li>
+                            <li>WhatsApp: <a href="https://wa.me/573148704374" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">+57 314 870 4374</a></li>
+                            <li>Email: <a href="mailto:lantelmew@gmail.com" className="hover:text-white transition-colors">lantelmew@gmail.com</a></li>
                             <li className="pt-2 text-rio-yellow">Dein Buddy in Rio!</li>
                         </ul>
                     </div>
