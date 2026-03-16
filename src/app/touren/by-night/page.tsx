@@ -192,7 +192,7 @@ export default function RioByNightPage() {
                                 <span className="text-rio-yellow text-2xl lg:text-4xl">sicher und unvergesslich.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Schreib mir auf WhatsApp und ich plane den perfekten Abend für dich — von Samba bis Cocktails, immer sicher und mit Insider-Wissen.
+                                Schreib mir per WhatsApp oder E-Mail und ich plane den perfekten Abend für dich — von Samba bis Cocktails, immer sicher und mit Insider-Wissen.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a
@@ -205,10 +205,10 @@ export default function RioByNightPage() {
                                     WhatsApp an uns
                                 </a>
                                 <Link
-                                    href="/#kontakt"
+                                    href="/kontakt"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
-                                    Zum Kontaktformular
+                                    Kontakt per E-Mail
                                 </Link>
                             </div>
                         </FadeIn>

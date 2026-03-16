@@ -433,7 +433,7 @@ export default function KlassikerTourPage() {
                                 <span className="text-rio-yellow">ich plane ihn für dich.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
-                                Schreib mir auf WhatsApp und wir stellen gemeinsam dein perfektes Programm zusammen.
+                                Schreib mir per WhatsApp oder E-Mail und wir stellen gemeinsam dein perfektes Programm zusammen.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a
@@ -449,7 +449,7 @@ export default function KlassikerTourPage() {
                                     href="/kontakt"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
-                                    Zum Kontakt
+                                    Kontakt per E-Mail
                                 </Link>
                             </div>
                         </FadeIn>

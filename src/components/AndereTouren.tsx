@@ -109,8 +109,8 @@ const allTours: Tour[] = [
         title: "Individuelle Tour in Rio de Janeiro",
         description: "Dein Wunschtag in Rio — du bestimmst die Orte, ich plane den perfekten Tag.",
         badges: ["Flexibel", "Auf Anfrage"],
-        link: "https://wa.me/573148704374?text=Hallo! Ich möchte eine individuelle Tour in Rio planen...",
-        isExternal: true
+        link: "/touren/individuell",
+        isComingSoon: false
     }
 ];
 

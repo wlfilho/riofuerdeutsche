@@ -72,16 +72,18 @@ export default function TourenPage() {
 
                 {/* SEÇÃO B — Texto Intro SEO */}
                 <section className="py-20 lg:py-28 bg-white">
-                    <div className="max-w-4xl mx-auto px-5 lg:px-8">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up">
-                            <div className="max-w-[800px] mx-auto text-center space-y-6 text-gray-600 leading-relaxed text-lg">
-                                <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug mb-8">
+                            <div className="max-w-[800px] mx-auto space-y-8 text-left">
+                                <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
                                     Rio de Janeiro gehört zu den aufregendsten Städten der Welt — aber gerade als deutschsprachiger Tourist stellt man sich viele Fragen: Welche Sehenswürdigkeiten lohnen sich wirklich? Wo ist es sicher? Und wie erlebt man die Stadt abseits der typischen Touristenpfade? Genau hier komme ich ins Spiel.
                                 </p>
-                                <p>
-                                    Als gebürtiger Carioca, der in Deutschland gelebt hat und fließend Deutsch spricht, biete ich geführte Touren in Rio de Janeiro an, die Sicherheit, Insider-Wissen und authentische Erlebnisse verbinden. Ob die klassischen Highlights wie Corcovado und Zuckerhut, versteckte Strände im Tijuca-Regenwald, ein Fußball-Erlebnis im Maracanã oder Tagesausflüge nach Búzios und Ilha Grande — ich zeige dir meine Stadt so, wie du sie allein nie erleben würdest.
-                                </p>
-                                <p className="font-medium text-gray-900 pt-4">
+                                <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
+                                    <p>
+                                        Als gebürtiger Carioca, der in Deutschland gelebt hat und fließend Deutsch spricht, biete ich geführte Touren in Rio de Janeiro an, die Sicherheit, Insider-Wissen und authentische Erlebnisse verbinden. Ob die klassischen Highlights wie Corcovado und Zuckerhut, versteckte Strände im Tijuca-Regenwald, ein Fußball-Erlebnis im Maracanã oder Tagesausflüge nach Búzios und Ilha Grande — ich zeige dir meine Stadt so, wie du sie allein nie erleben würdest.
+                                    </p>
+                                </div>
+                                <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
                                     Alle Touren sind flexibel, individuell anpassbar und komplett auf Deutsch. Schau dir die verschiedenen Optionen an und schreib mir einfach — zusammen planen wir deinen perfekten Tag in Rio.
                                 </p>
                             </div>
@@ -99,238 +101,130 @@ export default function TourenPage() {
                             </h2>
                         </FadeIn>
 
-                        {/* Cards Disponíveis (Páginas prontas) */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                            {/* Card 1 — Klassiker Tour */}
-                            <FadeIn direction="up" delay={0.1}>
-                                <div className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300 h-full">
-                                    <div className="relative h-64 lg:h-80 overflow-hidden">
-                                        <Image
-                                            src="/images/home-pao-de-acucar.webp"
-                                            alt="Klassiker Tour in Rio de Janeiro"
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                                        />
-                                        <div className="absolute top-4 right-4 z-20 flex flex-wrap gap-2 justify-end">
-                                            {['~8 Stunden', '12 Highlights'].map((badge) => (
-                                                <div key={badge} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
-                                                    {badge}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div className="p-8 flex flex-col flex-grow">
-                                        <h3 className="text-2xl font-bold font-heading text-gray-900 mb-3">
-                                            🏔️ Klassiker Tour in Rio de Janeiro
-                                        </h3>
-                                        <p className="text-gray-600 mb-8 flex-grow leading-relaxed">
-                                            Die schönsten Sehenswürdigkeiten Rios an einem Tag — von Corcovado über den Zuckerhut bis zum Sonnenuntergang am Arpoador. 12 Highlights, 6 fertige Tagesprogramme.
-                                        </p>
-                                        <Link
-                                            href="/touren/klassiker"
-                                            className="inline-flex items-center gap-2 text-rio-green font-bold group-hover:translate-x-1 transition-transform"
-                                        >
-                                            Mehr erfahren <ChevronRight className="w-4 h-4" />
-                                        </Link>
-                                    </div>
-                                </div>
-                            </FadeIn>
-
-                            {/* Card 2 — Natur & Strände */}
-                            <FadeIn direction="up" delay={0.2}>
-                                <div className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300 h-full">
-                                    <div className="relative h-64 lg:h-80 overflow-hidden">
-                                        <Image
-                                            src="/images/natur-und-straende.webp"
-                                            alt="Natur & Strände in Rio de Janeiro"
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                                        />
-                                        <div className="absolute top-4 right-4 z-20 flex flex-wrap gap-2 justify-end">
-                                            {['3–8 Stunden', '9 Highlights'].map((badge) => (
-                                                <div key={badge} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
-                                                    {badge}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div className="p-8 flex flex-col flex-grow">
-                                        <h3 className="text-2xl font-bold font-heading text-gray-900 mb-3">
-                                            🌿 Natur & Strände in Rio de Janeiro
-                                        </h3>
-                                        <p className="text-gray-600 mb-8 flex-grow leading-relaxed">
-                                            Regenwald-Wanderungen, Gipfeltouren und versteckte Strände — Rios wilde Seite abseits der Touristenpfade. Von leicht bis anspruchsvoll.
-                                        </p>
-                                        <Link
-                                            href="/touren/natur-und-straende"
-                                            className="inline-flex items-center gap-2 text-rio-green font-bold group-hover:translate-x-1 transition-transform"
-                                        >
-                                            Mehr erfahren <ChevronRight className="w-4 h-4" />
-                                        </Link>
-                                    </div>
-                                </div>
-                            </FadeIn>
-
-                            {/* Card 3 — Favela Tour */}
-                            <FadeIn direction="up" delay={0.3}>
-                                <div className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300 h-full">
-                                    <div className="relative h-64 lg:h-80 overflow-hidden">
-                                        <Image
-                                            src="/images/rio-favela.webp"
-                                            alt="Favela Tour in Rio de Janeiro"
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                                        />
-                                        <div className="absolute top-4 right-4 z-20 flex flex-wrap gap-2 justify-end">
-                                            {['2–3 Stunden', '2 Highlights'].map((badge) => (
-                                                <div key={badge} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
-                                                    {badge}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div className="p-8 flex flex-col flex-grow">
-                                        <h3 className="text-2xl font-bold font-heading text-gray-900 mb-3">
-                                            🏘️ Favela Tour in Rio de Janeiro
-                                        </h3>
-                                        <p className="text-gray-600 mb-8 flex-grow leading-relaxed">
-                                            Ein respektvoller Einblick in die Kultur und den Alltag der Favelas — authentisch und sicher mit lokalem Guide. Besuche Rocinha und The Maze.
-                                        </p>
-                                        <Link
-                                            href="/touren/favela-tour"
-                                            className="inline-flex items-center gap-2 text-rio-green font-bold group-hover:translate-x-1 transition-transform"
-                                        >
-                                            Mehr erfahren <ChevronRight className="w-4 h-4" />
-                                        </Link>
-                                    </div>
-                                </div>
-                            </FadeIn>
-                        </div>
-
-                        {/* Cards "In Kürze" */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Touren Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {[
                                 {
-                                    emoji: "�️",
+                                    slug: "klassiker",
+                                    emoji: "🏔️",
+                                    title: "Klassiker Tour in Rio de Janeiro",
+                                    image: "/images/home-pao-de-acucar.webp",
+                                    desc: "Die schönsten Sehenswürdigkeiten Rios an einem Tag — von Corcovado über den Zuckerhut bis zum Sonnenuntergang am Arpoador. 12 Highlights, 6 fertige Tagesprogramme.",
+                                    badges: ['~8 Stunden', '12 Highlights']
+                                },
+                                {
+                                    slug: "natur-und-straende",
+                                    emoji: "🌿",
+                                    title: "Natur & Strände in Rio de Janeiro",
+                                    image: "/images/natur-und-straende.webp",
+                                    desc: "Regenwald-Wanderungen, Gipfeltouren und versteckte Strände — Rios wilde Seite abseits der Touristenpfade. Von leicht bis anspruchsvoll.",
+                                    badges: ['3–8 Stunden', '9 Highlights']
+                                },
+                                {
+                                    slug: "favela-tour",
+                                    emoji: "🏘️",
+                                    title: "Favela Tour in Rio de Janeiro",
+                                    image: "/images/rio-favela.webp",
+                                    desc: "Ein respektvoller Einblick in die Kultur und den Alltag der Favelas — authentisch und sicher mit lokalem Guide. Besuche Rocinha und The Maze.",
+                                    badges: ['2–3 Stunden', '2 Highlights']
+                                },
+                                {
+                                    slug: "kultur-und-geschichte",
+                                    emoji: "🏛️",
                                     title: "Kultur & Geschichte Tour in Rio de Janeiro",
+                                    image: "/images/kultur-und-geschichte-bg.webp",
                                     desc: "Museen, historische Gebäude und die faszinierende Geschichte Rios — vom kolonialen Zentrum bis zur modernen Praça Mauá.",
-                                    msg: "Hallo! Ich interessiere mich für eine Kultur & Geschichte Tour in Rio. Kannst du mir mehr erzählen?",
-                                    href: "/touren/kultur-und-geschichte",
                                     badges: ["4–6 Stunden", "10 Highlights"]
                                 },
                                 {
+                                    slug: "by-night",
                                     emoji: "🌙",
                                     title: "Rio by Night — Nachtleben in Rio de Janeiro",
+                                    image: "/images/lapa-by-night.webp",
                                     desc: "Samba in Lapa, Cocktails in Leblon und das pulsierende Nachtleben Rios — erlebe die Stadt nach Sonnenuntergang.",
-                                    msg: "Hallo! Ich interessiere mich für eine Rio by Night Tour. Kannst du mir mehr erzählen?",
-                                    href: "/touren/by-night",
                                     badges: ["3–4 Stunden", "Nachtleben"]
                                 },
                                 {
+                                    slug: "karneval-tour",
                                     emoji: "🎉",
                                     title: "Karneval Tour in Rio de Janeiro",
+                                    image: "/images/bloco-de-rua.webp",
                                     desc: "Das größte Fest der Welt hautnah erleben — Sambódromo, Blocos de Rua und die beste Karnevalsstimmung mit einem echten Carioca.",
-                                    msg: "Hallo! Ich interessiere mich für eine Karneval Tour in Rio. Kannst du mir mehr erzählen?",
-                                    href: "/touren/karneval-tour",
                                     badges: ["Saisonal", "Karneval"]
                                 },
                                 {
-                                    emoji: "☔",
-                                    title: "Regentage in Rio de Janeiro",
-                                    desc: "Regen in Rio? Kein Problem! Museen, Gastronomie, Indoor-Aktivitäten und kulturelle Erlebnisse — damit kein Tag verloren geht.",
-                                    msg: "Hallo! Es regnet in Rio und ich suche nach Indoor-Aktivitäten. Kannst du mir helfen?",
-                                    href: "/touren/regentage",
-                                    badges: ["Flexibel", "Indoor-Erlebnisse"]
-                                },
-                                {
+                                    slug: "fussball",
                                     emoji: "⚽",
                                     title: "Fußball Tour in Rio de Janeiro",
+                                    image: "/images/maracana-rio-de-janeiro.webp",
                                     desc: "Maracanã, Fußball-Museen und echte Leidenschaft — erlebe Rio wie ein Fan und spüre die Begeisterung der Cariocas.",
-                                    msg: "Hallo! Ich interessiere mich für eine Fußball Tour in Rio. Kannst du mir mehr erzählen?",
-                                    href: "/touren/fussball",
                                     badges: ["3–4 Stunden", "Fußball"]
                                 },
                                 {
-                                    emoji: "🧗",
-                                    title: "Sport & Abenteuer in Rio de Janeiro",
-                                    desc: "Surfen, Paragliding, Stand-up Paddle, Klettern und mehr — Rio de Janeiro ist ein Paradies für Abenteurer und Sportbegeisterte.",
-                                    msg: "Hallo! Ich interessiere mich für Sport- und Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?",
-                                    href: "/touren/sport-und-abenteuer",
-                                    badges: ["3–8 Stunden", "Adrenalin & Natur"]
-                                },
-                                {
+                                    slug: "tagesausfluege",
                                     emoji: "🗺️",
                                     title: "Tagesausflüge ab Rio de Janeiro",
+                                    image: "/images/buzios.webp",
                                     desc: "Búzios, Ilha Grande, Paraty, Petrópolis und mehr — traumhafte Ausflüge rund um Rio, perfekt für einen Extra-Tag.",
-                                    msg: "Hallo! Ich interessiere mich für einen Tagesausflug ab Rio. Kannst du mir mehr erzählen?",
-                                    href: "/touren/tagesausfluege",
                                     badges: ["Ganztägig", "Ab Rio"]
                                 },
                                 {
+                                    slug: "regentage",
+                                    emoji: "☔",
+                                    title: "Regentage in Rio de Janeiro",
+                                    image: "/images/mudeu-do-amanha.webp",
+                                    desc: "Regen in Rio? Kein Problem! Museen, Gastronomie, Indoor-Aktivitäten und kulturelle Erlebnisse — damit kein Tag verloren geht.",
+                                    badges: ["Flexibel", "Indoor-Erlebnisse"]
+                                },
+                                {
+                                    slug: "sport-und-abenteuer",
+                                    emoji: "🧗",
+                                    title: "Sport & Abenteuer in Rio de Janeiro",
+                                    image: "/images/paraglider-rio.webp",
+                                    desc: "Surfen, Paragliding, Stand-up Paddle, Klettern und mehr — Rio de Janeiro ist ein Paradies für Abenteurer und Sportbegeisterte.",
+                                    badges: ["3–8 Stunden", "Adrenalin & Natur"]
+                                },
+                                {
+                                    slug: "individuell",
                                     emoji: "🎯",
                                     title: "Individuelle Tour in Rio de Janeiro",
+                                    image: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800&q=80",
                                     desc: "Dein Wunschtag in Rio — du bestimmst die Orte und das Tempo, ich plane den perfekten Tag für dich.",
-                                    msg: "Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?",
                                     badges: ["Flexibel", "Auf Anfrage"]
                                 }
                             ].map((tour, i) => (
-                                <FadeIn key={i} delay={0.1 * i} direction="up" className="flex flex-col h-full">
-                                    {tour.href ? (
-                                        <Link
-                                            href={tour.href}
-                                            className="group p-8 rounded-3xl bg-white border border-gray-200 hover:border-rio-yellow hover:shadow-xl transition-all duration-300 flex flex-col h-full"
-                                        >
-                                            <div className="flex items-center justify-between mb-4">
-                                                <span className="text-3xl">{tour.emoji}</span>
-                                                <div className="flex flex-wrap gap-1.5 justify-end max-w-[70%]">
-                                                    {(tour as any).badges?.map((badge: string) => (
-                                                        <span key={badge} className="bg-white/90 px-2 py-0.5 rounded-full text-[9px] font-black text-rio-green border border-rio-green/10 uppercase tracking-tighter whitespace-nowrap">
-                                                            {badge}
-                                                        </span>
-                                                    ))}
-                                                </div>
+                                <FadeIn key={i} delay={0.1 * (i % 3)} direction="up">
+                                    <div className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300 h-full">
+                                        <div className="relative h-64 lg:h-72 overflow-hidden">
+                                            <Image
+                                                src={tour.image}
+                                                alt={tour.title}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                            />
+                                            <div className="absolute top-4 right-4 z-20 flex flex-wrap gap-2 justify-end">
+                                                {tour.badges.map((badge) => (
+                                                    <div key={badge} className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
+                                                        {badge}
+                                                    </div>
+                                                ))}
                                             </div>
+                                        </div>
+                                        <div className="p-8 flex flex-col flex-grow">
                                             <h3 className="text-xl font-bold font-heading text-gray-900 mb-3 group-hover:text-rio-green transition-colors">
-                                                {tour.title}
+                                                {tour.emoji} {tour.title}
                                             </h3>
-                                            <p className="text-gray-500 text-sm mb-6 flex-grow leading-relaxed">
+                                            <p className="text-gray-600 text-sm mb-8 flex-grow leading-relaxed">
                                                 {tour.desc}
                                             </p>
-                                            <div className="flex items-center gap-2 text-rio-green font-bold text-sm">
+                                            <Link
+                                                href={`/touren/${tour.slug === "individuell" ? "individuell" : tour.slug}`}
+                                                className="inline-flex items-center gap-2 text-rio-green font-bold group-hover:translate-x-1 transition-transform"
+                                            >
                                                 Mehr erfahren <ChevronRight className="w-4 h-4" />
-                                            </div>
-                                        </Link>
-                                    ) : (
-                                        <a
-                                            href={`https://wa.me/573148704374?text=${encodeURIComponent(tour.msg || "")}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="group p-8 rounded-3xl bg-gray-100/50 border border-gray-200 hover:border-rio-yellow hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col h-full"
-                                        >
-                                            <div className="flex items-center justify-between mb-4">
-                                                <span className="text-3xl">{tour.emoji}</span>
-                                                <div className="flex flex-wrap gap-1.5 justify-end max-w-[70%]">
-                                                    <span className="bg-gray-200 text-gray-500 text-[9px] font-bold px-2 py-0.5 rounded border border-gray-200 uppercase tracking-wider whitespace-nowrap">
-                                                        In Kürze
-                                                    </span>
-                                                    {(tour as any).badges?.map((badge: string) => (
-                                                        <span key={badge} className="bg-white/90 px-2 py-0.5 rounded-full text-[9px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider whitespace-nowrap">
-                                                            {badge}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <h3 className="text-xl font-bold font-heading text-gray-900 mb-3 group-hover:text-rio-green transition-colors">
-                                                {tour.title}
-                                            </h3>
-                                            <p className="text-gray-500 text-sm mb-6 flex-grow leading-relaxed">
-                                                {tour.desc}
-                                            </p>
-                                            <div className="flex items-center gap-2 text-rio-green font-bold text-sm">
-                                                Details anfragen <ChevronRight className="w-4 h-4" />
-                                            </div>
-                                        </a>
-                                    )}
+                                            </Link>
+                                        </div>
+                                    </div>
                                 </FadeIn>
                             ))}
                         </div>
@@ -398,27 +292,65 @@ export default function TourenPage() {
                             <div className="max-w-6xl mx-auto px-5 lg:px-8">
                                 <div className="columns-1 sm:columns-2 lg:columns-4 gap-x-8 gap-y-4 space-y-4 text-left">
                                     {[
-                                        "Arcos da Lapa", "Arraial do Cabo", "Blocos de Rua", "Botanischer Garten",
-                                        "Botafogo", "Búzios", "Catedral Metropolitana", "CCBB (Centro Cultural Banco do Brasil)",
-                                        "Confeitaria Colombo", "Cristo Redentor (Corcovado)", "Escadaria Selarón",
-                                        "Estádio Nilton Santos", "Ilha Grande", "Lagoa Rodrigo de Freitas",
-                                        "Lapa", "Leblon", "MAC (Niterói)", "MAM (Museu de Arte Moderna)",
-                                        "Maracanã (Stadion & Museum)", "Mirante Dona Marta", "Morro Dois Irmãos",
-                                        "Museu de Arte do Rio (MAR)", "Museu do Amanhã", "Museu do Flamengo",
-                                        "Museu Nacional de Belas Artes", "Paraty", "Parque Lage",
-                                        "Pedra Bonita", "Pedra da Gávea", "Pedra do Arpoador", "Petrópolis",
-                                        "Pico da Tijuca", "Praia de Grumari", "Praia Vermelha", "Prainha",
-                                        "Real Gabinete Português de Leitura", "Rocinha",
-                                        "Sambódromo", "Santa Teresa", "São Januário (Vasco)", "Teatro Municipal",
-                                        "Tijuca-Regenwald", "Urca", "Vidigal", "Zuckerhut (Pão de Açúcar)"
+                                        { name: "AquaRio", slug: "kultur-und-geschichte" },
+                                        { name: "Arcos da Lapa", slug: "klassiker" },
+                                        { name: "Arraial do Cabo", slug: "tagesausfluege" },
+                                        { name: "Blocos de Rua", slug: "karneval-tour" },
+                                        { name: "Botanischer Garten", slug: "klassiker" },
+                                        { name: "Botafogo", slug: "by-night" },
+                                        { name: "Búzios", slug: "tagesausfluege" },
+                                        { name: "Casa Firjan", slug: "kultur-und-geschichte" },
+                                        { name: "Catedral Metropolitana", slug: "kultur-und-geschichte" },
+                                        { name: "CCBB (Centro Cultural Banco do Brasil)", slug: "kultur-und-geschichte" },
+                                        { name: "Confeitaria Colombo", slug: "kultur-und-geschichte" },
+                                        { name: "Cristo Redentor (Corcovado)", slug: "klassiker" },
+                                        { name: "Escadaria Selarón", slug: "klassiker" },
+                                        { name: "Estádio Nilton Santos", slug: "fussball" },
+                                        { name: "Ilha Grande", slug: "tagesausfluege" },
+                                        { name: "Lagoa Rodrigo de Freitas", slug: "klassiker" },
+                                        { name: "Lapa", slug: "by-night" },
+                                        { name: "Leblon", slug: "by-night" },
+                                        { name: "MAC (Niterói)", slug: "kultur-und-geschichte" },
+                                        { name: "MAM (Museu de Arte Moderna)", slug: "kultur-und-geschichte" },
+                                        { name: "Maracanã (Stadion & Museum)", slug: "fussball" },
+                                        { name: "Mirante Dona Marta", slug: "klassiker" },
+                                        { name: "Morro Dois Irmãos", slug: "natur-und-straende" },
+                                        { name: "Museu da Chácara do Céu", slug: "kultur-und-geschichte" },
+                                        { name: "Museu de Arte do Rio (MAR)", slug: "kultur-und-geschichte" },
+                                        { name: "Museu do Amanhã", slug: "kultur-und-geschichte" },
+                                        { name: "Museu do Flamengo", slug: "fussball" },
+                                        { name: "Museu Nacional de Belas Artes", slug: "kultur-und-geschichte" },
+                                        { name: "Paraty", slug: "tagesausfluege" },
+                                        { name: "Parque Glória Maria", slug: "kultur-und-geschichte" },
+                                        { name: "Parque Lage", slug: "klassiker" },
+                                        { name: "Pedra Bonita", slug: "natur-und-straende" },
+                                        { name: "Pedra da Gávea", slug: "natur-und-straende" },
+                                        { name: "Pedra do Arpoador", slug: "klassiker" },
+                                        { name: "Petrópolis", slug: "tagesausfluege" },
+                                        { name: "Pico da Tijuca", slug: "natur-und-straende" },
+                                        { name: "Praia de Grumari", slug: "natur-und-straende" },
+                                        { name: "Praia Vermelha", slug: "natur-und-straende" },
+                                        { name: "Prainha", slug: "natur-und-straende" },
+                                        { name: "Real Gabinete Português de Leitura", slug: "kultur-und-geschichte" },
+                                        { name: "Rocinha", slug: "favela-tour" },
+                                        { name: "Sambódromo", slug: "karneval-tour" },
+                                        { name: "Santa Teresa", slug: "by-night" },
+                                        { name: "São Januário (Vasco)", slug: "fussball" },
+                                        { name: "Teatro Municipal", slug: "kultur-und-geschichte" },
+                                        { name: "The Maze (Tavares Bastos)", slug: "favela-tour" },
+                                        { name: "Tijuca-Regenwald", slug: "natur-und-straende" },
+                                        { name: "Urca", slug: "klassiker" },
+                                        { name: "Vidigal", slug: "favela-tour" },
+                                        { name: "Yup Star", slug: "klassiker" },
+                                        { name: "Zuckerhut (Pão de Açúcar)", slug: "klassiker" }
                                     ].map((item) => (
-                                        <div key={item} className="break-inside-avoid mb-4">
+                                        <div key={item.name} className="break-inside-avoid mb-4">
                                             <Link
-                                                href="#kontakt"
-                                                title={item}
+                                                href={`/touren/${item.slug}`}
+                                                title={item.name}
                                                 className="text-rio-green font-bold hover:underline decoration-2 underline-offset-4 transition-all text-sm lg:text-base leading-relaxed"
                                             >
-                                                {item}
+                                                {item.name}
                                             </Link>
                                         </div>
                                     ))}
@@ -438,7 +370,7 @@ export default function TourenPage() {
                                 <span className="text-rio-yellow">ich plane ihn für dich.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
-                                Schreib mir auf WhatsApp und wir stellen gemeinsam dein perfektes Programm zusammen.
+                                Schreib mir per WhatsApp oder E-Mail und wir stellen gemeinsam dein perfektes Programm zusammen.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a
@@ -451,15 +383,16 @@ export default function TourenPage() {
                                     WhatsApp an uns
                                 </a>
                                 <Link
-                                    href="/#kontakt"
+                                    href="/kontakt"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
-                                    Zum Kontaktformular
+                                    Kontakt per E-Mail
                                 </Link>
                             </div>
                         </FadeIn>
                     </div>
                 </section>
+
             </main>
 
             <Footer />

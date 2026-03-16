@@ -28,7 +28,7 @@ const navLinks = [
             { href: "/touren/fussball", label: "⚽ Fußball Tour" },
             { href: "/touren/sport-und-abenteuer", label: "🧗 Sport & Abenteuer" },
             { href: "/touren/tagesausfluege", label: "🗺️ Tagesausflüge" },
-            { href: "#", label: "🎯 Individuelle Tour", disabled: true },
+            { href: "/touren/individuell", label: "🎯 Individuelle Tour" },
         ],
     },
     { href: "/#ueber-uns", label: "Über Uns" },
@@ -70,11 +70,7 @@ export default function Navbar() {
                                     <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                                         <div className="bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden transform origin-top translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                                             <div className="py-2">
-                                                {link.subLinks.map((sub, i) => sub.disabled ? (
-                                                    <span key={i} className="block px-5 py-2.5 text-sm text-gray-400 cursor-not-allowed">
-                                                        {sub.label}
-                                                    </span>
-                                                ) : (
+                                                {link.subLinks.map((sub, i) => (
                                                     <Link
                                                         key={i}
                                                         href={sub.href}
@@ -148,11 +144,7 @@ export default function Navbar() {
                                         </button>
                                     </div>
                                     <div className={`flex flex-col gap-4 overflow-hidden transition-all duration-300 w-full ${mobileTourenOpen ? "max-h-64 opacity-100 mt-6" : "max-h-0 opacity-0 mt-0"}`}>
-                                        {link.subLinks.map((sub, i) => sub.disabled ? (
-                                            <span key={i} className="text-lg font-medium text-gray-400">
-                                                {sub.label}
-                                            </span>
-                                        ) : (
+                                        {link.subLinks.map((sub, i) => (
                                             <Link
                                                 key={i}
                                                 href={sub.href}

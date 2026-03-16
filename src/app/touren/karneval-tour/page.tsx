@@ -187,7 +187,7 @@ export default function KarnevalTourPage() {
                                 <span className="text-rio-yellow text-2xl lg:text-4xl">mit einem Carioca an deiner Seite.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Schreib mir auf WhatsApp und ich plane deinen perfekten Karneval — von Sambódromo-Tickets bis zu den besten Blocos, sicher und unvergesslich.
+                                Schreib mir per WhatsApp oder E-Mail und ich plane deinen perfekten Karneval — von Sambódromo-Tickets bis zu den besten Blocos, sicher und unvergesslich.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a
@@ -200,10 +200,10 @@ export default function KarnevalTourPage() {
                                     WhatsApp an uns
                                 </a>
                                 <Link
-                                    href="/#kontakt"
+                                    href="/kontakt"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
-                                    Zum Kontaktformular
+                                    Kontakt per E-Mail
                                 </Link>
                             </div>
                         </FadeIn>

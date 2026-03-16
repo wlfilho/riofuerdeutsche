@@ -236,8 +236,8 @@ export default function NaturTourPage() {
                                 Dein Abenteuer in Rios Natur — <br className="hidden sm:block" />
                                 <span className="text-rio-yellow">ich plane es für dich.</span>
                             </h2>
-                            <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
-                                Ob Regenwald-Wanderung, Gipfeltour oder versteckter Strand — schreib mir auf WhatsApp und ich stelle deine perfekte Natur-Tour zusammen.
+                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
+                                Ob Regenwald-Wanderung, Gipfeltour oder versteckter Strand — schreib mir per WhatsApp oder E-Mail und ich stelle deine perfekte Natur-Tour zusammen.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a
@@ -250,10 +250,10 @@ export default function NaturTourPage() {
                                     WhatsApp an uns
                                 </a>
                                 <Link
-                                    href="/#kontakt"
+                                    href="/kontakt"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
-                                    Zum Kontaktformular
+                                    Kontakt per E-Mail
                                 </Link>
                             </div>
                         </FadeIn>
