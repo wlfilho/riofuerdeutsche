@@ -239,6 +239,7 @@ export default function TourenPage() {
                                     title: "Regentage in Rio de Janeiro",
                                     desc: "Regen in Rio? Kein Problem! Museen, Gastronomie, Indoor-Aktivitäten und kulturelle Erlebnisse — damit kein Tag verloren geht.",
                                     msg: "Hallo! Es regnet in Rio und ich suche nach Indoor-Aktivitäten. Kannst du mir helfen?",
+                                    href: "/touren/regentage",
                                     badges: ["Flexibel", "Indoor-Erlebnisse"]
                                 },
                                 {

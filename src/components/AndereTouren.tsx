@@ -73,10 +73,8 @@ const allTours: Tour[] = [
         title: "Regentage in Rio de Janeiro",
         description: "Regen in Rio? Kein Problem! Museen, Gastronomie, Indoor-Aktivitäten und kulturelle Erlebnisse — damit kein Tag verloren geht.",
         badges: ["Flexibel", "Indoor-Erlebnisse"],
-        link: "https://wa.me/573148704374?text=Hallo! Es regnet in Rio und ich suche nach Indoor-Aktivitäten. Kannst du mir helfen?",
-        isExternal: true,
-        isComingSoon: true,
-        comingSoonLabel: "Bald verfügbar"
+        link: "/touren/regentage",
+        isComingSoon: false
     },
     {
         slug: "fussball",

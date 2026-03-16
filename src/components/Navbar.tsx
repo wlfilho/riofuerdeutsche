@@ -24,7 +24,7 @@ const navLinks = [
             { href: "/touren/kultur-und-geschichte", label: "🏛️ Kultur & Geschichte" },
             { href: "/touren/by-night", label: "🌙 Rio by Night" },
             { href: "/touren/karneval-tour", label: "🎉 Karneval Tour" },
-            { href: "#", label: "☔ Regentage in Rio", disabled: true },
+            { href: "/touren/regentage", label: "☔ Regentage in Rio" },
             { href: "/touren/fussball", label: "⚽ Fußball Tour" },
             { href: "/touren/sport-und-abenteuer", label: "🧗 Sport & Abenteuer" },
             { href: "/touren/tagesausfluege", label: "🗺️ Tagesausflüge" },
