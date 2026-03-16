@@ -25,7 +25,7 @@ const jsonLd = {
         "Deutschsprachige Privattouren durch Rio de Janeiro. Maßgeschneidert, sicher und unvergesslich.",
       url: "https://riofuerdeutsche.de",
       telephone: "+573148704374",
-      email: "kontakt@riofuerdeutsche.example",
+      email: "lantelmew@gmail.com",
       image: "/images/rio-background.webp",
       address: {
         "@type": "PostalAddress",
@@ -212,7 +212,7 @@ export default function Home() {
                       Touren ansehen
                     </Link>
                     <Link
-                      href="#kontakt"
+                      href="/kontakt"
                       className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                     >
                       Kostenlos anfragen
@@ -499,12 +499,12 @@ export default function Home() {
                     <Phone className="w-5 h-5" />
                     WhatsApp an uns
                   </a>
-                  <a
-                    href="mailto:kontakt@riofuerdeutsche.example"
+                  <Link
+                    href="/kontakt"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                   >
-                    Zum Kontaktformular
-                  </a>
+                    Zum Kontakt
+                  </Link>
                 </div>
               </FadeIn>
             </div>

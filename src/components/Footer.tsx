@@ -39,7 +39,7 @@ export default function Footer() {
                             <li><Link href="/touren/klassiker" className="hover:text-white transition-colors">Touren und Ausflüge</Link></li>
                             <li><Link href="/#ueber-uns" className="hover:text-white transition-colors">Über Uns</Link></li>
                             <li><Link href="/#vorteile" className="hover:text-white transition-colors">Warum Wir?</Link></li>
-                            <li><Link href="/#kontakt" className="hover:text-white transition-colors">Kontakt</Link></li>
+                            <li><Link href="/kontakt" className="hover:text-white transition-colors">Kontakt</Link></li>
                         </ul>
                     </div>
                     <div>
@@ -47,7 +47,7 @@ export default function Footer() {
                         <ul className="space-y-2 text-sm">
                             <li>Rio de Janeiro, Brasilien</li>
                             <li>WhatsApp: +57 314 870 4374</li>
-                            <li>Email: kontakt@riofuerdeutsche.example</li>
+                            <li>Email: lantelmew@gmail.com</li>
                             <li className="pt-2 text-rio-yellow">Dein Buddy in Rio!</li>
                         </ul>
                     </div>
@@ -55,8 +55,8 @@ export default function Footer() {
                 <div className="flex flex-col md:flex-row justify-between items-center text-xs">
                     <p>&copy; {new Date().getFullYear()} Rio für Deutsche. Alle Rechte vorbehalten.</p>
                     <div className="flex gap-4 mt-4 md:mt-0">
-                        <Link href="#" className="hover:text-white transition-colors">Impressum</Link>
-                        <Link href="#" className="hover:text-white transition-colors">Datenschutz</Link>
+                        <Link href="/impressum" className="hover:text-white transition-colors">Impressum</Link>
+                        <Link href="/datenschutz" className="hover:text-white transition-colors">Datenschutz</Link>
                     </div>
                 </div>
             </div>

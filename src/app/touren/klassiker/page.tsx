@@ -446,10 +446,10 @@ export default function KlassikerTourPage() {
                                     WhatsApp an uns
                                 </a>
                                 <Link
-                                    href="/#kontakt"
+                                    href="/kontakt"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
-                                    Zum Kontaktformular
+                                    Zum Kontakt
                                 </Link>
                             </div>
                         </FadeIn>

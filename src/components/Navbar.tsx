@@ -34,7 +34,7 @@ const navLinks = [
     { href: "/#ueber-uns", label: "Über Uns" },
     { href: "/#vorteile", label: "Vorteile" },
     { href: "/#bewertungen", label: "Bewertungen" },
-    { href: "/#kontakt", label: "Kontakt" },
+    { href: "/kontakt", label: "Kontakt" },
 ];
 
 export default function Navbar() {
