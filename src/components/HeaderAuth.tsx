@@ -30,18 +30,34 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
   useEffect(() => {
     let mounted = true;
 
+    const fetchProfile = async (userId: string) => {
+      try {
+        console.log('HeaderAuth: Fetching profile for', userId);
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('first_name, email, role')
+          .eq('id', userId)
+          .single();
+
+        if (error) {
+          console.error('HeaderAuth: Profile fetch error:', error);
+          return null;
+        }
+
+        console.log('HeaderAuth: Profile found:', profile);
+        return profile;
+      } catch (err) {
+        console.error('HeaderAuth: Unexpected error fetching profile:', err);
+        return null;
+      }
+    };
+
     const initAuth = async () => {
       try {
-        // Usar getSession para velocidade, depois getUser para segurança se necessário
         const { data: { session } } = await supabase.auth.getSession();
 
         if (session?.user && mounted) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('first_name, email, role')
-            .eq('id', session.user.id)
-            .single();
-
+          const profile = await fetchProfile(session.user.id);
           if (profile && mounted) {
             setUser({
               firstName: profile.first_name,
@@ -53,7 +69,10 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
       } catch (error) {
         console.error('HeaderAuth Init Error:', error);
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          console.log('HeaderAuth: Initial loading finished');
+        }
       }
     };
 
@@ -61,15 +80,11 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('HeaderAuth: Auth event:', event);
         if (!mounted) return;
 
         if (session?.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('first_name, email, role')
-            .eq('id', session.user.id)
-            .single();
-
+          const profile = await fetchProfile(session.user.id);
           if (profile && mounted) {
             setUser({
               firstName: profile.first_name,
@@ -85,9 +100,11 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
       }
     );
 
-    // Safety valve: nunca ficar mais de 5s carregando
     const timeout = setTimeout(() => {
-      if (mounted && loading) setLoading(false);
+      if (mounted && loading) {
+        console.warn('HeaderAuth: Loading timeout triggered');
+        setLoading(false);
+      }
     }, 5000);
 
     return () => {
@@ -95,7 +112,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
       subscription.unsubscribe();
       clearTimeout(timeout);
     };
-  }, [supabase, loading]);
+  }, [supabase]);
 
   // Fechar dropdown ao clicar fora
   useEffect(() => {
