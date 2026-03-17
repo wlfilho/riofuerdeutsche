@@ -26,6 +26,7 @@ export default function GuideChapterPage({
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchChapter = async () => {
@@ -49,6 +50,19 @@ export default function GuideChapterPage({
         }
 
         setChapter(data.chapter);
+
+        // Fetch user info for personalization
+        const { createClient } = await import('@/utils/supabase/client');
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name')
+            .eq('id', user.id)
+            .single();
+          if (profile) setFirstName(profile.first_name);
+        }
       } catch (err) {
         setError('Fehler beim Laden des Kapitels');
       } finally {
@@ -93,6 +107,15 @@ export default function GuideChapterPage({
       <h1>
         {chapter.icon} {chapter.title}
       </h1>
+
+      {chapter.slug === 'sicherheit' && firstName && (
+        <div className="not-prose bg-green-50 border border-green-200 rounded-xl p-5 mb-8">
+          <p className="text-green-900 leading-relaxed">
+            <strong className="block text-lg mb-1">Hey {firstName}! 🇧🇷</strong>
+            Schön, dass du hier bist. Lies dieses Kapitel besonders aufmerksam durch — es kann dir in Rio de Janeiro wirklich den Urlaub retten.
+          </p>
+        </div>
+      )}
 
       <ReactMarkdown remarkPlugins={[remarkGfm]}>
         {chapter.content}

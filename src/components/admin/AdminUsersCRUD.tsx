@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from 'react';
 interface UserProfile {
   id: string;
   email: string;
+  first_name: string | null;
   role: 'user' | 'premium' | 'admin';
   created_at: string;
   premium_since: string | null;
@@ -29,6 +30,7 @@ export default function AdminUsersCRUD() {
   const [actionLoading, setActionLoading] = useState(false);
 
   // Form fields (para criar e editar)
+  const [formFirstName, setFormFirstName] = useState('');
   const [formEmail, setFormEmail] = useState('');
   const [formPassword, setFormPassword] = useState('');
   const [formRole, setFormRole] = useState<'user' | 'premium' | 'admin'>('user');
@@ -72,6 +74,7 @@ export default function AdminUsersCRUD() {
 
   // Abrir modal de criação
   const openCreateModal = () => {
+    setFormFirstName('');
     setFormEmail('');
     setFormPassword('');
     setFormRole('user');
@@ -85,6 +88,7 @@ export default function AdminUsersCRUD() {
   // Abrir modal de edição
   const openEditModal = (user: UserProfile) => {
     setSelectedUser(user);
+    setFormFirstName(user.first_name || '');
     setFormEmail(user.email);
     setFormRole(user.role);
     setFormEdition(user.guide_edition || 1);
@@ -120,6 +124,7 @@ export default function AdminUsersCRUD() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          first_name: formFirstName,
           email: formEmail,
           password: formPassword,
           role: formRole,
@@ -154,6 +159,7 @@ export default function AdminUsersCRUD() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          first_name: formFirstName,
           role: formRole,
           guide_edition: formRole === 'premium' ? formEdition : null,
           premium_until: formPremiumUntil
@@ -371,6 +377,9 @@ export default function AdminUsersCRUD() {
                     E-Mail
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
+                    Name
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
                     Rolle
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">
@@ -413,6 +422,9 @@ export default function AdminUsersCRUD() {
                         <p className="text-xs text-gray-400 md:hidden">
                           {formatDate(u.created_at)}
                         </p>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700">
+                        {u.first_name || '—'}
                       </td>
                       <td className="px-4 py-3">{roleBadge(u.role)}</td>
                       <td className="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">
@@ -518,6 +530,10 @@ export default function AdminUsersCRUD() {
                     <p className="text-sm font-medium">{selectedUser.email}</p>
                   </div>
                   <div>
+                    <p className="text-xs text-gray-500">Vorname</p>
+                    <p className="text-sm font-medium">{selectedUser.first_name || '—'}</p>
+                  </div>
+                  <div>
                     <p className="text-xs text-gray-500">Rolle</p>
                     <div className="mt-1">{roleBadge(selectedUser.role)}</div>
                   </div>
@@ -586,6 +602,20 @@ export default function AdminUsersCRUD() {
               {/* === CREATE / EDIT MODE === */}
               {(modalMode === 'create' || modalMode === 'edit') && (
                 <div className="space-y-4">
+                  {/* Vorname */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Vorname
+                    </label>
+                    <input
+                      type="text"
+                      value={formFirstName}
+                      onChange={(e) => setFormFirstName(e.target.value)}
+                      placeholder="z.B. Sarah"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                    />
+                  </div>
+
                   {/* Email */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">

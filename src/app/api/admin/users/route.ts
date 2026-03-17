@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { email, password, role, guide_edition } = body;
+  const { email, password, role, guide_edition, first_name } = body;
 
   if (!email || !password) {
     return NextResponse.json(
@@ -81,6 +81,9 @@ export async function POST(request: NextRequest) {
       email,
       password,
       email_confirm: true, // Já confirma o email
+      user_metadata: {
+        first_name: first_name || null,
+      },
     });
 
   if (authError) {

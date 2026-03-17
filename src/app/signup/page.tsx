@@ -8,6 +8,7 @@ import { m, AnimatePresence } from "framer-motion";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function SignupPage() {
+    const [firstName, setFirstName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -24,6 +25,9 @@ export default function SignupPage() {
                 email,
                 password,
                 options: {
+                    data: {
+                        first_name: firstName,
+                    },
                     emailRedirectTo: `${window.location.origin}/auth/callback`,
                 },
             });
@@ -32,7 +36,7 @@ export default function SignupPage() {
 
             setMessage({
                 type: "success",
-                text: "Konto erfolgreich erstellt! Bitte überprüfe deine E-Mails, um die Registrierung zu bestätigen."
+                text: "Konto erfolgreich erstellt! Bitte überprüfe deine E-Mails, um die Registrierung e zu bestätigen."
             });
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : "Fehler bei der Kontoerstellung.";
@@ -65,6 +69,21 @@ export default function SignupPage() {
                         </m.div>
                     )}
                 </AnimatePresence>
+
+                <div>
+                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                        Vorname
+                    </label>
+                    <input
+                        id="firstName"
+                        type="text"
+                        required
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-rio-green focus:border-rio-green sm:text-sm transition-all"
+                        placeholder="z.B. Sarah"
+                    />
+                </div>
 
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">

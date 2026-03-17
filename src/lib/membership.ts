@@ -21,6 +21,7 @@ export async function getMembershipAccess(): Promise<MembershipAccess> {
       hasLeadMagnet: false,
       role: null,
       guideEdition: null,
+      firstName: null,
     };
   }
 
@@ -38,6 +39,7 @@ export async function getMembershipAccess(): Promise<MembershipAccess> {
       hasLeadMagnet: false,
       role: 'user',
       guideEdition: null,
+      firstName: null,
     };
   }
 
@@ -60,6 +62,7 @@ export async function getMembershipAccess(): Promise<MembershipAccess> {
     hasLeadMagnet: true, // qualquer usuário registrado
     role: typedProfile.role,
     guideEdition: typedProfile.guide_edition,
+    firstName: typedProfile.first_name || null,
   };
 }
 

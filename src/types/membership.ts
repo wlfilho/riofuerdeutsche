@@ -5,6 +5,7 @@ export type UserRole = 'user' | 'premium' | 'admin';
 export interface UserProfile {
   id: string;
   email: string;
+  first_name: string | null;
   role: UserRole;
   created_at: string;
   premium_since: string | null;
@@ -20,4 +21,5 @@ export interface MembershipAccess {
   hasLeadMagnet: boolean;   // true se registrado (qualquer role)
   role: UserRole | null;
   guideEdition: number | null;
+  firstName: string | null;
 }

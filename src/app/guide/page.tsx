@@ -28,8 +28,7 @@ export default function GuidePage({
 
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isPremium, setIsPremium] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [firstName, setFirstName] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,15 +40,19 @@ export default function GuidePage({
           setChapters(chData.chapters);
         }
 
-        // Check access (using the admin users endpoint as a proxy for now 
-        // since it's already verified and returns role info if authorized)
-        // In a real app, a dedicated /api/auth/me or similar is better.
-        const userRes = await fetch('/api/admin/users');
-        if (userRes.ok) {
-          // If we can reach this, it doesn't mean we are admin, 
-          // because verifyAdmin in that endpoint checks for role.
-          // Let's just use the membership check from server side via a small API or prop.
-          // For now, I'll use a hack: if we can fetch ANY non-free chapter, we have access.
+        // Fetch membership info (client-side proxy or direct if possible)
+        // Since getMembershipAccess is server-side, we should probably have a small API route 
+        // or just fetch the user metadata here.
+        const { createClient } = await import('@/utils/supabase/client');
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name')
+            .eq('id', user.id)
+            .single();
+          if (profile) setFirstName(profile.first_name);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -61,10 +64,6 @@ export default function GuidePage({
     fetchData();
   }, []);
 
-  // For the sake of the demo and the current structure, I'll fetch the user role 
-  // from a small custom endpoint I'll add or just use the local storage if available.
-  // Actually, I'll just check if the user is logged in and their role.
-  
   const freeChapters = chapters.filter(c => c.is_free);
   const premiumChaptersList = chapters.filter(c => !c.is_free);
 
@@ -86,7 +85,7 @@ export default function GuidePage({
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Willkommen im Rio-Guide! 🇧🇷
+          {firstName ? `Willkommen, ${firstName}! 🇧🇷` : 'Willkommen im Rio-Guide! 🇧🇷'}
         </h1>
         <p className="text-gray-600">
           Entdecke Rio de Janeiro mit Insider-Tipps von einem echten Carioca.

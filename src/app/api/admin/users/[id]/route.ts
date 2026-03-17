@@ -57,7 +57,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const { role, premium_until, guide_edition, payment_id } = body;
+  const { role, premium_until, guide_edition, payment_id, first_name } = body;
 
   // Prevenir auto-rebaixamento
   if (id === userId && role && role !== 'admin') {
@@ -89,6 +89,7 @@ export async function PATCH(
   if (premium_until !== undefined) updateData.premium_until = premium_until || null;
   if (guide_edition !== undefined) updateData.guide_edition = guide_edition;
   if (payment_id !== undefined) updateData.payment_id = payment_id;
+  if (first_name !== undefined) updateData.first_name = first_name || null;
 
   const { data: profile, error } = await supabaseAdmin
     .from('profiles')
