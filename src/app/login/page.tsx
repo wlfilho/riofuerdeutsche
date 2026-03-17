@@ -38,7 +38,37 @@ export default function LoginPage() {
                 }
             } else {
                 setMessage({ type: "success", text: "Login erfolgreich! Leite weiter..." });
-                setTimeout(() => router.push("/dashboard"), 1500);
+
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    // Verificar se tem redirect na URL
+                    const searchParams = new URLSearchParams(window.location.search);
+                    const redirectTo = searchParams.get('returnTo') || searchParams.get('redirect');
+
+                    if (redirectTo) {
+                        router.push(redirectTo);
+                        return;
+                    }
+
+                    // Senão, redirecionar baseado no role
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', user.id)
+                        .single();
+
+                    switch (profile?.role) {
+                        case 'admin':
+                            router.push('/dashboard');
+                            break;
+                        case 'premium':
+                            router.push('/guide');
+                            break;
+                        default:
+                            router.push('/guide/sicherheit');
+                            break;
+                    }
+                }
             }
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : "Fehler bei der Anmeldung.";

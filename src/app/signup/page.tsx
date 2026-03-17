@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import AuthLayout from "@/components/AuthLayout";
 import { m, AnimatePresence } from "framer-motion";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function SignupPage() {
+    const router = useRouter();
     const [firstName, setFirstName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -36,8 +38,12 @@ export default function SignupPage() {
 
             setMessage({
                 type: "success",
-                text: "Konto erfolgreich erstellt! Bitte überprüfe deine E-Mails, um die Registrierung e zu bestätigen."
+                text: "Konto erfolgreich erstellt! Willkommen im Rio-Guide."
             });
+
+            setTimeout(() => {
+                router.push('/guide/sicherheit');
+            }, 1500);
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : "Fehler bei der Kontoerstellung.";
             setMessage({ type: "error", text: errorMessage });

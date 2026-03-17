@@ -5,13 +5,13 @@ import Link from "next/link";
 import {
     MapPin,
     Phone,
-    User,
     Menu,
     X,
     Instagram,
     Youtube,
     ChevronDown,
 } from "lucide-react";
+import HeaderAuth from "./HeaderAuth";
 
 const navLinks = [
     {
@@ -96,10 +96,7 @@ export default function Navbar() {
                     </nav>
 
                     <div className="flex items-center gap-4">
-                        <Link href="/login" className="hidden lg:flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-rio-green transition-colors duration-200">
-                            <User className="h-4 w-4 text-rio-green" />
-                            <span>Login</span>
-                        </Link>
+                        <HeaderAuth />
 
                         {/* Hamburger Button */}
                         <button
@@ -169,14 +166,9 @@ export default function Navbar() {
                         ))}
 
                         <div className="w-full h-px bg-gray-100 max-w-xs my-2"></div>
-                        <Link
-                            href="/login"
-                            className="flex items-center gap-3 text-2xl font-bold text-gray-900 hover:text-rio-green transition-colors"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            <User className="h-6 w-6 text-rio-green" />
-                            <span>Login</span>
-                        </Link>
+                        <div className="lg:hidden">
+                            <HeaderAuth />
+                        </div>
                     </nav>
 
                     <div className="mt-auto pt-10 text-center border-t border-gray-100 pb-10">
