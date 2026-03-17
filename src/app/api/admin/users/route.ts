@@ -1,3 +1,4 @@
+// src/app/api/admin/users/route.ts
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
@@ -7,23 +8,27 @@ const supabaseAdmin = createAdminClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function GET(request: NextRequest) {
+// Helper para verificar admin
+async function verifyAdmin() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { authorized: false, supabase, userId: null };
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
     .single();
+  return {
+    authorized: profile?.role === 'admin',
+    supabase,
+    userId: user.id,
+  };
+}
 
-  if (profile?.role !== 'admin') {
+// GET — Listar todos os usuários
+export async function GET(request: NextRequest) {
+  const { authorized } = await verifyAdmin();
+  if (!authorized) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
   }
 
@@ -51,4 +56,52 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({ users });
+}
+
+// POST — Criar novo usuário manualmente
+export async function POST(request: NextRequest) {
+  const { authorized } = await verifyAdmin();
+  if (!authorized) {
+    return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+  }
+
+  const body = await request.json();
+  const { email, password, role, guide_edition } = body;
+
+  if (!email || !password) {
+    return NextResponse.json(
+      { error: 'Email und Passwort sind erforderlich.' },
+      { status: 400 }
+    );
+  }
+
+  // Criar usuário via Supabase Auth (admin API)
+  const { data: authUser, error: authError } =
+    await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Já confirma o email
+    });
+
+  if (authError) {
+    return NextResponse.json({ error: authError.message }, { status: 500 });
+  }
+
+  // O trigger handle_new_user já cria o profile com role='user'
+  // Se o role desejado for diferente, atualizar
+  if (authUser.user && role && role !== 'user') {
+    const updateData: Record<string, unknown> = { role };
+
+    if (role === 'premium') {
+      updateData.premium_since = new Date().toISOString();
+      updateData.guide_edition = guide_edition || 1;
+    }
+
+    await supabaseAdmin
+      .from('profiles')
+      .update(updateData)
+      .eq('id', authUser.user.id);
+  }
+
+  return NextResponse.json({ user: authUser.user }, { status: 201 });
 }
