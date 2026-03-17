@@ -33,21 +33,29 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
     const fetchProfile = async (userId: string) => {
       try {
         console.log('HeaderAuth: Fetching profile for', userId);
-        const { data: profile, error } = await supabase
+        
+        // Timeout the fetch ourselves just in case Supabase hangs due to ERR_BLOCKED_BY_CLIENT
+        const fetchPromise = supabase
           .from('profiles')
           .select('first_name, email, role')
           .eq('id', userId)
           .single();
-
-        if (error) {
-          console.error('HeaderAuth: Profile fetch error:', error);
+          
+        const timeoutPromise = new Promise<any>((_, reject) => 
+          setTimeout(() => reject(new Error('Profile fetch timeout')), 4000)
+        );
+        
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
+        
+        if (response?.error) {
+          console.error('HeaderAuth: Profile fetch error:', response.error);
           return null;
         }
 
-        console.log('HeaderAuth: Profile found:', profile);
-        return profile;
+        console.log('HeaderAuth: Profile found:', response?.data);
+        return response?.data;
       } catch (err) {
-        console.error('HeaderAuth: Unexpected error fetching profile:', err);
+        console.warn('HeaderAuth: fallback after fetch error/timeout:', err);
         return null;
       }
     };
@@ -57,12 +65,20 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
         const { data: { user: authUser } } = await supabase.auth.getUser();
 
         if (authUser && mounted) {
+          // Fallback imediato com os dados do Auth
+          setUser({
+            firstName: authUser.user_metadata?.first_name || authUser.user_metadata?.name || null,
+            email: authUser.email || '',
+            role: (authUser.user_metadata?.role || 'user') as 'user' | 'premium' | 'admin',
+          });
+          setLoading(false);
+          
           const profile = await fetchProfile(authUser.id);
           if (profile && mounted) {
             setUser({
-              firstName: profile.first_name,
-              email: profile.email,
-              role: profile.role as 'user' | 'premium' | 'admin',
+              firstName: profile.first_name || authUser.user_metadata?.first_name || null,
+              email: profile.email || authUser.email || '',
+              role: (profile.role || 'user') as 'user' | 'premium' | 'admin',
             });
           }
         }
@@ -84,12 +100,19 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
         if (!mounted) return;
 
         if (session?.user) {
+          setUser({
+            firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.name || null,
+            email: session.user.email || '',
+            role: (session.user.user_metadata?.role || 'user') as 'user' | 'premium' | 'admin',
+          });
+          setLoading(false);
+
           const profile = await fetchProfile(session.user.id);
           if (profile && mounted) {
             setUser({
-              firstName: profile.first_name,
-              email: profile.email,
-              role: profile.role as 'user' | 'premium' | 'admin',
+              firstName: profile.first_name || session.user.user_metadata?.first_name || null,
+              email: profile.email || session.user.email || '',
+              role: (profile.role || 'user') as 'user' | 'premium' | 'admin',
             });
           }
         } else {
