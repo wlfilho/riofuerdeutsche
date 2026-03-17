@@ -3,9 +3,7 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-
+import MarkdownContent from '@/components/MarkdownContent';
 interface ChapterData {
   id?: string;
   slug: string;
@@ -248,9 +246,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
             ) : (
               <div className="bg-white border border-gray-200 rounded-xl p-6 min-h-[600px] prose prose-gray max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-strong:text-gray-900 prose-a:text-green-600">
                 {chapter.content ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {chapter.content}
-                  </ReactMarkdown>
+                  <MarkdownContent content={chapter.content} />
                 ) : (
                   <p className="text-gray-400 italic">Noch kein Inhalt.</p>
                 )}

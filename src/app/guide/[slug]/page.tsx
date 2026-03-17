@@ -3,8 +3,7 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import MarkdownContent from '@/components/MarkdownContent';
 import Link from 'next/link';
 
 interface Chapter {
@@ -117,9 +116,7 @@ export default function GuideChapterPage({
         </div>
       )}
 
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-        {chapter.content}
-      </ReactMarkdown>
+      <MarkdownContent content={chapter.content} />
 
       {/* Se for o final de um capítulo gratuito e o usuário não for premium, mostrar CTA */}
       {chapter.is_free && (

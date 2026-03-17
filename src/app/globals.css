@@ -26,3 +26,178 @@ body {
     text-shadow: 0px 4px 20px rgba(0, 0, 0, 0.6);
   }
 }
+
+/* =============================
+   MARKDOWN CONTENT STYLES
+   Usado em: componente MarkdownContent
+   ============================= */
+
+.markdown-body {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #1a1a1a;
+  max-width: 720px;
+}
+
+/* Títulos */
+.markdown-body h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  color: #111;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.markdown-body h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+  color: #1a1a1a;
+}
+
+.markdown-body h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #222;
+}
+
+/* Parágrafos */
+.markdown-body p {
+  margin-bottom: 1.25rem;
+}
+
+/* Listas */
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.markdown-body li {
+  margin-bottom: 0.4rem;
+  line-height: 1.7;
+}
+
+.markdown-body ul li {
+  list-style-type: disc;
+}
+
+.markdown-body ol li {
+  list-style-type: decimal;
+}
+
+/* Listas aninhadas */
+.markdown-body ul ul,
+.markdown-body ol ul {
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem;
+}
+
+/* Negrito e itálico */
+.markdown-body strong {
+  font-weight: 700;
+  color: #111;
+}
+
+.markdown-body em {
+  font-style: italic;
+  color: #444;
+}
+
+/* Links */
+.markdown-body a {
+  color: #1a7a4a;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.markdown-body a:hover {
+  color: #0f4a2c;
+}
+
+/* Blockquotes (citações / destaques) */
+.markdown-body blockquote {
+  border-left: 4px solid #1a7a4a;
+  padding: 0.75rem 1rem;
+  margin: 1.5rem 0;
+  background: #f0faf5;
+  color: #333;
+  border-radius: 0 6px 6px 0;
+}
+
+.markdown-body blockquote p {
+  margin-bottom: 0;
+}
+
+/* Código inline */
+.markdown-body code {
+  background: #f3f4f6;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-family: monospace;
+  color: #c0392b;
+}
+
+/* Blocos de código */
+.markdown-body pre {
+  background: #1a1a2e;
+  color: #e2e8f0;
+  padding: 1.25rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.markdown-body pre code {
+  background: none;
+  color: inherit;
+  font-size: 0.875rem;
+  padding: 0;
+}
+
+/* Linha horizontal */
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 2rem 0;
+}
+
+/* Tabelas */
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.markdown-body th {
+  background: #f3f4f6;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.6rem 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+.markdown-body td {
+  padding: 0.6rem 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+.markdown-body tr:nth-child(even) td {
+  background: #fafafa;
+}
+
+/* Remove margin-top do primeiro elemento */
+.markdown-body > h1:first-child,
+.markdown-body > h2:first-child,
+.markdown-body > p:first-child {
+  margin-top: 0;
+}
