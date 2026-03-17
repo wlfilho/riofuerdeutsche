@@ -201,3 +201,217 @@ body {
 .markdown-body > p:first-child {
   margin-top: 0;
 }
+
+/* ===================================
+   RICH EDITOR — ADMIN & CONTENT
+   =================================== */
+
+.rich-editor-wrapper {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* Toolbar */
+.rich-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: #d1d5db;
+  margin: 0 4px;
+}
+
+.rich-editor-toolbar button {
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+  transition: all 0.15s;
+}
+
+.rich-editor-toolbar button:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.rich-editor-toolbar button.active {
+  background: #1a7a4a;
+  color: #fff;
+  border-color: #1a7a4a;
+}
+
+.rich-editor-toolbar select {
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #374151;
+  background: #fff;
+  cursor: pointer;
+}
+
+.toolbar-char-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Área de edição */
+.rich-editor-content {
+  padding: 24px;
+  min-height: 400px;
+  outline: none;
+}
+
+.rich-editor-content .ProseMirror {
+  outline: none;
+  min-height: 360px;
+}
+
+/* Placeholder */
+.rich-editor-content .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* Tipografia (Editor & Frontend) */
+.rich-editor-content .ProseMirror h1,
+.guide-content h1 {
+  font-size: 1.875rem;
+  font-weight: 800;
+  margin: 1.5rem 0 0.75rem;
+  line-height: 1.2;
+  color: #111;
+}
+
+.rich-editor-content .ProseMirror h2,
+.guide-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 1.25rem 0 0.6rem;
+  color: #1a1a1a;
+}
+
+.rich-editor-content .ProseMirror h3,
+.guide-content h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+  color: #222;
+}
+
+.rich-editor-content .ProseMirror p,
+.guide-content p {
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.rich-editor-content .ProseMirror ul,
+.guide-content ul,
+.rich-editor-content .ProseMirror ol,
+.guide-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.rich-editor-content .ProseMirror li,
+.guide-content li {
+  margin-bottom: 0.3rem;
+  line-height: 1.7;
+}
+
+.rich-editor-content .ProseMirror blockquote,
+.guide-content blockquote {
+  border-left: 4px solid #1a7a4a;
+  padding: 0.75rem 1rem;
+  margin: 1.25rem 0;
+  background: #f0faf5;
+  border-radius: 0 6px 6px 0;
+  color: #374151;
+}
+
+.rich-editor-content .ProseMirror img,
+.guide-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.rich-editor-content .ProseMirror iframe,
+.guide-content iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.rich-editor-content .ProseMirror table,
+.guide-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+}
+
+.rich-editor-content .ProseMirror th,
+.guide-content th {
+  background: #f3f4f6;
+  font-weight: 600;
+  padding: 0.6rem 1rem;
+  border: 1px solid #d1d5db;
+  text-align: left;
+}
+
+.rich-editor-content .ProseMirror td,
+.guide-content td {
+  padding: 0.6rem 1rem;
+  border: 1px solid #d1d5db;
+}
+
+.rich-editor-content .ProseMirror a,
+.guide-content a {
+  color: #1a7a4a;
+  text-decoration: underline;
+}
+
+.rich-editor-content .ProseMirror hr,
+.guide-content hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1.5rem 0;
+}
+
+/* Seleção de célula de tabela */
+.rich-editor-content .ProseMirror .selectedCell {
+  background: #d1fae5;
+}
+
+/* Frontend specific */
+.guide-content {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #1a1a1a;
+  max-width: 720px;
+}

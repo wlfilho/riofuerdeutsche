@@ -3,7 +3,7 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import MarkdownContent from '@/components/MarkdownContent';
+import GuideContent from '@/components/guide/GuideContent';
 import Link from 'next/link';
 
 interface Chapter {
@@ -11,7 +11,7 @@ interface Chapter {
   slug: string;
   title: string;
   icon: string;
-  content: string;
+  content: any;
   is_free: boolean;
 }
 
@@ -102,7 +102,7 @@ export default function GuideChapterPage({
   }
 
   return (
-    <article className="max-w-3xl prose prose-gray prose-headings:text-gray-900 prose-p:text-gray-600 prose-strong:text-gray-900 prose-a:text-green-600 prose-img:rounded-xl">
+    <article className="max-w-3xl">
       <h1>
         {chapter.icon} {chapter.title}
       </h1>
@@ -116,7 +116,7 @@ export default function GuideChapterPage({
         </div>
       )}
 
-      <MarkdownContent content={chapter.content} />
+      <GuideContent content={chapter.content} />
 
       {/* Se for o final de um capítulo gratuito e o usuário não for premium, mostrar CTA */}
       {chapter.is_free && (

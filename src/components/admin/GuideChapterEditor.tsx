@@ -3,14 +3,15 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import MarkdownContent from '@/components/MarkdownContent';
+import RichEditor from '@/components/admin/RichEditor';
+import GuideContent from '@/components/guide/GuideContent';
 interface ChapterData {
   id?: string;
   slug: string;
   title: string;
   subtitle: string;
   icon: string;
-  content: string;
+  content: any; // Agora é JSONB (TipTap)
   edition: number;
   is_free: boolean;
   status: 'draft' | 'published';
@@ -230,56 +231,27 @@ export default function GuideChapterEditor({ chapterId }: Props) {
               </button>
             </div>
 
-            {/* Editor / Preview */}
             {activeTab === 'edit' ? (
-              <textarea
-                value={chapter.content}
-                onChange={(e) =>
+              <RichEditor
+                content={chapter.content}
+                onChange={(json) =>
                   setChapter((prev) => ({
                     ...prev,
-                    content: e.target.value,
+                    content: json,
                   }))
                 }
-                placeholder="Schreibe deinen Inhalt in Markdown..."
-                className="w-full h-[600px] p-4 bg-white border border-gray-200 rounded-xl font-mono text-sm text-gray-800 resize-y focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             ) : (
-              <div className="bg-white border border-gray-200 rounded-xl p-6 min-h-[600px] prose prose-gray max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-strong:text-gray-900 prose-a:text-green-600">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 min-h-[600px]">
                 {chapter.content ? (
-                  <MarkdownContent content={chapter.content} />
+                  <GuideContent content={chapter.content} />
                 ) : (
                   <p className="text-gray-400 italic">Noch kein Inhalt.</p>
                 )}
               </div>
             )}
 
-            {/* Markdown Help */}
-            <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <p className="text-xs text-gray-500 font-medium mb-1">
-                Markdown-Hilfe:
-              </p>
-              <p className="text-xs text-gray-400">
-                <code className="bg-gray-200 px-1 rounded"># Überschrift</code>{' '}
-                ·{' '}
-                <code className="bg-gray-200 px-1 rounded">
-                  **fett**
-                </code>{' '}
-                ·{' '}
-                <code className="bg-gray-200 px-1 rounded">*kursiv*</code>{' '}
-                ·{' '}
-                <code className="bg-gray-200 px-1 rounded">
-                  - Liste
-                </code>{' '}
-                ·{' '}
-                <code className="bg-gray-200 px-1 rounded">
-                  [Link](url)
-                </code>{' '}
-                ·{' '}
-                <code className="bg-gray-200 px-1 rounded">
-                  {'> Zitat'}
-                </code>
-              </p>
-            </div>
+            {/* Markdown Help Removed - No longer applicable */}
           </div>
 
           {/* Sidebar — Metadaten */}
