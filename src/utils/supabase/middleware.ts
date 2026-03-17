@@ -37,6 +37,21 @@ export async function updateSession(request: NextRequest) {
 
     const pathname = request.nextUrl.pathname;
 
+    // --- REGRAS DE REDIRECIONAMENTO PARA LOGIN/SIGNUP ---
+    if (user && (pathname === "/login" || pathname === "/signup")) {
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+        let redirectTo = "/guide/sicherheit";
+        if (profile?.role === "admin") redirectTo = "/dashboard";
+        else if (profile?.role === "premium") redirectTo = "/guide";
+
+        return NextResponse.redirect(new URL(redirectTo, request.url));
+    }
+
     // --- REGRAS DA ÁREA DE MEMBROS ---
 
     // Rotas /guide/* requerem autenticação

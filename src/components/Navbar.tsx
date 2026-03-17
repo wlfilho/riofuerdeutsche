@@ -166,8 +166,8 @@ export default function Navbar() {
                         ))}
 
                         <div className="w-full h-px bg-gray-100 max-w-xs my-2"></div>
-                        <div className="lg:hidden">
-                            <HeaderAuth />
+                        <div className="lg:hidden w-full">
+                            <HeaderAuth isMobile={true} onItemClick={() => setIsMenuOpen(false)} />
                         </div>
                     </nav>
 

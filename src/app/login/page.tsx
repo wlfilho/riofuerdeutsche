@@ -22,7 +22,7 @@ export default function LoginPage() {
         setMessage(null);
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
@@ -39,7 +39,7 @@ export default function LoginPage() {
             } else {
                 setMessage({ type: "success", text: "Login erfolgreich! Leite weiter..." });
 
-                const { data: { user } } = await supabase.auth.getUser();
+                const user = data.user;
                 if (user) {
                     // Verificar se tem redirect na URL
                     const searchParams = new URLSearchParams(window.location.search);
