@@ -1,7 +1,12 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(find /Users/williamfilho/Documents/01_projects/03_UiB/01_site/riofuerdeutsche -name *.env* -type f)",
+      "Bash(find /Users/williamfilho/Documents/01_projects/03_UiB/01_site/riofuerdeutsche -type f \\\\\\(-name *.sql -o -name *schema* -o -name *migration* -o -name *supabase* \\\\\\) -not -path */node_modules/*)"
+    ],
     "additionalDirectories": [
-      "/Users/williamfilho/Documents/01_projects/03_UiB/01_site/riofuerdeutsche/src/app/guide"
+      "/Users/williamfilho/Documents/01_projects/03_UiB/01_site/riofuerdeutsche/src/app/guide",
+      "/Users/williamfilho/Documents/01_projects/03_UiB/01_site/riofuerdeutsche/src/app/api/admin/users/[id]"
     ]
   }
 }
