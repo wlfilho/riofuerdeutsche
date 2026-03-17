@@ -54,10 +54,10 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
 
     const initAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { user: authUser } } = await supabase.auth.getUser();
 
-        if (session?.user && mounted) {
-          const profile = await fetchProfile(session.user.id);
+        if (authUser && mounted) {
+          const profile = await fetchProfile(authUser.id);
           if (profile && mounted) {
             setUser({
               firstName: profile.first_name,
@@ -166,7 +166,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
         }
       >
         <User className={isMobile ? "h-6 w-6 text-rio-green" : "h-4 w-4 text-rio-green"} />
-        <span>Login</span>
+        <span>Anmelden</span>
       </Link>
     );
   }
