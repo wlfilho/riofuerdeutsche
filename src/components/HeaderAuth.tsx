@@ -23,59 +23,95 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
-  
+
   // Usar uma única instância do client
   const [supabase] = useState(() => createClient());
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
+    let mounted = true;
 
-      if (authUser) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('first_name, email, role')
-          .eq('id', authUser.id)
-          .single();
+    const initAuth = async () => {
+      try {
+        // Usar getSession para velocidade, depois getUser para segurança se necessário
+        const { data: { session } } = await supabase.auth.getSession();
 
-        if (profile) {
-          setUser({
-            firstName: profile.first_name,
-            email: profile.email,
-            role: profile.role as 'user' | 'premium' | 'admin',
-          });
-        }
-      }
-
-      setLoading(false);
-    };
-
-    getUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
+        if (session?.user && mounted) {
           const { data: profile } = await supabase
             .from('profiles')
             .select('first_name, email, role')
             .eq('id', session.user.id)
             .single();
 
-          if (profile) {
+          if (profile && mounted) {
             setUser({
               firstName: profile.first_name,
               email: profile.email,
               role: profile.role as 'user' | 'premium' | 'admin',
             });
           }
-        } else if (event === 'SIGNED_OUT') {
+        }
+      } catch (error) {
+        console.error('HeaderAuth Init Error:', error);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name, email, role')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profile && mounted) {
+            setUser({
+              firstName: profile.first_name,
+              email: profile.email,
+              role: profile.role as 'user' | 'premium' | 'admin',
+            });
+          }
+        } else {
           setUser(null);
         }
+
+        setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
-  }, [supabase]);
+    // Safety valve: nunca ficar mais de 5s carregando
+    const timeout = setTimeout(() => {
+      if (mounted && loading) setLoading(false);
+    }, 5000);
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
+  }, [supabase, loading]);
+
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.header-auth-dropdown')) {
+        setDropdownOpen(false);
+      }
+    };
+
+    if (dropdownOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [dropdownOpen]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -203,13 +239,12 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
             </p>
             <p className="text-[11px] text-gray-500 truncate mb-2">{user.email}</p>
             <span
-              className={`inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full ${
-                user.role === 'admin'
+              className={`inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full ${user.role === 'admin'
                   ? 'bg-red-50 text-red-600 border border-red-100'
                   : user.role === 'premium'
-                  ? 'bg-yellow-50 text-yellow-700 border border-yellow-100'
-                  : 'bg-green-50 text-green-700 border border-green-100'
-              }`}
+                    ? 'bg-yellow-50 text-yellow-700 border border-yellow-100'
+                    : 'bg-green-50 text-green-700 border border-green-100'
+                }`}
             >
               {user.role === 'admin' ? '🛡️ Admin' : user.role === 'premium' ? '⭐ Premium' : 'Kostenlos'}
             </span>
