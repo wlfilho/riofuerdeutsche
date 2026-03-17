@@ -35,16 +35,73 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
+    const pathname = request.nextUrl.pathname;
+
+    // --- REGRAS DA ÁREA DE MEMBROS ---
+
+    // Rotas /guide/* requerem autenticação
+    if (pathname.startsWith("/guide")) {
+        if (!user) {
+            const url = request.nextUrl.clone();
+            url.pathname = "/login";
+            url.searchParams.set("redirect", pathname);
+            return NextResponse.redirect(url);
+        }
+
+        // /guide/sicherheit é acessível para qualquer usuário autenticado
+        // Os demais capítulos exigem premium ou admin
+        if (pathname !== "/guide" && !pathname.startsWith("/guide/sicherheit")) {
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("role, premium_until")
+                .eq("id", user.id)
+                .single();
+
+            const role = profile?.role;
+            const isPremium =
+                role === "admin" ||
+                (role === "premium" &&
+                    (!profile?.premium_until ||
+                        new Date(profile.premium_until) > new Date()));
+
+            if (!isPremium) {
+                const url = request.nextUrl.clone();
+                url.pathname = "/guide";
+                url.searchParams.set("upgrade", "true");
+                return NextResponse.redirect(url);
+            }
+        }
+    }
+
+    // Rota /dashboard requer admin
+    if (pathname.startsWith("/dashboard")) {
+        if (!user) {
+            return NextResponse.redirect(new URL("/login", request.url));
+        }
+
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+        if (profile?.role !== "admin") {
+            return NextResponse.redirect(new URL("/", request.url));
+        }
+    }
+
+    // --- REGRA GERAL: rotas não públicas requerem autenticação ---
+
     if (
         !user &&
-        !request.nextUrl.pathname.startsWith("/login") &&
-        !request.nextUrl.pathname.startsWith("/signup") &&
-        !request.nextUrl.pathname.startsWith("/forgot-password") &&
-        !request.nextUrl.pathname.startsWith("/touren") &&
-        !request.nextUrl.pathname.startsWith("/kontakt") &&
-        !request.nextUrl.pathname.startsWith("/impressum") &&
-        !request.nextUrl.pathname.startsWith("/datenschutz") &&
-        request.nextUrl.pathname !== "/"
+        !pathname.startsWith("/login") &&
+        !pathname.startsWith("/signup") &&
+        !pathname.startsWith("/forgot-password") &&
+        !pathname.startsWith("/touren") &&
+        !pathname.startsWith("/kontakt") &&
+        !pathname.startsWith("/impressum") &&
+        !pathname.startsWith("/datenschutz") &&
+        pathname !== "/"
     ) {
         // no user, potentially respond by redirecting the user to the login page
         const url = request.nextUrl.clone();
