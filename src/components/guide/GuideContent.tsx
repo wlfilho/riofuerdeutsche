@@ -22,16 +22,31 @@ interface GuideContentProps {
 export default function GuideContent({ content }: GuideContentProps) {
   if (!content) return null
 
-  // Se o conteúdo for string (legado), tenta exibir como parágrafo ou retorna nulo
-  // Se for objeto TipTap, gera HTML
-  let html = ''
+  // Se o conteúdo for string, tenta fazer o parse caso seja um JSON stringificado
+  let parsedContent = content;
   
   if (typeof content === 'string') {
-    // Fallback básico para conteúdo legado se necessário durante a transição
-    html = `<p>${content}</p>`
+    try {
+      // Se começar com { (indicando JSON), tenta parsear
+      if (content.trim().startsWith('{')) {
+        parsedContent = JSON.parse(content);
+      }
+    } catch (e) {
+      console.error('Error parsing content as JSON:', e);
+      // Mantém como string se falhar o parse
+    }
+  }
+
+  // Se for objeto TipTap, gera HTML. Se for string simples (legado), exibe como texto.
+  let html = ''
+  
+  if (typeof parsedContent === 'string') {
+    // Fallback básico para conteúdo legado (Markdown simples ou texto puro)
+    // Para capítulos antigos que ainda não foram editados no TipTap
+    html = `<p style="white-space: pre-wrap;">${parsedContent}</p>`
   } else {
     try {
-      html = generateHTML(content, [
+      html = generateHTML(parsedContent, [
         StarterKit,
         Image,
         Youtube,
@@ -48,7 +63,7 @@ export default function GuideContent({ content }: GuideContentProps) {
       ])
     } catch (e) {
       console.error('Error generating HTML from TipTap JSON:', e)
-      return null
+      return <p className="text-red-500">Erro ao renderizar conteúdo.</p>
     }
   }
 
