@@ -1,139 +1,142 @@
-// src/app/guide/[slug]/page.tsx
-'use client';
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import { Syne } from "next/font/google";
+import Link from "next/link";
 
-import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
-import GuideContent from '@/components/guide/GuideContent';
-import Link from 'next/link';
+import ChapterContent from "@/components/members/ChapterContent";
+import ChapterNav from "@/components/members/ChapterNav";
+import InlineUpgradeCTA from "@/components/members/InlineUpgradeCTA";
 
-interface Chapter {
-  id: string;
-  slug: string;
-  title: string;
-  icon: string;
-  content: any;
-  is_free: boolean;
-}
+const syne = Syne({ subsets: ["latin"], weight: ["700", "800"] });
 
-export default function GuideChapterPage({
+export default async function GuideChapterPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = use(params);
-  const router = useRouter();
-  const [chapter, setChapter] = useState<Chapter | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [firstName, setFirstName] = useState<string | null>(null);
+  const { slug } = await params;
 
-  useEffect(() => {
-    const fetchChapter = async () => {
-      try {
-        const res = await fetch(`/api/guide/chapters/${slug}`);
-        const data = await res.json();
+  // Supabase Auth
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-        if (res.status === 401) {
-          router.push(`/login?returnTo=/guide/${slug}`);
-          return;
-        }
-
-        if (res.status === 403 && data.upgrade) {
-          router.push('/guide?upgrade=true');
-          return;
-        }
-
-        if (!res.ok) {
-          setError(data.error || 'Kapitel nicht gefunden');
-          return;
-        }
-
-        setChapter(data.chapter);
-
-        // Fetch user info for personalization
-        const { createClient } = await import('@/utils/supabase/client');
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('first_name')
-            .eq('id', user.id)
-            .single();
-          if (profile) setFirstName(profile.first_name);
-        }
-      } catch (err) {
-        setError('Fehler beim Laden des Kapitels');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchChapter();
-  }, [slug, router]);
-
-  if (loading) {
-    return (
-      <div className="max-w-3xl animate-pulse">
-        <div className="h-10 bg-gray-200 rounded-lg w-3/4 mb-6" />
-        <div className="space-y-4">
-          <div className="h-4 bg-gray-100 rounded w-full" />
-          <div className="h-4 bg-gray-100 rounded w-full" />
-          <div className="h-4 bg-gray-100 rounded w-5/6" />
-        </div>
-      </div>
-    );
+  if (!user) {
+    redirect(`/login?redirect=/guide/${slug}`);
   }
 
-  if (error || !chapter) {
-    return (
-      <div className="max-w-3xl py-12 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          Oops! {error || 'Kapitel nicht gefunden'}
-        </h1>
-        <Link
-          href="/guide"
-          className="text-green-600 font-semibold hover:underline"
-        >
-          Zurück zur Übersicht
-        </Link>
-      </div>
-    );
-  }
+  // Busca dados de assinatura
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, premium_until")
+    .eq("id", user.id)
+    .single();
+
+  const isAdmin = profile?.role === "admin";
+  const isPremium =
+    isAdmin ||
+    (profile?.role === "premium" &&
+      (!profile.premium_until ||
+        new Date(profile.premium_until) > new Date()));
+
+  const userPlan = isPremium ? "premium" : "free";
+
+  // Busca capítulo atual
+  const { data: chapter, error } = await (supabase
+    .from("guide_chapters")
+    .select("*")
+    .eq("slug", slug)
+    .single() as any);
+
+  // Se o capítulo não voltar do DB, criamos fallback pra teste visual
+  // em caso de banco de dados ainda não populado
+  const finalChapter = error || !chapter ? {
+    id: "fallback",
+    title: slug === "sicherheit" ? "Sicherheit in Rio" : "Inhalt",
+    slug,
+    icon: slug === "sicherheit" ? "🛡️" : "📖",
+    edition: 1,
+    access: slug === "sicherheit" ? "free" : "locked",
+    content: "Dies ist ein Platzhaltertext im Markdown (*fallback*).\n\n## Warum es wichtig ist\n\n- Wichtiger Punkt\n\n> Dica útil da vida."
+  } : chapter;
+
+  // Busca todos capítulos ordenados
+  const { data: allChapters } = await (supabase
+    .from("guide_chapters")
+    .select("id, title, slug, access, sort_order, icon")
+    .order("sort_order") as any);
+
+  // Fallback pra ordenação caso o banco de dados não traga
+  const fallbackChapters = allChapters || [
+    { title: "Sicherheit in Rio", slug: "sicherheit", access: "free" },
+    { title: "Wie du nach Rio kommst", slug: "anreise", access: "locked" },
+  ];
+
+  const currentIndex = fallbackChapters.findIndex((c: any) => c.slug === slug);
+  const prevChapter =
+    currentIndex > 0 ? fallbackChapters[currentIndex - 1] : undefined;
+  const nextChapter =
+    currentIndex !== -1 && currentIndex < fallbackChapters.length - 1
+      ? fallbackChapters[currentIndex + 1]
+      : undefined;
+
+  // Verifica proteção
+  const isLockedPreview =
+    finalChapter.access === "locked" && userPlan === "free";
 
   return (
-    <article className="max-w-3xl">
-      <h1>
-        {chapter.icon} {chapter.title}
+    <article className="max-w-[760px] w-full pb-[40px]">
+      {/* Breadcrumb */}
+      <div className="text-[11px] text-[#aaa] mb-[20px] flex items-center">
+        Rio-Guide <span className="text-[#ccc] mx-[6px]">/</span> Edition{" "}
+        {finalChapter.edition || 1} <span className="text-[#ccc] mx-[6px]">/</span>{" "}
+        <span className="text-[#555]">{finalChapter.title}</span>
+      </div>
+
+      {/* Cabeçalho */}
+      <h1 className="mb-[6px]">
+        <div className="text-[32px] mb-[8px] leading-none">
+          {finalChapter.icon}
+        </div>
+        <div
+          className={`${syne.className} font-[800] text-[28px] text-[#1a1a1a]`}
+        >
+          {finalChapter.title}
+        </div>
       </h1>
 
-      {chapter.slug === 'sicherheit' && firstName && (
-        <div className="not-prose bg-green-50 border border-green-200 rounded-xl p-5 mb-8">
-          <p className="text-green-900 leading-relaxed">
-            <strong className="block text-lg mb-1">Hey {firstName}! 🇧🇷</strong>
-            Schön, dass du hier bist. Lies dieses Kapitel besonders aufmerksam durch — es kann dir in Rio de Janeiro wirklich den Urlaub retten.
-          </p>
+      <div className="inline-block bg-[#e8f5e9] text-[#2e7d32] text-[9px] font-[700] px-[10px] py-[3px] rounded-[20px] uppercase">
+        Edition {finalChapter.edition || 1} — O Essencial
+      </div>
+
+      <div className="border-t-[1px] border-[#e8e4dc] my-[20px]" />
+
+      {/* Conteúdo Renderizado (Prose React-Markdown) */}
+      <ChapterContent
+        content={finalChapter.content}
+        isLockedPreview={isLockedPreview}
+      />
+
+      {/* Se não temos permissão, exibe CTA de upgrade imediatamente colado ao Mask Blur */}
+      {isLockedPreview && (
+        <div className="relative mt-[-40px]">
+          <InlineUpgradeCTA userPlan={userPlan} />
         </div>
       )}
 
-      <GuideContent content={chapter.content} />
+      {/* Navegação Entre Capítulos */}
+      {!isLockedPreview && (
+        <ChapterNav
+          prev={prevChapter}
+          next={nextChapter}
+          isNextLocked={nextChapter?.access === "locked" && userPlan === "free"}
+        />
+      )}
 
-      {/* Se for o final de um capítulo gratuito e o usuário não for premium, mostrar CTA */}
-      {chapter.is_free && (
-        <div className="not-prose mt-12 p-6 bg-gradient-to-br from-green-50 to-yellow-50 rounded-2xl border border-green-200">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
-            📖 Lust auf mehr?
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Im kompletten Rio-Guide findest du alle Kapitel, Insider-Tipps zu Unterkünften, Sicherheit und den besten Orten in Rio — alles an einem Ort.
-          </p>
-          <Link
-            href="/guide?upgrade=true"
-            className="inline-block px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors"
-          >
-            Kompletten Guide freischalten — ab 9€
-          </Link>
-        </div>
+      {/* CTA final do final da leitura */}
+      {userPlan === "free" && !isLockedPreview && (
+        <InlineUpgradeCTA userPlan={userPlan} />
       )}
     </article>
   );

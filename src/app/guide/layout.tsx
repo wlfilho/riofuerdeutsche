@@ -1,7 +1,7 @@
-// src/app/guide/layout.tsx
 import { getMembershipAccess } from '@/lib/membership';
 import { redirect } from 'next/navigation';
-import GuideSidebar from '@/components/guide/GuideSidebar';
+import MembersHeader from '@/components/members/MembersHeader';
+import { createClient } from '@/utils/supabase/server';
 
 export default async function GuideLayout({
   children,
@@ -10,22 +10,23 @@ export default async function GuideLayout({
 }) {
   const access = await getMembershipAccess();
 
-  // Se não está autenticado, middleware já redireciona,
-  // mas double-check aqui
   if (!access.isAuthenticated) {
     redirect('/login?redirect=/guide');
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto flex">
-        {/* Sidebar com navegação dos capítulos */}
-        <GuideSidebar access={access} />
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-        {/* Conteúdo principal */}
-        <main className="flex-1 p-6 md:p-10">
-          {children}
-        </main>
+  const userName = access.firstName || (user?.email ? user.email.split('@')[0] : 'User');
+  const userPlan = access.isPremium ? 'premium' : 'free';
+
+  return (
+    <div className="min-h-screen bg-[#f8f5f0] flex flex-col">
+      <MembersHeader userName={userName} userPlan={userPlan} />
+
+      {/* children ocupam largura total — a hero vai de borda a borda */}
+      <div className="flex-1 flex flex-col w-full">
+        {children}
       </div>
     </div>
   );

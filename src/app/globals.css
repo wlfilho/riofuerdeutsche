@@ -14,6 +14,27 @@
 :root {
   --background: #F7F3EB;
   --foreground: #111827;
+
+  /* =============================
+     RIO FÜR DEUTSCHE - MEMBERS AREA TOKENS
+     ============================= */
+  --rfd-green-dark:   #0d1f15;
+  --rfd-green-mid:    #1a4a2c;
+  --rfd-green-brand:  #22a262;
+  --rfd-green-light:  #0f4a2c;
+  --rfd-yellow:       #f5c518;
+  --rfd-cream:        #f8f5f0;
+  --rfd-white:        #ffffff;
+  --rfd-text-dark:    #1a1a1a;
+  --rfd-text-mid:     #555555;
+  --rfd-text-muted:   #888888;
+  --rfd-text-light:   #99ddee;
+  --rfd-border:       #e0ddd6;
+  --rfd-border-light: #e8e4dc;
+
+  --rfd-radius-card:  12px;
+  --rfd-radius-btn:   8px;
+  --rfd-radius-pill:  20px;
 }
 
 body {
