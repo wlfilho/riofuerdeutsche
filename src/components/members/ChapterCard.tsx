@@ -26,7 +26,7 @@ export default function ChapterCard({ chapter, userPlan }: ChapterCardProps) {
         <div className="flex justify-between items-start w-full mb-[12px]">
           <span className="text-[28px] opacity-30">{chapter.icon}</span>
         </div>
-        <h3 className="font-bold text-[#1a1a1a] mb-[4px]">{chapter.title}</h3>
+        <h3 className="font-display font-bold text-[#1a1a1a] mb-[4px]">{chapter.title}</h3>
         <p className="text-[12px] text-[#555] mb-[16px] leading-[1.6] line-clamp-2">
           {chapter.description}
         </p>
@@ -48,7 +48,7 @@ export default function ChapterCard({ chapter, userPlan }: ChapterCardProps) {
         <div className="flex justify-between items-start w-full mb-[12px]">
           <span className="text-[28px]">{chapter.icon}</span>
         </div>
-        <h3 className="font-bold text-[#1a1a1a] mb-[4px]">{chapter.title}</h3>
+        <h3 className="font-display font-bold text-[#1a1a1a] mb-[4px]">{chapter.title}</h3>
         <p className="text-[12px] text-[#555] mb-[16px] leading-[1.6] line-clamp-2">
           {chapter.description}
         </p>

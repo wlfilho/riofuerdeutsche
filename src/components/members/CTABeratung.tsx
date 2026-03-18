@@ -1,52 +1,121 @@
 export default function CTABeratung() {
   return (
-    <section className="bg-[#ffffff] border-[0.5px] border-[#e0ddd6] rounded-[14px] p-[28px] md:py-[28px] md:px-[32px] flex flex-col md:flex-row md:items-center gap-[28px] w-full">
-      {/* Ícone (Esquerda) */}
-      <div className="w-[56px] h-[56px] bg-[#f0faf4] rounded-full flex items-center justify-center shrink-0">
-        <span className="text-[26px]">📞</span>
-      </div>
+    <section
+      className="w-full text-center"
+      style={{
+        background: "#f8f5f0",
+        borderTop: "1px solid #e8e4dc",
+        padding: "72px 24px",
+      }}
+    >
+      <div className="flex flex-col items-center" style={{ maxWidth: "700px", margin: "0 auto" }}>
+        {/* Badge */}
+        <span
+          className="inline-block uppercase font-bold tracking-widest"
+          style={{
+            background: "#e8f5e9",
+            border: "1px solid rgba(34,162,98,0.35)",
+            borderRadius: "999px",
+            padding: "4px 16px",
+            fontSize: "10px",
+            letterSpacing: "1px",
+            color: "#2e7d32",
+            marginBottom: "20px",
+          }}
+        >
+          Persönliche Beratung
+        </span>
 
-      {/* Conteúdo (Centro) */}
-      <div className="flex-1">
         {/* Título */}
-        <h2 className="text-[#1a1a1a] text-[16px] font-[800] mb-[5px]">
+        <h2
+          className="font-display"
+          style={{
+            fontSize: "clamp(26px, 5vw, 36px)",
+            fontWeight: 800,
+            color: "#1a1a1a",
+            marginBottom: "12px",
+            lineHeight: 1.2,
+          }}
+        >
           Persönliche Unterkunft-Beratung
         </h2>
 
         {/* Subtítulo */}
-        <p className="text-[#666666] text-[11px] leading-[1.6] max-w-[480px]">
-          60 Minuten mit Will per Videocall — sichere Unterkunft finden,
-          Routen planen, alle Fragen beantwortet. Von einem Carioca,
-          der fließend Deutsch spricht.
+        <p
+          style={{
+            fontSize: "16px",
+            color: "#555",
+            lineHeight: 1.6,
+            maxWidth: "560px",
+            margin: "0 auto 20px",
+          }}
+        >
+          60 Minuten mit Will per Videocall — sichere Unterkunft finden, Routen
+          planen und alle deine Fragen beantwortet. Von einem Carioca, der
+          fließend Deutsch spricht.
         </p>
 
-        {/* Pills */}
-        <div className="flex flex-wrap gap-[8px] mt-[10px]">
-          <span className="bg-[#e8f5e9] text-[#0f4a2c] text-[9px] font-[600] px-[10px] py-[3px] rounded-[20px]">
-            60 Minuten
-          </span>
-          <span className="bg-[#e8f5e9] text-[#0f4a2c] text-[9px] font-[600] px-[10px] py-[3px] rounded-[20px]">
-            Videocall
-          </span>
-          <span className="bg-[#e8f5e9] text-[#0f4a2c] text-[9px] font-[600] px-[10px] py-[3px] rounded-[20px]">
-            Personalisiert
-          </span>
-          <span className="bg-[#e8f5e9] text-[#0f4a2c] text-[9px] font-[600] px-[10px] py-[3px] rounded-[20px]">
-            Auf Deutsch
-          </span>
-        </div>
-      </div>
-
-      {/* Botão (Direita) */}
-      <div className="shrink-0 w-full md:w-auto mt-[4px] md:mt-0">
-        <a
-          href="https://riofuerdeutsche.de/unterkunft/beratung"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-[#0d1f15] text-[#f8f5f0] text-[12px] font-[700] py-[13px] px-[22px] rounded-[10px] hover:bg-[#1a3a28] transition-colors whitespace-nowrap text-center block w-full md:w-auto"
+        {/* Pills de características */}
+        <div
+          className="flex justify-center flex-wrap"
+          style={{ gap: "10px", marginBottom: "32px" }}
         >
-          Beratung buchen →
-        </a>
+          {["60 Minuten", "Videocall", "Personalisiert", "Auf Deutsch"].map((label) => (
+            <span
+              key={label}
+              style={{
+                background: "#e8f5e9",
+                color: "#0f4a2c",
+                borderRadius: "999px",
+                padding: "5px 14px",
+                fontSize: "11px",
+                fontWeight: 600,
+              }}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+
+        {/* Botões */}
+        <div className="flex justify-center flex-wrap" style={{ gap: "16px" }}>
+          <a
+            href="https://riofuerdeutsche.de/unterkunft/beratung"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: "#0d1f15",
+              color: "#f8f5f0",
+              fontSize: "15px",
+              fontWeight: 700,
+              padding: "14px 28px",
+              borderRadius: "999px",
+              border: "none",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            📞 Beratung buchen
+          </a>
+          <a
+            href="https://riofuerdeutsche.de/unterkunft/beratung#details"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: "transparent",
+              color: "#0d1f15",
+              fontSize: "15px",
+              fontWeight: 600,
+              padding: "14px 28px",
+              borderRadius: "999px",
+              border: "1px solid #0d1f15",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Mehr erfahren
+          </a>
+        </div>
       </div>
     </section>
   );

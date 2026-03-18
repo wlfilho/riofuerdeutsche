@@ -122,16 +122,11 @@ export default function GuidePage({
 
         {/* Grid de capítulos */}
         <ChapterGrid userPlan={userPlan} />
-
-        {/* CTAs */}
-        <div className="mt-4">
-          <CTAGuideCompleto />
-          <hr style={{ border: 'none', borderTop: '1px solid #e8e4dc', margin: '28px 0' }} />
-          <CTABeratung />
-          {/* Espaço reservado para futuro CTA do YouTube */}
-          <div className="mt-0 pb-12" />
-        </div>
       </main>
+
+      {/* CTAs — largura total, fora do container max-width */}
+      <CTAGuideCompleto />
+      <CTABeratung />
     </>
   );
 }

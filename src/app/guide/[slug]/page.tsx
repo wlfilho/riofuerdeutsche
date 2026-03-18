@@ -1,13 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { Syne } from "next/font/google";
 import Link from "next/link";
 
 import ChapterContent from "@/components/members/ChapterContent";
 import ChapterNav from "@/components/members/ChapterNav";
 import InlineUpgradeCTA from "@/components/members/InlineUpgradeCTA";
-
-const syne = Syne({ subsets: ["latin"], weight: ["700", "800"] });
 
 export default async function GuideChapterPage({
   params,
@@ -100,7 +97,7 @@ export default async function GuideChapterPage({
           {finalChapter.icon}
         </div>
         <div
-          className={`${syne.className} font-[800] text-[28px] text-[#1a1a1a]`}
+          className="font-display font-[800] text-[28px] text-[#1a1a1a]"
         >
           {finalChapter.title}
         </div>

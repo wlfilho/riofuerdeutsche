@@ -2,9 +2,6 @@
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Syne } from "next/font/google";
-
-const syne = Syne({ subsets: ["latin"], weight: ["700", "800"] });
 
 interface ChapterContentProps {
   content: string | any;
@@ -59,7 +56,7 @@ export default function ChapterContent({
           remarkPlugins={[remarkGfm]}
           components={{
             h2: ({ node, ...props }) => (
-              <h2 className={syne.className} {...props} />
+              <h2 className="font-display" {...props} />
             ),
           }}
         >

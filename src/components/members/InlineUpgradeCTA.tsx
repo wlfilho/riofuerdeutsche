@@ -1,7 +1,4 @@
 import Link from "next/link";
-import { Syne } from "next/font/google";
-
-const syne = Syne({ subsets: ["latin"], weight: ["700", "800"] });
 
 interface InlineUpgradeCTAProps {
   userPlan: "free" | "premium";
@@ -12,7 +9,7 @@ export default function InlineUpgradeCTA({ userPlan }: InlineUpgradeCTAProps) {
 
   return (
     <div className="bg-[#0d1f15] rounded-[12px] py-[20px] px-[24px] mt-[24px] flex flex-col items-start w-full relative z-10 shadow-lg">
-      <h3 className={`${syne.className} text-[#f8f5f0] text-[14px] font-[800] mb-[4px]`}>
+      <h3 className="font-display text-[#f8f5f0] text-[14px] font-[800] mb-[4px]">
         Willst du mehr entdecken?
       </h3>
       <p className="text-[#99ddee] text-[11px] mb-[16px]">

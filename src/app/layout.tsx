@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Inter } from "next/font/google";
+import { Outfit, Inter, Syne } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import FramerMotionProvider from "@/components/FramerMotionProvider";
@@ -13,6 +13,13 @@ const outfit = Outfit({
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const syne = Syne({
+  variable: "--font-syne",
+  subsets: ["latin"],
+  weight: ["700", "800"],
   display: "swap",
 });
 
@@ -102,7 +109,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${outfit.variable} ${inter.variable} antialiased font-sans text-gray-900 bg-gray-50`}
+        className={`${outfit.variable} ${inter.variable} ${syne.variable} antialiased font-sans text-gray-900 bg-gray-50`}
       >
         <FramerMotionProvider>
           {children}

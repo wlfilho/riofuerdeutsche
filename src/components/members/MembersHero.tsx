@@ -36,7 +36,7 @@ export default function MembersHero({ userName, heroImageUrl }: MembersHeroProps
         </div>
 
         {/* Título */}
-        <h1 className="font-heading font-black text-white leading-tight mb-[12px]"
+        <h1 className="font-display font-extrabold text-white leading-tight mb-[12px]"
           style={{ fontSize: "clamp(32px, 5vw, 48px)" }}>
           Willkommen zurück,{" "}
           <span style={{ color: "#f5c518" }}>{userName}!</span>

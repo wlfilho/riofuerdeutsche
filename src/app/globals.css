@@ -3,6 +3,7 @@
 @theme {
   --font-sans: var(--font-inter), "Inter", "sans-serif";
   --font-heading: var(--font-outfit), "Outfit", "sans-serif";
+  --font-display: var(--font-syne), "Syne", "sans-serif";
 
   --color-rio-green: #0A5C36;
   --color-rio-green-light: #16A34A;
