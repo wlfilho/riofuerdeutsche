@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation'
-import { Lock } from 'lucide-react'
+import { Lock, ChevronDown, List } from 'lucide-react'
 import Link from 'next/link'
 
+import type { ToCItem, SiblingPage } from '@/components/guide/GuideToC'
 import { createClient } from '@/utils/supabase/server'
 import { getMembershipAccess } from '@/lib/membership'
 import { contentToHtml } from '@/lib/guideContent'
-import { extractToCItems, injectHeadingIds } from '@/components/guide/GuidePageContent'
+import GuidePageContent, { extractToCItems, injectHeadingIds } from '@/components/guide/GuidePageContent'
 
-import GuidePageContent from '@/components/guide/GuidePageContent'
 import GuideToC from '@/components/guide/GuideToC'
 import GuideToCMobile from '@/components/guide/GuideToCMobile'
 import GuideNav from '@/components/guide/GuideNav'
@@ -63,7 +63,7 @@ export default async function GuideChapterPagePage({ params }: PageProps) {
 
   // ── Access control ─────────────────────────────────────────────────────────
   const isPremiumUser = access.isPremium
-  const pageIsFree = currentPage.is_free || chapter.is_free
+  const pageIsFree = Boolean(currentPage.is_free) || Boolean(chapter.is_free)
 
   if (!isPremiumUser && !pageIsFree) {
     redirect('/guide?upgrade=true')
@@ -170,8 +170,11 @@ export default async function GuideChapterPagePage({ params }: PageProps) {
         <GuideToC
           items={tocItems}
           chapterTitle={chapter.title}
+          chapterSlug={chapterSlug}
           currentPage={currentPageNumber}
           totalPages={totalPagesInChapter}
+          pages={pages.map(p => ({ title: p.title, slug: p.slug, is_free: p.is_free }))}
+          currentSlug={pageSlug}
         />
 
         {/* ── Main content column ───────────────────────────────────────── */}
@@ -180,8 +183,11 @@ export default async function GuideChapterPagePage({ params }: PageProps) {
           <GuideToCMobile
             items={tocItems}
             chapterTitle={chapter.title}
+            chapterSlug={chapterSlug}
             currentPage={currentPageNumber}
             totalPages={totalPagesInChapter}
+            pages={pages.map(p => ({ title: p.title, slug: p.slug, is_free: p.is_free }))}
+            currentSlug={pageSlug}
           />
 
           {/* Breadcrumb */}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 
 export interface ToCItem {
   id: string
@@ -8,14 +9,31 @@ export interface ToCItem {
   level: 2 | 3
 }
 
+export interface SiblingPage {
+  title: string
+  slug: string
+  is_free: boolean
+}
+
 interface GuideToCProps {
   items: ToCItem[]
   chapterTitle: string
+  chapterSlug: string
   currentPage: number
   totalPages: number
+  pages: SiblingPage[]
+  currentSlug: string
 }
 
-export default function GuideToC({ items, chapterTitle, currentPage, totalPages }: GuideToCProps) {
+export default function GuideToC({
+  items,
+  chapterTitle,
+  chapterSlug,
+  currentPage,
+  totalPages,
+  pages,
+  currentSlug,
+}: GuideToCProps) {
   const [activeId, setActiveId] = useState<string>('')
   const observerRef = useRef<IntersectionObserver | null>(null)
 
@@ -67,7 +85,9 @@ export default function GuideToC({ items, chapterTitle, currentPage, totalPages 
     window.scrollTo({ top, behavior: 'smooth' })
   }
 
-  if (items.length === 0) return null
+  const hasHeadings = items.length > 0
+  const hasMultiplePages = pages.length > 1 || (pages.length === 1 && pages[0].slug !== currentSlug) // Showing even if 1 page to satisfy "listing"
+  const showSidebar = hasHeadings || pages.length > 0
 
   return (
     <aside className="hidden lg:flex flex-col gap-0" style={{ width: '260px', flexShrink: 0 }}>
@@ -122,7 +142,7 @@ export default function GuideToC({ items, chapterTitle, currentPage, totalPages 
           </div>
         </div>
 
-        {/* Table of Contents */}
+        {/* Pages of this Chapter */}
         <div
           className="rounded-xl p-4"
           style={{ background: '#fff', border: '1px solid var(--rfd-border)' }}
@@ -131,45 +151,93 @@ export default function GuideToC({ items, chapterTitle, currentPage, totalPages 
             className="font-mono text-[10px] uppercase tracking-widest mb-3"
             style={{ color: 'var(--rfd-text-muted)' }}
           >
-            Inhaltsverzeichnis
+            Seiten in diesem Kapitel
           </p>
 
-          <nav className="flex flex-col gap-0.5">
-            {items.map((item) => {
-              const isActive = activeId === item.id
+          <nav className="flex flex-col gap-1">
+            {pages.map((page) => {
+              const isActive = page.slug === currentSlug
               return (
-                <button
-                  key={item.id}
-                  onClick={() => handleClick(item.id)}
-                  className="text-left transition-all duration-150 rounded-lg group"
+                <Link
+                  key={page.slug}
+                  href={`/guide/${chapterSlug}/${page.slug}`}
+                  className="text-left rounded-lg px-3 py-2 transition-colors flex items-center justify-between text-no-underline"
                   style={{
-                    paddingLeft: item.level === 3 ? '16px' : '8px',
-                    paddingRight: '8px',
-                    paddingTop: '5px',
-                    paddingBottom: '5px',
-                    borderLeft: isActive
-                      ? '2px solid var(--rfd-green-brand)'
-                      : '2px solid transparent',
                     background: isActive ? '#f0faf5' : 'transparent',
+                    border: isActive ? '1px solid #c8e6c9' : '1px solid transparent',
                   }}
                 >
                   <span
                     className="block leading-snug"
                     style={{
-                      fontSize: item.level === 2 ? '13px' : '12px',
-                      fontWeight: item.level === 2 ? 600 : 400,
-                      color: isActive
-                        ? 'var(--rfd-green-brand)'
-                        : 'var(--rfd-text-mid)',
+                      fontSize: '12px',
+                      fontWeight: isActive ? 600 : 400,
+                      color: isActive ? 'var(--rfd-green-brand)' : 'var(--rfd-text-dark)',
                     }}
                   >
-                    {item.text}
+                    {page.title}
                   </span>
-                </button>
+                  {isActive && (
+                    <span className="text-[10px]" style={{ color: 'var(--rfd-green-brand)' }}>
+                      ●
+                    </span>
+                  )}
+                </Link>
               )
             })}
           </nav>
         </div>
+
+        {/* Table of Contents */}
+        {hasHeadings && (
+          <div
+            className="rounded-xl p-4"
+            style={{ background: '#fff', border: '1px solid var(--rfd-border)' }}
+          >
+            <p
+              className="font-mono text-[10px] uppercase tracking-widest mb-3"
+              style={{ color: 'var(--rfd-text-muted)' }}
+            >
+              Auf dieser Seite
+            </p>
+
+            <nav className="flex flex-col gap-0.5">
+              {items.map((item) => {
+                const isActive = activeId === item.id
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleClick(item.id)}
+                    className="text-left transition-all duration-150 rounded-lg group"
+                    style={{
+                      paddingLeft: item.level === 3 ? '16px' : '8px',
+                      paddingRight: '8px',
+                      paddingTop: '5px',
+                      paddingBottom: '5px',
+                      borderLeft: isActive
+                        ? '2px solid var(--rfd-green-brand)'
+                        : '2px solid transparent',
+                      background: isActive ? '#f0faf5' : 'transparent',
+                    }}
+                  >
+                    <span
+                      className="block leading-snug"
+                      style={{
+                        fontSize: item.level === 2 ? '13px' : '12px',
+                        fontWeight: item.level === 2 ? 600 : 400,
+                        color: isActive
+                          ? 'var(--rfd-green-brand)'
+                          : 'var(--rfd-text-mid)',
+                      }}
+                    >
+                      {item.text}
+                    </span>
+                  </button>
+                )
+              })}
+            </nav>
+          </div>
+        )}
       </div>
     </aside>
   )

@@ -12,7 +12,7 @@ export default async function GuideChapterIndexPage({ params }: PageProps) {
   // 1. Encontrar o capítulo pelo slug
   const { data: chapter } = await supabase
     .from('guide_chapters')
-    .select('id')
+    .select('*')
     .eq('slug', chapterSlug)
     .eq('status', 'published')
     .single()
@@ -33,7 +33,7 @@ export default async function GuideChapterIndexPage({ params }: PageProps) {
   // 2. Encontrar a primeira página publicada desse capítulo
   const { data: firstPage } = await supabase
     .from('guide_pages')
-    .select('slug')
+    .select('slug, is_free')
     .eq('chapter_id', chapter.id)
     .eq('status', 'published')
     .order('sort_order', { ascending: true })

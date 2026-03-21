@@ -18,11 +18,12 @@ export default async function GuideLayout({
   const { data: { user } } = await supabase.auth.getUser();
 
   const userName = access.firstName || (user?.email ? user.email.split('@')[0] : 'User');
-  const userPlan = access.isPremium ? 'premium' : 'free';
+  const userEmail = user?.email || '';
+  const userRole = (access.role || 'user') as 'user' | 'premium' | 'admin';
 
   return (
     <div className="min-h-screen bg-[#f8f5f0] flex flex-col">
-      <MembersHeader userName={userName} userPlan={userPlan} />
+      <MembersHeader userName={userName} userEmail={userEmail} userRole={userRole} />
 
       {/* children ocupam largura total — a hero vai de borda a borda */}
       <div className="flex-1 flex flex-col w-full">
