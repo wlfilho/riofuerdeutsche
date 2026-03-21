@@ -1,4 +1,4 @@
-// src/app/api/admin/guide/[id]/route.ts
+// src/app/api/admin/guide/[chapterId]/route.ts
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -17,19 +17,19 @@ async function verifyAdmin() {
 // GET — Buscar capítulo por ID (com conteúdo completo)
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ chapterId: string }> }
 ) {
   const { authorized, supabase } = await verifyAdmin();
   if (!authorized) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
   }
 
-  const { id } = await params;
+  const { chapterId } = await params;
 
   const { data: chapter, error } = await supabase
     .from('guide_chapters')
     .select('*')
-    .eq('id', id)
+    .eq('id', chapterId)
     .single();
 
   if (error || !chapter) {
@@ -42,17 +42,16 @@ export async function GET(
 // PATCH — Atualizar capítulo
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ chapterId: string }> }
 ) {
   const { authorized, supabase } = await verifyAdmin();
   if (!authorized) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
   }
 
-  const { id } = await params;
+  const { chapterId } = await params;
   const body = await request.json();
 
-  // Campos permitidos para update
   const allowedFields = [
     'slug', 'title', 'subtitle', 'icon', 'content',
     'sort_order', 'edition', 'is_free', 'status'
@@ -68,7 +67,7 @@ export async function PATCH(
   const { data: chapter, error } = await supabase
     .from('guide_chapters')
     .update(updateData)
-    .eq('id', id)
+    .eq('id', chapterId)
     .select()
     .single();
 
@@ -82,19 +81,19 @@ export async function PATCH(
 // DELETE — Deletar capítulo
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ chapterId: string }> }
 ) {
   const { authorized, supabase } = await verifyAdmin();
   if (!authorized) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
   }
 
-  const { id } = await params;
+  const { chapterId } = await params;
 
   const { error } = await supabase
     .from('guide_chapters')
     .delete()
-    .eq('id', id);
+    .eq('id', chapterId);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

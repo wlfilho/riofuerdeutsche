@@ -27,14 +27,21 @@ export async function GET() {
 
   const { data: chapters, error } = await supabase
     .from('guide_chapters')
-    .select('id, slug, title, subtitle, icon, sort_order, edition, is_free, status, created_at, updated_at')
+    .select('id, slug, title, subtitle, icon, sort_order, edition, is_free, status, created_at, updated_at, guide_pages(count)')
     .order('sort_order', { ascending: true });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ chapters });
+  // Flatten page count from nested relation
+  const chaptersWithCount = (chapters ?? []).map((ch: any) => ({
+    ...ch,
+    page_count: ch.guide_pages?.[0]?.count ?? 0,
+    guide_pages: undefined,
+  }));
+
+  return NextResponse.json({ chapters: chaptersWithCount });
 }
 
 // POST — Criar novo capítulo

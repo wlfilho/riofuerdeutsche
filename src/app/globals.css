@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter), "Inter", "sans-serif";
-  --font-heading: var(--font-outfit), "Outfit", "sans-serif";
-  --font-display: var(--font-syne), "Syne", "sans-serif";
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
 
   --color-rio-green: #0A5C36;
   --color-rio-green-light: #16A34A;
@@ -435,5 +435,60 @@ body {
   font-size: 1rem;
   line-height: 1.8;
   color: #1a1a1a;
-  max-width: 720px;
+  max-width: 72ch;
+}
+
+/* Heading font override for guide content */
+.guide-content h1,
+.guide-content h2,
+.guide-content h3,
+.guide-content h4 {
+  font-family: var(--font-heading), "Outfit", sans-serif;
+  scroll-margin-top: 100px;
+}
+
+.guide-content h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0.85rem 0 0.4rem;
+  color: #333;
+}
+
+/* Table zebra striping */
+.guide-content tr:nth-child(even) td {
+  background: #f6f3ef;
+}
+
+/* List style types */
+.guide-content ul li {
+  list-style-type: disc;
+}
+
+.guide-content ol li {
+  list-style-type: decimal;
+}
+
+/* Strong & em */
+.guide-content strong {
+  font-weight: 700;
+  color: #111;
+}
+
+.guide-content em {
+  font-style: italic;
+  color: #444;
+}
+
+/* Link hover */
+.guide-content a:hover {
+  color: var(--rfd-green-brand);
+}
+
+/* Iframe / embed (YouTube) */
+.guide-content iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 10px;
+  margin: 1.25rem 0;
+  border: none;
 }

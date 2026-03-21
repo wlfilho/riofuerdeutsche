@@ -15,6 +15,7 @@ interface Chapter {
   is_free: boolean;
   status: 'draft' | 'published';
   updated_at: string;
+  page_count?: number;
 }
 
 export default function GuideChaptersList() {
@@ -222,8 +223,11 @@ export default function GuideChaptersList() {
                       )}
                     </div>
                     <p className="text-xs text-gray-400 truncate">
-                      /{chapter.slug} · Ed. {chapter.edition} · Aktualisiert{' '}
-                      {formatDate(chapter.updated_at)}
+                      /{chapter.slug} · Ed. {chapter.edition} ·{' '}
+                      <span className="text-blue-500 font-medium">
+                        {chapter.page_count ?? 0} Seiten
+                      </span>{' '}
+                      · Aktualisiert {formatDate(chapter.updated_at)}
                     </p>
                   </div>
 
@@ -241,6 +245,12 @@ export default function GuideChaptersList() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
+                    <Link
+                      href={`/dashboard/guide/${chapter.id}/pages`}
+                      className="px-3 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                      📄 Seiten
+                    </Link>
                     <Link
                       href={`/dashboard/guide/${chapter.id}/edit`}
                       className="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"

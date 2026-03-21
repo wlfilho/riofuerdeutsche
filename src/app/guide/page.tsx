@@ -94,10 +94,10 @@ export default function GuidePage({
     <>
       {/* Hero — largura total, de borda a borda */}
       <MembersHero userName={firstName || 'Gast'} userPlan={userPlan} />
-      <GuideIntro userPlan={userPlan} />
 
       {/* Conteúdo — centralizado com max-width */}
       <main className="max-w-5xl mx-auto px-6 py-8 w-full flex flex-col gap-0">
+        <GuideIntro userPlan={userPlan} />
 
         {/* Upgrade Banner (legado, mantido por compatibilidade) */}
         {showUpgrade && (
