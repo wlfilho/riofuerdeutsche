@@ -25,7 +25,7 @@ export default async function GuideChapterIndexPage({ params }: PageProps) {
       redirect('/guide/sicherheit-rio')
     }
     if (chapterSlug === 'upgrade') {
-      redirect('/guide?upgrade=true')
+      redirect('/guide?upgrade=true&r=1')
     }
     redirect('/guide')
   }

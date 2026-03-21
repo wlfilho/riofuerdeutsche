@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
             .eq("id", user.id)
             .single();
 
-        let redirectTo = "/guide/sicherheit-rio";
+        let redirectTo = "/guide/sicherheit";
         if (profile?.role === "admin") redirectTo = "/dashboard";
         else if (profile?.role === "premium") redirectTo = "/guide";
 
@@ -63,9 +63,9 @@ export async function updateSession(request: NextRequest) {
             return NextResponse.redirect(url);
         }
 
-        // /guide/sicherheit-rio é acessível para qualquer usuário autenticado
+        // /guide/sicherheit é acessível para qualquer usuário autenticado
         // Os demais capítulos exigem premium ou admin
-        if (pathname !== "/guide" && !pathname.startsWith("/guide/sicherheit-rio")) {
+        if (pathname !== "/guide" && !pathname.startsWith("/guide/sicherheit")) {
             const { data: profile } = await supabase
                 .from("profiles")
                 .select("role, premium_until")

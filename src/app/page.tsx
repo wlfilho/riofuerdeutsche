@@ -219,7 +219,7 @@ export default function Home() {
 
             <div className="relative z-10 max-w-7xl mx-auto px-5 lg:px-8 w-full">
               <FadeIn direction="up">
-                <div className="max-w-2xl space-y-6">
+                <div className="max-w-4xl space-y-6">
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-medium">
                     <HeartHandshake className="w-4 h-4 text-rio-yellow" />
                     <span>Dein deutschsprachiger Guide in Rio</span>

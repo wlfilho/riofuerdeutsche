@@ -65,8 +65,12 @@ export default async function GuideChapterPagePage({ params }: PageProps) {
   const isPremiumUser = access.isPremium
   const pageIsFree = Boolean(currentPage.is_free) || Boolean(chapter.is_free)
 
+  if (chapterSlug === 'upgrade') {
+    redirect('/guide?upgrade=true&r=1')
+  }
+
   if (!isPremiumUser && !pageIsFree) {
-    redirect('/guide?upgrade=true')
+    redirect('/guide?upgrade=true&r=2')
   }
 
   // ── Fetch all chapters + their published pages (for cross-chapter nav) ──────
