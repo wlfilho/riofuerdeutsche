@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(find /Users/williamfilho/Documents/01_projects/03_UiB/01_site/riofuerdeutsche -name *.env* -type f)",
-      "Bash(find /Users/williamfilho/Documents/01_projects/03_UiB/01_site/riofuerdeutsche -type f \\\\\\(-name *.sql -o -name *schema* -o -name *migration* -o -name *supabase* \\\\\\) -not -path */node_modules/*)"
+      "Bash(find /Users/williamfilho/Documents/01_projects/03_UiB/01_site/riofuerdeutsche -type f \\\\\\(-name *.sql -o -name *schema* -o -name *migration* -o -name *supabase* \\\\\\) -not -path */node_modules/*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(grep -E \"\\\\.\\(ts|js|json|css\\)$\")",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "mcp__claude_ai_Supabase__list_tables"
     ],
     "additionalDirectories": [
       "/Users/williamfilho/Documents/01_projects/03_UiB/01_site/riofuerdeutsche/src/app/guide",
