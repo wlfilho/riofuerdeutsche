@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import MembersHero from '@/components/members/MembersHero';
 import ChapterGrid from '@/components/members/ChapterGrid';
+import GuideIntro from '@/components/members/GuideIntro';
 import CTAGuideCompleto from '@/components/members/CTAGuideCompleto';
+import EditionsPreview from '@/components/members/EditionsPreview';
 import CTABeratung from '@/components/members/CTABeratung';
 
 export default function GuidePage({
@@ -20,13 +22,30 @@ export default function GuidePage({
   const [loading, setLoading] = useState(true);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [userPlan, setUserPlan] = useState<'free' | 'premium'>('free');
+  const [chapters, setChapters] = useState<import('@/components/members/ChapterCard').Chapter[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { createClient } = await import('@/utils/supabase/client');
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+
+        const [{ data: { user } }, { data: chaptersData }] = await Promise.all([
+          supabase.auth.getUser(),
+          supabase
+            .from('guide_chapters')
+            .select('id, title, subtitle, slug, icon, is_free, edition, status')
+            .eq('status', 'published')
+            .order('sort_order'),
+        ]);
+
+        if (chaptersData) {
+          setChapters(chaptersData.map((ch) => ({
+            ...ch,
+            description: ch.subtitle ?? '',
+          })));
+        }
+
         if (user) {
           const { data: profile } = await supabase
             .from('profiles')
@@ -74,7 +93,8 @@ export default function GuidePage({
   return (
     <>
       {/* Hero — largura total, de borda a borda */}
-      <MembersHero userName={firstName || 'Gast'} />
+      <MembersHero userName={firstName || 'Gast'} userPlan={userPlan} />
+      <GuideIntro userPlan={userPlan} />
 
       {/* Conteúdo — centralizado com max-width */}
       <main className="max-w-5xl mx-auto px-6 py-8 w-full flex flex-col gap-0">
@@ -121,11 +141,12 @@ export default function GuidePage({
         )}
 
         {/* Grid de capítulos */}
-        <ChapterGrid userPlan={userPlan} />
+        <ChapterGrid chapters={chapters} userPlan={userPlan} />
       </main>
 
       {/* CTAs — largura total, fora do container max-width */}
       <CTAGuideCompleto />
+      <EditionsPreview />
       <CTABeratung />
     </>
   );

@@ -14,19 +14,10 @@ export default function ChapterSidebar({
   currentSlug,
   userPlan,
 }: ChapterSidebarProps) {
-  const isAccessible = (ch: Chapter) =>
-    ch.access === "free" || (ch.access === "locked" && userPlan === "premium");
+  const isAccessible = (ch: Chapter) => ch.is_free || userPlan === "premium";
 
-  const sortedChapters = [...chapters].sort((a, b) => {
-    // We could order by some rule, right now let's just use their natural order or edition.
-    // Assuming hardcoded list order is correct
-    return 0;
-  });
-
-  const freeChapters = sortedChapters.filter((ch) => ch.access === "free");
-  const premiumChapters = sortedChapters.filter(
-    (ch) => ch.access === "locked" || ch.access === "coming_soon"
-  );
+  const freeChapters = chapters.filter((ch) => ch.is_free);
+  const premiumChapters = chapters.filter((ch) => !ch.is_free);
 
   return (
     <div className="hidden md:flex flex-col w-[220px] shrink-0 bg-[#ffffff] border-[0.5px] border-[#e0ddd6] rounded-[14px] p-[16px_0] my-[20px] ml-[20px] sticky top-[20px] max-h-[calc(100vh-100px)] overflow-y-auto">
@@ -65,7 +56,7 @@ export default function ChapterSidebar({
       {/* Divisor */}
       <div className="h-[0.5px] bg-[#e8e4dc] mx-[14px] my-[8px]" />
 
-      {/* Premium Edition 1 Section */}
+      {/* Premium Section */}
       <div className="text-[#bbb] text-[8px] font-[700] uppercase tracking-[1.5px] px-[14px] mb-[6px] mt-[8px]">
         EDITION 1 — O ESSENCIAL
       </div>
@@ -73,20 +64,6 @@ export default function ChapterSidebar({
         {premiumChapters.map((ch) => {
           const isActive = ch.slug === currentSlug;
           const accessible = isAccessible(ch);
-
-          if (ch.access === "coming_soon") {
-            return (
-              <div
-                key={ch.id}
-                className="text-[#ccc] text-[11px] py-[9px] px-[14px] flex items-center cursor-default"
-              >
-                <span className="text-[13px] mr-[8px] opacity-70">
-                  {ch.icon}
-                </span>
-                <span className="flex-1 opacity-70">{ch.title}</span>
-              </div>
-            );
-          }
 
           if (accessible) {
             if (isActive) {

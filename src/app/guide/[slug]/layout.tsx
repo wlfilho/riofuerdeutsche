@@ -1,6 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
 import ChapterSidebar from "@/components/members/ChapterSidebar";
-import { hardcodedChapters } from "@/components/members/ChapterGrid";
 
 export default async function ChapterLayout({
   children,
@@ -11,7 +10,6 @@ export default async function ChapterLayout({
 }) {
   const { slug } = await params;
 
-  // Busca dados do usuário
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,10 +36,21 @@ export default async function ChapterLayout({
     }
   }
 
+  const { data: chaptersData } = await supabase
+    .from("guide_chapters")
+    .select("id, title, subtitle, slug, icon, is_free, edition, status")
+    .eq("status", "published")
+    .order("sort_order");
+
+  const chapters = (chaptersData ?? []).map((ch) => ({
+    ...ch,
+    description: ch.subtitle ?? "",
+  }));
+
   return (
     <div className="flex bg-[#f8f5f0] min-h-screen w-full relative">
       <ChapterSidebar
-        chapters={hardcodedChapters}
+        chapters={chapters}
         currentSlug={slug}
         userPlan={userPlan}
       />

@@ -3,8 +3,8 @@ export default function CTABeratung() {
     <section
       className="w-full text-center"
       style={{
-        background: "#f8f5f0",
-        borderTop: "1px solid #e8e4dc",
+        background: "#f5c518",
+        borderTop: "none",
         padding: "72px 24px",
       }}
     >
