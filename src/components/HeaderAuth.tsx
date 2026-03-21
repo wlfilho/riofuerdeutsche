@@ -213,7 +213,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
 
         <div className="flex flex-col gap-4 w-full max-w-xs">
           <Link
-            href={user.role === 'premium' || user.role === 'admin' ? '/guide' : '/guide/sicherheit'}
+            href={user.role === 'premium' || user.role === 'admin' ? '/guide' : '/guide/sicherheit-rio'}
             onClick={handleLinkClick}
             className="flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-900 rounded-xl font-bold text-lg border border-gray-100"
           >
@@ -292,7 +292,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
 
           <div className="px-2 space-y-1">
             <Link
-              href={user.role === 'premium' || user.role === 'admin' ? '/guide' : '/guide/sicherheit'}
+              href={user.role === 'premium' || user.role === 'admin' ? '/guide' : '/guide/sicherheit-rio'}
               onClick={handleLinkClick}
               className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green rounded-xl transition-colors"
             >

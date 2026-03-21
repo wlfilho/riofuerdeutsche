@@ -65,7 +65,7 @@ export default function LoginPage() {
                             router.push('/guide');
                             break;
                         default:
-                            router.push('/guide/sicherheit');
+                            router.push('/guide/sicherheit-rio');
                             break;
                     }
                 }

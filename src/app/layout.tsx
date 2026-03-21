@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Inter, Syne } from "next/font/google";
+import { Outfit } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import FramerMotionProvider from "@/components/FramerMotionProvider";
@@ -7,19 +7,6 @@ import FramerMotionProvider from "@/components/FramerMotionProvider";
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
-  display: "swap",
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const syne = Syne({
-  variable: "--font-syne",
-  subsets: ["latin"],
-  weight: ["700", "800"],
   display: "swap",
 });
 
@@ -93,7 +80,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className="scroll-smooth">
+    <html lang="de" className={`${outfit.variable} scroll-smooth`}>
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-4BKZYR81FF"
@@ -109,7 +96,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${outfit.variable} ${inter.variable} ${syne.variable} antialiased font-sans text-gray-900 bg-gray-50`}
+        className="antialiased font-sans text-gray-900 bg-gray-50"
       >
         <FramerMotionProvider>
           {children}

@@ -42,7 +42,7 @@ export default function SignupPage() {
             });
 
             setTimeout(() => {
-                router.push('/guide/sicherheit');
+                router.push('/guide/sicherheit-rio');
             }, 1500);
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : "Fehler bei der Kontoerstellung.";
