@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Syne } from "next/font/google";
+import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import FramerMotionProvider from "@/components/FramerMotionProvider";
@@ -8,13 +8,6 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
-});
-
-const syne = Syne({
-  variable: "--font-syne",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
 });
 
 const siteUrl = "https://riofuerdeutsche.de";
@@ -87,7 +80,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className={`${inter.variable} ${syne.variable} scroll-smooth`}>
+    <html lang="de" className={`${inter.variable} scroll-smooth`}>
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-4BKZYR81FF"
