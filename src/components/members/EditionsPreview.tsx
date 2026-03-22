@@ -3,7 +3,7 @@ const editions = [
     id: 1,
     number: '01',
     status: 'available' as const,
-    title: 'O Essencial',
+    title: 'Das Wesentliche',
     subtitle: 'Die Basis für deine Reise',
     items: [
       'Wie du sicher nach Rio kommst',
@@ -17,7 +17,7 @@ const editions = [
     id: 2,
     number: '02',
     status: 'coming_soon' as const,
-    title: 'Viver o Rio',
+    title: 'Rio erleben',
     subtitle: 'Rio wie ein Einheimischer',
     items: [
       'Alle Viertel im Detail',
@@ -31,7 +31,7 @@ const editions = [
     id: 3,
     number: '03',
     status: 'coming_soon' as const,
-    title: 'Rio como um Local',
+    title: 'Rio wie ein Insider',
     subtitle: 'Tief eintauchen',
     items: [
       'Kultur, Kunst und Geschichte',
@@ -45,7 +45,7 @@ const editions = [
     id: 4,
     number: '04',
     status: 'coming_soon' as const,
-    title: 'Rio Completo',
+    title: 'Der komplette Guide',
     subtitle: 'Das komplette Bild',
     items: [
       'Tagesausflüge: Búzios, Ilha Grande',

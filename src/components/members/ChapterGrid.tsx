@@ -22,7 +22,7 @@ export default function ChapterGrid({ chapters, userPlan }: ChapterGridProps) {
           </div>
           <h3 className="font-display font-bold text-[#1a1a1a] mb-[4px]">Edition 2, 3, 4...</h3>
           <p className="text-[12px] text-[#555] mb-[16px] leading-[1.6] line-clamp-2">
-            Bairros, Gastronomia, Karneval, Kultur — em breve.
+            Viertel, Gastronomie, Karneval, Kultur — bald verfügbar.
           </p>
           <div className="mt-auto">
             <span className="inline-block px-[8px] py-[3px] bg-[#fff8e1] text-[#b8860b] text-[10px] font-[700] rounded-[6px]">
