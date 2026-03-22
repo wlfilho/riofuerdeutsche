@@ -47,6 +47,34 @@ body {
   .text-shadow-hero {
     text-shadow: 0px 4px 20px rgba(0, 0, 0, 0.6);
   }
+
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.4); }
+    100% { transform: scale(1); }
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e0ddd6;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #d1ceba;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* =============================
@@ -444,7 +472,7 @@ body {
 .guide-content h3,
 .guide-content h4 {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  scroll-margin-top: 100px;
+  scroll-margin-top: 104px;
 }
 
 .guide-content h4 {

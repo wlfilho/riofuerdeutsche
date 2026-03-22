@@ -9,6 +9,10 @@ export interface Chapter {
   is_free: boolean;
   edition: number;
   status: "draft" | "published";
+  progress?: {
+    total: number;
+    read: number;
+  };
 }
 
 interface ChapterCardProps {
@@ -28,16 +32,39 @@ export default function ChapterCard({ chapter, userPlan }: ChapterCardProps) {
       >
         <div className="flex justify-between items-start w-full mb-[12px]">
           <span className="text-[28px]">{chapter.icon}</span>
+          {chapter.progress && chapter.progress.read === chapter.progress.total && chapter.progress.total > 0 && (
+            <span className="text-[18px] text-[#22a262]">✓</span>
+          )}
         </div>
-        <h3 className="font-display font-bold text-[#1a1a1a] mb-[4px]">{chapter.title}</h3>
-        <p className="text-[12px] text-[#555] mb-[16px] leading-[1.6] line-clamp-2">
+        <h3 className="font-display font-bold text-[#1a1a1a] mb-[4px] leading-tight">{chapter.title}</h3>
+        <p className="text-[12px] text-[#888] mb-[12px] leading-[1.6] line-clamp-2">
           {chapter.description}
         </p>
-        <div className="mt-auto flex items-center justify-between">
+
+        {chapter.progress && (
+          <div className="mt-2 mb-4">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-[10px] text-gray-500 font-mono">
+                {chapter.progress.read} von {chapter.progress.total} Seiten gelesen
+              </span>
+              <span className="text-[10px] font-bold text-[#22a262]">
+                {Math.round((chapter.progress.read / chapter.progress.total) * 100)}%
+              </span>
+            </div>
+            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[#22a262] rounded-full transition-all duration-500"
+                style={{ width: `${(chapter.progress.read / chapter.progress.total) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="mt-auto flex items-center justify-between pt-2">
           <span className="inline-block px-[8px] py-[3px] bg-[#e8f5e9] text-[#2e7d32] text-[10px] font-[700] rounded-[6px] uppercase tracking-[0.5px]">
             {chapter.is_free ? "GRATIS" : "PREMIUM ✓"}
           </span>
-          <span className="text-[#22a262] font-bold text-[16px] opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-[#22a262] font-bold text-[16px] opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-4px] group-hover:translate-x-0 transition-transform">
             →
           </span>
         </div>

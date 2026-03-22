@@ -9,6 +9,7 @@ import GuideIntro from '@/components/members/GuideIntro';
 import CTAGuideCompleto from '@/components/members/CTAGuideCompleto';
 import EditionsPreview from '@/components/members/EditionsPreview';
 import CTABeratung from '@/components/members/CTABeratung';
+import { getAllProgress } from '@/app/actions/guideProgress';
 
 export default function GuidePage({
   searchParams,
@@ -30,19 +31,21 @@ export default function GuidePage({
         const { createClient } = await import('@/utils/supabase/client');
         const supabase = createClient();
 
-        const [{ data: { user } }, { data: chaptersData }] = await Promise.all([
+        const [{ data: { user } }, { data: chaptersData }, allProgress] = await Promise.all([
           supabase.auth.getUser(),
           supabase
             .from('guide_chapters')
             .select('id, title, subtitle, slug, icon, is_free, edition, status')
             .eq('status', 'published')
             .order('sort_order'),
+          getAllProgress(),
         ]);
 
         if (chaptersData) {
           setChapters(chaptersData.map((ch) => ({
             ...ch,
             description: ch.subtitle ?? '',
+            progress: allProgress[ch.id] || { total: 0, read: 0 },
           })));
         }
 

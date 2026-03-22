@@ -1,15 +1,17 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { CheckCircle2, Circle } from 'lucide-react'
 import Link from 'next/link'
+import { useReading } from './ReadingContext'
 
 export interface ToCItem {
   id: string
   text: string
-  level: 2 | 3
+  level: number
 }
 
 export interface SiblingPage {
+  id: string
   title: string
   slug: string
   is_free: boolean
@@ -17,132 +19,145 @@ export interface SiblingPage {
 
 interface GuideToCProps {
   items: ToCItem[]
+  activeId: string
   chapterTitle: string
   chapterSlug: string
   currentPage: number
   totalPages: number
   pages: SiblingPage[]
   currentSlug: string
+  readPageIds?: string[]
 }
 
 export default function GuideToC({
   items,
+  activeId,
   chapterTitle,
   chapterSlug,
   currentPage,
   totalPages,
   pages,
   currentSlug,
+  readPageIds: propReadPageIds,
 }: GuideToCProps) {
-  const [activeId, setActiveId] = useState<string>('')
-  const observerRef = useRef<IntersectionObserver | null>(null)
+  const { readPageIds: contextReadPageIds } = useReading()
+  const readPageIds = contextReadPageIds || propReadPageIds || []
 
-  useEffect(() => {
-    if (items.length === 0) return
+  const readInChapter = pages.filter(p => readPageIds.includes(p.id)).length
+  const progressPercent = totalPages > 0 ? Math.round((readInChapter / totalPages) * 100) : 0
 
-    const headingElements = items
-      .map(({ id }) => document.getElementById(id))
-      .filter(Boolean) as HTMLElement[]
-
-    if (headingElements.length === 0) return
-
-    // Track which headings are visible
-    const visibleHeadings = new Map<string, number>()
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            visibleHeadings.set(entry.target.id, entry.boundingClientRect.top)
-          } else {
-            visibleHeadings.delete(entry.target.id)
-          }
-        })
-
-        // Pick the topmost visible heading
-        if (visibleHeadings.size > 0) {
-          const sorted = [...visibleHeadings.entries()].sort((a, b) => a[1] - b[1])
-          setActiveId(sorted[0][0])
-        }
-      },
-      { rootMargin: '-80px 0px -60% 0px', threshold: 0 }
-    )
-
-    headingElements.forEach((el) => observerRef.current!.observe(el))
-
-    return () => {
-      observerRef.current?.disconnect()
-    }
-  }, [items])
-
-  const progressPercent = totalPages > 1 ? Math.round(((currentPage - 1) / (totalPages - 1)) * 100) : 100
-
-  const handleClick = (id: string) => {
+  const handleClick = (e: React.MouseEvent, id: string) => {
+    e.preventDefault()
     const el = document.getElementById(id)
-    if (!el) return
-    const offset = 100
-    const top = el.getBoundingClientRect().top + window.scrollY - offset
-    window.scrollTo({ top, behavior: 'smooth' })
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
   }
 
   const hasHeadings = items.length > 0
-  const hasMultiplePages = pages.length > 1 || (pages.length === 1 && pages[0].slug !== currentSlug) // Showing even if 1 page to satisfy "listing"
-  const showSidebar = hasHeadings || pages.length > 0
 
   return (
-    <aside className="hidden lg:flex flex-col gap-0" style={{ width: '260px', flexShrink: 0 }}>
+    <div className="flex flex-col gap-4">
+      {/* Chapter info + progress */}
       <div
-        className="sticky flex flex-col gap-4"
-        style={{ top: '100px', maxHeight: 'calc(100vh - 120px)', overflowY: 'auto' }}
+        className="rounded-xl p-4"
+        style={{ background: '#fff', border: '1px solid var(--rfd-border)' }}
       >
-        {/* Chapter info + progress */}
-        <div
-          className="rounded-xl p-4"
-          style={{ background: '#fff', border: '1px solid var(--rfd-border)' }}
+        <p
+          className="font-mono text-[10px] uppercase tracking-widest mb-1"
+          style={{ color: 'var(--rfd-text-muted)' }}
         >
-          <p
-            className="font-mono text-[10px] uppercase tracking-widest mb-1"
+          Kapitel
+        </p>
+        <p
+          className="font-heading font-bold text-sm leading-snug mb-3"
+          style={{ color: 'var(--rfd-text-dark)' }}
+        >
+          {chapterTitle}
+        </p>
+
+        <div className="flex items-center justify-between mb-1.5">
+          <span
+            className="font-mono text-[10px]"
             style={{ color: 'var(--rfd-text-muted)' }}
           >
-            Kapitel
-          </p>
-          <p
-            className="font-heading font-bold text-sm leading-snug mb-3"
-            style={{ color: 'var(--rfd-text-dark)' }}
+            {readInChapter} von {totalPages} gelesen
+          </span>
+          <span
+            className="font-mono text-[10px] font-bold"
+            style={{ color: 'var(--rfd-green-brand)' }}
           >
-            {chapterTitle}
-          </p>
-
-          <div className="flex items-center justify-between mb-1.5">
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: 'var(--rfd-text-muted)' }}
-            >
-              Seite {currentPage} von {totalPages}
-            </span>
-            <span
-              className="font-mono text-[10px] font-bold"
-              style={{ color: 'var(--rfd-green-brand)' }}
-            >
-              {progressPercent}%
-            </span>
-          </div>
-
-          <div
-            className="w-full rounded-full overflow-hidden"
-            style={{ height: '4px', background: 'var(--rfd-border)' }}
-          >
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{
-                width: `${progressPercent}%`,
-                background: 'var(--rfd-green-brand)',
-              }}
-            />
-          </div>
+            {progressPercent}%
+          </span>
         </div>
 
-        {/* Pages of this Chapter */}
+        <div
+          className="w-full rounded-full overflow-hidden"
+          style={{ height: '4px', background: 'var(--rfd-border)' }}
+        >
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${progressPercent}%`,
+              background: 'var(--rfd-green-brand)',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Pages of this Chapter */}
+      <div
+        className="rounded-xl p-4"
+        style={{ background: '#fff', border: '1px solid var(--rfd-border)' }}
+      >
+        <p
+          className="font-mono text-[10px] uppercase tracking-widest mb-3"
+          style={{ color: 'var(--rfd-text-muted)' }}
+        >
+          Seiten in diesem Kapitel
+        </p>
+
+        <nav className="flex flex-col gap-1">
+          {pages.map((page) => {
+            const isActive = page.slug === currentSlug
+            const isRead = readPageIds.includes(page.id)
+            return (
+              <Link
+                key={page.slug}
+                href={`/guide/${chapterSlug}/${page.slug}`}
+                className="text-left rounded-lg px-3 py-2 transition-colors flex items-center justify-between text-no-underline"
+                style={{
+                  background: isActive ? '#f0faf5' : 'transparent',
+                  border: isActive ? '1px solid #c8e6c9' : '1px solid transparent',
+                }}
+              >
+                <span
+                  className="block leading-snug flex-1"
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: isActive ? 600 : 400,
+                    color: isActive ? 'var(--rfd-green-brand)' : 'var(--rfd-text-dark)',
+                  }}
+                >
+                  {page.title}
+                </span>
+                {isActive ? (
+                  <span className="text-[10px]" style={{ color: 'var(--rfd-green-brand)' }}>
+                    ●
+                  </span>
+                ) : isRead ? (
+                  <CheckCircle2 size={12} className="text-green-500" />
+                ) : (
+                  <Circle size={10} className="text-gray-200" />
+                )}
+              </Link>
+            )
+          })}
+        </nav>
+      </div>
+
+      {/* Table of Contents */}
+      {hasHeadings && (
         <div
           className="rounded-xl p-4"
           style={{ background: '#fff', border: '1px solid var(--rfd-border)' }}
@@ -151,94 +166,47 @@ export default function GuideToC({
             className="font-mono text-[10px] uppercase tracking-widest mb-3"
             style={{ color: 'var(--rfd-text-muted)' }}
           >
-            Seiten in diesem Kapitel
+            Auf dieser Seite
           </p>
 
-          <nav className="flex flex-col gap-1">
-            {pages.map((page) => {
-              const isActive = page.slug === currentSlug
+          <nav className="flex flex-col gap-0.5">
+            {items.map((item) => {
+              const isActive = activeId === item.id
               return (
-                <Link
-                  key={page.slug}
-                  href={`/guide/${chapterSlug}/${page.slug}`}
-                  className="text-left rounded-lg px-3 py-2 transition-colors flex items-center justify-between text-no-underline"
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  onClick={(e) => handleClick(e, item.id)}
+                  className="text-left transition-all duration-150 rounded-lg group no-underline block"
                   style={{
+                    paddingLeft: `${Math.max(0, (item.level - 2) * 12 + 8)}px`,
+                    paddingRight: '8px',
+                    paddingTop: '5px',
+                    paddingBottom: '5px',
+                    borderLeft: isActive
+                      ? '2px solid var(--rfd-green-brand)'
+                      : '2px solid transparent',
                     background: isActive ? '#f0faf5' : 'transparent',
-                    border: isActive ? '1px solid #c8e6c9' : '1px solid transparent',
                   }}
                 >
                   <span
                     className="block leading-snug"
                     style={{
-                      fontSize: '12px',
-                      fontWeight: isActive ? 600 : 400,
-                      color: isActive ? 'var(--rfd-green-brand)' : 'var(--rfd-text-dark)',
+                      fontSize: item.level <= 2 ? '13px' : '12px',
+                      fontWeight: item.level <= 2 ? 600 : 400,
+                      color: isActive
+                        ? 'var(--rfd-green-brand)'
+                        : 'var(--rfd-text-mid)',
                     }}
                   >
-                    {page.title}
+                    {item.text}
                   </span>
-                  {isActive && (
-                    <span className="text-[10px]" style={{ color: 'var(--rfd-green-brand)' }}>
-                      ●
-                    </span>
-                  )}
-                </Link>
+                </a>
               )
             })}
           </nav>
         </div>
-
-        {/* Table of Contents */}
-        {hasHeadings && (
-          <div
-            className="rounded-xl p-4"
-            style={{ background: '#fff', border: '1px solid var(--rfd-border)' }}
-          >
-            <p
-              className="font-mono text-[10px] uppercase tracking-widest mb-3"
-              style={{ color: 'var(--rfd-text-muted)' }}
-            >
-              Auf dieser Seite
-            </p>
-
-            <nav className="flex flex-col gap-0.5">
-              {items.map((item) => {
-                const isActive = activeId === item.id
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleClick(item.id)}
-                    className="text-left transition-all duration-150 rounded-lg group"
-                    style={{
-                      paddingLeft: item.level === 3 ? '16px' : '8px',
-                      paddingRight: '8px',
-                      paddingTop: '5px',
-                      paddingBottom: '5px',
-                      borderLeft: isActive
-                        ? '2px solid var(--rfd-green-brand)'
-                        : '2px solid transparent',
-                      background: isActive ? '#f0faf5' : 'transparent',
-                    }}
-                  >
-                    <span
-                      className="block leading-snug"
-                      style={{
-                        fontSize: item.level === 2 ? '13px' : '12px',
-                        fontWeight: item.level === 2 ? 600 : 400,
-                        color: isActive
-                          ? 'var(--rfd-green-brand)'
-                          : 'var(--rfd-text-mid)',
-                      }}
-                    >
-                      {item.text}
-                    </span>
-                  </button>
-                )
-              })}
-            </nav>
-          </div>
-        )}
-      </div>
-    </aside>
+      )}
+    </div>
   )
 }

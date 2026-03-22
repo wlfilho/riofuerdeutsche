@@ -2,170 +2,157 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ChevronDown, List } from 'lucide-react'
+import { ChevronDown, List, CheckCircle2, Circle } from 'lucide-react'
 import type { ToCItem, SiblingPage } from './GuideToC'
+import { useReading } from './ReadingContext'
 
 interface GuideToCMobileProps {
   items: ToCItem[]
+  activeId: string
   chapterTitle: string
   chapterSlug: string
   currentPage: number
   totalPages: number
   pages: SiblingPage[]
   currentSlug: string
+  readPageIds?: string[]
 }
 
 export default function GuideToCMobile({
   items,
+  activeId,
   chapterTitle,
   chapterSlug,
   currentPage,
   totalPages,
   pages,
   currentSlug,
+  readPageIds: propReadPageIds,
 }: GuideToCMobileProps) {
+  const { readPageIds: contextReadPageIds } = useReading()
+  const readPageIds = contextReadPageIds || propReadPageIds || []
   const [open, setOpen] = useState(false)
 
-  const handleClick = (id: string) => {
+  const activeItem = items.find((item) => item.id === activeId)
+  const activeLabel = activeItem?.text ?? 'Inhaltsverzeichnis'
+
+  const handleClick = (e: React.MouseEvent, id: string) => {
+    e.preventDefault()
     const el = document.getElementById(id)
-    if (!el) return
-    const offset = 80
-    const top = el.getBoundingClientRect().top + window.scrollY - offset
-    window.scrollTo({ top, behavior: 'smooth' })
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
     setOpen(false)
   }
 
-  if (items.length === 0) return null
-
+  // If no items on page, we might still want to show the chapter menu? 
+  // The original component showed but checked items.length.
+  // The instruction says "Substitute by a sticky top bar".
+  
   return (
-    <div className="lg:hidden mb-6" style={{ borderRadius: '12px', border: '1px solid var(--rfd-border)', background: '#fff', overflow: 'hidden' }}>
-      {/* Header / trigger */}
+    <div className="md:hidden sticky top-[80px] z-40 bg-white border-b border-gray-100 shadow-sm">
+      {/* Sticky Bar */}
       <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 transition-colors"
-        style={{ background: open ? '#f8f5f0' : '#fff' }}
-        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center gap-3 px-4 py-3 text-left"
       >
-        <div className="flex items-center gap-2">
-          <List size={15} style={{ color: 'var(--rfd-green-brand)', flexShrink: 0 }} />
-          <span
-            className="font-mono text-[11px] uppercase tracking-widest font-semibold"
-            style={{ color: 'var(--rfd-text-mid)' }}
-          >
-            Menü
-          </span>
-          {totalPages > 1 && (
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: 'var(--rfd-text-muted)' }}
-            >
-              — Seite {currentPage}/{totalPages}
-            </span>
-          )}
-        </div>
-        <ChevronDown
-          size={16}
-          style={{
-            color: 'var(--rfd-text-muted)',
-            transition: 'transform 0.2s',
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            flexShrink: 0,
-          }}
+        <List size={18} className="shrink-0" style={{ color: 'var(--rfd-green-brand)' }} />
+        
+        <span className="flex-1 text-xs font-semibold uppercase tracking-wider text-gray-600 truncate">
+          {activeLabel}
+        </span>
+        
+        <ChevronDown 
+          size={18} 
+          className={`shrink-0 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
-      {/* Collapsible content */}
-      <div
-        style={{
-          maxHeight: open ? '400px' : '0',
-          overflow: 'hidden',
-          transition: 'max-height 0.3s ease',
-        }}
-      >
-        <div style={{ borderTop: '1px solid var(--rfd-border)' }}>
-          <div className="px-4 py-2">
-            <p
-              className="font-heading font-semibold text-xs mb-3 mt-1"
-              style={{ color: 'var(--rfd-text-dark)' }}
-            >
-              {chapterTitle}
-            </p>
-            {/* Sibling Pages */}
-            <p
-              className="font-mono text-[10px] uppercase tracking-widest mb-3"
-              style={{ color: 'var(--rfd-text-muted)' }}
-            >
-              Kapitel-Seiten
-            </p>
-            <nav className="flex flex-col gap-1 mb-6">
-              {pages.map((page) => {
-                const isActive = page.slug === currentSlug
-                return (
-                  <Link
-                    key={page.slug}
-                    href={`/guide/${chapterSlug}/${page.slug}`}
-                    className="text-left rounded-lg px-3 py-2 transition-colors flex items-center justify-between"
-                    style={{
-                      background: isActive ? '#f0faf5' : 'transparent',
-                      border: isActive ? '1px solid #c8e6c9' : '1px solid transparent',
-                      textDecoration: 'none'
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: '13px',
-                        fontWeight: isActive ? 600 : 400,
-                        color: isActive ? 'var(--rfd-green-brand)' : 'var(--rfd-text-dark)',
-                      }}
-                    >
-                      {page.title}
-                    </span>
-                    {isActive && (
-                      <span className="text-[10px]" style={{ color: 'var(--rfd-green-brand)' }}>
-                        ●
-                      </span>
-                    )}
-                  </Link>
-                )
-              })}
-            </nav>
+      {/* Dropdown menu */}
+      {open && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-30"
+            style={{ top: 'calc(80px + 44px)', background: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(2px)' }}
+            onClick={() => setOpen(false)}
+          />
 
-            {/* Table of Contents */}
-            {items.length > 0 && (
-              <>
-                <p
-                  className="font-mono text-[10px] uppercase tracking-widest mb-3"
-                  style={{ color: 'var(--rfd-text-muted)' }}
-                >
-                  Auf dieser Seite
+          <nav 
+            className="relative z-40 bg-white border-t border-gray-100 shadow-xl overflow-y-auto"
+            style={{ maxHeight: 'calc(100vh - 200px)' }}
+          >
+            <div className="p-4">
+              <p className="font-heading font-bold text-sm mb-4 text-gray-800">
+                {chapterTitle}
+              </p>
+
+              {/* Chapter Pages */}
+              <div className="mb-6">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400 mb-2">
+                  Kapitel-Seiten
                 </p>
-                <nav className="flex flex-col gap-0.5 pb-2">
-                  {items.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleClick(item.id)}
-                      className="text-left rounded-lg px-2 py-1.5 transition-colors hover:bg-[#f0faf5]"
-                      style={{ paddingLeft: item.level === 3 ? '20px' : '8px' }}
-                    >
-                      <span
-                        style={{
-                          fontSize: item.level === 2 ? '13px' : '12px',
-                          fontWeight: item.level === 2 ? 600 : 400,
-                          color: 'var(--rfd-text-mid)',
-                          lineHeight: 1.4,
-                          display: 'block',
-                        }}
+                <div className="flex flex-col gap-1">
+                  {pages.map((page) => {
+                    const isActive = page.slug === currentSlug
+                    return (
+                      <Link
+                        key={page.slug}
+                        href={`/guide/${chapterSlug}/${page.slug}`}
+                        onClick={() => setOpen(false)}
+                        className={`text-left rounded-lg px-3 py-2 flex items-center justify-between text-no-underline transition-colors
+                          ${isActive ? 'bg-[var(--rfd-cream)] border border-[rgba(0,0,0,0.05)]' : 'hover:bg-gray-50'}`}
                       >
-                        {item.text}
-                      </span>
-                    </button>
-                  ))}
-                </nav>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+                        <span className={`text-[13px] flex-1 ${isActive ? 'font-bold text-[var(--rfd-green-brand)]' : 'text-gray-700'}`}>
+                          {page.title}
+                        </span>
+                        {isActive ? (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--rfd-green-brand)]" />
+                        ) : readPageIds.includes(page.id) ? (
+                          <CheckCircle2 size={12} className="text-green-500" />
+                        ) : (
+                          <Circle size={10} className="text-gray-200" />
+                        )}
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* On this page items */}
+              {items.length > 0 && (
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400 mb-2">
+                    Auf dieser Seite
+                  </p>
+                  <div className="flex flex-col gap-0.5">
+                    {items.map((item) => {
+                      const isActive = activeId === item.id
+                      return (
+                        <a
+                          key={item.id}
+                          href={`#${item.id}`}
+                          onClick={(e) => handleClick(e, item.id)}
+                          className={`text-left rounded-lg py-2 transition-colors no-underline block
+                            ${isActive ? 'bg-green-50 text-[var(--rfd-green-brand)] font-semibold' : 'text-gray-600 hover:bg-gray-50'}
+                          `}
+                          style={{
+                            paddingLeft: `${Math.max(12, (item.level - 2) * 12 + 12)}px`,
+                            paddingRight: '12px',
+                            fontSize: item.level <= 2 ? '13px' : '12px',
+                          }}
+                        >
+                          {item.text}
+                        </a>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </nav>
+        </>
+      )}
     </div>
   )
 }

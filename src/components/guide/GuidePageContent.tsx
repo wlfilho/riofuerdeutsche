@@ -9,15 +9,15 @@ export function extractToCItems(html: string): ToCItem[] {
   const items: ToCItem[] = []
   const usedIds = new Set<string>()
 
-  const headingRegex = /<(h[23])[^>]*>([\s\S]*?)<\/h[23]>/gi
+  const headingRegex = /<(h[1-4])([^>]*)?>([\s\S]*?)<\/h[1-4]\s*>/gi
   let match: RegExpExecArray | null
 
   while ((match = headingRegex.exec(html)) !== null) {
-    const tag = match[1].toLowerCase() as 'h2' | 'h3'
-    const level = tag === 'h2' ? 2 : 3
+    const tag = match[1].toLowerCase()
+    const level = parseInt(tag.charAt(1))
 
-    // Strip inner HTML tags to get plain text
-    const text = match[2].replace(/<[^>]+>/g, '').trim()
+    // match[1] is tag, match[2] is attributes, match[3] is inner content
+    const text = (match[3] || '').replace(/<[^>]+>/g, '').trim()
     if (!text) continue
 
     // Build slug from text
@@ -49,12 +49,12 @@ export function extractToCItems(html: string): ToCItem[] {
  */
 export function injectHeadingIds(html: string, items: ToCItem[]): string {
   let index = 0
-  return html.replace(/<(h[23])([^>]*)>([\s\S]*?)<\/h[23]>/gi, (match, tag, attrs, inner) => {
+  return html.replace(/<(h[1-4])([^>]*)?>([\s\S]*?)<\/h[1-4]\s*>/gi, (match, tag, attrs, inner) => {
     const item = items[index]
     if (!item) return match
     index++
-    // Remove any existing id attribute then inject ours
-    const cleanAttrs = attrs.replace(/\s*id="[^"]*"/gi, '')
+    // Remove any existing id attribute then inject ours (handle undefined attrs)
+    const cleanAttrs = (attrs || '').replace(/\s*id="[^"]*"/gi, '')
     return `<${tag}${cleanAttrs} id="${item.id}">${inner}</${tag}>`
   })
 }

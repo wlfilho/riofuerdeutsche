@@ -8,10 +8,11 @@ import { getMembershipAccess } from '@/lib/membership'
 import { contentToHtml } from '@/lib/guideContent'
 import GuidePageContent, { extractToCItems, injectHeadingIds } from '@/components/guide/GuidePageContent'
 
-import GuideToC from '@/components/guide/GuideToC'
-import GuideToCMobile from '@/components/guide/GuideToCMobile'
+import GuideToCWrapper from '@/components/guide/GuideToCWrapper'
 import GuideNav from '@/components/guide/GuideNav'
 import GuideCTA from '@/components/guide/GuideCTA'
+import { ReadToggle } from '@/components/guide/ReadToggle'
+import { getChapterProgress } from '@/app/actions/guideProgress'
 
 export const dynamic = 'force-dynamic'
 
@@ -133,11 +134,15 @@ export default async function GuideChapterPagePage({ params }: PageProps) {
       : undefined
   const isLastPage = currentFlatIndex === flatPages.length - 1
 
-  // ── Pagination within this chapter ────────────────────────────────────────
+  // ── Pagination & Progress ───────────────────────────────────────────────────
   const sortedChapterPages = [...pages].sort((a, b) => a.sort_order - b.sort_order)
   const pageIndex = sortedChapterPages.findIndex((p) => p.slug === pageSlug)
   const currentPageNumber = pageIndex + 1
   const totalPagesInChapter = sortedChapterPages.length
+
+  const { readPageIds, readAtMap } = await getChapterProgress(chapter.id)
+  const isRead = readPageIds.includes(currentPage.id)
+  const readAt = readAtMap[currentPage.id]
 
   // ── ToC items from content ─────────────────────────────────────────────────
   const rawHtml = contentToHtml(currentPage.content)
@@ -164,41 +169,23 @@ export default async function GuideChapterPagePage({ params }: PageProps) {
     : undefined
 
   return (
-    <div className="w-full px-4 md:px-8" style={{ background: 'var(--rfd-cream)' }}>
-      {/* Centered container */}
-      <div
-        className="mx-auto w-full py-8 md:py-12 flex gap-10 items-start"
-        style={{ maxWidth: '1080px' }}
+    <div className="w-full overflow-hidden" style={{ background: 'var(--rfd-cream)' }}>
+      <GuideToCWrapper
+        items={tocItems}
+        chapterTitle={chapter.title}
+        chapterSlug={chapterSlug}
+        currentPage={currentPageNumber}
+        totalPages={totalPagesInChapter}
+        pages={pages.map(p => ({ id: p.id, title: p.title, slug: p.slug, is_free: p.is_free }))}
+        currentSlug={pageSlug}
+        readPageIds={readPageIds}
       >
-        {/* ── Desktop Sidebar ToC ────────────────────────────────────────── */}
-        <GuideToC
-          items={tocItems}
-          chapterTitle={chapter.title}
-          chapterSlug={chapterSlug}
-          currentPage={currentPageNumber}
-          totalPages={totalPagesInChapter}
-          pages={pages.map(p => ({ title: p.title, slug: p.slug, is_free: p.is_free }))}
-          currentSlug={pageSlug}
-        />
-
-        {/* ── Main content column ───────────────────────────────────────── */}
-        <main className="flex-1 min-w-0">
-          {/* Mobile ToC accordion */}
-          <GuideToCMobile
-            items={tocItems}
-            chapterTitle={chapter.title}
-            chapterSlug={chapterSlug}
-            currentPage={currentPageNumber}
-            totalPages={totalPagesInChapter}
-            pages={pages.map(p => ({ title: p.title, slug: p.slug, is_free: p.is_free }))}
-            currentSlug={pageSlug}
-          />
-
-          {/* Breadcrumb */}
-          <nav
-            className="flex items-center gap-1.5 mb-6 flex-wrap"
-            aria-label="Breadcrumb"
-          >
+        {/* Breadcrumb row with compact ReadToggle */}
+        <nav
+          className="flex items-center justify-between gap-4 mb-6 flex-wrap"
+          aria-label="Breadcrumb"
+        >
+          <div className="flex items-center gap-1.5 flex-wrap">
             <Link
               href="/guide"
               className="font-mono text-[11px] hover:underline"
@@ -214,52 +201,58 @@ export default async function GuideChapterPagePage({ params }: PageProps) {
             <span className="font-mono text-[11px] font-semibold" style={{ color: 'var(--rfd-text-dark)' }}>
               {currentPage.title}
             </span>
-          </nav>
+          </div>
 
-          {/* Page header */}
-          <header className="mb-8">
-            {/* Free badge or page label */}
-            {pageIsFree && !isPremiumUser && (
-              <span
-                className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest px-3 py-1 rounded-full mb-3"
-                style={{ background: '#e8f5e9', color: '#2e7d32' }}
-              >
-                Kostenlos
-              </span>
-            )}
+          <ReadToggle pageId={currentPage.id} />
+        </nav>
 
-            <h1
-              className="font-heading font-extrabold leading-tight mb-2"
-              style={{ fontSize: 'clamp(24px, 4vw, 36px)', color: 'var(--rfd-text-dark)' }}
+        {/* Page header */}
+        <header className="mb-8">
+          {pageIsFree && !isPremiumUser && (
+            <span
+              className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest px-3 py-1 rounded-full mb-3"
+              style={{ background: '#e8f5e9', color: '#2e7d32' }}
             >
-              {currentPage.title}
-            </h1>
+              Kostenlos
+            </span>
+          )}
 
-            {currentPage.subtitle && (
-              <p
-                className="text-base leading-relaxed"
-                style={{ color: 'var(--rfd-text-mid)', maxWidth: '640px' }}
-              >
-                {currentPage.subtitle}
-              </p>
-            )}
+          <h1
+            className="font-heading font-extrabold leading-tight mb-2"
+            style={{ fontSize: 'clamp(24px, 4vw, 36px)', color: 'var(--rfd-text-dark)' }}
+          >
+            {currentPage.title}
+          </h1>
 
-            <div
-              className="mt-5"
-              style={{ height: '1px', background: 'var(--rfd-border)' }}
-            />
-          </header>
+          {currentPage.subtitle && (
+            <p
+              className="text-base leading-relaxed"
+              style={{ color: 'var(--rfd-text-mid)', maxWidth: '640px' }}
+            >
+              {currentPage.subtitle}
+            </p>
+          )}
 
-          {/* Content */}
-          <GuidePageContent html={htmlWithIds} />
+          <div
+            className="mt-5"
+            style={{ height: '1px', background: 'var(--rfd-border)' }}
+          />
+        </header>
 
-          {/* Navigation */}
-          <GuideNav prev={prevNav} next={nextNav} isLastPage={isLastPage} />
+        {/* Content */}
+        <GuidePageContent html={htmlWithIds} />
 
-          {/* Contextual CTA */}
-          <GuideCTA chapterSlug={chapterSlug} />
-        </main>
-      </div>
+        {/* Content footer with compact ReadToggle */}
+        <div className="flex justify-end mt-12 mb-6 border-t border-gray-100 pt-8">
+          <ReadToggle pageId={currentPage.id} />
+        </div>
+
+        {/* Navigation */}
+        <GuideNav prev={prevNav} next={nextNav} isLastPage={isLastPage} />
+
+        {/* Contextual CTA */}
+        <GuideCTA chapterSlug={chapterSlug} />
+      </GuideToCWrapper>
     </div>
   )
 }
