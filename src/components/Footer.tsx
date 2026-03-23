@@ -22,7 +22,8 @@ export default function Footer() {
                             <MapPin className="h-6 w-6 text-rio-yellow" />
                             <span>Rio<span className="text-rio-blue">FürDeutsche</span></span>
                         </Link>
-                        <p className="text-sm mb-6">Dein deutschsprachiger Insider Guide in der wunderbaren Stadt Rio de Janeiro.</p>
+                        <p className="text-sm mb-3">Dein deutschsprachiger Insider Guide in der wunderbaren Stadt Rio de Janeiro.</p>
+                        <p className="text-sm mb-6 text-gray-500">RioFürDeutsche bietet deutschsprachige Reiseleitung, Citytouren und Ausflüge in Rio de Janeiro — geführt von einem echten Carioca, der fließend Deutsch spricht.</p>
                         <div className="flex items-center gap-3">
                             <a
                                 href="https://instagram.com/riofuerdeutsche"

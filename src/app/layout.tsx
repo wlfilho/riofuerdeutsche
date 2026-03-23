@@ -15,15 +15,17 @@ const siteUrl = "https://riofuerdeutsche.de";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Rio für Deutsche – Deutschsprachige Privattouren in Rio de Janeiro",
+    default: "Rio de Janeiro: Deutschsprachiger Tourguide, Stadtführungen & Ausflüge | RioFürDeutsche",
     template: "%s | Rio für Deutsche",
   },
   description:
-    "Erlebe Rio de Janeiro mit deinem deutschsprachigen Guide. Privattouren zum Corcovado, Zuckerhut, Favelas & mehr – sicher, authentisch und unvergesslich.",
+    "Deutschsprachige Reiseleitung in Rio de Janeiro ✓ Citytouren, Stadtrundfahrten & Ausflüge mit einem echten Carioca. Sicher, persönlich, auf Deutsch.",
   keywords: [
     "Rio de Janeiro",
     "deutschsprachiger Guide",
-    "Privattouren Rio",
+    "Stadtführungen Rio",
+    "Tourguide Rio de Janeiro",
+    "Reiseleitung Rio",
     "Corcovado Tour",
     "Zuckerhut Tour",
     "Rio Reiseführer Deutsch",
@@ -39,9 +41,9 @@ export const metadata: Metadata = {
     locale: "de_DE",
     url: siteUrl,
     siteName: "Rio für Deutsche",
-    title: "Rio für Deutsche – Deutschsprachige Privattouren in Rio de Janeiro",
+    title: "Rio de Janeiro: Deutschsprachiger Tourguide, Stadtführungen & Ausflüge | RioFürDeutsche",
     description:
-      "Erlebe Rio de Janeiro mit deinem deutschsprachigen Guide. Privattouren zum Corcovado, Zuckerhut, Favelas & mehr – sicher, authentisch und unvergesslich.",
+      "Deutschsprachige Reiseleitung in Rio de Janeiro ✓ Citytouren, Stadtrundfahrten & Ausflüge mit einem echten Carioca. Sicher, persönlich, auf Deutsch.",
     images: [
       {
         url: "/images/rio-background.webp",
@@ -53,9 +55,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rio für Deutsche – Deutschsprachige Privattouren in Rio de Janeiro",
+    title: "Rio de Janeiro: Deutschsprachiger Tourguide, Stadtführungen & Ausflüge | RioFürDeutsche",
     description:
-      "Erlebe Rio de Janeiro mit deinem deutschsprachigen Guide. Sicher, authentisch und unvergesslich.",
+      "Deutschsprachige Reiseleitung in Rio de Janeiro ✓ Citytouren, Stadtrundfahrten & Ausflüge mit einem echten Carioca. Sicher, persönlich, auf Deutsch.",
     images: ["/images/rio-background.webp"],
   },
   robots: {

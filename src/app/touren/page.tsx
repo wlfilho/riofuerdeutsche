@@ -6,8 +6,8 @@ import FadeIn from "@/components/FadeIn";
 import { ChevronRight, Phone, CalendarDays } from "lucide-react";
 
 export const metadata = {
-    title: "Geführte Touren in Rio de Janeiro — sicher & auf Deutsch | RioFürDeutsche",
-    description: "Entdecke Rio de Janeiro mit einem echten Carioca als Guide. Stadttouren, Natur, Fußball, Karneval und Tagesausflüge — sicher, authentisch und komplett auf Deutsch."
+    title: "Touren & Stadtrundfahrten in Rio de Janeiro auf Deutsch | RioFürDeutsche",
+    description: "Deutschsprachige Touren & Stadtführungen in Rio de Janeiro ✓ Klassiker, Favela, Karneval, Natur & Ausflüge. Mit einem echten Carioca. Jetzt anfragen."
 };
 
 export default function TourenPage() {
@@ -44,7 +44,7 @@ export default function TourenPage() {
                             <div className="max-w-3xl space-y-6">
                                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium">
                                     <CalendarDays className="w-4 h-4 text-rio-yellow" />
-                                    <span>Privattouren auf Deutsch · Alle Touren im Überblick</span>
+                                    <span>Stadtführungen auf Deutsch · Alle Touren im Überblick</span>
                                 </div>
 
                                 <h1 className="text-4xl lg:text-[clamp(32px,3.8vw,52px)] font-heading font-black text-white leading-[1.15] tracking-tight whitespace-normal lg:whitespace-nowrap">
@@ -76,15 +76,15 @@ export default function TourenPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Rio de Janeiro gehört zu den aufregendsten Städten der Welt — aber gerade als deutschsprachiger Tourist stellt man sich viele Fragen: Welche Sehenswürdigkeiten lohnen sich wirklich? Wo ist es sicher? Und wie erlebt man die Stadt abseits der typischen Touristenpfade? Genau hier komme ich ins Spiel.
+                                    Rio de Janeiro gehört zu den aufregendsten Städten der Welt — aber gerade als deutschsprachiger Tourist stellt man sich viele Fragen: Welche Sehenswürdigkeiten lohnen sich wirklich? Wo ist es sicher? Und wie erlebt man die Stadt abseits der typischen Touristenpfade? Genau hier komme ich als dein <Link href="/ueber-will" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Tourguide</Link> ins Spiel.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Als gebürtiger Carioca, der in Deutschland gelebt hat und fließend Deutsch spricht, biete ich geführte Touren in Rio de Janeiro an, die Sicherheit, Insider-Wissen und authentische Erlebnisse verbinden. Ob die klassischen Highlights wie Corcovado und Zuckerhut, versteckte Strände im Tijuca-Regenwald, ein Fußball-Erlebnis im Maracanã oder Tagesausflüge nach Búzios und Ilha Grande — ich zeige dir meine Stadt so, wie du sie allein nie erleben würdest.
+                                        Als gebürtiger Carioca, der in Deutschland gelebt hat und fließend Deutsch spricht, biete ich geführte Touren in Rio de Janeiro an, die Sicherheit, Insider-Wissen und authentische Erlebnisse verbinden. Ob die klassischen Highlights wie Corcovado und Zuckerhut, versteckte Strände im Tijuca-Regenwald, ein Fußball-Erlebnis im Maracanã oder <Link href="/touren/tagesausfluege" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Tagesausflüge</Link> nach Búzios und Ilha Grande — ich zeige dir meine Stadt so, wie du sie allein nie erleben würdest.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Alle Touren sind flexibel, individuell anpassbar und komplett auf Deutsch. Schau dir die verschiedenen Optionen an und schreib mir einfach — zusammen planen wir deinen perfekten Tag in Rio.
+                                    Alle Touren sind flexibel, individuell anpassbar und komplett auf Deutsch. Du kannst auch eine <Link href="/touren/individuell" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">individuelle Tour</Link> zusammenstellen oder unseren <Link href="/touren/flughafen-transfer" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Flughafen-Transfer</Link> buchen. Schreib mir einfach — zusammen planen wir deinen perfekten Tag in Rio.
                                 </p>
                             </div>
                         </FadeIn>
@@ -371,7 +371,7 @@ export default function TourenPage() {
                                 <span className="text-rio-yellow">ich plane ihn für dich.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
-                                Schreib mir per WhatsApp oder E-Mail und wir stellen gemeinsam dein perfektes Programm zusammen.
+                                Schreib mir per WhatsApp oder E-Mail und wir stellen gemeinsam dein perfektes Programm zusammen. Auch für <Link href="/kontakt" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">persönliche Reiseleitung</Link> stehe ich gerne zur Verfügung.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a

@@ -22,7 +22,7 @@ const jsonLd = {
       "@id": "https://riofuerdeutsche.de/#business",
       name: "Rio für Deutsche",
       description:
-        "Deutschsprachige Privattouren durch Rio de Janeiro. Maßgeschneidert, sicher und unvergesslich.",
+        "Deutschsprachige Stadtführungen und Ausflüge in Rio de Janeiro. Maßgeschneidert, sicher und unvergesslich.",
       url: "https://riofuerdeutsche.de",
       telephone: "+573148704374",
       email: "lantelmew@gmail.com",
@@ -231,7 +231,7 @@ export default function Home() {
                   </h1>
 
                   <p className="text-lg lg:text-xl text-gray-200 max-w-xl font-light leading-relaxed">
-                    Deutschsprachige Privattouren durch Rio de Janeiro. Maßgeschneidert, sicher und unvergesslich – erlebe die Marvelous City aus der besten Perspektive.
+                    Dein deutschsprachiger Tourguide in Rio de Janeiro — für <Link href="/touren" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Citytouren</Link>, <Link href="/touren/klassiker" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Stadtrundfahrten</Link>, <Link href="/touren/tagesausfluege" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Ausflüge</Link> und persönliche <Link href="/kontakt" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Reiseleitung</Link>. Maßgeschneidert, sicher und unvergesslich.
                   </p>
 
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -272,16 +272,16 @@ export default function Home() {
               <FadeIn direction="up" delay={0.1}>
                 <div className="grid sm:grid-cols-2 gap-x-12 gap-y-6 mb-12">
                   {[
-                    { emoji: "🎯", text: "100 % auf Rio de Janeiro spezialisiert" },
-                    { emoji: "🇩🇪", text: "Deutschsprachige Begleitung durch einen echten Carioca" },
-                    { emoji: "🚗", text: "Eigene Fahrzeuge mit Fahrer für maximalen Komfort" },
-                    { emoji: "🛡️", text: "Sicherheit an erster Stelle – sichere Routen und beste Zeiten" },
-                    { emoji: "✨", text: "Individueller Service, von der Beratung bis zur Tour" },
-                    { emoji: "💬", text: "Schnelle Erreichbarkeit per WhatsApp und E-Mail" },
+                    { emoji: "🎯", content: <>100 % auf Rio de Janeiro spezialisiert</> },
+                    { emoji: "🇩🇪", content: <>Deutschsprachige Begleitung durch einen <Link href="/ueber-will" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">echten Carioca</Link></> },
+                    { emoji: "🚗", content: <>Eigene Fahrzeuge mit Fahrer für maximalen Komfort</> },
+                    { emoji: "🛡️", content: <><Link href="/kontakt" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Sicherheit</Link> an erster Stelle – sichere Routen und beste Zeiten</> },
+                    { emoji: "✨", content: <><Link href="/touren/individuell" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Individueller Service</Link>, von der Beratung bis zur Tour</> },
+                    { emoji: "💬", content: <>Schnelle Erreichbarkeit per WhatsApp und E-Mail</> },
                   ].map((item, i) => (
                     <div key={i} className="flex items-start gap-4">
                       <span className="text-2xl leading-none mt-0.5 shrink-0">{item.emoji}</span>
-                      <span className="text-gray-900 font-bold text-base leading-snug">{item.text}</span>
+                      <span className="text-gray-900 font-bold text-base leading-snug">{item.content}</span>
                     </div>
                   ))}
                 </div>
@@ -311,7 +311,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-5 lg:px-8">
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                 <FadeIn direction="left" className="max-w-2xl">
-                  <h2 id="touren-heading" className="text-rio-green font-semibold tracking-wide uppercase text-sm mb-3">Touren & Ausflüge in Rio de Janeiro</h2>
+                  <h2 id="touren-heading" className="text-rio-green font-semibold tracking-wide uppercase text-sm mb-3">Touren & <Link href="/touren/tagesausfluege" className="hover:underline">Ausflüge</Link> in Rio de Janeiro</h2>
                   <p className="text-3xl md:text-4xl font-heading font-bold text-gray-900 leading-tight">
                     Geführte Touren in Rio de Janeiro
                   </p>
@@ -409,7 +409,7 @@ export default function Home() {
                     Geboren und aufgewachsen in Rio, habe ich an der Köln International School of Design studiert und spreche fließend Deutsch. Ich kenne beide Welten: die deutsche Mentalität und das Leben als Carioca. Und genau das macht den Unterschied.
                   </p>
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    In den meisten Fällen begleite ich dich persönlich. Wenn ich bereits mit einer Gruppe unterwegs bin, übernehmen erfahrene Partner-Guides meines Vertrauens – mit der gleichen Leidenschaft für Rio und dem gleichen Anspruch an Sicherheit.
+                    In den meisten Fällen begleite ich dich persönlich. Wenn ich bereits mit einer Gruppe unterwegs bin, übernehmen erfahrene <Link href="/kontakt" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Partner-Guides</Link> meines Vertrauens – mit der gleichen Leidenschaft für Rio und dem gleichen Anspruch an Sicherheit.
                   </p>
 
                   <blockquote className="border-l-4 border-rio-yellow pl-4 py-2 my-6">
@@ -421,7 +421,7 @@ export default function Home() {
                   <div className="flex flex-wrap gap-3 pt-4">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100/80 text-gray-800 text-sm font-medium">
                       <MapPin className="w-4 h-4 text-rio-blue" />
-                      <span>Lokaler Guide</span>
+                      <Link href="/ueber-will" className="hover:text-rio-green transition-colors">Lokaler Guide</Link>
                     </div>
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100/80 text-gray-800 text-sm font-medium">
                       <HeartHandshake className="w-4 h-4 text-rio-blue" />
@@ -456,19 +456,19 @@ export default function Home() {
 
                 <FadeIn direction="up" delay={0.15}>
                   <p className="text-lg text-gray-700 leading-relaxed">
-                    Bei uns erlebst du Rio so, wie es nur ein Einheimischer zeigen kann – ob auf unserer Klassiker Tour zu den großen Sehenswürdigkeiten, einer Favela Tour mit echtem Einblick, einer Natur- und Strandtour zu den schönsten Küsten, einer Kultur- und Geschichtstour durch die Seele der Stadt, einer unvergesslichen Karneval Tour, beim Rio by Night oder bei einem Fußballerlebnis im Stadion. Du kannst aus unseren Touren wählen oder dir eine komplett individuelle Tour zusammenstellen – ganz nach deinen Wünschen.
+                    Bei uns erlebst du Rio so, wie es nur ein Einheimischer zeigen kann – ob auf unserer <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Klassiker Tour</Link> zu den großen Sehenswürdigkeiten, einer <Link href="/touren/favela-tour" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela Tour</Link> mit echtem Einblick, einer Natur- und Strandtour zu den schönsten Küsten, einer Kultur- und Geschichtstour durch die Seele der Stadt, einer unvergesslichen Karneval Tour, beim Rio by Night oder bei einem Fußballerlebnis im Stadion. Du kannst aus unseren Touren wählen oder dir eine komplett individuelle Tour zusammenstellen – ganz nach deinen Wünschen.
                   </p>
                 </FadeIn>
 
                 <FadeIn direction="up" delay={0.2}>
                   <p className="text-lg text-gray-700 leading-relaxed">
-                    Alle Touren finden in unseren eigenen Fahrzeugen mit Fahrer statt – bequem, sicher und ohne Stress. Wir bieten außerdem einen Flughafen-Transfer direkt zu deiner Unterkunft an, damit deine Reise entspannt beginnt.
+                    Alle Touren finden in unseren eigenen Fahrzeugen mit Fahrer statt – bequem, sicher und ohne Stress. Wir bieten außerdem einen <Link href="/touren/flughafen-transfer" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Flughafen-Transfer</Link> direkt zu deiner Unterkunft an, damit deine Reise entspannt beginnt.
                   </p>
                 </FadeIn>
 
                 <FadeIn direction="up" delay={0.25}>
                   <p className="text-lg text-gray-700 leading-relaxed">
-                    Sicherheit ist uns besonders wichtig. Wir wissen, dass viele deutsche Reisende sich Sorgen machen, wenn es um Rio geht. Deshalb begleiten wir dich nicht nur vor Ort, sondern beraten dich auch vorab – zum Beispiel mit unserer persönlichen Unterkunftsberatung per Videocall, damit du von Anfang an im richtigen und sicheren Viertel landest.
+                    Sicherheit ist uns besonders wichtig. Wir wissen, dass viele deutsche Reisende sich Sorgen machen, wenn es um Rio geht. Deshalb begleiten wir dich nicht nur vor Ort, sondern beraten dich auch vorab – zum Beispiel mit unserer persönlichen <Link href="/unterkunft/beratung" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Unterkunftsberatung</Link> per Videocall, damit du von Anfang an im richtigen und sicheren Viertel landest.
                   </p>
                 </FadeIn>
 
@@ -518,7 +518,7 @@ export default function Home() {
               <FadeIn direction="up">
                 <h2 id="kontakt-heading" className="text-3xl md:text-5xl font-heading font-bold text-white mb-6">Lust auf Rio bekommen?</h2>
                 <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
-                  Lass uns unverbindlich über deine Pläne sprechen. Wir erstellen dir gerne ein auf dich zugeschnittenes Angebot für deinen Traumurlaub in Brasilien.
+                  Lass uns unverbindlich über deine Pläne sprechen. Starte mit einer <Link href="/unterkunft/beratung" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">kostenlosen Beratung</Link> und wir erstellen dir ein auf dich zugeschnittenes Angebot für deinen Traumurlaub in Brasilien.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                   <a
