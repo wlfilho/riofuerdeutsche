@@ -17,7 +17,7 @@ export default function InlineUpgradeCTA({ userPlan }: InlineUpgradeCTAProps) {
       </p>
 
       <Link
-        href="/guide/upgrade"
+        href="/dashboard/upgrade"
         className="inline-block bg-[#f5c518] text-[#0d1f15] font-[800] text-[12px] py-[10px] px-[20px] rounded-[8px] hover:bg-[#e6b800] transition-colors"
       >
         Kompletten Guide freischalten →

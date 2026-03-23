@@ -15,7 +15,7 @@ export default function GuideIntro({ userPlan }: GuideIntroProps) {
             {' '}Alle weiteren Kapitel sind im vollständigen Rio-Guide enthalten —
             schalte ihn einmalig frei und erhalte alle 4 Editionen für immer.{' '}
             <a
-              href="/guide/upgrade"
+              href="/dashboard/upgrade"
               className="text-[#22a262] font-semibold underline underline-offset-2 hover:text-[#1a8050] transition-colors whitespace-nowrap"
             >
               Jetzt freischalten →

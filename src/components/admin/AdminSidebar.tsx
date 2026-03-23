@@ -7,18 +7,18 @@ import { usePathname } from 'next/navigation';
 const navItems = [
   {
     label: 'Übersicht',
-    href: '/dashboard',
+    href: '/admin',
     icon: '📊',
-    exact: true, // Só ativo quando é exatamente /dashboard
+    exact: true, // Só ativo quando é exatamente /admin
   },
   {
     label: 'Benutzer',
-    href: '/dashboard/users',
+    href: '/admin/users',
     icon: '👥',
   },
   {
     label: 'Guide-Inhalte',
-    href: '/dashboard/guide',
+    href: '/admin/guide',
     icon: '📖',
   },
 ];
@@ -35,7 +35,7 @@ export default function AdminSidebar() {
     <aside className="w-56 bg-white border-r border-gray-200 min-h-screen flex flex-col">
       {/* Logo / Título */}
       <div className="p-4 border-b border-gray-100">
-        <Link href="/dashboard" className="block">
+        <Link href="/admin" className="block">
           <p className="text-sm font-bold text-gray-900">⚙️ Admin</p>
           <p className="text-xs text-gray-400">Rio für Deutsche</p>
         </Link>
@@ -69,7 +69,7 @@ export default function AdminSidebar() {
           <span>Zur Website</span>
         </Link>
         <Link
-          href="/guide"
+          href="/dashboard"
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
         >
           <span>📗</span>

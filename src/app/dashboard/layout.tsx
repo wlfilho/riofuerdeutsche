@@ -1,28 +1,34 @@
-// src/app/dashboard/layout.tsx
 import { getMembershipAccess } from '@/lib/membership';
 import { redirect } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
+import MembersHeader from '@/components/members/MembersHeader';
+import { createClient } from '@/utils/supabase/server';
 
-export default async function DashboardLayout({
+export default async function GuideLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const access = await getMembershipAccess();
 
-  if (!access.isAdmin) {
-    redirect('/');
+  if (!access.isAuthenticated) {
+    redirect('/login?redirect=/dashboard');
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar fixa */}
-      <AdminSidebar />
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-      {/* Conteúdo principal */}
-      <main className="flex-1 min-w-0">
+  const userName = access.firstName || (user?.email ? user.email.split('@')[0] : 'User');
+  const userEmail = user?.email || '';
+  const userRole = (access.role || 'user') as 'user' | 'premium' | 'admin';
+
+  return (
+    <div className="min-h-screen bg-[#f8f5f0] flex flex-col">
+      <MembersHeader userName={userName} userEmail={userEmail} userRole={userRole} />
+
+      {/* children ocupam largura total — a hero vai de borda a borda */}
+      <div className="flex-1 flex flex-col w-full">
         {children}
-      </main>
+      </div>
     </div>
   );
 }

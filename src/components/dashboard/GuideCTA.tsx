@@ -11,12 +11,12 @@ interface CTAConfig {
 }
 
 const CTA_MAP: Record<string, CTAConfig> = {
-  'sicherheit-rio': {
+  sicherheit: {
     icon: '🛡️',
     title: 'Kostenloser Sicherheits-Guide als PDF',
     subtitle: 'Lade dir unsere kompakte Zusammenfassung der wichtigsten Sicherheitstipps für Rio herunter — kostenlos und sofort verfügbar.',
     buttonLabel: 'PDF kostenlos herunterladen',
-    buttonHref: '/guide?upgrade=true',
+    buttonHref: '/dashboard?upgrade=true',
   },
   unterkunft: {
     icon: '🏨',

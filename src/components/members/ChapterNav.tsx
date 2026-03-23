@@ -27,7 +27,7 @@ export default function ChapterNav({
         </Link>
       ) : (
         <Link
-          href="/guide"
+          href="/dashboard"
           className="border-[0.5px] border-[#e0ddd6] rounded-[8px] px-[16px] py-[10px] text-[12px] text-[#555] hover:border-[#22a262] hover:text-[#22a262] transition-colors"
         >
           ← Zurück zur Übersicht

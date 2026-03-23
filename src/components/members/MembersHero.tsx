@@ -46,14 +46,14 @@ export default function MembersHero({ userName, userPlan }: MembersHeroProps) {
           <div className="pt-2">
             {userPlan === 'free' ? (
               <a
-                href="/guide?upgrade=true"
+                href="/dashboard?upgrade=true"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 transition-colors"
               >
                 📖 Guide freischalten
               </a>
             ) : (
               <a
-                href="/guide/sicherheit-rio"
+                href="/dashboard"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/15 text-white rounded-full font-bold text-lg border border-white/25 hover:bg-white/25 transition-colors"
               >
                 Zum Guide →

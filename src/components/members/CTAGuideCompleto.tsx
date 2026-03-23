@@ -70,7 +70,7 @@ export default function CTAGuideCompleto() {
         {/* Botões */}
         <div className="flex justify-center flex-wrap" style={{ gap: "16px" }}>
           <Link
-            href="/guide/upgrade"
+            href="/dashboard/upgrade"
             style={{
               background: "#f5c518",
               color: "#1a1a1a",

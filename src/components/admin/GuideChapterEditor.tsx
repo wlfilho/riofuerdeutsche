@@ -4,7 +4,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import RichEditor from '@/components/admin/RichEditor';
-import GuideContent from '@/components/guide/GuideContent';
+import GuideContent from '@/components/dashboard/GuideContent';
 interface ChapterData {
   id?: string;
   slug: string;
@@ -112,7 +112,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
 
         if (!isEditing && data.chapter?.id) {
           // Redirecionar para edição do capítulo criado
-          router.push(`/dashboard/guide/${data.chapter.id}/edit`);
+          router.push(`/admin/guide/${data.chapter.id}/edit`);
         }
       } else {
         setMessage({
@@ -142,7 +142,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => router.push('/dashboard/guide')}
+              onClick={() => router.push('/admin/guide')}
               className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
             >
               ← Zurück
@@ -276,7 +276,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
                 Slug (URL)
               </label>
               <div className="flex items-center gap-1">
-                <span className="text-xs text-gray-400">/guide/</span>
+                <span className="text-xs text-gray-400">/dashboard/</span>
                 <input
                   type="text"
                   value={chapter.slug}

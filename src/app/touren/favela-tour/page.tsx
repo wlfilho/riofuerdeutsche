@@ -36,6 +36,15 @@ const favelaExperiences = [
         image: "/images/the-maze.webp",
         desc: "The Maze ist einer der außergewöhnlichsten Orte in ganz Rio de Janeiro. Auf dem Morro Tavares Bastos im Stadtteil Catete hat der ehemalige BBC-Korrespondent Bob Nadkarni über vier Jahrzehnte ein labyrintisches Kulturzentrum geschaffen — mit Kunstgalerie, Bar und Hostel in einem. Die Wände sind mit handgefertigten Mosaiken internationaler Künstler geschmückt, und die Dachterrasse bietet einen der spektakulärsten Ausblicke der Stadt über die Guanabara-Bucht und den Zuckerhut.",
         tip: "The Maze ist am besten mit einem lokalen Guide zu erleben. Man erreicht den Morro Tavares Bastos mit kleinen VW-Vans ab der Rua Bento Lisboa im Catete — ich begleite dich den ganzen Weg und erzähle dir die faszinierende Geschichte dieses Ortes und seiner Gemeinschaft."
+    },
+    {
+        name: "Favela Santa Marta",
+        time: "~2 Stunden",
+        effort: "Leicht",
+        image: "https://images.unsplash.com/photo-1593102089898-4f5e6a5a5e5a?w=600&h=400&fit=crop&q=80",
+        desc: "Santa Marta ist eine der geschichtsträchtigsten Favelas Rios — und weltberühmt als Drehort von Michael Jacksons Musikvideo \"They Don't Care About Us\". Mit rund 8.000 Einwohnern liegt sie auf einem steilen Hügel in Botafogo und bietet von oben einen atemberaubenden Blick auf den Cristo Redentor, die Lagoa und die Bucht von Botafogo. Als erste pacificada Favela Rios gilt sie als Vorbild für die gesamte Stadt.",
+        tip: "Die lebensgroße Michael-Jackson-Statue auf dem Platz, wo das berühmte Video gedreht wurde, ist ein beliebter Fotospot. Wer kann, sollte den Planalto-Funicular nehmen — eine kleine Seilbahn, die kostenlos die steilen Stufen der Favela ersetzt.",
+        badge: "Botafogo"
     }
 ];
 
@@ -130,14 +139,14 @@ export default function FavelaTourPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12 text-center lg:text-left">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Favela Tour in Rio de Janeiro — <span className="text-rio-green">2 besondere Erlebnisse</span>
+                                Favela Tour in Rio de Janeiro — <span className="text-rio-green">3 besondere Erlebnisse</span>
                             </h2>
                             <p className="mt-4 text-gray-600 text-lg">
-                                Jede Favela hat ihre eigene Geschichte. Hier sind die zwei Erlebnisse, die ich dir zeigen möchte.
+                                Jede Favela hat ihre eigene Geschichte. Hier sind die drei Erlebnisse, die ich dir zeigen möchte.
                             </p>
                         </FadeIn>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {favelaExperiences.map((exp, index) => (
                                 <FadeIn key={index} delay={index * 0.1} direction="up" className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 group flex flex-col h-full">
                                     <div className="h-64 lg:h-80 w-full relative overflow-hidden bg-gray-100">
@@ -154,11 +163,14 @@ export default function FavelaTourPage() {
                                     <div className="p-8 flex flex-col flex-grow">
                                         <h3 className="text-2xl font-bold font-heading text-gray-900 mb-4">{exp.name}</h3>
                                         <p className="text-gray-600 text-sm mb-6 leading-relaxed flex-grow">{exp.desc}</p>
-                                        <p className="text-gray-500 text-xs italic mb-8 bg-gray-50 p-4 rounded-xl border-l-4 border-rio-yellow">
-                                            💡 <span className="font-bold text-gray-700">Insider-Tipp:</span> {exp.tip}
-                                        </p>
+                                        <p className="text-gray-400 text-xs italic mb-6 flex-grow">💡 {exp.tip}</p>
 
-                                        <div className="flex items-center gap-3 pt-6 border-t border-gray-100 mt-auto">
+                                        <div className="flex items-center gap-3 pt-6 border-t border-gray-100 mt-auto flex-wrap">
+                                            {(exp as any).badge && (
+                                                <div className="flex items-center gap-2 text-[10px] font-bold px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 uppercase tracking-wider">
+                                                    {(exp as any).badge}
+                                                </div>
+                                            )}
                                             <div className="flex items-center gap-2 text-[10px] font-bold px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 uppercase tracking-wider">
                                                 <Clock className="w-3.5 h-3.5 text-gray-400" />
                                                 {exp.time}

@@ -116,7 +116,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
         setMessage({ type: 'success', text: isEditing ? 'Seite gespeichert!' : 'Seite erstellt!' });
         if (!isEditing && data.page?.id) {
           // Redirect to edit after creation
-          router.push(`/dashboard/guide/${chapterId}/pages/${data.page.id}/edit`);
+          router.push(`/admin/guide/${chapterId}/pages/${data.page.id}/edit`);
         }
       } else {
         setMessage({ type: 'error', text: data.error || 'Fehler beim Speichern.' });
@@ -144,7 +144,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
-              onClick={() => router.push(`/dashboard/guide/${chapterId}/pages`)}
+              onClick={() => router.push(`/admin/guide/${chapterId}/pages`)}
               className="text-sm text-gray-400 hover:text-gray-700 shrink-0 cursor-pointer"
             >
               ← Zurück
@@ -195,11 +195,11 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
       <div className="max-w-6xl mx-auto p-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6 flex-wrap">
-          <Link href="/dashboard" className="hover:text-gray-600">Dashboard</Link>
+          <Link href="/admin" className="hover:text-gray-600">Dashboard</Link>
           <span>›</span>
-          <Link href="/dashboard/guide" className="hover:text-gray-600">Guide</Link>
+          <Link href="/admin/guide" className="hover:text-gray-600">Guide</Link>
           <span>›</span>
-          <Link href={`/dashboard/guide/${chapterId}/pages`} className="hover:text-gray-600">{chapterTitle}</Link>
+          <Link href={`/admin/guide/${chapterId}/pages`} className="hover:text-gray-600">{chapterTitle}</Link>
           <span>›</span>
           <span className="text-gray-600">{isEditing ? 'Bearbeiten' : 'Neue Seite'}</span>
         </div>
@@ -244,7 +244,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
                 Slug (URL) <span className="text-red-400">*</span>
               </label>
               <div className="flex items-center gap-1">
-                <span className="text-xs text-gray-400 shrink-0">/guide/…/</span>
+                <span className="text-xs text-gray-400 shrink-0">/dashboard/…/</span>
                 <input
                   type="text"
                   value={page.slug}
@@ -340,7 +340,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
             {/* Abbrechen */}
             <button
               type="button"
-              onClick={() => router.push(`/dashboard/guide/${chapterId}/pages`)}
+              onClick={() => router.push(`/admin/guide/${chapterId}/pages`)}
               className="py-2 text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
             >
               Abbrechen

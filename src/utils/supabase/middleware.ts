@@ -45,16 +45,23 @@ export async function updateSession(request: NextRequest) {
             .eq("id", user.id)
             .single();
 
-        let redirectTo = "/guide/sicherheit";
-        if (profile?.role === "admin") redirectTo = "/dashboard";
-        else if (profile?.role === "premium") redirectTo = "/guide";
+        let redirectTo = "/dashboard";
+        if (profile?.role === "admin") redirectTo = "/admin";
 
         return NextResponse.redirect(new URL(redirectTo, request.url));
     }
 
-    // --- REGRAS DA ÁREA DE MEMBROS ---
+    // --- ROTA /dashboard: hub da área de membros (qualquer membro autenticado) ---
+    if (pathname.startsWith("/dashboard")) {
+        if (!user) {
+            const url = request.nextUrl.clone();
+            url.pathname = "/login";
+            url.searchParams.set("redirect", pathname);
+            return NextResponse.redirect(url);
+        }
+    }
 
-    // Rotas /guide/* requerem autenticação
+    // --- ROTAS /guide/*: conteúdo do guide ---
     if (pathname.startsWith("/guide")) {
         if (!user) {
             const url = request.nextUrl.clone();
@@ -65,7 +72,7 @@ export async function updateSession(request: NextRequest) {
 
         // /guide/sicherheit é acessível para qualquer usuário autenticado
         // Os demais capítulos exigem premium ou admin
-        if (pathname !== "/guide" && !pathname.startsWith("/guide/sicherheit")) {
+        if (!pathname.startsWith("/guide/sicherheit")) {
             const { data: profile } = await supabase
                 .from("profiles")
                 .select("role, premium_until")
@@ -81,15 +88,15 @@ export async function updateSession(request: NextRequest) {
 
             if (!isPremium) {
                 const url = request.nextUrl.clone();
-                url.pathname = "/guide";
+                url.pathname = "/dashboard";
                 url.searchParams.set("upgrade", "true");
                 return NextResponse.redirect(url);
             }
         }
     }
 
-    // Rota /dashboard requer admin
-    if (pathname.startsWith("/dashboard")) {
+    // --- ROTA /admin: apenas admins ---
+    if (pathname.startsWith("/admin")) {
         if (!user) {
             return NextResponse.redirect(new URL("/login", request.url));
         }
@@ -106,7 +113,6 @@ export async function updateSession(request: NextRequest) {
     }
 
     // --- REGRA GERAL: rotas não públicas requerem autenticação ---
-
     if (
         !user &&
         !pathname.startsWith("/login") &&
@@ -118,7 +124,6 @@ export async function updateSession(request: NextRequest) {
         !pathname.startsWith("/datenschutz") &&
         pathname !== "/"
     ) {
-        // no user, potentially respond by redirecting the user to the login page
         const url = request.nextUrl.clone();
         url.pathname = "/login";
         return NextResponse.redirect(url);

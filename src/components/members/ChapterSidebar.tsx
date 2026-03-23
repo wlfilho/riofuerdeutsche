@@ -122,7 +122,7 @@ export default function ChapterSidebar({
             Ed. 1 bis 4 inklusive...
           </p>
           <Link
-            href="/guide/upgrade"
+            href="/dashboard/upgrade"
             className="bg-[#f5c518] text-[#0d1f15] text-[9px] font-[800] py-[6px] px-[10px] rounded-[6px] text-center w-full hover:bg-[#e6b800] transition-colors"
           >
             Jetzt für 9€ →

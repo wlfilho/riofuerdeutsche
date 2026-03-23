@@ -126,7 +126,7 @@ export default function TourenPage() {
                                     title: "Favela Tour in Rio de Janeiro",
                                     image: "/images/rio-favela.webp",
                                     desc: "Ein respektvoller Einblick in die Kultur und den Alltag der Favelas — authentisch und sicher mit lokalem Guide. Besuche Rocinha und The Maze.",
-                                    badges: ['2–3 Stunden', '2 Highlights']
+                                    badges: ['2–3 Stunden', '3 Highlights']
                                 },
                                 {
                                     slug: "kultur-und-geschichte",
@@ -334,6 +334,7 @@ export default function TourenPage() {
                                         { name: "Real Gabinete Português de Leitura", slug: "kultur-und-geschichte" },
                                         { name: "Rocinha", slug: "favela-tour" },
                                         { name: "Sambódromo", slug: "karneval-tour" },
+                                        { name: "Santa Marta", slug: "favela-tour" },
                                         { name: "Santa Teresa", slug: "by-night" },
                                         { name: "São Januário (Vasco)", slug: "fussball" },
                                         { name: "Teatro Municipal", slug: "kultur-und-geschichte" },

@@ -11,7 +11,7 @@ export default async function GuideLayout({
   const access = await getMembershipAccess();
 
   if (!access.isAuthenticated) {
-    redirect('/login?redirect=/guide');
+    redirect('/login?redirect=/dashboard');
   }
 
   const supabase = await createClient();
@@ -25,7 +25,7 @@ export default async function GuideLayout({
     <div className="min-h-screen bg-[#f8f5f0] flex flex-col">
       <MembersHeader userName={userName} userEmail={userEmail} userRole={userRole} />
 
-      {/* children ocupam largura total — a hero vai de borda a borda */}
+      {/* children ocupam largura total */}
       <div className="flex-1 flex flex-col w-full">
         {children}
       </div>

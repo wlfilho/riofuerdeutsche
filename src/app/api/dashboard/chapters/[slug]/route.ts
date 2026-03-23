@@ -1,4 +1,4 @@
-// src/app/api/guide/chapters/[slug]/route.ts
+// src/app/api/dashboard/chapters/[slug]/route.ts
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 

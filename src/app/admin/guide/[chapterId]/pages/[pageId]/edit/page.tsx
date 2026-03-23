@@ -22,7 +22,7 @@ export default async function EditGuidePage({ params }: PageProps) {
     .eq('id', chapterId)
     .single();
 
-  if (!chapter) redirect('/dashboard/guide');
+  if (!chapter) redirect('/admin/guide');
 
   return (
     <GuidePageEditor

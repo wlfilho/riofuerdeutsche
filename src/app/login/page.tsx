@@ -59,13 +59,13 @@ export default function LoginPage() {
 
                     switch (profile?.role) {
                         case 'admin':
-                            router.push('/dashboard');
+                            router.push('/admin');
                             break;
                         case 'premium':
-                            router.push('/guide');
+                            router.push('/dashboard');
                             break;
                         default:
-                            router.push('/guide/sicherheit-rio');
+                            router.push('/dashboard');
                             break;
                     }
                 }

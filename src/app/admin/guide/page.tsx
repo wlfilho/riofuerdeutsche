@@ -1,4 +1,4 @@
-// src/app/dashboard/guide/page.tsx
+// src/app/admin/guide/page.tsx
 import { getMembershipAccess } from '@/lib/membership';
 import { redirect } from 'next/navigation';
 import GuideChaptersList from '@/components/admin/GuideChaptersList';

@@ -113,9 +113,9 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
       <div className="max-w-5xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6 flex-wrap">
-          <Link href="/dashboard" className="hover:text-gray-600">Dashboard</Link>
+          <Link href="/admin" className="hover:text-gray-600">Dashboard</Link>
           <span>›</span>
-          <Link href="/dashboard/guide" className="hover:text-gray-600">Guide</Link>
+          <Link href="/admin/guide" className="hover:text-gray-600">Guide</Link>
           <span>›</span>
           <span className="text-gray-700 font-medium">{chapterIcon} {chapterTitle}</span>
           <span>›</span>
@@ -133,7 +133,7 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
             </p>
           </div>
           <Link
-            href={`/dashboard/guide/${chapterId}/pages/new`}
+            href={`/admin/guide/${chapterId}/pages/new`}
             className="px-4 py-2 bg-green-600 text-white font-semibold rounded-full text-sm hover:bg-green-700 transition-colors whitespace-nowrap"
           >
             + Neue Seite
@@ -159,7 +159,7 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
             <div className="p-10 text-center">
               <p className="text-gray-400 mb-4">Noch keine Seiten in diesem Kapitel.</p>
               <Link
-                href={`/dashboard/guide/${chapterId}/pages/new`}
+                href={`/admin/guide/${chapterId}/pages/new`}
                 className="inline-block px-4 py-2 bg-green-600 text-white font-semibold rounded-full text-sm hover:bg-green-700 transition-colors"
               >
                 Erste Seite erstellen
@@ -235,7 +235,7 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
                   {/* Actions */}
                   <div className="flex items-center gap-1.5 justify-end">
                     <Link
-                      href={`/dashboard/guide/${chapterId}/pages/${page.id}/edit`}
+                      href={`/admin/guide/${chapterId}/pages/${page.id}/edit`}
                       className="px-2.5 py-1 text-[11px] font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       ✏️
@@ -255,7 +255,7 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
 
         {/* Back link */}
         <div className="mt-6">
-          <Link href="/dashboard/guide" className="text-sm text-gray-400 hover:text-gray-600">
+          <Link href="/admin/guide" className="text-sm text-gray-400 hover:text-gray-600">
             ← Zurück zu den Kapiteln
           </Link>
         </div>

@@ -173,7 +173,7 @@ export default function GuideChaptersList() {
           <div>
             <div className="flex items-center gap-3 mb-1">
               <Link
-                href="/dashboard"
+                href="/admin"
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
                 ← Übersicht
@@ -188,7 +188,7 @@ export default function GuideChaptersList() {
             </p>
           </div>
           <Link
-            href="/dashboard/guide/new"
+            href="/admin/guide/new"
             className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
           >
             + Neues Kapitel
@@ -295,14 +295,14 @@ export default function GuideChaptersList() {
                     {/* Actions */}
                     <div className="flex items-center gap-2">
                        <Link
-                        href={`/dashboard/guide/${chapter.id}/pages/new`}
+                        href={`/admin/guide/${chapter.id}/pages/new`}
                         className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                         title="Neue Seite hinzufügen"
                       >
                         <Plus className="w-4 h-4" />
                       </Link>
                       <Link
-                        href={`/dashboard/guide/${chapter.id}/edit`}
+                        href={`/admin/guide/${chapter.id}/edit`}
                         className="p-1 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
                         title="Bearbeiten"
                       >
@@ -324,7 +324,7 @@ export default function GuideChaptersList() {
                       {chapter.pages.length === 0 ? (
                         <div className="py-4 px-12 text-sm text-gray-400">
                           Keine Seiten in diesem Kapitel. 
-                          <Link href={`/dashboard/guide/${chapter.id}/pages/new`} className="text-blue-500 hover:underline ml-1">
+                          <Link href={`/admin/guide/${chapter.id}/pages/new`} className="text-blue-500 hover:underline ml-1">
                             Erste Seite erstellen
                           </Link>
                         </div>
@@ -349,7 +349,7 @@ export default function GuideChaptersList() {
 
                             <div className="flex items-center gap-1 opacity-10 md:opacity-0 group-hover:opacity-100 transition-opacity">
                               <Link
-                                href={`/dashboard/guide/${chapter.id}/pages/${page.id}/edit`}
+                                href={`/admin/guide/${chapter.id}/pages/${page.id}/edit`}
                                 className="p-1 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
                                 title="Seite bearbeiten"
                               >
@@ -371,7 +371,7 @@ export default function GuideChaptersList() {
                       {/* Manage pages link */}
                       <div className="py-2 px-10">
                         <Link
-                          href={`/dashboard/guide/${chapter.id}/pages`}
+                          href={`/admin/guide/${chapter.id}/pages`}
                           className="text-xs text-blue-500 hover:text-blue-700 font-medium"
                         >
                           Alle Seiten dieses Kapitels verwalten →

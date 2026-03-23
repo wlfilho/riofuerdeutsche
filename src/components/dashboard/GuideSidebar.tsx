@@ -28,7 +28,7 @@ export default function GuideSidebar({ access }: GuideSidebarProps) {
   useEffect(() => {
     const fetchChapters = async () => {
       try {
-        const res = await fetch('/api/guide/chapters');
+        const res = await fetch('/api/dashboard/chapters');
         const data = await res.json();
         if (data.chapters) {
           setChapters(data.chapters);
@@ -47,7 +47,7 @@ export default function GuideSidebar({ access }: GuideSidebarProps) {
     <aside className="w-72 bg-white border-r border-gray-200 min-h-screen p-4 hidden md:block overflow-y-auto">
       {/* Header da sidebar */}
       <div className="mb-6">
-        <Link href="/guide" className="block">
+        <Link href="/dashboard" className="block">
           <h2 className="text-lg font-bold text-gray-900">
             📖 Rio für Deutsche
           </h2>
@@ -88,7 +88,7 @@ export default function GuideSidebar({ access }: GuideSidebarProps) {
               <div key={chapter.id}>
                 {isLocked ? (
                   <Link
-                    href="/guide?upgrade=true"
+                    href="/dashboard?upgrade=true"
                     className="flex items-start gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 group"
                   >
                     <span className="text-lg opacity-50">{chapter.icon}</span>
@@ -148,7 +148,7 @@ export default function GuideSidebar({ access }: GuideSidebarProps) {
             Insider-Tipps.
           </p>
           <Link
-            href="/guide?upgrade=true"
+            href="/dashboard?upgrade=true"
             className="block w-full text-center px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
           >
             Guide kaufen — ab 9€

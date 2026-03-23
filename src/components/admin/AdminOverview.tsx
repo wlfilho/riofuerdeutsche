@@ -120,7 +120,7 @@ export default function AdminOverview() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
-            href="/dashboard/users"
+            href="/admin/users"
             className="flex items-start gap-4 p-5 bg-white rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group"
           >
             <span className="text-3xl">👥</span>
@@ -135,7 +135,7 @@ export default function AdminOverview() {
           </Link>
 
           <Link
-            href="/dashboard/guide"
+            href="/admin/guide"
             className="flex items-start gap-4 p-5 bg-white rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group"
           >
             <span className="text-3xl">📖</span>
@@ -150,7 +150,7 @@ export default function AdminOverview() {
           </Link>
 
           <Link
-            href="/dashboard/guide/new"
+            href="/admin/guide/new"
             className="flex items-start gap-4 p-5 bg-white rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group"
           >
             <span className="text-3xl">✏️</span>
@@ -165,7 +165,7 @@ export default function AdminOverview() {
           </Link>
 
           <Link
-            href="/guide"
+            href="/dashboard"
             className="flex items-start gap-4 p-5 bg-white rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group"
           >
             <span className="text-3xl">👁️</span>

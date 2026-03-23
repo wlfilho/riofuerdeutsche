@@ -1,4 +1,4 @@
-// src/app/dashboard/users/page.tsx
+// src/app/admin/users/page.tsx
 import AdminUsersCRUD from '@/components/admin/AdminUsersCRUD';
 
 export const metadata = {

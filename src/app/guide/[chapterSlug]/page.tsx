@@ -18,16 +18,10 @@ export default async function GuideChapterIndexPage({ params }: PageProps) {
     .single()
 
   if (!chapter) {
-    // Se o capítulo for 'sicherheit', mas o novo slug for 'sicherheit-rio', 
-    // podemos fazer um redirect especial aqui se quisermos, 
-    // ou apenas voltar para o /guide
-    if (chapterSlug === 'sicherheit') {
-      redirect('/guide/sicherheit-rio')
-    }
     if (chapterSlug === 'upgrade') {
-      redirect('/guide?upgrade=true&r=1')
+      redirect('/dashboard?upgrade=true&r=1')
     }
-    redirect('/guide')
+    redirect('/dashboard')
   }
 
   // 2. Encontrar a primeira página publicada desse capítulo
@@ -45,5 +39,5 @@ export default async function GuideChapterIndexPage({ params }: PageProps) {
   }
 
   // Se não houver páginas, volta para a home do guide
-  redirect('/guide')
+  redirect('/dashboard')
 }

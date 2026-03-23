@@ -91,8 +91,11 @@ export default function EditionsPreview() {
                   ✓ Verfügbar
                 </span>
                 <div>
+                  <p className="font-mono text-[10px] uppercase tracking-widest mb-0.5 text-gray-400">
+                    Edition {edition.id}
+                  </p>
                   <h3 className="font-heading font-black text-xl text-gray-900 leading-tight">
-                    Edition {edition.id} — {edition.title}
+                    {edition.title}
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">{edition.subtitle}</p>
                 </div>
@@ -117,8 +120,11 @@ export default function EditionsPreview() {
                   Demnächst
                 </span>
                 <div>
+                  <p className="font-mono text-[10px] uppercase tracking-widest mb-0.5 text-gray-400">
+                    Edition {edition.id}
+                  </p>
                   <h3 className="font-heading font-black text-xl text-gray-900 leading-tight">
-                    Edition {edition.id} — {edition.title}
+                    {edition.title}
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">{edition.subtitle}</p>
                 </div>

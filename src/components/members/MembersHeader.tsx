@@ -80,9 +80,9 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
             ↗ riofuerdeutsche.de
           </a>
           <Link
-            href="/guide"
+            href="/dashboard"
             className={`p-2 text-sm transition-colors duration-200 ${
-              pathname === "/guide" || pathname?.startsWith("/guide/")
+              pathname === "/dashboard" || pathname?.startsWith("/dashboard/")
                 ? "font-bold text-rio-green"
                 : "font-medium text-gray-700 hover:text-rio-green"
             }`}
@@ -130,7 +130,7 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
               {/* Menu items */}
               <div className="px-2 space-y-1">
                 <Link
-                  href={userRole === "premium" || userRole === "admin" ? "/guide" : "/guide/sicherheit-rio"}
+                  href="/dashboard"
                   onClick={handleLinkClick}
                   className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green rounded-xl transition-colors"
                 >
@@ -140,7 +140,7 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
 
                 {userRole === "admin" && (
                   <Link
-                    href="/dashboard"
+                    href="/admin"
                     onClick={handleLinkClick}
                     className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green rounded-xl transition-colors"
                   >
@@ -151,7 +151,7 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
 
                 {userRole === "user" && (
                   <Link
-                    href="/guide?upgrade=true"
+                    href="/dashboard?upgrade=true"
                     onClick={handleLinkClick}
                     className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-rio-blue hover:bg-rio-blue/5 rounded-xl transition-colors"
                   >

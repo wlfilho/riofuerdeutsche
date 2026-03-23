@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
             {
                 userAgent: "*",
                 allow: "/",
-                disallow: ["/dashboard", "/login", "/signup", "/forgot-password", "/auth"],
+                disallow: ["/admin", "/login", "/signup", "/forgot-password", "/auth"],
             },
         ],
         sitemap: "https://riofuerdeutsche.de/sitemap.xml",

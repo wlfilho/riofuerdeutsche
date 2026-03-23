@@ -2,16 +2,16 @@ import { redirect } from 'next/navigation'
 import { Lock, ChevronDown, List } from 'lucide-react'
 import Link from 'next/link'
 
-import type { ToCItem, SiblingPage } from '@/components/guide/GuideToC'
+import type { ToCItem, SiblingPage } from '@/components/dashboard/GuideToC'
 import { createClient } from '@/utils/supabase/server'
 import { getMembershipAccess } from '@/lib/membership'
 import { contentToHtml } from '@/lib/guideContent'
-import GuidePageContent, { extractToCItems, injectHeadingIds } from '@/components/guide/GuidePageContent'
+import GuidePageContent, { extractToCItems, injectHeadingIds } from '@/components/dashboard/GuidePageContent'
 
-import GuideToCWrapper from '@/components/guide/GuideToCWrapper'
-import GuideNav from '@/components/guide/GuideNav'
-import GuideCTA from '@/components/guide/GuideCTA'
-import { ReadToggle } from '@/components/guide/ReadToggle'
+import GuideToCWrapper from '@/components/dashboard/GuideToCWrapper'
+import GuideNav from '@/components/dashboard/GuideNav'
+import GuideCTA from '@/components/dashboard/GuideCTA'
+import { ReadToggle } from '@/components/dashboard/ReadToggle'
 import { getChapterProgress } from '@/app/actions/guideProgress'
 
 export const dynamic = 'force-dynamic'
@@ -39,7 +39,7 @@ export default async function GuideChapterPagePage({ params }: PageProps) {
     .eq('status', 'published')
     .single()
 
-  if (!chapter) redirect('/guide')
+  if (!chapter) redirect('/dashboard')
 
   // ── Fetch all pages of this chapter (for ToC + navigation) ─────────────────
   const { data: chapterPages } = await supabase
@@ -60,18 +60,18 @@ export default async function GuideChapterPagePage({ params }: PageProps) {
     .eq('status', 'published')
     .single()
 
-  if (!currentPage) redirect(`/guide`)
+  if (!currentPage) redirect(`/dashboard`)
 
   // ── Access control ─────────────────────────────────────────────────────────
   const isPremiumUser = access.isPremium
   const pageIsFree = Boolean(currentPage.is_free) || Boolean(chapter.is_free)
 
   if (chapterSlug === 'upgrade') {
-    redirect('/guide?upgrade=true&r=1')
+    redirect('/dashboard?upgrade=true&r=1')
   }
 
   if (!isPremiumUser && !pageIsFree) {
-    redirect('/guide?upgrade=true&r=2')
+    redirect('/dashboard?upgrade=true&r=2')
   }
 
   // ── Fetch all chapters + their published pages (for cross-chapter nav) ──────
@@ -187,7 +187,7 @@ export default async function GuideChapterPagePage({ params }: PageProps) {
         >
           <div className="flex items-center gap-1.5 flex-wrap">
             <Link
-              href="/guide"
+              href="/dashboard"
               className="font-mono text-[11px] hover:underline"
               style={{ color: 'var(--rfd-text-muted)', textUnderlineOffset: '2px' }}
             >

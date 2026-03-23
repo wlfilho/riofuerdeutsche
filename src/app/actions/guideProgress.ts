@@ -24,7 +24,7 @@ export async function markPageAsRead(pageId: string) {
     return { success: false, error: error.message }
   }
 
-  revalidatePath('/guide', 'layout')
+  revalidatePath('/dashboard', 'layout')
   return { success: true, read_at: data.read_at }
 }
 
@@ -44,7 +44,7 @@ export async function markPageAsUnread(pageId: string) {
     return { success: false, error: error.message }
   }
 
-  revalidatePath('/guide', 'layout')
+  revalidatePath('/dashboard', 'layout')
   return { success: true }
 }
 
