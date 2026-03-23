@@ -1,3 +1,5 @@
+'use client'
+
 import Link from "next/link";
 import { MapPin, Instagram, Youtube, Mail, Send } from "lucide-react";
 
@@ -100,6 +102,12 @@ export default function Footer() {
                     <div className="flex gap-4 mt-4 md:mt-0">
                         <Link href="/impressum" className="hover:text-white transition-colors">Impressum</Link>
                         <Link href="/datenschutz" className="hover:text-white transition-colors">Datenschutz</Link>
+                        <button
+                            onClick={() => window.dispatchEvent(new Event('cookie_consent_reset'))}
+                            className="hover:text-white transition-colors cursor-pointer"
+                        >
+                            Cookie-Einstellungen
+                        </button>
                     </div>
                 </div>
             </div>
