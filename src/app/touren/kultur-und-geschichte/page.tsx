@@ -12,7 +12,13 @@ import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
     title: "Kultur & Geschichte Tour in Rio de Janeiro — Museen, Architektur & mehr | RioFürDeutsche",
-    description: "Entdecke die kulturelle Seite von Rio de Janeiro — vom Museu do Amanhã über die Confeitaria Colombo bis zum Teatro Municipal. Geführte Tour auf Deutsch mit einem echten Carioca."
+    description: "Entdecke die kulturelle Seite von Rio de Janeiro — vom Museu do Amanhã über die Confeitaria Colombo bis zum Teatro Municipal. Geführte Tour auf Deutsch mit einem echten Carioca.",
+    alternates: {
+        canonical: "https://riofuerdeutsche.de/touren/kultur-und-geschichte",
+    },
+    openGraph: {
+        url: "https://riofuerdeutsche.de/touren/kultur-und-geschichte",
+    },
 };
 
 const estimatedTourDuration = "4–6 Stunden";

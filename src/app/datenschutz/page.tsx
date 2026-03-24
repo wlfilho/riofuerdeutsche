@@ -8,6 +8,12 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Datenschutzerklärung | Rio für Deutsche",
   description: "Datenschutzerklärung von Rio für Deutsche – Informationen zum Umgang mit deinen Daten.",
+  alternates: {
+    canonical: "https://riofuerdeutsche.de/datenschutz",
+  },
+  openGraph: {
+    url: "https://riofuerdeutsche.de/datenschutz",
+  },
 };
 
 export default function DatenschutzPage() {

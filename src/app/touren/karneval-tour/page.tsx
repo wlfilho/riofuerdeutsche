@@ -12,7 +12,13 @@ import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
     title: "Karneval Tour in Rio de Janeiro — Sambódromo, Blocos & mehr | RioFürDeutsche",
-    description: "Erlebe den Karneval in Rio de Janeiro mit einem echten Carioca als Guide. Sambódromo, Blocos de Rua und Samba-Ensaios — sicher, authentisch und komplett auf Deutsch."
+    description: "Erlebe den Karneval in Rio de Janeiro mit einem echten Carioca als Guide. Sambódromo, Blocos de Rua und Samba-Ensaios — sicher, authentisch und komplett auf Deutsch.",
+    alternates: {
+        canonical: "https://riofuerdeutsche.de/touren/karneval-tour",
+    },
+    openGraph: {
+        url: "https://riofuerdeutsche.de/touren/karneval-tour",
+    },
 };
 
 const estimatedTourDuration = "Nur während des Karnevals";

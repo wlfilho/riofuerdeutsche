@@ -12,7 +12,13 @@ import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
     title: "Tagesausflüge ab Rio de Janeiro — Búzios, Ilha Grande, Paraty & mehr | RioFürDeutsche",
-    description: "Die schönsten Tagesausflüge ab Rio de Janeiro — Búzios, Ilha Grande, Paraty, Petrópolis und Arraial do Cabo. Mit einem lokalen Guide, sicher und auf Deutsch."
+    description: "Die schönsten Tagesausflüge ab Rio de Janeiro — Búzios, Ilha Grande, Paraty, Petrópolis und Arraial do Cabo. Mit einem lokalen Guide, sicher und auf Deutsch.",
+    alternates: {
+        canonical: "https://riofuerdeutsche.de/touren/tagesausfluege",
+    },
+    openGraph: {
+        url: "https://riofuerdeutsche.de/touren/tagesausfluege",
+    },
 };
 
 const estimatedTourDuration = "Ganztägig";

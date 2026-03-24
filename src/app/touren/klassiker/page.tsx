@@ -21,7 +21,13 @@ import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
     title: "Klassiker Tour Rio de Janeiro — Sehenswürdigkeiten mit deutschsprachigem Guide | RioFürDeutsche",
-    description: "Entdecken Sie Rios schönste Sehenswürdigkeiten auf einer privaten Tagestour auf Deutsch. Corcovado, Zuckerhut, Escadaria Selarón und mehr — 8 Stunden, 3–4 Highlights, ein unvergesslicher Tag."
+    description: "Entdecken Sie Rios schönste Sehenswürdigkeiten auf einer privaten Tagestour auf Deutsch. Corcovado, Zuckerhut, Escadaria Selarón und mehr — 8 Stunden, 3–4 Highlights, ein unvergesslicher Tag.",
+    alternates: {
+        canonical: "https://riofuerdeutsche.de/touren/klassiker",
+    },
+    openGraph: {
+        url: "https://riofuerdeutsche.de/touren/klassiker",
+    },
 };
 
 const estimatedTourDuration = "8 Stunden";

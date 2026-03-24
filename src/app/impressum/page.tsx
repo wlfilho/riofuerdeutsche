@@ -8,6 +8,12 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Impressum | Rio für Deutsche",
   description: "Rechtliche Informationen und Impressum von Rio für Deutsche.",
+  alternates: {
+    canonical: "https://riofuerdeutsche.de/impressum",
+  },
+  openGraph: {
+    url: "https://riofuerdeutsche.de/impressum",
+  },
 };
 
 export default function ImpressumPage() {

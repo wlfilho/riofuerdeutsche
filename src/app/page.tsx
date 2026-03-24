@@ -12,6 +12,16 @@ import {
   Phone,
   User,
 } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "https://riofuerdeutsche.de",
+  },
+  openGraph: {
+    url: "https://riofuerdeutsche.de",
+  },
+};
 
 // JSON-LD structured data for Google rich results
 const jsonLd = {

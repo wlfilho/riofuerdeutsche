@@ -8,7 +8,13 @@ import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
     title: "Individuelle Tour in Rio de Janeiro — dein Wunschtag mit lokalem Guide | RioFürDeutsche",
-    description: "Plane deine individuelle Tour in Rio de Janeiro — du bestimmst die Orte, das Tempo und die Interessen. Dein persönlicher Carioca-Guide organisiert den perfekten Tag, komplett auf Deutsch."
+    description: "Plane deine individuelle Tour in Rio de Janeiro — du bestimmst die Orte, das Tempo und die Interessen. Dein persönlicher Carioca-Guide organisiert den perfekten Tag, komplett auf Deutsch.",
+    alternates: {
+        canonical: "https://riofuerdeutsche.de/touren/individuell",
+    },
+    openGraph: {
+        url: "https://riofuerdeutsche.de/touren/individuell",
+    },
 };
 
 export default function IndividuelleTourPage() {

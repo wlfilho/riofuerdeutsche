@@ -8,7 +8,13 @@ import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
     title: "Sport & Abenteuer in Rio de Janeiro — Surfen, Paragliding & mehr | RioFürDeutsche",
-    description: "Erlebe Rio de Janeiro von der sportlichen Seite — Surfen, Stand-up Paddle, Paragliding und Asa Delta. Adrenalin pur mit einem lokalen Guide, sicher und auf Deutsch."
+    description: "Erlebe Rio de Janeiro von der sportlichen Seite — Surfen, Stand-up Paddle, Paragliding und Asa Delta. Adrenalin pur mit einem lokalen Guide, sicher und auf Deutsch.",
+    alternates: {
+        canonical: "https://riofuerdeutsche.de/touren/sport-und-abenteuer",
+    },
+    openGraph: {
+        url: "https://riofuerdeutsche.de/touren/sport-und-abenteuer",
+    },
 };
 
 const estimatedTourDuration = "2–4 Stunden";

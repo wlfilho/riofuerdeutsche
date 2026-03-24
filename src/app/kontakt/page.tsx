@@ -8,6 +8,12 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Kontakt | Rio für Deutsche",
   description: "Schreib mir! Ich antworte auf Deutsch — meistens innerhalb von 24 Stunden. Kontaktiere mich per WhatsApp oder E-Mail für deine private Tour in Rio de Janeiro.",
+  alternates: {
+    canonical: "https://riofuerdeutsche.de/kontakt",
+  },
+  openGraph: {
+    url: "https://riofuerdeutsche.de/kontakt",
+  },
 };
 
 export default function KontaktPage() {
