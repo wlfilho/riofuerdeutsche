@@ -58,7 +58,7 @@ const jsonLd = {
         "https://instagram.com/riofuerdeutsche",
         "https://youtube.com/@riofuerdeutsche",
       ],
-      availableLanguage: [
+      knowsLanguage: [
         {
           "@type": "Language",
           name: "German",
