@@ -134,7 +134,7 @@ export default function RioByNightPage() {
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Aber nachts in einer fremden Stadt unterwegs zu sein kann auch verunsichern — besonders in Rio. Genau deshalb bin ich an deiner Seite. Als gebürtiger Carioca kenne ich die sicheren Spots, die besten Bars und die Orte, an denen die Stimmung wirklich einzigartig ist. Kein Touristenfallen, keine unsicheren Ecken — nur das echte Rio bei Nacht.
+                                        Aber nachts in einer fremden Stadt unterwegs zu sein kann auch verunsichern — besonders in Rio. Genau deshalb bin ich an deiner Seite. Als gebürtiger Carioca kenne ich die <Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">sicheren Spots</Link>, die besten Bars und die Orte, an denen die Stimmung wirklich einzigartig ist. Kein Touristenfallen, keine unsicheren Ecken — nur das echte Rio bei Nacht.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">

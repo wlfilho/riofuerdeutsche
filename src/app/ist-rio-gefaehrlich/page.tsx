@@ -463,7 +463,7 @@ export default function IstRioGefaehrlich() {
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Ist Rio de Janeiro gefährlicher als São Paulo?</h3>
                   <p className="text-gray-700">
-                    Rio hat spezifische Herausforderungen, oft im Zusammenhang mit Favelas auf Hügeln neben wohlhabenden Zonen, was Kriminalität sichtbarer machen kann. Die Kriminalitätsraten und die reale Gefahr für dich variieren jedoch stark je nach Stadtteil. Mit gesundem Menschenverstand ist das tägliche Risiko für informierte Touristen in beiden Mega-Städten absolut vergleichbar und handhabbar.
+                    Rio hat spezifische Herausforderungen, oft im Zusammenhang mit <Link href="/touren/favela-tour" className="text-rio-green underline hover:text-[#0d1f15]">Favelas</Link> auf Hügeln neben wohlhabenden Zonen, was Kriminalität sichtbarer machen kann. Die Kriminalitätsraten und die reale Gefahr für dich variieren jedoch stark je nach Stadtteil. Mit gesundem Menschenverstand ist das tägliche Risiko für informierte Touristen in beiden Mega-Städten absolut vergleichbar und handhabbar.
                   </p>
                 </div>
 
@@ -542,6 +542,33 @@ export default function IstRioGefaehrlich() {
             <div className="my-16">
               <MagicLinkForm variant="final" />
             </div>
+
+            {/* 12. CTA TOURS */}
+            <section className="bg-[#0d1f15] text-white p-8 md:p-12 rounded-3xl shadow-xl mb-16">
+              <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                Rio sicher erleben — mit einem Guide, der diese Regeln täglich lebt
+              </h2>
+              <p className="text-lg text-gray-300 leading-relaxed mb-4">
+                Das Wissen ist das eine. Die Erfahrung ist das andere.
+              </p>
+              <p className="text-lg text-gray-300 leading-relaxed mb-8">
+                Ich begleite dich persönlich durch Rio — mit denselben Regeln, die ich dir hier erklärt habe, als tägliche Praxis. Du weißt immer, wo du bist, was sicher ist und wie du das Beste aus deinem Tag machst.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/touren"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-green text-white rounded-full font-semibold text-lg hover:bg-rio-green/90 hover:scale-[1.02] transition-all shadow-xl shadow-rio-green/20"
+                >
+                  Touren ansehen
+                </Link>
+                <Link
+                  href="/kontakt"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/10 transition-all"
+                >
+                  Direkt anfragen
+                </Link>
+              </div>
+            </section>
 
           </article>
         </main>

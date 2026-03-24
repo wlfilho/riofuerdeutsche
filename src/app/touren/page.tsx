@@ -6,8 +6,8 @@ import FadeIn from "@/components/FadeIn";
 import { ChevronRight, Phone, CalendarDays } from "lucide-react";
 
 export const metadata = {
-    title: "Touren in Rio de Janeiro — Deutschsprachiger Guide",
-    description: "Geführte Stadtführungen und Touren in Rio de Janeiro auf Deutsch. Dein lokaler Reiseleiter zeigt dir die schönsten Sehenswürdigkeiten — sicher, authentisch und individuell. Jetzt Tour anfragen!",
+    title: "Touren & Stadtrundfahrten in Rio de Janeiro auf Deutsch | RioFürDeutsche",
+    description: "Deutschsprachige Touren & Stadtführungen in Rio de Janeiro ✓ Klassiker, Favela, Karneval, Natur & Ausflüge. Mit einem echten Carioca. Jetzt anfragen.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren",
     },
@@ -167,14 +167,14 @@ export default function TourenPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Rio de Janeiro gehört zu den faszinierendsten Städten der Welt — aber ohne einen lokalen Guide verpasst du das Beste. Unsere deutschsprachigen Stadtführungen und Touren zeigen dir das echte Rio: sicher, authentisch und abseits der Touristenpfade.
+                                    Rio de Janeiro gehört zu den faszinierendsten Städten der Welt — aber ohne einen <Link href="/ueber-will" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">lokalen Guide</Link> verpasst du das Beste. Unsere deutschsprachigen Stadtführungen und Touren zeigen dir das echte Rio: <Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">sicher</Link>, authentisch und abseits der Touristenpfade.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
                                         Ob du die <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">klassischen Sehenswürdigkeiten wie den Corcovado und den Zuckerhut</Link> erleben, die <Link href="/touren/natur-und-straende" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">wilde Natur des Tijuca-Regenwaldes</Link> entdecken oder das pulsierende <Link href="/touren/by-night" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Nachtleben von Lapa und Leblon</Link> genießen möchtest — wir haben die passende Tour für dich. Alle Touren werden von einem gebürtigen Carioca geleitet, der fließend Deutsch spricht und vier Jahre in Deutschland gelebt hat.
                                     </p>
                                     <p>
-                                        Was uns von anderen Anbietern unterscheidet: Jede Stadtführung ist privat und individuell. Kein Bus voller Touristen, keine starren Zeitpläne, keine Sprachbarrieren. Stattdessen ein persönlicher Reiseleiter, der sich ganz auf dich und deine Wünsche einstellt — ob du allein reist, als Paar, mit Familie oder in einer kleinen Gruppe.
+                                        Was uns von anderen Anbietern unterscheidet: Jede Stadtführung ist privat und individuell. Kein Bus voller Touristen, keine starren Zeitpläne, keine Sprachbarrieren. Stattdessen ein persönlicher <Link href="/kontakt" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Reiseleiter</Link>, der sich ganz auf dich und deine Wünsche einstellt — ob du allein reist, als Paar, mit Familie oder in einer kleinen Gruppe.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">

@@ -15,6 +15,8 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  title: "Rio de Janeiro: Deutschsprachiger Tourguide, Stadtführungen & Ausflüge | RioFürDeutsche",
+  description: "Deutschsprachige Reiseleitung in Rio de Janeiro ✓ Citytouren, Stadtrundfahrten & Ausflüge mit einem echten Carioca. Sicher, persönlich, auf Deutsch.",
   alternates: {
     canonical: "https://riofuerdeutsche.de",
   },
@@ -285,7 +287,7 @@ export default function Home() {
                     { emoji: "🎯", content: <>100 % auf Rio de Janeiro spezialisiert</> },
                     { emoji: "🇩🇪", content: <>Deutschsprachige Begleitung durch einen <Link href="/ueber-will" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">echten Carioca</Link></> },
                     { emoji: "🚗", content: <>Eigene Fahrzeuge mit Fahrer für maximalen Komfort</> },
-                    { emoji: "🛡️", content: <><Link href="/kontakt" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Sicherheit</Link> an erster Stelle – sichere Routen und beste Zeiten</> },
+                    { emoji: "🛡️", content: <><Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Sicherheit</Link> an erster Stelle – sichere Routen und beste Zeiten</> },
                     { emoji: "✨", content: <><Link href="/touren/individuell" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Individueller Service</Link>, von der Beratung bis zur Tour</> },
                     { emoji: "💬", content: <>Schnelle Erreichbarkeit per WhatsApp und E-Mail</> },
                   ].map((item, i) => (

@@ -379,7 +379,7 @@ export default function KlassikerTourPage() {
                                 Tagesprogramme in Rio de Janeiro —{" "}
                                 <span className="text-rio-green">direkt buchbar mit lokalem Guide</span>
                             </h2>
-                            <p className="text-gray-500 mt-3 text-lg">6 kuratierte Vorschläge für jeden Reisestil — oder ich stelle dir ein individuelles Programm zusammen, perfekt abgestimmt auf deine Wünsche.</p>
+                            <p className="text-gray-500 mt-3 text-lg">6 kuratierte Vorschläge für jeden Reisestil — oder ich stelle dir ein <Link href="/touren/individuell" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">individuelles Programm</Link> zusammen, perfekt abgestimmt auf deine Wünsche.</p>
                         </FadeIn>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {programs.map((program, index) => (

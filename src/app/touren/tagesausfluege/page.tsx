@@ -138,7 +138,7 @@ export default function TagesausfluegePage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Rio de Janeiro ist spektakulär — aber die Region rund um die Stadt hat noch viel mehr zu bieten. Paradiesische Strände, koloniale Bergstädte, tropische Inseln und kristallklares Wasser warten nur wenige Stunden entfernt auf dich.
+                                    <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Rio de Janeiro</Link> ist spektakulär — aber die Region rund um die Stadt hat noch viel mehr zu bieten. Paradiesische Strände, koloniale Bergstädte, tropische Inseln und kristallklares Wasser warten nur wenige Stunden entfernt auf dich.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
