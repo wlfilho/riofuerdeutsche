@@ -11,7 +11,7 @@ import {
 import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
-    title: "Fußball Tour in Rio de Janeiro — Maracanã, Flamengo & Live-Spiele | RioFürDeutsche",
+    title: "Fußball Tour in Rio — Maracanã, Flamengo & Live-Spiele",
     description: "Erlebe die Fußball-Leidenschaft von Rio de Janeiro hautnah — Maracanã-Tour, Museu do Flamengo und Live-Spiele im Stadion. Mit einem echten Carioca als Guide, komplett auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/fussball",

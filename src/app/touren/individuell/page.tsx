@@ -7,7 +7,7 @@ import { ChevronRight, Phone, CalendarDays } from "lucide-react";
 import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
-    title: "Individuelle Tour in Rio de Janeiro — dein Wunschtag mit lokalem Guide | RioFürDeutsche",
+    title: "Individuelle Tour in Rio — dein Wunschtag mit Guide",
     description: "Plane deine individuelle Tour in Rio de Janeiro — du bestimmst die Orte, das Tempo und die Interessen. Dein persönlicher Carioca-Guide organisiert den perfekten Tag, komplett auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/individuell",

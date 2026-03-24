@@ -13,7 +13,7 @@ import {
 import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
-    title: "Favela Tour Rio de Janeiro auf Deutsch | Rio für Deutsche",
+    title: "Favela Tour Rio de Janeiro — respektvoll & sicher auf Deutsch",
     description: "Favela Tour in Rio de Janeiro auf Deutsch mit lokalem Guide. Favela Santa Marta & Rocinha erklärt. Sicher, authentisch, unvergesslich.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/favela-tour",

@@ -7,7 +7,7 @@ import { ChevronRight, Phone, CalendarDays, MapPin, Clock } from "lucide-react";
 import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
-    title: "Sport & Abenteuer in Rio de Janeiro — Surfen, Paragliding & mehr | RioFürDeutsche",
+    title: "Sport & Abenteuer in Rio — Surfen, Paragliding & mehr",
     description: "Erlebe Rio de Janeiro von der sportlichen Seite — Surfen, Stand-up Paddle, Paragliding und Asa Delta. Adrenalin pur mit einem lokalen Guide, sicher und auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/sport-und-abenteuer",

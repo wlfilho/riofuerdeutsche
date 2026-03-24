@@ -13,7 +13,7 @@ import {
 import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
-    title: "Natur & Strände in Rio de Janeiro — Wanderungen, Regenwald und geheime Strände | RioFürDeutsche",
+    title: "Natur & Strände in Rio — Wanderungen & Regenwald",
     description: "Entdecken Sie Rios wilde Seite: Tijuca-Regenwald, Pedra da Gávea, Prainha und versteckte Strände mit einem deutschsprachigen Guide. Natur-Touren für Abenteurer und Naturliebhaber.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/natur-und-straende",

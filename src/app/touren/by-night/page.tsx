@@ -11,7 +11,7 @@ import {
 import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
-    title: "Rio by Night — Nachtleben in Rio de Janeiro mit lokalem Guide | RioFürDeutsche",
+    title: "Rio by Night — Nachtleben in Rio mit lokalem Guide",
     description: "Erlebe das Nachtleben von Rio de Janeiro sicher und authentisch — Samba in Lapa, Cocktails in Leblon, Craft-Biere in Botafogo. Dein Carioca-Guide zeigt dir die besten Spots, komplett auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/by-night",

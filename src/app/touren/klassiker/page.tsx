@@ -20,7 +20,7 @@ import {
 import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
-    title: "Klassiker Tour Rio de Janeiro — Sehenswürdigkeiten mit deutschsprachigem Guide | RioFürDeutsche",
+    title: "Klassiker Tour Rio — Sehenswürdigkeiten mit deutschem Guide",
     description: "Entdecken Sie Rios schönste Sehenswürdigkeiten auf einer privaten Tagestour auf Deutsch. Corcovado, Zuckerhut, Escadaria Selarón und mehr — 8 Stunden, 3–4 Highlights, ein unvergesslicher Tag.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/klassiker",

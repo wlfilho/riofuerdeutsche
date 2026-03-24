@@ -16,7 +16,7 @@ const siteUrl = "https://riofuerdeutsche.de";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Rio de Janeiro: Deutschsprachiger Tourguide, Stadtführungen & Ausflüge | RioFürDeutsche",
+    default: "Rio de Janeiro: Deutschsprachiger Tourguide, Stadtführungen & Ausflüge | Rio für Deutsche",
     template: "%s | Rio für Deutsche",
   },
   description:
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "de_DE",
     siteName: "Rio für Deutsche",
-    title: "Rio de Janeiro: Deutschsprachiger Tourguide, Stadtführungen & Ausflüge | RioFürDeutsche",
+    title: "Rio de Janeiro: Deutschsprachiger Tourguide, Stadtführungen & Ausflüge | Rio für Deutsche",
     description:
       "Deutschsprachige Reiseleitung in Rio de Janeiro ✓ Citytouren, Stadtrundfahrten & Ausflüge mit einem echten Carioca. Sicher, persönlich, auf Deutsch.",
     images: [
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rio de Janeiro: Deutschsprachiger Tourguide, Stadtführungen & Ausflüge | RioFürDeutsche",
+    title: "Rio de Janeiro: Deutschsprachiger Tourguide, Stadtführungen & Ausflüge | Rio für Deutsche",
     description:
       "Deutschsprachige Reiseleitung in Rio de Janeiro ✓ Citytouren, Stadtrundfahrten & Ausflüge mit einem echten Carioca. Sicher, persönlich, auf Deutsch.",
     images: ["/images/rio-background.webp"],

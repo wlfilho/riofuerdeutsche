@@ -6,7 +6,7 @@ import { ChevronRight } from "lucide-react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Datenschutzerklärung | Rio für Deutsche",
+  title: "Datenschutzerklärung",
   description: "Datenschutzerklärung von Rio für Deutsche – Informationen zum Umgang mit deinen Daten.",
   alternates: {
     canonical: "https://riofuerdeutsche.de/datenschutz",

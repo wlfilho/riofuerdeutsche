@@ -11,7 +11,7 @@ import {
 import AndereTouren from "@/components/AndereTouren";
 
 export const metadata = {
-    title: "Regentage in Rio de Janeiro — Was tun bei Regen? | RioFürDeutsche",
+    title: "Regentage in Rio de Janeiro — Was tun bei Regen?",
     description: "Regen in Rio? Kein Problem! Museen, AquaRio, Capoeira-Kurse und Wellness — die besten Indoor-Aktivitäten in Rio de Janeiro für schlechtes Wetter. Tipps von einem echten Carioca.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/regentage",

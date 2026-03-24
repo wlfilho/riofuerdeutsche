@@ -6,7 +6,7 @@ import FadeIn from "@/components/FadeIn";
 import { ChevronRight, Phone, CalendarDays } from "lucide-react";
 
 export const metadata = {
-    title: "Rio Touren & Stadtführungen auf Deutsch — Reiseleitung in Rio de Janeiro | RioFürDeutsche",
+    title: "Rio Touren & Stadtführungen auf Deutsch — Reiseleitung in Rio",
     description: "Geführte Stadtführungen und Touren in Rio de Janeiro auf Deutsch. Dein lokaler Reiseleiter zeigt dir die schönsten Sehenswürdigkeiten — sicher, authentisch und individuell. Jetzt Tour anfragen!",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren",
