@@ -123,6 +123,7 @@ export async function updateSession(request: NextRequest) {
         !pathname.startsWith("/impressum") &&
         !pathname.startsWith("/datenschutz") &&
         !pathname.startsWith("/ist-rio-gefaehrlich") &&
+        !pathname.startsWith("/rio-guide") &&
         pathname !== "/"
     ) {
         const url = request.nextUrl.clone();
