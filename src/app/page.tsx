@@ -3,6 +3,7 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
+import FaqAccordion from "@/components/FaqAccordion";
 import {
   ArrowRight,
   MapPin,
@@ -587,55 +588,7 @@ export default function Home() {
                 </p>
               </FadeIn>
 
-              <div className="divide-y divide-gray-100">
-                {[
-                  {
-                    q: "Sprichst du wirklich fließend Deutsch?",
-                    a: "Ja — ich bin in Rio auf eine deutsche Schule gegangen und habe vier Jahre in Köln gelebt und studiert. Deutsch ist für mich keine Fremdsprache, sondern ein echter Teil meiner Identität.",
-                    cta: null,
-                  },
-                  {
-                    q: "Ist Rio de Janeiro wirklich so gefährlich?",
-                    a: "Rio hat Risiken — aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben.",
-                    cta: { label: "Die 7 häufigsten Fehler — und wie du sie vermeidest →", href: "/ist-rio-gefaehrlich" },
-                  },
-                  {
-                    q: "Wie buche ich eine Tour?",
-                    a: "Schreib mir einfach auf WhatsApp oder per E-Mail — ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.",
-                    cta: null,
-                  },
-                  {
-                    q: "Fahre ich allein oder in einer Gruppe?",
-                    a: "Alle Touren sind privat oder in sehr kleinen Gruppen (max. 6 Personen) — niemals ein Touristenbus. Du buchst direkt bei mir, nicht über eine Agentur.",
-                    cta: null,
-                  },
-                  {
-                    q: "Was kostet eine Tour?",
-                    a: "Der Preis hängt von der Dauer, der Gruppengröße und den gewählten Aktivitäten ab. Schreib mir — ich erstelle dir ein persönliches Angebot, das zu deinem Budget passt.",
-                    cta: null,
-                  },
-                ].map((item, i) => (
-                  <FadeIn key={i} direction="up" delay={i * 0.08}>
-                    <div className="py-7">
-                      <p className="font-bold text-gray-900 text-lg mb-2">{item.q}</p>
-                      <p className="text-gray-600 leading-relaxed">
-                        {item.a}
-                        {item.cta && (
-                          <>
-                            {" "}
-                            <Link
-                              href={item.cta.href}
-                              className="text-rio-green underline decoration-rio-green/40 underline-offset-2 hover:decoration-rio-green transition-colors"
-                            >
-                              {item.cta.label}
-                            </Link>
-                          </>
-                        )}
-                      </p>
-                    </div>
-                  </FadeIn>
-                ))}
-              </div>
+              <FaqAccordion />
             </div>
           </section>
 
