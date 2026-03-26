@@ -25,6 +25,54 @@ export const metadata: Metadata = {
   },
 };
 
+// JSON-LD FAQ structured data for Google rich results
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "Sprichst du wirklich fließend Deutsch?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Ja — ich bin in Rio auf eine deutsche Schule gegangen und habe vier Jahre in Köln gelebt und studiert. Deutsch ist für mich keine Fremdsprache, sondern ein echter Teil meiner Identität.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Ist Rio de Janeiro wirklich so gefährlich?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Rio hat Risiken — aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben. Mehr dazu: riofuerdeutsche.de/ist-rio-gefaehrlich",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Wie buche ich eine Tour?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Schreib mir einfach auf WhatsApp oder per E-Mail — ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Fahre ich allein oder in einer Gruppe?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Alle Touren sind privat oder in sehr kleinen Gruppen (max. 6 Personen) — niemals ein Touristenbus. Du buchst direkt bei mir, nicht über eine Agentur.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Was kostet eine Tour?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Der Preis hängt von der Dauer, der Gruppengröße und den gewählten Aktivitäten ab. Schreib mir — ich erstelle dir ein persönliches Angebot, das zu deinem Budget passt.",
+      },
+    },
+  ],
+};
+
 // JSON-LD structured data for Google rich results
 const jsonLd = {
   "@context": "https://schema.org",
@@ -205,6 +253,10 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
 
       <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white pb-0 font-sans">
         {/* Client Component: Navbar with mobile menu state */}
@@ -248,17 +300,17 @@ export default function Home() {
 
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
                     <Link
-                      href="#touren"
+                      href="/ist-rio-gefaehrlich"
                       className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-semibold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
                     >
                       <Camera className="w-5 h-5" />
-                      Touren ansehen
+                      Kostenlosen Sicherheits-Guide sichern
                     </Link>
                     <Link
-                      href="/kontakt"
+                      href="#touren"
                       className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                     >
-                      Kostenlos anfragen
+                      Touren ansehen
                     </Link>
                   </div>
                 </div>
@@ -302,16 +354,16 @@ export default function Home() {
               <FadeIn direction="up" delay={0.2}>
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                   <Link
-                    href="/touren"
+                    href="/ist-rio-gefaehrlich"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-green text-white rounded-full font-bold text-base hover:bg-rio-green/90 hover:scale-[1.02] transition-all shadow-lg"
                   >
-                    TOUREN ANSEHEN
+                    Kostenlosen Rio-Guide sichern
                   </Link>
                   <Link
-                    href="/unterkunft/beratung"
+                    href="#touren"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-rio-green text-rio-green rounded-full font-bold text-base hover:bg-rio-green/5 transition-all"
                   >
-                    BERATUNG BUCHEN
+                    TOUREN ANSEHEN
                   </Link>
                 </div>
               </FadeIn>
@@ -523,6 +575,70 @@ export default function Home() {
             </div>
           </section>
 
+          {/* FAQ SECTION */}
+          <section id="faq" className="py-24 bg-white" aria-labelledby="faq-heading">
+            <div className="max-w-3xl mx-auto px-5 lg:px-8">
+              <FadeIn direction="up" className="text-center mb-12">
+                <h2 id="faq-heading" className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-3">
+                  Häufige Fragen
+                </h2>
+                <p className="text-lg text-gray-500">
+                  Alles, was du vor deiner Rio-Reise wissen möchtest.
+                </p>
+              </FadeIn>
+
+              <div className="divide-y divide-gray-100">
+                {[
+                  {
+                    q: "Sprichst du wirklich fließend Deutsch?",
+                    a: "Ja — ich bin in Rio auf eine deutsche Schule gegangen und habe vier Jahre in Köln gelebt und studiert. Deutsch ist für mich keine Fremdsprache, sondern ein echter Teil meiner Identität.",
+                    cta: null,
+                  },
+                  {
+                    q: "Ist Rio de Janeiro wirklich so gefährlich?",
+                    a: "Rio hat Risiken — aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben.",
+                    cta: { label: "Die 7 häufigsten Fehler — und wie du sie vermeidest →", href: "/ist-rio-gefaehrlich" },
+                  },
+                  {
+                    q: "Wie buche ich eine Tour?",
+                    a: "Schreib mir einfach auf WhatsApp oder per E-Mail — ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.",
+                    cta: null,
+                  },
+                  {
+                    q: "Fahre ich allein oder in einer Gruppe?",
+                    a: "Alle Touren sind privat oder in sehr kleinen Gruppen (max. 6 Personen) — niemals ein Touristenbus. Du buchst direkt bei mir, nicht über eine Agentur.",
+                    cta: null,
+                  },
+                  {
+                    q: "Was kostet eine Tour?",
+                    a: "Der Preis hängt von der Dauer, der Gruppengröße und den gewählten Aktivitäten ab. Schreib mir — ich erstelle dir ein persönliches Angebot, das zu deinem Budget passt.",
+                    cta: null,
+                  },
+                ].map((item, i) => (
+                  <FadeIn key={i} direction="up" delay={i * 0.08}>
+                    <div className="py-7">
+                      <p className="font-bold text-gray-900 text-lg mb-2">{item.q}</p>
+                      <p className="text-gray-600 leading-relaxed">
+                        {item.a}
+                        {item.cta && (
+                          <>
+                            {" "}
+                            <Link
+                              href={item.cta.href}
+                              className="text-rio-green underline decoration-rio-green/40 underline-offset-2 hover:decoration-rio-green transition-colors"
+                            >
+                              {item.cta.label}
+                            </Link>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  </FadeIn>
+                ))}
+              </div>
+            </div>
+          </section>
+
           {/* CALL TO ACTION */}
           <section id="kontakt" className="py-24 relative overflow-hidden bg-rio-green" aria-labelledby="kontakt-heading">
             <div className="absolute inset-0 bg-[url('/images/rio-background.webp')] bg-cover bg-center mix-blend-overlay opacity-10"></div>
@@ -530,23 +646,21 @@ export default function Home() {
               <FadeIn direction="up">
                 <h2 id="kontakt-heading" className="text-3xl md:text-5xl font-heading font-bold text-white mb-6">Lust auf Rio bekommen?</h2>
                 <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
-                  Lass uns unverbindlich über deine Pläne sprechen. Starte mit einer <Link href="/unterkunft/beratung" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">kostenlosen Beratung</Link> und wir erstellen dir ein auf dich zugeschnittenes Angebot für deinen Traumurlaub in Brasilien.
+                  Bevor du buchst: Hol dir unseren kostenlosen Sicherheits-Guide für Rio. 7 Fehler, die deutsche Touristen machen — und wie du sie vermeidest. Kostenlos, sofort per E-Mail.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
-                  <a
-                    href="https://wa.me/573148704374"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href="/ist-rio-gefaehrlich"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
                   >
-                    <Phone className="w-5 h-5" />
-                    WhatsApp an uns
-                  </a>
+                    <Camera className="w-5 h-5" />
+                    Kostenlosen Guide sichern
+                  </Link>
                   <Link
                     href="/kontakt"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                   >
-                    Zum Kontakt
+                    Tour anfragen
                   </Link>
                 </div>
               </FadeIn>
