@@ -25,9 +25,9 @@ type SubGroup = {
 };
 
 type NavLink =
-    | { label: string; href: string; subLinks?: never; subGroups?: never }
-    | { label: string; href: string; subLinks: SubLink[]; subGroups?: never }
-    | { label: string; href: string; subGroups: SubGroup[]; subLinks?: never };
+    | { label: string; href: string; subLinks?: never; subGroups?: never; directLinks?: never }
+    | { label: string; href: string; subLinks: SubLink[]; subGroups?: never; directLinks?: never }
+    | { label: string; href: string; subGroups: SubGroup[]; subLinks?: never; directLinks?: SubLink[] };
 
 const navLinks: NavLink[] = [
     {
@@ -56,10 +56,14 @@ const navLinks: NavLink[] = [
                 href: "/rio-guide/sehenswuerdigkeiten",
                 items: [
                     { href: "/rio-guide/sehenswuerdigkeiten/christus-erloeser", label: "Christus-Erlöser" },
+                    { href: "/rio-guide/sehenswuerdigkeiten/zuckerhut", label: "Zuckerhut" },
                 ],
                 allHref: "/rio-guide/sehenswuerdigkeiten",
                 allLabel: "Alle ansehen",
             },
+        ],
+        directLinks: [
+            { href: "/ist-rio-gefaehrlich", label: "Sicherheit" },
         ],
     },
     { href: "/#ueber-uns", label: "Über Uns" },
@@ -168,6 +172,20 @@ export default function Navbar() {
                                                             </div>
                                                         </div>
                                                     ))}
+                                                    {link.directLinks && link.directLinks.length > 0 && (
+                                                        <>
+                                                            <div className="mx-4 my-1 h-px bg-gray-100" />
+                                                            {link.directLinks.map((dl, i) => (
+                                                                <Link
+                                                                    key={i}
+                                                                    href={dl.href}
+                                                                    className="block px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green transition-colors"
+                                                                >
+                                                                    {dl.label}
+                                                                </Link>
+                                                            ))}
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -300,6 +318,16 @@ export default function Navbar() {
                                                         )}
                                                     </div>
                                                 </div>
+                                            ))}
+                                            {link.directLinks && link.directLinks.map((dl, i) => (
+                                                <Link
+                                                    key={i}
+                                                    href={dl.href}
+                                                    className="text-lg font-medium text-gray-600 hover:text-rio-green transition-colors"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                >
+                                                    {dl.label}
+                                                </Link>
                                             ))}
                                         </div>
                                     </div>

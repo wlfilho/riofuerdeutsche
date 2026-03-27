@@ -90,6 +90,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.8,
         },
         {
+            url: `${baseUrl}/rio-guide/sehenswuerdigkeiten/zuckerhut`,
+            lastModified: new Date("2026-03-26"),
+            changeFrequency: "monthly",
+            priority: 0.8,
+        },
+        {
             url: `${baseUrl}/kontakt`,
             lastModified: today,
             changeFrequency: "monthly",
