@@ -77,7 +77,8 @@ export default function Footer() {
                         <ul className="space-y-2 text-sm">
                             <li><Link href="/touren" className="hover:text-white transition-colors">Touren und Ausflüge</Link></li>
                             <li><Link href="/#ueber-uns" className="hover:text-white transition-colors">Über Uns</Link></li>
-                            <li><Link href="/#vorteile" className="hover:text-white transition-colors">Warum Wir?</Link></li>
+                            <li><Link href="/rio-guide/sehenswuerdigkeiten" className="hover:text-white transition-colors">Rio-Guide</Link></li>
+                            <li><Link href="/rio-guide/sehenswuerdigkeiten/christus-erloeser" className="hover:text-white transition-colors">Christus-Erlöser</Link></li>
                             <li><Link href="/kontakt" className="hover:text-white transition-colors">Kontakt</Link></li>
                         </ul>
                     </div>

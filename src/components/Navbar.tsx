@@ -10,10 +10,26 @@ import {
     Instagram,
     Youtube,
     ChevronDown,
+    ChevronRight,
 } from "lucide-react";
 import HeaderAuth from "./HeaderAuth";
 
-const navLinks = [
+type SubLink = { href: string; label: string };
+
+type SubGroup = {
+    label: string;
+    href: string;
+    items: SubLink[];
+    allHref?: string;
+    allLabel?: string;
+};
+
+type NavLink =
+    | { label: string; href: string; subLinks?: never; subGroups?: never }
+    | { label: string; href: string; subLinks: SubLink[]; subGroups?: never }
+    | { label: string; href: string; subGroups: SubGroup[]; subLinks?: never };
+
+const navLinks: NavLink[] = [
     {
         label: "Touren & Ausflüge",
         href: "/touren",
@@ -31,8 +47,22 @@ const navLinks = [
             { href: "/touren/individuell", label: "🎯 Individuelle Tour" },
         ],
     },
+    {
+        label: "Rio-Guide",
+        href: "/rio-guide",
+        subGroups: [
+            {
+                label: "Sehenswürdigkeiten",
+                href: "/rio-guide/sehenswuerdigkeiten",
+                items: [
+                    { href: "/rio-guide/sehenswuerdigkeiten/christus-erloeser", label: "Christus-Erlöser" },
+                ],
+                allHref: "/rio-guide/sehenswuerdigkeiten",
+                allLabel: "Alle ansehen",
+            },
+        ],
+    },
     { href: "/#ueber-uns", label: "Über Uns" },
-    { href: "/#vorteile", label: "Vorteile" },
     { href: "/#bewertungen", label: "Bewertungen" },
     { href: "/kontakt", label: "Kontakt" },
 ];
@@ -40,6 +70,8 @@ const navLinks = [
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [mobileTourenOpen, setMobileTourenOpen] = useState(false);
+    const [mobileGuideOpen, setMobileGuideOpen] = useState(false);
+    const [mobileGuideSehenOpen, setMobileGuideSehenOpen] = useState(false);
 
     return (
         <>
@@ -57,42 +89,102 @@ export default function Navbar() {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden lg:flex gap-8 items-center" aria-label="Hauptnavigation">
-                        {navLinks.map((link) => (
-                            link.subLinks ? (
-                                <div key={link.label} className="relative group p-2">
-                                    <Link
-                                        href={link.href || "#"}
-                                        className="flex items-center gap-1 text-sm font-medium text-gray-700 group-hover:text-rio-green transition-colors duration-200"
-                                    >
-                                        {link.label}
-                                        <ChevronDown className="w-4 h-4 transition-transform duration-300 group-hover:-rotate-180" />
-                                    </Link>
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                                        <div className="bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden transform origin-top translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                                            <div className="py-2">
-                                                {link.subLinks.map((sub, i) => (
-                                                    <Link
-                                                        key={i}
-                                                        href={sub.href}
-                                                        className="block px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green transition-colors"
-                                                    >
-                                                        {sub.label}
-                                                    </Link>
-                                                ))}
+                        {navLinks.map((link) => {
+                            if (link.subLinks) {
+                                return (
+                                    <div key={link.label} className="relative group p-2">
+                                        <Link
+                                            href={link.href}
+                                            className="flex items-center gap-1 text-sm font-medium text-gray-700 group-hover:text-rio-green transition-colors duration-200"
+                                        >
+                                            {link.label}
+                                            <ChevronDown className="w-4 h-4 transition-transform duration-300 group-hover:-rotate-180" />
+                                        </Link>
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                                            <div className="bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden transform origin-top translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                                                <div className="py-2">
+                                                    {link.subLinks.map((sub, i) => (
+                                                        <Link
+                                                            key={i}
+                                                            href={sub.href}
+                                                            className="block px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green transition-colors"
+                                                        >
+                                                            {sub.label}
+                                                        </Link>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ) : (
+                                );
+                            }
+
+                            if (link.subGroups) {
+                                return (
+                                    <div key={link.label} className="relative group p-2">
+                                        <button
+                                            className="flex items-center gap-1 text-sm font-medium text-gray-700 group-hover:text-rio-green transition-colors duration-200 cursor-default"
+                                        >
+                                            {link.label}
+                                            <ChevronDown className="w-4 h-4 transition-transform duration-300 group-hover:-rotate-180" />
+                                        </button>
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                                            <div className="bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 transform origin-top translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                                                <div className="py-2">
+                                                    {link.subGroups.map((group, gi) => (
+                                                        <div key={gi} className="relative group/sub">
+                                                            <span
+                                                                className="flex items-center justify-between px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green transition-colors rounded-t-xl cursor-default"
+                                                            >
+                                                                {group.label}
+                                                                <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+                                                            </span>
+                                                            {/* Flyout opens to the right */}
+                                                            <div className="absolute top-0 left-[calc(100%-8px)] w-56 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-200 z-[60]">
+                                                                <div className="bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden">
+                                                                    <div className="py-2">
+                                                                        {group.items.map((item, ii) => (
+                                                                            <Link
+                                                                                key={ii}
+                                                                                href={item.href}
+                                                                                className="block px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green transition-colors"
+                                                                            >
+                                                                                {item.label}
+                                                                            </Link>
+                                                                        ))}
+                                                                        {group.allHref && (
+                                                                            <>
+                                                                                <div className="mx-4 my-1 h-px bg-gray-100" />
+                                                                                <Link
+                                                                                    href={group.allHref}
+                                                                                    className="block px-5 py-2.5 text-sm font-medium text-rio-green hover:bg-rio-green/5 transition-colors"
+                                                                                >
+                                                                                    {group.allLabel} →
+                                                                                </Link>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            return (
                                 <Link
                                     key={link.href}
-                                    href={link.href!}
+                                    href={link.href}
                                     className="p-2 text-sm font-medium text-gray-700 hover:text-rio-green transition-colors duration-200"
                                 >
                                     {link.label}
                                 </Link>
-                            )
-                        ))}
+                            );
+                        })}
                     </nav>
 
                     <div className="flex items-center gap-4">
@@ -113,57 +205,118 @@ export default function Navbar() {
 
             {/* Mobile Menu Overlay */}
             <div
-                className={`fixed inset-0 z-[110] lg:hidden bg-white transition-all duration-500 ease-in-out ${isMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
-                    }`}
+                className={`fixed inset-0 z-[110] lg:hidden bg-white transition-all duration-500 ease-in-out ${isMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
                 role="dialog"
                 aria-modal="true"
                 aria-label="Mobile Navigation"
             >
                 <div className="flex flex-col h-full pt-24 pb-8 px-8 overflow-y-auto">
                     <nav className="flex flex-col gap-8 items-center text-center py-10 w-full" aria-label="Mobile Navigation">
-                        {navLinks.map((link) => (
-                            link.subLinks ? (
-                                <div key={link.label} className="flex flex-col items-center w-full">
-                                    <div className="flex items-center gap-2">
-                                        <Link
-                                            href={link.href || "#"}
-                                            className="text-2xl font-bold text-gray-900 hover:text-rio-green transition-colors"
-                                            onClick={() => setIsMenuOpen(false)}
-                                        >
-                                            {link.label}
-                                        </Link>
-                                        <button
-                                            className="p-2"
-                                            onClick={() => setMobileTourenOpen(!mobileTourenOpen)}
-                                            aria-label="Toggle Submenu"
-                                        >
-                                            <ChevronDown className={`w-6 h-6 transition-transform duration-300 ${mobileTourenOpen ? "-rotate-180 text-rio-green" : ""}`} />
-                                        </button>
-                                    </div>
-                                    <div className={`flex flex-col gap-4 overflow-hidden transition-all duration-300 w-full ${mobileTourenOpen ? "max-h-64 opacity-100 mt-6" : "max-h-0 opacity-0 mt-0"}`}>
-                                        {link.subLinks.map((sub, i) => (
+                        {navLinks.map((link) => {
+                            if (link.subLinks) {
+                                return (
+                                    <div key={link.label} className="flex flex-col items-center w-full">
+                                        <div className="flex items-center gap-2">
                                             <Link
-                                                key={i}
-                                                href={sub.href}
-                                                className="text-lg font-medium text-gray-600 hover:text-rio-green transition-colors"
+                                                href={link.href}
+                                                className="text-2xl font-bold text-gray-900 hover:text-rio-green transition-colors"
                                                 onClick={() => setIsMenuOpen(false)}
                                             >
-                                                {sub.label}
+                                                {link.label}
                                             </Link>
-                                        ))}
+                                            <button
+                                                className="p-2"
+                                                onClick={() => setMobileTourenOpen(!mobileTourenOpen)}
+                                                aria-label="Toggle Submenu"
+                                            >
+                                                <ChevronDown className={`w-6 h-6 transition-transform duration-300 ${mobileTourenOpen ? "-rotate-180 text-rio-green" : ""}`} />
+                                            </button>
+                                        </div>
+                                        <div className={`flex flex-col gap-4 overflow-hidden transition-all duration-300 w-full ${mobileTourenOpen ? "max-h-[600px] opacity-100 mt-6" : "max-h-0 opacity-0 mt-0"}`}>
+                                            {link.subLinks.map((sub, i) => (
+                                                <Link
+                                                    key={i}
+                                                    href={sub.href}
+                                                    className="text-lg font-medium text-gray-600 hover:text-rio-green transition-colors"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                >
+                                                    {sub.label}
+                                                </Link>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            ) : (
+                                );
+                            }
+
+                            if (link.subGroups) {
+                                return (
+                                    <div key={link.label} className="flex flex-col items-center w-full">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-2xl font-bold text-gray-900">
+                                                {link.label}
+                                            </span>
+                                            <button
+                                                className="p-2"
+                                                onClick={() => setMobileGuideOpen(!mobileGuideOpen)}
+                                                aria-label="Toggle Submenu"
+                                            >
+                                                <ChevronDown className={`w-6 h-6 transition-transform duration-300 ${mobileGuideOpen ? "-rotate-180 text-rio-green" : ""}`} />
+                                            </button>
+                                        </div>
+                                        <div className={`flex flex-col gap-2 overflow-hidden transition-all duration-300 w-full ${mobileGuideOpen ? "max-h-[600px] opacity-100 mt-6" : "max-h-0 opacity-0 mt-0"}`}>
+                                            {link.subGroups.map((group, gi) => (
+                                                <div key={gi} className="flex flex-col items-center gap-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-lg font-semibold text-gray-700">
+                                                            {group.label}
+                                                        </span>
+                                                        <button
+                                                            className="p-1"
+                                                            onClick={() => setMobileGuideSehenOpen(!mobileGuideSehenOpen)}
+                                                            aria-label="Toggle Sehenswürdigkeiten"
+                                                        >
+                                                            <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${mobileGuideSehenOpen ? "-rotate-180 text-rio-green" : ""}`} />
+                                                        </button>
+                                                    </div>
+                                                    <div className={`flex flex-col gap-3 overflow-hidden transition-all duration-300 w-full ${mobileGuideSehenOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
+                                                        {group.items.map((item, ii) => (
+                                                            <Link
+                                                                key={ii}
+                                                                href={item.href}
+                                                                className="text-base font-medium text-gray-500 hover:text-rio-green transition-colors"
+                                                                onClick={() => setIsMenuOpen(false)}
+                                                            >
+                                                                {item.label}
+                                                            </Link>
+                                                        ))}
+                                                        {group.allHref && (
+                                                            <Link
+                                                                href={group.allHref}
+                                                                className="text-base font-medium text-rio-green hover:underline transition-colors"
+                                                                onClick={() => setIsMenuOpen(false)}
+                                                            >
+                                                                {group.allLabel} →
+                                                            </Link>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            return (
                                 <Link
                                     key={link.href}
-                                    href={link.href!}
+                                    href={link.href}
                                     className="text-2xl font-bold text-gray-900 hover:text-rio-green transition-colors"
                                     onClick={() => setIsMenuOpen(false)}
                                 >
                                     {link.label}
                                 </Link>
-                            )
-                        ))}
+                            );
+                        })}
 
                         <div className="w-full h-px bg-gray-100 max-w-xs my-2"></div>
                         <div className="lg:hidden w-full">

@@ -9,7 +9,7 @@ import { ChevronRight, MapPin, ArrowRight, Phone } from "lucide-react";
 export const metadata = {
     title: "Christus Erlöser Rio de Janeiro — Tipps, Eintritt & Anfahrt | Rio für Deutsche",
     description:
-        "Alles über den Christus Erlöser in Rio: Eintritt, beste Reisezeit, Geheimtipps vom Carioca. Redeemer statue rio de janeiro — so besuchst du ihn richtig.",
+        "Alles über den Christus Erlöser in Rio: Eintritt, beste Reisezeit, Geheimtipps vom Carioca. Redeemer statue rio de janeiro — so besuchst du ihn richtig. Auf Deutsch, mit lokalem Wissen.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/christus-erloeser",
     },
@@ -187,7 +187,77 @@ export default function ChristusErloeserPage() {
                                 </div>
                             </FadeIn>
 
+                            {/* Card 7 — Öffnungszeiten */}
+                            <FadeIn delay={0.3} direction="up" className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 hover:border-rio-green/30 hover:shadow-sm transition-all duration-300">
+                                <span className="text-2xl" role="img" aria-label="Uhr">🕗</span>
+                                <div>
+                                    <p className="text-[11px] font-bold tracking-widest uppercase text-gray-400 mb-1">Öffnungszeiten</p>
+                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Täglich 08:00–19:00 Uhr</p>
+                                </div>
+                            </FadeIn>
+
+                            {/* Card 8 — Wann hin? */}
+                            <FadeIn delay={0.35} direction="up" className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 hover:border-rio-green/30 hover:shadow-sm transition-all duration-300">
+                                <span className="text-2xl" role="img" aria-label="Menschenmenge">👥</span>
+                                <div>
+                                    <p className="text-[11px] font-bold tracking-widest uppercase text-gray-400 mb-1">Wann hin?</p>
+                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Vor 9 Uhr — danach wird es voll</p>
+                                </div>
+                            </FadeIn>
+
+                            {/* Card 9 — Zahnradbahn */}
+                            <FadeIn delay={0.4} direction="up" className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 hover:border-rio-green/30 hover:shadow-sm transition-all duration-300">
+                                <span className="text-2xl" role="img" aria-label="Zug">🚂</span>
+                                <div>
+                                    <p className="text-[11px] font-bold tracking-widest uppercase text-gray-400 mb-1">Zahnradbahn</p>
+                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">
+                                        Option vorhanden —{" "}
+                                        <span className="text-rio-green font-semibold">aber mit Will geht&apos;s besser</span>
+                                    </p>
+                                </div>
+                            </FadeIn>
+
                         </div>
+
+                        {/* ── Wetter & Sicht — Card destacado ─────────── */}
+                        <FadeIn direction="up" className="mt-6">
+                            <div className="relative bg-[#0d1f15] rounded-2xl overflow-hidden border border-amber-500/40 shadow-lg shadow-black/10">
+
+                                {/* Glow accent */}
+                                <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-amber-500/8 blur-3xl pointer-events-none" />
+
+                                <div className="relative p-7 lg:p-8">
+                                    {/* Icon + label */}
+                                    <div className="flex items-center gap-3 mb-5">
+                                        <span className="text-3xl" role="img" aria-label="Wetter">⛅</span>
+                                        <span className="text-xs font-bold tracking-widest uppercase text-amber-400">
+                                            Wetter &amp; Sicht
+                                        </span>
+                                    </div>
+
+                                    {/* Título */}
+                                    <h3 className="text-xl lg:text-2xl font-heading font-bold text-white mb-4 leading-tight">
+                                        Das Wetter entscheidet alles
+                                    </h3>
+
+                                    {/* Texto */}
+                                    <p className="text-white/75 text-base leading-relaxed mb-4">
+                                        Der Corcovado liegt auf 710 Metern — und Wolken machen keinen Urlaub.
+                                        An vielen Tagen ist der Gipfel komplett im Nebel, und du siehst buchstäblich
+                                        nichts. Mein Tipp als Carioca: Schau morgens früh aus dem Fenster. Wenn du
+                                        den Christus von der Stadt aus sehen kannst, ist der Tag perfekt. Kannst du
+                                        ihn nicht sehen — warte oder plane um.
+                                    </p>
+
+                                    <p className="text-white/60 text-sm leading-relaxed">
+                                        <span className="text-amber-400 font-semibold">Die besten Monate für klare Sicht:</span>{" "}
+                                        Juni bis August (Winter in Rio — weniger Wolken, angenehme Temperaturen).
+                                        Vermeide Januar und Februar — Regenzeit, Wolken fast jeden Nachmittag.
+                                    </p>
+                                </div>
+                            </div>
+                        </FadeIn>
+
                     </div>
                 </section>
 
@@ -203,31 +273,34 @@ export default function ChristusErloeserPage() {
                                     er plötzlich vor dir steht — riesig, ruhig, die Arme ausgebreitet
                                     über der ganzen Stadt. Ich bin in Rio aufgewachsen und habe ihn
                                     hundertmal gesehen, aber dieser Moment überrascht mich immer noch.
-                                    Den Christus Erlöser muss man einfach erlebt haben.
+                                    Den Christus Erlöser — auf Englisch <em>Christ the Redeemer</em>,
+                                    auf Portugiesisch <em>Cristo Redentor</em> — muss man einfach erlebt haben.
                                 </p>
 
                                 {/* Parágrafo 2 — O que o torna especial */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
-                                    Auf 710 Metern Höhe thront die Statue auf dem Gipfel des Corcovado —
-                                    und von dort oben öffnet sich ein 360°-Panorama, das seinesgleichen
-                                    sucht: Ipanema, Copacabana, die Guanabara-Bucht, der Zuckerhut, der
-                                    Regenwald der Tijuca — alles auf einmal, in einer einzigen Drehung.
-                                    An wirklich klaren Tagen reicht der Blick bis zum Horizont. Der
-                                    Christus Erlöser ist nicht einfach eine Statue. Er ist der einzige
-                                    Aussichtspunkt der Welt, um den sich eine ganze Millionenstadt wie
-                                    selbstverständlich herum organisiert — als wäre er schon immer da
-                                    gewesen und hätte nie irgendwo anderes stehen können.
+                                    Auf 710 Metern Höhe thront die Statue auf dem Gipfel des Corcovado
+                                    in Rio de Janeiro — und von dort oben öffnet sich ein 360°-Panorama,
+                                    das seinesgleichen sucht: Ipanema, Copacabana, die Guanabara-Bucht,
+                                    der Zuckerhut, der Regenwald der Tijuca — alles auf einmal, in einer
+                                    einzigen Drehung. An wirklich klaren Tagen reicht der Blick bis zum
+                                    Horizont. Die <em>redeemer statue</em> von Rio de Janeiro ist nicht
+                                    einfach ein Wahrzeichen. Sie ist der einzige Aussichtspunkt der Welt,
+                                    um den sich eine ganze Millionenstadt wie selbstverständlich herum
+                                    organisiert — als wäre sie schon immer da gewesen und hätte nie
+                                    irgendwo anderes stehen können.
                                 </p>
 
                                 {/* Parágrafo 3 — O conselho do Will */}
                                 <p className="text-lg text-gray-600 leading-relaxed pt-2 border-t border-gray-100">
-                                    Mein wichtigster Tipp: Geh früh hin. Vor 9 Uhr gehört der Christus
-                                    fast nur dir — die Luft ist kühler, das Licht ist weicher, und du
-                                    kannst in aller Ruhe stehen und einfach schauen. Ab 10 Uhr rollen
-                                    die Reisebusse an und das Erlebnis wird ein ganz anderes. Es lohnt
-                                    sich außerdem immer, die Tickets vorab online zu reservieren — die
-                                    Schlange an der Kasse kann an vollen Tagen eine Stunde oder mehr
-                                    betragen, und das bei praller Sonne. Das muss wirklich nicht sein.
+                                    Mein wichtigster Tipp für den Christus Erlöser in Rio: Geh früh
+                                    hin. Vor 9 Uhr gehört der Corcovado fast nur dir — die Luft ist
+                                    kühler, das Licht ist weicher, und du kannst in aller Ruhe stehen
+                                    und einfach schauen. Ab 10 Uhr rollen die Reisebusse an und das
+                                    Erlebnis wird ein ganz anderes. Es lohnt sich außerdem immer, die
+                                    Tickets vorab online zu reservieren — die Schlange an der Kasse
+                                    kann an vollen Tagen eine Stunde oder mehr betragen, und das bei
+                                    praller Sonne. Das muss wirklich nicht sein.
                                 </p>
 
                             </div>
@@ -264,13 +337,14 @@ export default function ChristusErloeserPage() {
 
                                 {/* P2 — Os números */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
-                                    Die Statue ist 30 Meter hoch, der Sockel weitere 8 Meter —
-                                    insgesamt also 38 Meter. Die ausgestreckten Arme messen 28 Meter
-                                    von Fingerspitze zu Fingerspitze, das Gesamtgewicht beträgt rund
-                                    635 Tonnen. Der Corcovado, auf dem er steht, erhebt sich 710
-                                    Meter über dem Meeresspiegel und liegt mitten in der Floresta
-                                    da Tijuca — dem größten urbanen Regenwald der Welt. 2007 wurde
-                                    der Christus Erlöser offiziell zu einem der Sieben Weltwunder
+                                    Die Christus-Statue in Rio de Janeiro ist 30 Meter hoch, der Sockel
+                                    weitere 8 Meter — insgesamt also 38 Meter. Die ausgestreckten Arme
+                                    messen 28 Meter von Fingerspitze zu Fingerspitze, das Gesamtgewicht
+                                    beträgt rund 635 Tonnen. Der Corcovado, auf dem er steht, erhebt
+                                    sich 710 Meter über dem Meeresspiegel und liegt mitten in der
+                                    Floresta da Tijuca — dem größten urbanen Regenwald der Welt. 2007
+                                    wurde der <em>Christ the Redeemer</em>, die berühmteste
+                                    Jesus-Christus-Statue Rios, offiziell zu einem der Sieben Weltwunder
                                     der Neuzeit gewählt.
                                 </p>
 
@@ -300,6 +374,31 @@ export default function ChristusErloeserPage() {
                                     ihrer neuen Heimat erblickten. Das erzähle ich meinen deutschen
                                     Gästen immer — es ist einer der Momente, in denen man spürt,
                                     dass Geschichte wirklich persönlich werden kann.
+                                </p>
+
+                                {/* P5 — Felix Baumgartner */}
+                                <p className="text-lg text-gray-600 leading-relaxed">
+                                    Eine der verrücktesten Anekdoten rund um den Christus stammt
+                                    aus dem Jahr 1999 — und betrifft einen Österreicher. Der
+                                    Extremsportler Felix Baumgartner schlich sich nachts auf das
+                                    Gelände, kletterte auf den rechten Arm der Statue und sprang
+                                    mit dem Fallschirm ab. Er nutzte eine armbrustähnliche
+                                    Vorrichtung, um ein Seil über den Arm zu schießen — und
+                                    landete sicher im Tijuca-Regenwald. Für viele Brasilianer war
+                                    es eine Provokation. Für Baumgartner war es der Beginn einer
+                                    Karriere als bekanntester Extremsportler der Welt.
+                                </p>
+
+                                {/* P6 — Iluminação WM 2014 */}
+                                <p className="text-lg text-gray-600 leading-relaxed">
+                                    Seit einer umfassenden Restaurierung im Jahr 2010 verfügt die
+                                    Statue über ein modernes Beleuchtungssystem. Seitdem erstrahlt
+                                    der Christus regelmäßig in besonderen Farben — zum Gedenken,
+                                    zur Feier, oder als Zeichen der Solidarität. Beim WM-Finale
+                                    2014, als Deutschland in Brasilien Weltmeister wurde, leuchtete
+                                    der Cristo Redentor in Schwarz, Rot und Gold. Für viele
+                                    Deutsche, die damals in Rio waren, war es eines der
+                                    unvergesslichsten Bilder der Reise.
                                 </p>
 
                             </div>
