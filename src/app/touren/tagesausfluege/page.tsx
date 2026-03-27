@@ -166,32 +166,54 @@ export default function TagesausfluegePage() {
                         </FadeIn>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {tagesausfluegDestinos.map((place, index) => (
-                                <FadeIn key={index} delay={index * 0.1} direction="up" className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 group flex flex-col h-full">
-                                    <div className="h-56 w-full relative overflow-hidden bg-gray-100">
-                                        <Image
-                                            src={place.image}
-                                            alt={place.name}
-                                            fill
-                                            loading="lazy"
-                                            className="object-cover group-hover:scale-105 transition-transform duration-700"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                    </div>
-                                    <div className="p-8 flex flex-col flex-grow">
-                                        <h3 className="text-2xl font-bold font-heading text-gray-900 mb-2">{place.name}</h3>
-                                        <p className="text-gray-500 text-sm mb-3">{place.desc}</p>
-                                        <p className="text-gray-400 text-xs italic mb-6 flex-grow">💡 {place.tip}</p>
-                                        <div className="flex flex-wrap items-center gap-2 pt-6 border-t border-gray-50">
-                                            {place.badges.map((badge) => (
-                                                <span key={badge} className="text-xs font-bold px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 uppercase tracking-wider">
-                                                    {badge}
-                                                </span>
-                                            ))}
+                            {tagesausfluegDestinos.map((place, index) => {
+                                const hasLink = "link" in place && !!(place as any).link;
+                                const cardContent = (
+                                    <>
+                                        <div className="h-56 w-full relative overflow-hidden bg-gray-100">
+                                            <Image
+                                                src={place.image}
+                                                alt={place.name}
+                                                fill
+                                                loading="lazy"
+                                                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                            <div className="absolute top-3 left-3 flex flex-wrap items-center gap-2">
+                                                {place.badges.map((badge) => (
+                                                    <span key={badge} className="text-xs font-bold px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-gray-700 shadow-sm uppercase tracking-wider">
+                                                        {badge}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                </FadeIn>
-                            ))}
+                                        <div className="p-8 flex flex-col flex-grow">
+                                            <h3 className="text-2xl font-bold font-heading text-gray-900 mb-2">{place.name}</h3>
+                                            <p className="text-gray-500 text-sm mb-3">{place.desc}</p>
+                                            <p className="text-gray-400 text-xs italic flex-grow">💡 {place.tip}</p>
+                                            {hasLink && (
+                                                <div className="mt-6 pt-6 border-t border-gray-50">
+                                                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-rio-green group-hover:gap-2.5 transition-all duration-200">
+                                                        Mehr erfahren
+                                                        <ChevronRight className="w-4 h-4" />
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                );
+                                return hasLink ? (
+                                    <FadeIn key={index} delay={index * 0.1} direction="up">
+                                        <Link href={(place as any).link} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:scale-[1.01] border border-gray-100 transition-all duration-300 group flex flex-col h-full cursor-pointer block">
+                                            {cardContent}
+                                        </Link>
+                                    </FadeIn>
+                                ) : (
+                                    <FadeIn key={index} delay={index * 0.1} direction="up" className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 group flex flex-col h-full">
+                                        {cardContent}
+                                    </FadeIn>
+                                );
+                            })}
                         </div>
                     </div>
                 </section>

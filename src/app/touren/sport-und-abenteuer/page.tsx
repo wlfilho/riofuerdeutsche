@@ -164,34 +164,55 @@ export default function SportUndAbenteuerPage() {
                         </FadeIn>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            {activities.map((item, index) => (
-                                <FadeIn key={index} delay={index * 0.1} direction="up" className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 group flex flex-col h-full">
-                                    <div className="h-64 lg:h-72 w-full relative overflow-hidden">
-                                        <Image
-                                            src={item.image}
-                                            alt={item.title}
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-700"
-                                            loading="lazy"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                    </div>
-                                    <div className="p-8 flex flex-col flex-grow">
-                                        <h3 className="text-2xl font-bold font-heading text-gray-900 mb-3">{item.title}</h3>
-                                        <p className="text-gray-600 text-base mb-4 leading-relaxed">{item.description}</p>
-                                        <p className="text-gray-400 text-sm italic mb-8 flex-grow">💡 {item.tip}</p>
-
-                                        <div className="flex flex-wrap items-center gap-3 pt-6 border-t border-gray-50">
-                                            {item.badges.map((badge, bIndex) => (
-                                                <div key={bIndex} className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${bIndex === 0 ? 'bg-rio-green/5 text-rio-green' : 'bg-gray-100 text-gray-600'}`}>
-                                                    <badge.icon className="w-3.5 h-3.5" />
-                                                    {badge.text}
-                                                </div>
-                                            ))}
+                            {activities.map((item, index) => {
+                                const hasLink = "link" in item && !!(item as any).link;
+                                const cardContent = (
+                                    <>
+                                        <div className="h-64 lg:h-72 w-full relative overflow-hidden">
+                                            <Image
+                                                src={item.image}
+                                                alt={item.title}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                                loading="lazy"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                            <div className="absolute top-3 left-3 flex flex-wrap items-center gap-2">
+                                                {item.badges.map((badge, bIndex) => (
+                                                    <div key={bIndex} className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-gray-700 shadow-sm">
+                                                        <badge.icon className="w-3.5 h-3.5" />
+                                                        {badge.text}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                </FadeIn>
-                            ))}
+                                        <div className="p-8 flex flex-col flex-grow">
+                                            <h3 className="text-2xl font-bold font-heading text-gray-900 mb-3">{item.title}</h3>
+                                            <p className="text-gray-600 text-base mb-4 leading-relaxed">{item.description}</p>
+                                            <p className="text-gray-400 text-sm italic flex-grow">💡 {item.tip}</p>
+                                            {hasLink && (
+                                                <div className="mt-6 pt-6 border-t border-gray-50">
+                                                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-rio-green group-hover:gap-2.5 transition-all duration-200">
+                                                        Mehr erfahren
+                                                        <ChevronRight className="w-4 h-4" />
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                );
+                                return hasLink ? (
+                                    <FadeIn key={index} delay={index * 0.1} direction="up">
+                                        <Link href={(item as any).link} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:scale-[1.01] border border-gray-100 transition-all duration-300 group flex flex-col h-full cursor-pointer block">
+                                            {cardContent}
+                                        </Link>
+                                    </FadeIn>
+                                ) : (
+                                    <FadeIn key={index} delay={index * 0.1} direction="up" className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 group flex flex-col h-full">
+                                        {cardContent}
+                                    </FadeIn>
+                                );
+                            })}
                         </div>
                     </div>
                 </section>

@@ -498,12 +498,12 @@ export default function ChristusErloeserPage() {
                                     <div className="flex justify-between items-start mb-4">
                                         <span className="text-3xl" role="img" aria-label="Seilbahn">🚡</span>
                                         <span className="bg-white/90 px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
-                                            Sehenswürdigkeit
+                                            Klassiker
                                         </span>
                                     </div>
                                     <h3 className="text-xl font-bold font-heading text-gray-900 mb-2">Zuckerhut</h3>
                                     <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-grow">
-                                        Der zweite große Klassiker — am schönsten bei Sonnenuntergang mit Blick auf den Christus.
+                                        Der perfekte Gegenpol — vom Zuckerhut aus siehst du den Christus in seiner ganzen Größe.
                                     </p>
                                     <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors">
                                         Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

@@ -41,7 +41,8 @@ const attractions = [
         effort: "Leicht",
         gradient: "from-blue-100 to-blue-200",
         image: "/images/cristo.webp",
-        style: { objectPosition: "50% 0%" }
+        style: { objectPosition: "50% 0%" },
+        guideLink: "/rio-guide/sehenswuerdigkeiten/christus-erloeser",
     },
     {
         name: "Zuckerhut (Pão de Açúcar)",
@@ -50,7 +51,8 @@ const attractions = [
         tip: "Der Sonnenuntergang vom Zuckerhut ist eines der schönsten Erlebnisse in Rio. Ich plane die Tour so, dass wir genau zur richtigen Zeit oben sind.",
         effort: "Leicht",
         gradient: "from-orange-100 to-orange-200",
-        image: "/images/zuckerhut.jpg"
+        image: "/images/zuckerhut.jpg",
+        guideLink: "/rio-guide/sehenswuerdigkeiten/zuckerhut",
     },
     {
         name: "Escadaria Selarón",
@@ -310,37 +312,58 @@ export default function KlassikerTourPage() {
                             <p className="text-gray-500 mt-3 text-lg">12 Highlights, von weltbekannten Ikonen bis zu versteckten Geheimtipps.</p>
                         </FadeIn>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {attractions.map((attr, index) => (
-                                <FadeIn key={index} delay={index * 0.1} direction="up" className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 group flex flex-col h-full">
-                                    <div className="h-56 w-full relative overflow-hidden">
-                                        <Image
-                                            src={attr.image}
-                                            alt={attr.name}
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-700"
-                                            style={attr.style as React.CSSProperties}
-                                            loading="lazy"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                    </div>
-                                    <div className="p-6 flex flex-col flex-grow">
-                                        <h3 className="text-xl font-bold font-heading text-gray-900 mb-2">{attr.name}</h3>
-                                        <p className="text-gray-500 text-sm mb-3">{attr.desc}</p>
-                                        <p className="text-gray-400 text-xs italic mb-6 flex-grow">💡 {attr.tip}</p>
-
-                                        <div className="flex items-center gap-3 pt-4 border-t border-gray-50">
-                                            <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600">
-                                                <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                                {attr.time}
-                                            </div>
-                                            <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700">
-                                                <Activity className="w-3.5 h-3.5 text-blue-400" />
-                                                {attr.effort}
+                            {attractions.map((attr, index) => {
+                                const hasLink = "guideLink" in attr && !!attr.guideLink;
+                                const cardContent = (
+                                    <>
+                                        <div className="h-56 w-full relative overflow-hidden">
+                                            <Image
+                                                src={attr.image}
+                                                alt={attr.name}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                                style={attr.style as React.CSSProperties}
+                                                loading="lazy"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                            <div className="absolute top-3 left-3 flex items-center gap-2">
+                                                <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-gray-700 shadow-sm">
+                                                    <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                                    {attr.time}
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-gray-700 shadow-sm">
+                                                    <Activity className="w-3.5 h-3.5 text-gray-400" />
+                                                    {attr.effort}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </FadeIn>
-                            ))}
+                                        <div className="p-6 flex flex-col flex-grow">
+                                            <h3 className="text-xl font-bold font-heading text-gray-900 mb-2">{attr.name}</h3>
+                                            <p className="text-gray-500 text-sm mb-3">{attr.desc}</p>
+                                            <p className="text-gray-400 text-xs italic flex-grow">💡 {attr.tip}</p>
+                                            {hasLink && (
+                                                <div className="mt-4 pt-4 border-t border-gray-50">
+                                                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-rio-green group-hover:gap-2.5 transition-all duration-200">
+                                                        Mehr erfahren
+                                                        <ChevronRight className="w-4 h-4" />
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                );
+                                return hasLink ? (
+                                    <FadeIn key={index} delay={index * 0.1} direction="up">
+                                        <Link href={(attr as any).guideLink} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:scale-[1.01] border border-gray-100 transition-all duration-300 group flex flex-col h-full cursor-pointer block">
+                                            {cardContent}
+                                        </Link>
+                                    </FadeIn>
+                                ) : (
+                                    <FadeIn key={index} delay={index * 0.1} direction="up" className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 group flex flex-col h-full">
+                                        {cardContent}
+                                    </FadeIn>
+                                );
+                            })}
                         </div>
                     </div>
                 </section>
