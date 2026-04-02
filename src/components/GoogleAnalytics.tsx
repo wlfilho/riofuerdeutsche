@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import Script from 'next/script'
 
 const GA_ID = 'G-4BKZYR81FF'
 
@@ -11,33 +12,19 @@ declare global {
   }
 }
 
-function loadGA4() {
-  if (document.querySelector(`script[src*="gtag/js?id=${GA_ID}"]`)) return
-
-  window.dataLayer = window.dataLayer || []
-  window.gtag = function gtag(...args: unknown[]) {
-    window.dataLayer.push(args)
-  }
-  window.gtag('js', new Date())
-  window.gtag('config', GA_ID)
-
-  const script = document.createElement('script')
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`
-  script.async = true
-  document.head.appendChild(script)
-}
-
 export default function GoogleAnalytics() {
+  const [enabled, setEnabled] = useState(false)
+
   useEffect(() => {
     const consent = localStorage.getItem('cookie_consent')
     if (consent === 'accepted') {
-      loadGA4()
+      setEnabled(true)
     }
 
     const handleConsentUpdate = () => {
       const updated = localStorage.getItem('cookie_consent')
       if (updated === 'accepted') {
-        loadGA4()
+        setEnabled(true)
       }
     }
 
@@ -47,5 +34,22 @@ export default function GoogleAnalytics() {
     }
   }, [])
 
-  return null
+  if (!enabled) return null
+
+  return (
+    <>
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+        strategy="afterInteractive"
+      />
+      <Script id="ga4-init" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${GA_ID}');
+        `}
+      </Script>
+    </>
+  )
 }
