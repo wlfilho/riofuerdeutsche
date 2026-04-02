@@ -19,13 +19,11 @@ function loadGA4() {
     window.dataLayer.push(args)
   }
   window.gtag('js', new Date())
+  window.gtag('config', GA_ID)
 
   const script = document.createElement('script')
   script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`
   script.async = true
-  script.onload = () => {
-    window.gtag('config', GA_ID)
-  }
   document.head.appendChild(script)
 }
 
