@@ -103,7 +103,7 @@ export default function MagicLinkForm({
           href="/guide/sicherheit"
           className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#0d1f15] text-white rounded-full font-bold text-lg hover:bg-[#1a3826] hover:scale-[1.02] transition-all shadow-md"
         >
-          Zum Guide (/guide/sicherheit)
+          Jetzt lesen
           <ArrowRight className="w-5 h-5" />
         </Link>
       </div>
