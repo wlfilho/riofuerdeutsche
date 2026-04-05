@@ -10,8 +10,21 @@ export async function GET(request: Request) {
 
     if (code) {
         const supabase = await createClient();
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
         if (!error) {
+            // Sync first_name from user_metadata to profiles table
+            const user = sessionData?.user;
+            if (user) {
+                const firstName = user.user_metadata?.first_name;
+                if (firstName) {
+                    await supabase
+                        .from('profiles')
+                        .upsert(
+                            { id: user.id, first_name: firstName },
+                            { onConflict: 'id', ignoreDuplicates: false }
+                        );
+                }
+            }
             const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
             const isLocalHost = origin.startsWith("http://localhost");
             if (isLocalHost) {
