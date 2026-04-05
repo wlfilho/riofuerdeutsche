@@ -39,7 +39,7 @@ export default function MagicLinkForm({
         email,
         options: {
           data: { first_name: vorname },
-          emailRedirectTo: `${window.location.origin}/guide/sicherheit`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/guide/sicherheit`,
         },
       });
 

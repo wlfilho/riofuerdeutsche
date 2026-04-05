@@ -118,12 +118,14 @@ export async function updateSession(request: NextRequest) {
         !pathname.startsWith("/login") &&
         !pathname.startsWith("/signup") &&
         !pathname.startsWith("/forgot-password") &&
+        !pathname.startsWith("/auth") &&
         !pathname.startsWith("/touren") &&
         !pathname.startsWith("/kontakt") &&
         !pathname.startsWith("/impressum") &&
         !pathname.startsWith("/datenschutz") &&
         !pathname.startsWith("/ist-rio-gefaehrlich") &&
         !pathname.startsWith("/rio-guide") &&
+        !pathname.startsWith("/sicherheit") &&
         pathname !== "/"
     ) {
         const url = request.nextUrl.clone();
