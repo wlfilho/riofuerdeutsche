@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import ReviewsModeration from '@/app/admin/ReviewsModeration';
 
 interface Stats {
   totalUsers: number;
@@ -12,6 +11,7 @@ interface Stats {
   totalChapters: number;
   publishedChapters: number;
   draftChapters: number;
+  pendingReviews: number;
 }
 
 export default function AdminOverview() {
@@ -22,6 +22,7 @@ export default function AdminOverview() {
     totalChapters: 0,
     publishedChapters: 0,
     draftChapters: 0,
+    pendingReviews: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -38,6 +39,10 @@ export default function AdminOverview() {
         const chaptersData = await chaptersRes.json();
         const chapters = chaptersData.chapters || [];
 
+        // Fetch pending reviews count
+        const reviewsRes = await fetch('/api/admin/reviews?status=pending');
+        const reviewsData = await reviewsRes.json();
+
         setStats({
           totalUsers: users.length,
           freeUsers: users.filter((u: any) => u.role === 'user').length,
@@ -45,6 +50,7 @@ export default function AdminOverview() {
           totalChapters: chapters.length,
           publishedChapters: chapters.filter((c: any) => c.status === 'published').length,
           draftChapters: chapters.filter((c: any) => c.status === 'draft').length,
+          pendingReviews: reviewsData.count ?? 0,
         });
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -179,10 +185,29 @@ export default function AdminOverview() {
               </p>
             </div>
           </Link>
-        </div>
 
-        {/* Reviews Moderation Section */}
-        <ReviewsModeration />
+          <Link
+            href="/admin/bewertungen"
+            className="flex items-start gap-4 p-5 bg-white rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group"
+          >
+            <span className="text-3xl">⭐</span>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-gray-900 group-hover:text-green-700">
+                  Bewertungen
+                </h3>
+                {stats.pendingReviews > 0 && (
+                  <span className="px-2 py-0.5 bg-yellow-400 text-black text-xs font-bold rounded-full">
+                    {stats.pendingReviews} ausstehend
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                Nutzerbewertungen prüfen und freischalten.
+              </p>
+            </div>
+          </Link>
+        </div>
       </div>
     </div>
   );

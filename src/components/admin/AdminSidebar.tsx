@@ -21,6 +21,11 @@ const navItems = [
     href: '/admin/guide',
     icon: '📖',
   },
+  {
+    label: 'Bewertungen',
+    href: '/admin/bewertungen',
+    icon: '⭐',
+  },
 ];
 
 export default function AdminSidebar() {
