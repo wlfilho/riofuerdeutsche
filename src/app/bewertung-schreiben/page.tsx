@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Star, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -47,6 +47,7 @@ interface FormData {
     rating: number;
     title: string;
     body: string;
+    website: string; // Honeypot field
 }
 
 interface FormErrors {
@@ -67,12 +68,18 @@ export default function BewertungSchreibenPage() {
         rating: 0,
         title: '',
         body: '',
+        website: '',
     });
 
     const [errors, setErrors] = useState<FormErrors>({});
     const [hoveredRating, setHoveredRating] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [mountTime, setMountTime] = useState(0);
+
+    useEffect(() => {
+        setMountTime(Date.now());
+    }, []);
 
     const validate = (): boolean => {
         const newErrors: FormErrors = {};
@@ -96,6 +103,21 @@ export default function BewertungSchreibenPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrors({});
+
+        // 1. Honeypot check: de bot preenchido, ignoramos silenciosamente
+        if (formData.website) {
+            console.log('Spam detectado (honeypot)');
+            setIsSubmitted(true); // Fingimos sucesso para o bot
+            return;
+        }
+
+        // 2. Time check: se o formulário foi enviado muito rápido (< 3 segundos), provável robô
+        const timeElapsed = Date.now() - mountTime;
+        if (timeElapsed < 3000) {
+            console.log('Spam detectado (velocidade)');
+            setIsSubmitted(true);
+            return;
+        }
 
         if (!validate()) return;
 
@@ -160,13 +182,25 @@ export default function BewertungSchreibenPage() {
                         Deine Erfahrung teilen
                     </h1>
                     <p className="text-lg text-gray-600 max-w-lg mx-auto">
-                        Hat dir das Erlebnis gefallen? Schreib uns — dein Feedback ajuda outros viajantes alemães.
+                        Hat dir das Erlebnis gefallen? Schreib uns — dein Feedback hilft anderen deutschen Reisenden.
                     </p>
                 </div>
 
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                     <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
                         
+                        {/* Honeypot field (hidden from humans) */}
+                        <div className="hidden" aria-hidden="true">
+                            <input
+                                type="text"
+                                name="website"
+                                value={formData.website}
+                                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                                tabIndex={-1}
+                                autoComplete="off"
+                            />
+                        </div>
+
                         {/* Name & Email Group */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-1.5">
@@ -187,7 +221,7 @@ export default function BewertungSchreibenPage() {
                             </div>
                             <div className="space-y-1.5">
                                 <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
-                                    Deine E-Mail <span className="text-xs font-normal text-gray-500">(wird não veröffentlicht)</span>
+                                    Deine E-Mail <span className="text-xs font-normal text-gray-500">(wird nicht veröffentlicht)</span>
                                 </label>
                                 <input
                                     type="email"
