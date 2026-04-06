@@ -124,6 +124,8 @@ export async function updateSession(request: NextRequest) {
         !pathname.startsWith("/ist-rio-gefaehrlich") &&
         !pathname.startsWith("/rio-guide") &&
         !pathname.startsWith("/sicherheit") &&
+        !pathname.startsWith("/bewertungen") &&
+        !pathname.startsWith("/bewertung-schreiben") &&
         pathname !== "/"
     ) {
         const url = request.nextUrl.clone();

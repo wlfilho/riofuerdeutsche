@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ReviewsModeration from '@/app/admin/ReviewsModeration';
 
 interface Stats {
   totalUsers: number;
@@ -179,6 +180,9 @@ export default function AdminOverview() {
             </div>
           </Link>
         </div>
+
+        {/* Reviews Moderation Section */}
+        <ReviewsModeration />
       </div>
     </div>
   );
