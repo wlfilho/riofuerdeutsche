@@ -48,6 +48,8 @@ interface FormData {
     title: string;
     body: string;
     website: string; // Honeypot field
+    consentOwnPhotos: boolean;
+    consentWillPhotos: boolean;
 }
 
 interface FormErrors {
@@ -57,6 +59,7 @@ interface FormErrors {
     rating?: string;
     title?: string;
     body?: string;
+    photos?: string;
     submit?: string;
 }
 
@@ -69,8 +72,11 @@ export default function ReviewForm() {
         title: '',
         body: '',
         website: '',
+        consentOwnPhotos: false,
+        consentWillPhotos: false,
     });
 
+    const [photoFiles, setPhotoFiles] = useState<File[]>([]);
     const [errors, setErrors] = useState<FormErrors>({});
     const [hoveredRating, setHoveredRating] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,6 +86,36 @@ export default function ReviewForm() {
     useEffect(() => {
         setMountTime(Date.now());
     }, []);
+
+    // Handler para selecionar fotos
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        
+        // Máximo 5 fotos
+        if (photoFiles.length + files.length > 5) {
+            setErrors(prev => ({ ...prev, photos: "Maximal 5 Fotos erlaubt." }));
+            return;
+        }
+        
+        // Máximo 5MB por ficheiro
+        const oversized = files.filter(f => f.size > 5 * 1024 * 1024);
+        if (oversized.length > 0) {
+            setErrors(prev => ({ ...prev, photos: "Jedes Bild darf maximal 5 MB groß sein." }));
+            return;
+        }
+        
+        setErrors(prev => {
+            const newErrs = { ...prev };
+            delete newErrs.photos;
+            return newErrs;
+        });
+        setPhotoFiles(prev => [...prev, ...files]);
+    };
+
+    // Remover foto do preview
+    const removePhoto = (index: number) => {
+        setPhotoFiles(prev => prev.filter((_, i) => i !== index));
+    };
 
     const validate = (): boolean => {
         const newErrors: FormErrors = {};
@@ -104,14 +140,14 @@ export default function ReviewForm() {
         e.preventDefault();
         setErrors({});
 
-        // 1. Honeypot check: de bot preenchido, ignoramos silenciosamente
+        // 1. Honeypot check
         if (formData.website) {
             console.log('Spam detectado (honeypot)');
-            setIsSubmitted(true); // Fingimos sucesso para o bot
+            setIsSubmitted(true);
             return;
         }
 
-        // 2. Time check: se o formulário foi enviado muito rápido (< 3 segundos), provável robô
+        // 2. Time check
         const timeElapsed = Date.now() - mountTime;
         if (timeElapsed < 3000) {
             console.log('Spam detectado (velocidade)');
@@ -124,25 +160,58 @@ export default function ReviewForm() {
         setIsSubmitting(true);
         const supabase = createClient();
 
-        const { error } = await supabase
-            .from('reviews')
-            .insert({
-                attractions: formData.attractions,
-                nickname: formData.nickname,
-                email: formData.email,
-                rating: formData.rating,
-                title: formData.title,
-                body: formData.body,
-                status: 'pending'
-            });
+        try {
+            // 2. Upload de fotos (se houver)
+            const uploadedUrls: string[] = [];
+            
+            for (const file of photoFiles) {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('review-photos')
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: false,
+                    });
+                
+                if (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    continue; // continua mesmo se 1 foto falhar
+                }
+                
+                // Obter URL pública
+                const { data: { publicUrl } } = supabase.storage
+                    .from('review-photos')
+                    .getPublicUrl(uploadData.path);
+                
+                uploadedUrls.push(publicUrl);
+            }
 
-        setIsSubmitting(false);
+            // 3. Insert no Supabase
+            const { error } = await supabase
+                .from('reviews')
+                .insert({
+                    attractions: formData.attractions,
+                    nickname: formData.nickname,
+                    email: formData.email,
+                    rating: formData.rating,
+                    title: formData.title,
+                    body: formData.body,
+                    photo_urls: uploadedUrls,
+                    consent_own_photos: formData.consentOwnPhotos,
+                    consent_will_photos: formData.consentWillPhotos,
+                    status: 'pending'
+                });
 
-        if (error) {
-            console.error('Error submitting review:', error);
-            setErrors({ submit: 'Ups! Etwas ist schief gelaufen. Bitte versuche es später noch einmal.' });
-        } else {
+            if (error) throw error;
             setIsSubmitted(true);
+
+        } catch (error) {
+            console.error('Submit error:', error);
+            setErrors({ submit: 'Ups! Etwas ist schief gelaufen. Bitte versuche es später noch einmal.' });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -310,6 +379,58 @@ export default function ReviewForm() {
                             </div>
                         </div>
 
+                        {/* Upload de fotos */}
+                        <div className="space-y-4">
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                Fotos teilen <span className="text-gray-400 font-normal">(optional)</span>
+                            </label>
+                            <p className="text-xs text-gray-500 mb-3">
+                                Hast du Fotos von der Tour? Du kannst bis zu 5 Bilder hochladen. 
+                                (JPG, PNG · max. 5 MB pro Bild)
+                            </p>
+
+                            <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                multiple
+                                onChange={handlePhotoChange}
+                                className="block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-lg file:border-0
+                                file:text-sm file:font-medium
+                                file:bg-yellow-50 file:text-yellow-800
+                                hover:file:bg-yellow-100 cursor-pointer"
+                            />
+
+                            {/* Preview das fotos selecionadas */}
+                            {photoFiles.length > 0 && (
+                                <div className="flex gap-2 mt-3 flex-wrap">
+                                    {photoFiles.map((file, index) => (
+                                        <div key={index} className="relative">
+                                            <img
+                                                src={URL.createObjectURL(file)}
+                                                alt={`Foto ${index + 1}`}
+                                                className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removePhoto(index)}
+                                                className="absolute -top-1 -right-1 bg-red-500 text-white 
+                                                rounded-full w-5 h-5 flex items-center justify-center 
+                                                text-xs hover:bg-red-600 shadow-sm"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {errors.photos && (
+                                <p className="text-red-500 text-xs mt-1">{errors.photos}</p>
+                            )}
+                        </div>
+
                         <hr className="border-gray-100" />
 
                         {/* Attractions visited (Optional) */}
@@ -353,6 +474,48 @@ export default function ReviewForm() {
                                         <span className="text-xs font-medium leading-tight">{item}</span>
                                     </label>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Consentimento de fotos */}
+                        <div className="border border-gray-200 rounded-lg p-5 bg-gray-50 space-y-4">
+                            <p className="text-sm font-bold text-gray-700">Foto-Einwilligung</p>
+
+                            <div className="space-y-3">
+                                {/* Consentimento para fotos do próprio upload */}
+                                {photoFiles.length > 0 && (
+                                    <label className="flex items-start gap-3 cursor-pointer group">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.consentOwnPhotos}
+                                            onChange={(e) =>
+                                                setFormData(prev => ({ ...prev, consentOwnPhotos: e.target.checked }))
+                                            }
+                                            className="mt-1 rounded border-gray-300 text-yellow-400 focus:ring-yellow-400"
+                                        />
+                                        <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+                                            Ich bin einverstanden, dass die hochgeladenen Fotos auf der Website 
+                                            und in den sozialen Medien von Rio für Deutsche veröffentlicht werden dürfen.
+                                        </span>
+                                    </label>
+                                )}
+
+                                {/* Consentimento para fotos tiradas pelo Will */}
+                                <label className="flex items-start gap-3 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.consentWillPhotos}
+                                        onChange={(e) =>
+                                            setFormData(prev => ({ ...prev, consentWillPhotos: e.target.checked }))
+                                        }
+                                        className="mt-1 rounded border-gray-300 text-yellow-400 focus:ring-yellow-400"
+                                    />
+                                    <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+                                        Ich bin einverstanden, dass Fotos, die Will während der Tour von mir 
+                                        gemacht hat, auf der Website und in den sozialen Medien von 
+                                        Rio für Deutsche veröffentlicht werden dürfen.
+                                    </span>
+                                </label>
                             </div>
                         </div>
 
