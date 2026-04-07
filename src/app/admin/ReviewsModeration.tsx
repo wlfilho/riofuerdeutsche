@@ -51,6 +51,9 @@ interface Review {
     title: string;
     body: string;
     status: ReviewStatus;
+    photo_urls?: string[];
+    consent_own_photos?: boolean;
+    consent_will_photos?: boolean;
 }
 
 export default function ReviewsModeration() {
@@ -67,7 +70,7 @@ export default function ReviewsModeration() {
         setLoading(true);
         let query = supabase
             .from('reviews')
-            .select('*');
+            .select('id, created_at, nickname, email, rating, title, body, status, attractions, photo_urls, consent_own_photos, consent_will_photos');
 
         if (activeTab === 'pending') {
             query = query.eq('status', 'pending').order('created_at', { ascending: false });
@@ -245,6 +248,43 @@ export default function ReviewsModeration() {
                                         "{review.body}"
                                     </p>
                                 </div>
+
+                                {/* Fotos em exibição no ADMIN */}
+                                {review.photo_urls && review.photo_urls.length > 0 && (
+                                  <div className="mt-3 mb-6">
+                                    <p className="text-xs font-medium text-gray-500 mb-2">
+                                      Fotos ({review.photo_urls.length})
+                                      {review.consent_own_photos && (
+                                        <span className="ml-2 text-green-600">✓ Veröffentlichung genehmigt</span>
+                                      )}
+                                    </p>
+                                    <div className="flex gap-2 flex-wrap">
+                                      {review.photo_urls.map((url: string, index: number) => (
+                                        <a
+                                          key={index}
+                                          href={url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="block"
+                                        >
+                                          <img
+                                            src={url}
+                                            alt={`Foto ${index + 1}`}
+                                            className="w-24 h-24 object-cover rounded-lg border border-gray-200 
+                                              hover:opacity-80 transition-opacity cursor-pointer shadow-sm"
+                                          />
+                                        </a>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Consentimento fotos do Will no ADMIN */}
+                                {review.consent_will_photos && (
+                                  <p className="text-xs text-green-600 mb-6 bg-green-50 w-fit px-3 py-1 rounded-full border border-green-100">
+                                    ✓ Turista autoriza publicação de fotos tiradas pelo Will
+                                  </p>
+                                )}
 
                                 {activeTab === 'pending' && (
                                     <div className="space-y-4">

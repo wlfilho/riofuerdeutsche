@@ -15,7 +15,7 @@ export default async function BewertungenPage() {
 
     const { data: reviews, error } = await supabase
         .from('reviews')
-        .select('id, created_at, attractions, nickname, rating, title, body')
+        .select('id, created_at, nickname, rating, title, body, attractions, photo_urls, consent_own_photos')
         .eq('status', 'approved')
         .order('approved_at', { ascending: false });
 

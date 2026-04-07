@@ -11,6 +11,8 @@ export interface Review {
     rating: number;
     title: string;
     body: string;
+    photo_urls?: string[];
+    consent_own_photos?: boolean;
 }
 
 export default function ReviewCard({ review }: { review: Review }) {
@@ -69,6 +71,30 @@ export default function ReviewCard({ review }: { review: Review }) {
                             </>
                         )}
                     </button>
+                )}
+
+                {/* Fotos do review — só mostrar se consent_own_photos = true */}
+                {review.photo_urls && 
+                 review.photo_urls.length > 0 && 
+                 review.consent_own_photos && (
+                  <div className="mt-3 flex gap-2 flex-wrap">
+                    {review.photo_urls.map((url: string, index: number) => (
+                      <a
+                        key={index}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <img
+                          src={url}
+                          alt={`Foto von ${review.nickname}`}
+                          className="w-20 h-20 object-cover rounded-lg border border-gray-100
+                            hover:opacity-90 transition-opacity cursor-pointer"
+                        />
+                      </a>
+                    ))}
+                  </div>
                 )}
             </div>
 
