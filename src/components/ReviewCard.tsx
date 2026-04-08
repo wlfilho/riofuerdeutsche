@@ -45,17 +45,32 @@ export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
     const publicPhotos = getPublicPhotos(review);
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full font-sans group">
-            {/* Stars */}
-            <div className="flex gap-1 mb-4">
-                {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                        key={star}
-                        className={`w-5 h-5 ${
-                            star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'
-                        }`}
-                    />
-                ))}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full font-sans group relative">
+            
+            {/* Top Header: Stars + Photo Button */}
+            <div className="flex justify-between items-start mb-4">
+                {/* Stars */}
+                <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                            key={star}
+                            className={`w-5 h-5 ${
+                                star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'
+                            }`}
+                        />
+                    ))}
+                </div>
+
+                {/* Camera Icon Button (Positioned Top Right) */}
+                {publicPhotos.length > 0 && onOpenPhotos && (
+                    <button
+                        onClick={() => onOpenPhotos(publicPhotos)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-yellow-50 text-gray-400 hover:text-yellow-600 rounded-full transition-all border border-gray-100 hover:border-yellow-200 text-xs font-bold shadow-sm active:scale-95"
+                    >
+                        <Camera className="w-4 h-4" />
+                        <span>{publicPhotos.length} {publicPhotos.length === 1 ? 'Foto' : 'Fotos'}</span>
+                    </button>
+                )}
             </div>
 
             {/* Title */}
@@ -65,7 +80,7 @@ export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
 
             {/* Body */}
             <div className="flex-grow">
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line mb-4">
+                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
                     {displayText}
                     {!isExpanded && isLongText && "..."}
                 </p>
@@ -73,7 +88,7 @@ export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
                 {isLongText && (
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="inline-flex items-center text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors mb-6 group/btn"
+                        className="inline-flex items-center text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors mt-4 group/btn"
                     >
                         {isExpanded ? (
                             <>
@@ -86,17 +101,6 @@ export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
                                 <ChevronDown className="ml-1 w-4 h-4 group-hover/btn:translate-y-0.5 transition-transform" />
                             </>
                         )}
-                    </button>
-                )}
-
-                {/* Camera Icon Button for Photos */}
-                {publicPhotos.length > 0 && onOpenPhotos && (
-                    <button
-                        onClick={() => onOpenPhotos(publicPhotos)}
-                        className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-yellow-500 transition-colors mt-2 font-medium"
-                    >
-                        <Camera className="w-4 h-4" />
-                        Fotos ansehen ({publicPhotos.length})
                     </button>
                 )}
             </div>
