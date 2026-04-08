@@ -31,6 +31,11 @@ const navItems = [
     href: '/admin/clientes',
     icon: '🧳',
   },
+  {
+    label: 'E-Mail Templates',
+    href: '/admin/email-templates',
+    icon: '✉️',
+  },
 ];
 
 export default function AdminSidebar() {
