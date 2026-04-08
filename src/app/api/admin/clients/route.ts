@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   if (!authorized) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { name, email, arrival_date, departure_date, tour_details } = body
+  const { name, email, arrival_date, departure_date, tour_details, total_amount, deposit_amount } = body
 
   if (!name || !email || !arrival_date || !departure_date) {
     return NextResponse.json(
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
   // Inserir cliente
   const { data: client, error: clientError } = await supabase
     .from('tour_clients')
-    .insert({ name, email, arrival_date, departure_date, tour_details: tour_details ?? null })
+    .insert({ name, email, arrival_date, departure_date, tour_details: tour_details ?? null, total_amount: total_amount ?? null, deposit_amount: deposit_amount ?? null })
     .select()
     .single()
 
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
   let resendId: string | null = null
   let sendError: string | null = null
 
-  const result = await sendTourEmail(1, { name, email, arrival_date, departure_date, tour_details })
+  const result = await sendTourEmail(1, { name, email, arrival_date, departure_date, tour_details, total_amount: total_amount ?? null, deposit_amount: deposit_amount ?? null })
   if ('error' in result) {
     sendError = result.error
   } else {

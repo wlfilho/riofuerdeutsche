@@ -11,6 +11,8 @@ interface Client {
   departure_date: string;
   tour_details: string | null;
   status: 'active' | 'completed' | 'cancelled';
+  total_amount: number | null;
+  deposit_amount: number | null;
 }
 
 interface EmailLog {
@@ -280,6 +282,28 @@ export default function ClienteDetailPage({
                     <p className="text-xs text-gray-400 mb-0.5">Tour-Details</p>
                     <p className="text-sm text-gray-700">{client.tour_details}</p>
                   </div>
+                )}
+                {client.total_amount != null && (
+                  <>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-0.5">Gesamtbetrag</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {client.total_amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-0.5">Anzahlung</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {(client.deposit_amount ?? 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-0.5">Restbetrag</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {(client.total_amount - (client.deposit_amount ?? 0)).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                      </p>
+                    </div>
+                  </>
                 )}
               </div>
             </div>

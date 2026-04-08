@@ -46,7 +46,7 @@ export async function POST(
   // Buscar dados completos do cliente
   const { data: client, error: clientError } = await supabase
     .from('tour_clients')
-    .select('name, email, arrival_date, departure_date, tour_details')
+    .select('name, email, arrival_date, departure_date, tour_details, total_amount, deposit_amount')
     .eq('id', log.client_id)
     .single()
 
@@ -63,6 +63,8 @@ export async function POST(
     arrival_date: client.arrival_date,
     departure_date: client.departure_date,
     tour_details: client.tour_details ?? undefined,
+    total_amount: client.total_amount ?? null,
+    deposit_amount: client.deposit_amount ?? null,
   })
   if ('error' in result) {
     sendError = result.error

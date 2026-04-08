@@ -10,6 +10,8 @@ export interface TourClient {
   arrival_date: string
   departure_date: string
   tour_details?: string
+  total_amount?: number | null
+  deposit_amount?: number | null
 }
 
 export async function sendTourEmail(
@@ -53,7 +55,7 @@ export async function sendTourEmail(
   }
 
   const { data, error } = await resend.emails.send({
-    from: 'Rio für Deutsche <noreply@riofuerdeutsche.de>',
+    from: 'Rio für Deutsche | Will <noreply@riofuerdeutsche.de>',
     to: client.email,
     subject,
     html,

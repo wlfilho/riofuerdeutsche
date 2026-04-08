@@ -12,6 +12,8 @@ export default function NovoClientePage() {
   const [arrivalDate, setArrivalDate] = useState('');
   const [departureDate, setDepartureDate] = useState('');
   const [tourDetails, setTourDetails] = useState('');
+  const [totalAmount, setTotalAmount] = useState('');
+  const [depositAmount, setDepositAmount] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +52,8 @@ export default function NovoClientePage() {
           arrival_date: arrivalDate,
           departure_date: departureDate,
           tour_details: tourDetails.trim() || undefined,
+          total_amount: totalAmount !== '' ? parseFloat(totalAmount) : undefined,
+          deposit_amount: depositAmount !== '' ? parseFloat(depositAmount) : undefined,
         }),
       });
 
@@ -158,6 +162,40 @@ export default function NovoClientePage() {
                 disabled={loading}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none disabled:bg-gray-50 disabled:text-gray-400"
               />
+            </div>
+
+            {/* Amounts */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Gesamtbetrag (€)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={totalAmount}
+                  onChange={e => setTotalAmount(e.target.value)}
+                  placeholder="0.00"
+                  disabled={loading}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Anzahlung erhalten (€)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={depositAmount}
+                  onChange={e => setDepositAmount(e.target.value)}
+                  placeholder="0.00"
+                  disabled={loading}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+                />
+              </div>
             </div>
           </div>
 
