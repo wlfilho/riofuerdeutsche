@@ -5,7 +5,7 @@ function formatTourDetails(raw: string): string {
   if (!raw) return ''
   const lines = raw.split(/•|\n/).map(l => l.trim()).filter(l => l.length > 0)
   if (lines.length === 0) return raw
-  return lines.map(line => `<span style="display:block;padding:3px 0;">• ${line}</span>`).join('')
+  return lines.map(line => `<span style="display:block;padding:3px 0;font-weight:normal;">• ${line}</span>`).join('')
 }
 
 function formatDate(dateStr: string): string {
