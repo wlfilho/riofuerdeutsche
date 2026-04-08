@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { calculateSchedule } from '@/lib/tour-email-scheduler'
 import { sendTourEmail } from '@/lib/email-templates'
+import { sendTemplatedEmail } from '@/lib/email/sendTemplatedEmail'
 
 async function verifyAdmin() {
   const supabase = await createClient()
@@ -103,14 +104,34 @@ export async function POST(request: NextRequest) {
   // Disparar email #1 imediatamente
   const email1Log = emailLogs?.find(l => l.email_number === 1)
 
+  // Formatar valores para envio do email
+  const formatCurrency = (val?: number | null) => 
+    val != null ? val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €' : ''
+
+  const replacements = {
+    nome: name,
+    email: email,
+    data_chegada: arrival_date,
+    data_saida: departure_date,
+    anzahlung: formatCurrency(deposit_amount),
+    betrag_total: formatCurrency(total_amount),
+    tour: tour_details ?? '',
+    assinatura: 'Viele Grüße aus Rio,',
+  }
+
   let resendId: string | null = null
   let sendError: string | null = null
 
-  const result = await sendTourEmail(1, { name, email, arrival_date, departure_date, tour_details, total_amount: total_amount ?? null, deposit_amount: deposit_amount ?? null })
-  if ('error' in result) {
+  const result = await sendTemplatedEmail({
+    slug: 'confirmacao-do-tour',
+    to: email,
+    data: replacements as any
+  })
+
+  if ('error' in result && result.error) {
     sendError = result.error
   } else {
-    resendId = result.id
+    resendId = result.id || null
   }
 
   // Atualizar log do email #1

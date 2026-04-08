@@ -16,7 +16,7 @@ export async function sendTemplatedEmail({
   to,
   data,
   subjectOverride,
-}: SendTemplatedEmailParams): Promise<{ success: boolean; error?: string }> {
+}: SendTemplatedEmailParams): Promise<{ success: boolean; error?: string; id?: string }> {
   try {
     const supabase = await createClient()
 
@@ -41,7 +41,7 @@ export async function sendTemplatedEmail({
     })
 
     if (sendError) return { success: false, error: sendError.message }
-    return { success: true }
+    return { success: true, id: data?.id }
   } catch (err) {
     return { success: false, error: String(err) }
   }

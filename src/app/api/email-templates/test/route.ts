@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const testData: Record<string, string> = {
       nome: 'Max Mustermann',
       email: 'test@example.com',
-      tour: 'Klassiker Tour – Cristo, Zuckerhut, Lapa, Santa Teresa',
+      tour: 'Sa. 02.05. – Transfer: Flughafen GIG → Hotel\nSo. 03.05. – Fußball: Flamengo × Vasco – Maracanã\nDi. 05.05. – Klassiker-Tour: Cristo, Zuckerhut, Lapa, Santa Teresa', // placeholder de teste
       data_chegada: '02.05.2026',
       data_saida: '08.05.2026',
       anzahlung: '200,00 €',
