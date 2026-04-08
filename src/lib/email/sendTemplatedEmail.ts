@@ -30,8 +30,20 @@ export async function sendTemplatedEmail({
       return { success: false, error: `Template "${slug}" não encontrado.` }
     }
 
-    const subject = applyShortcodes(subjectOverride ?? template.subject, data)
-    const html = applyShortcodes(template.html_body, data)
+    // Buscar assinatura global e injetar se não foi fornecida manualmente
+    const { data: sigData } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'email_assinatura')
+      .single()
+
+    const dataWithSignature: Partial<Record<ShortcodeKey, string>> = {
+      assinatura: sigData?.value ?? '',
+      ...data, // data do caller sobrescreve se precisar de assinatura customizada
+    }
+
+    const subject = applyShortcodes(subjectOverride ?? template.subject, dataWithSignature)
+    const html = applyShortcodes(template.html_body, dataWithSignature)
 
     const { data: resendData, error: sendError } = await resend.emails.send({
       from: 'Will · Rio für Deutsche <will@riofuerdeutsche.de>',
