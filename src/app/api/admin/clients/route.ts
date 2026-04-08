@@ -108,14 +108,41 @@ export async function POST(request: NextRequest) {
   const formatCurrency = (val?: number | null) => 
     val != null ? val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €' : ''
 
+  function formatDate(dateStr: string): string {
+    if (!dateStr) return ''
+    const [year, month, day] = dateStr.split('-')
+    if (!day) return dateStr // já está num formato diferente, retornar como está
+    return `${day}.${month}.${year}`
+  }
+
+  function formatTourDetails(raw: string): string {
+    if (!raw) return ''
+  
+    // Suporta dois formatos de entrada:
+    // 1) Itens separados por bullet "•"
+    // 2) Itens separados por quebra de linha "\n"
+  
+    const lines = raw
+      .split(/•|\n/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+  
+    if (lines.length === 0) return raw
+  
+    // Renderizar como linhas HTML com bullet visível
+    return lines
+      .map(line => `<span style="display:block; padding: 3px 0;">• ${line}</span>`)
+      .join('')
+  }
+
   const replacements = {
     nome: name,
     email: email,
-    data_chegada: arrival_date,
-    data_saida: departure_date,
+    data_chegada: formatDate(arrival_date),
+    data_saida: formatDate(departure_date),
     anzahlung: formatCurrency(deposit_amount),
     betrag_total: formatCurrency(total_amount),
-    tour: tour_details ?? '',
+    tour: formatTourDetails(tour_details ?? ''),
     assinatura: 'Viele Grüße aus Rio,',
   }
 
