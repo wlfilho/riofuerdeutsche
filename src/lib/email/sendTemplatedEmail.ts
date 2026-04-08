@@ -33,7 +33,7 @@ export async function sendTemplatedEmail({
     const subject = applyShortcodes(subjectOverride ?? template.subject, data)
     const html = applyShortcodes(template.html_body, data)
 
-    const { error: sendError } = await resend.emails.send({
+    const { data: resendData, error: sendError } = await resend.emails.send({
       from: 'Will · Rio für Deutsche <will@riofuerdeutsche.de>',
       to,
       subject,
@@ -41,7 +41,7 @@ export async function sendTemplatedEmail({
     })
 
     if (sendError) return { success: false, error: sendError.message }
-    return { success: true, id: data?.id }
+    return { success: true, id: resendData?.id }
   } catch (err) {
     return { success: false, error: String(err) }
   }
