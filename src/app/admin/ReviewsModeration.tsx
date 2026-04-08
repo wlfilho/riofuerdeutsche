@@ -217,7 +217,7 @@ export default function ReviewsModeration() {
             return;
         }
         
-        const link = `https://riofuerdeutsche.de/nps?token=${token}`;
+        const link = `${window.location.origin}/nps?token=${token}`;
         setGeneratedLink(link);
         setNpsNickname('');
         setNpsTourDate('');
