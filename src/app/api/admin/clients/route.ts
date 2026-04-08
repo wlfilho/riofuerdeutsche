@@ -1,8 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { calculateSchedule } from '@/lib/tour-email-scheduler'
-import { sendTourEmail } from '@/lib/email-templates'
-import { sendTemplatedEmail } from '@/lib/email/sendTemplatedEmail'
+import { sendConfirmationEmail } from '@/lib/email/sendConfirmationEmail'
 
 async function verifyAdmin() {
   const supabase = await createClient()
@@ -101,64 +100,17 @@ export async function POST(request: NextRequest) {
 
   if (logError) return NextResponse.json({ error: logError.message }, { status: 500 })
 
-  // Disparar email #1 imediatamente
+  // Disparar email #1 imediatamente via sendConfirmationEmail
   const email1Log = emailLogs?.find(l => l.email_number === 1)
-
-  // Formatar valores para envio do email
-  const formatCurrency = (val?: number | null) => 
-    val != null ? val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €' : ''
-
-  function formatDate(dateStr: string): string {
-    if (!dateStr) return ''
-    const [year, month, day] = dateStr.split('-')
-    if (!day) return dateStr // já está num formato diferente, retornar como está
-    return `${day}.${month}.${year}`
-  }
-
-  function formatTourDetails(raw: string): string {
-    if (!raw) return ''
-  
-    // Suporta dois formatos de entrada:
-    // 1) Itens separados por bullet "•"
-    // 2) Itens separados por quebra de linha "\n"
-  
-    const lines = raw
-      .split(/•|\n/)
-      .map(line => line.trim())
-      .filter(line => line.length > 0)
-  
-    if (lines.length === 0) return raw
-  
-    // Renderizar como linhas HTML com bullet visível
-    return lines
-      .map(line => `<span style="display:block; padding: 3px 0;">• ${line}</span>`)
-      .join('')
-  }
-
-  const replacements = {
-    nome: name,
-    email: email,
-    data_chegada: formatDate(arrival_date),
-    data_saida: formatDate(departure_date),
-    anzahlung: formatCurrency(deposit_amount),
-    betrag_total: formatCurrency(total_amount),
-    tour: formatTourDetails(tour_details ?? ''),
-    assinatura: 'Viele Grüße aus Rio,',
-  }
 
   let resendId: string | null = null
   let sendError: string | null = null
 
-  const result = await sendTemplatedEmail({
-    slug: 'confirmacao_reserva',
-    to: email,
-    data: replacements as any
-  })
-
-  if ('error' in result && result.error) {
-    sendError = result.error
-  } else {
+  try {
+    const result = await sendConfirmationEmail(client.id)
     resendId = result.id || null
+  } catch (error: any) {
+    sendError = error.message
   }
 
   // Atualizar log do email #1

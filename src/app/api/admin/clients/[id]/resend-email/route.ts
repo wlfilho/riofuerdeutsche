@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { sendTourEmail } from '@/lib/email-templates'
+import { sendConfirmationEmail } from '@/lib/email/sendConfirmationEmail'
 
 async function verifyAdmin() {
   const supabase = await createClient()
@@ -57,19 +58,29 @@ export async function POST(
   let sendError: string | null = null
 
   const emailNum = log.email_number as 1 | 2 | 3 | 4
-  const result = await sendTourEmail(emailNum, {
-    name: client.name,
-    email: client.email,
-    arrival_date: client.arrival_date,
-    departure_date: client.departure_date,
-    tour_details: client.tour_details ?? undefined,
-    total_amount: client.total_amount ?? null,
-    deposit_amount: client.deposit_amount ?? null,
-  })
-  if ('error' in result) {
-    sendError = result.error
+  
+  if (emailNum === 1) {
+    try {
+      const result = await sendConfirmationEmail(log.client_id)
+      resendId = result.id || null
+    } catch (error: any) {
+      sendError = error.message
+    }
   } else {
-    resendId = result.id
+    const result = await sendTourEmail(emailNum, {
+      name: client.name,
+      email: client.email,
+      arrival_date: client.arrival_date,
+      departure_date: client.departure_date,
+      tour_details: client.tour_details ?? undefined,
+      total_amount: client.total_amount ?? null,
+      deposit_amount: client.deposit_amount ?? null,
+    })
+    if ('error' in result && result.error) {
+      sendError = result.error
+    } else {
+      resendId = result.id || null
+    }
   }
 
   // Atualizar o log
