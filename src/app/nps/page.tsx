@@ -112,7 +112,7 @@ function NpsFormContent() {
                         Link nicht gültig
                     </h2>
                     <p className="text-gray-500 text-sm leading-relaxed">
-                        Dieser Link wurde bereits verwendet ou existiert nicht. Wenn du Fragen hast, melde dich bitte bei Will.
+                        Dieser Link wurde bereits verwendet oder existiert nicht. Wenn du Fragen hast, melde dich bitte bei Will.
                     </p>
                     <Link href="/" className="mt-8 inline-block text-sm font-bold text-yellow-600 hover:text-yellow-700 underline decoration-yellow-400">
                         Zurück zur Startseite
@@ -147,6 +147,9 @@ function NpsFormContent() {
                             >
                                 Jetzt Bewertung schreiben →
                             </button>
+                            <Link href="/" className="block mt-6 text-sm font-bold text-gray-400 hover:text-gray-600">
+                                Zurück zur Startseite
+                            </Link>
                         </div>
                     )}
 
@@ -213,7 +216,7 @@ function NpsFormContent() {
                                 Wie war deine Tour mit Will?
                             </h1>
                             <p className="text-gray-500 text-sm mt-3">
-                                3 kurze Fragen — dauert weniger als uma Minute.
+                                3 kurze Fragen — dauert weniger als eine Minute.
                             </p>
                         </div>
 

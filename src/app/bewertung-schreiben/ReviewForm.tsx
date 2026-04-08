@@ -124,10 +124,10 @@ export default function ReviewForm() {
         if (!formData.email.trim()) {
             newErrors.email = 'Bitte gib deine E-Mail-Adresse an.';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Bitte gib uma válida E-Mail-Adresse an.';
+            newErrors.email = 'Bitte gib eine gültige E-Mail-Adresse an.';
         }
-        if (formData.rating === 0) newErrors.rating = 'Bitte gib uma avaliação b.';
-        if (!formData.title.trim()) newErrors.title = 'Bitte gib um título an.';
+        if (formData.rating === 0) newErrors.rating = 'Bitte gib eine Bewertung ab.';
+        if (!formData.title.trim()) newErrors.title = 'Bitte gib einen Titel an.';
         if (formData.body.trim().length < 50) {
             newErrors.body = `Deine Erfahrung muss mindestens 50 Zeichen lang sein (aktuell: ${formData.body.trim().length}).`;
         }
