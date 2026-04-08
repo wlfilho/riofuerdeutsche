@@ -110,24 +110,12 @@ export async function updateSession(request: NextRequest) {
         }
     }
 
-    // --- REGRA GERAL: rotas não públicas requerem autenticação ---
-    if (
-        !user &&
-        !pathname.startsWith("/login") &&
-        !pathname.startsWith("/signup") &&
-        !pathname.startsWith("/forgot-password") &&
-        !pathname.startsWith("/auth") &&
-        !pathname.startsWith("/touren") &&
-        !pathname.startsWith("/kontakt") &&
-        !pathname.startsWith("/impressum") &&
-        !pathname.startsWith("/datenschutz") &&
-        !pathname.startsWith("/ist-rio-gefaehrlich") &&
-        !pathname.startsWith("/rio-guide") &&
-        !pathname.startsWith("/sicherheit") &&
-        !pathname.startsWith("/bewertungen") &&
-        !pathname.startsWith("/bewertung-schreiben") &&
-        pathname !== "/"
-    ) {
+    // --- REGRA GERAL: apenas rotas explicitamente protegidas requerem autenticação ---
+    // Rotas desconhecidas são deixadas passar para o Next.js renderizar o not-found.tsx
+    const protectedPrefixes = ["/nps"];
+    const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix));
+
+    if (!user && isProtected) {
         const url = request.nextUrl.clone();
         url.pathname = "/login";
         return NextResponse.redirect(url);
