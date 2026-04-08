@@ -1,37 +1,73 @@
-import { createClient } from "@/utils/supabase/server";
-import { Star, MessageCircle, ArrowRight } from "lucide-react";
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { createClient } from "@/utils/supabase/client";
+import { Star, ArrowRight, X, ChevronLeft, ChevronRight, Camera, Loader2 } from "lucide-react";
 import Link from "next/link";
-import ReviewCard from "@/components/ReviewCard";
+import ReviewCard, { Review } from "@/components/ReviewCard";
 
-export const revalidate = 60;
+export default function BewertungenPage() {
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [lightbox, setLightbox] = useState<{ photos: string[]; index: number } | null>(null);
 
-export const metadata = {
-    title: "Bewertungen — Rio für Deutsche",
-    description: "Echte Erfahrungen von deutschen Touristen mit Will, dem deutschsprachigen Reiseleiter in Rio de Janeiro.",
-};
+    const supabase = createClient();
 
-export default async function BewertungenPage() {
-    const supabase = await createClient();
+    const fetchReviews = async () => {
+        setLoading(true);
+        const { data, error } = await supabase
+            .from('reviews')
+            .select('id, created_at, nickname, rating, title, body, attractions, photo_urls, will_photo_urls, consent_own_photos, consent_will_photos')
+            .eq('status', 'approved')
+            .order('approved_at', { ascending: false });
 
-    const { data: reviews, error } = await supabase
-        .from('reviews')
-        .select('id, created_at, nickname, rating, title, body, attractions, photo_urls, consent_own_photos')
-        .eq('status', 'approved')
-        .order('approved_at', { ascending: false });
+        if (error) {
+            console.error('Error fetching reviews:', error);
+        } else {
+            setReviews(data || []);
+        }
+        setLoading(false);
+    };
 
-    if (error) {
-        console.error('Error fetching reviews:', error);
-    }
+    useEffect(() => {
+        fetchReviews();
+    }, []);
 
-    const hasReviews = reviews && reviews.length > 0;
-    
-    // Calcular média
-    const totalRating = reviews?.reduce((sum, r) => sum + r.rating, 0) || 0;
+    // Lightbox handlers
+    const openLightbox = (photos: string[]) => setLightbox({ photos, index: 0 });
+    const closeLightbox = () => setLightbox(null);
+    const next = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setLightbox(prev =>
+            prev ? { ...prev, index: (prev.index + 1) % prev.photos.length } : null
+        );
+    };
+    const prev = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setLightbox(prev =>
+            prev ? { ...prev, index: (prev.index - 1 + prev.photos.length) % prev.photos.length } : null
+        );
+    };
+
+    // Keyboard navigation
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (!lightbox) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowRight') next();
+            if (e.key === 'ArrowLeft') prev();
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [lightbox]);
+
+    const hasReviews = reviews.length > 0;
+    const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0) || 0;
     const avgRating = hasReviews ? (totalRating / reviews.length).toFixed(1) : 0;
-    const reviewCount = reviews?.length || 0;
+    const reviewCount = reviews.length || 0;
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans">
+        <div className="min-h-screen bg-gray-50 font-sans relative">
             {/* Hero */}
             <div className="bg-white border-b border-gray-200 py-16 px-4">
                 <div className="max-w-4xl mx-auto text-center">
@@ -42,9 +78,9 @@ export default async function BewertungenPage() {
                         Echte Erfahrungen von deutschen Reisenden — ungefiltert und authentisch.
                     </p>
 
-                    {hasReviews && (
+                    {!loading && hasReviews && (
                         <div className="flex flex-col items-center gap-2">
-                            <div className="flex items-center gap-1.5 bg-yellow-50 px-6 py-3 rounded-full border border-yellow-100">
+                            <div className="flex items-center gap-1.5 bg-yellow-50 px-6 py-3 rounded-full border border-yellow-100 shadow-sm">
                                 <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                                 <span className="text-xl font-bold text-gray-900">{avgRating}</span>
                                 <span className="text-gray-400 font-medium">von 5</span>
@@ -57,8 +93,13 @@ export default async function BewertungenPage() {
             </div>
 
             {/* Content */}
-            <main className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-                {!hasReviews ? (
+            <main className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 min-h-[500px]">
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+                        <Loader2 className="w-10 h-10 animate-spin mb-4" />
+                        <p className="font-medium">Bewertungen werden geladen...</p>
+                    </div>
+                ) : !hasReviews ? (
                     <div className="text-center py-20 bg-white rounded-3xl border border-gray-200 shadow-sm max-w-2xl mx-auto px-6">
                         <div className="flex justify-center mb-6">
                             <Star className="w-20 h-20 text-gray-200" />
@@ -78,13 +119,17 @@ export default async function BewertungenPage() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {reviews.map((review) => (
-                            <ReviewCard key={review.id} review={review} />
+                            <ReviewCard 
+                                key={review.id} 
+                                review={review} 
+                                onOpenPhotos={openLightbox} 
+                            />
                         ))}
                     </div>
                 )}
 
                 {/* Final CTA */}
-                {hasReviews && (
+                {!loading && hasReviews && (
                     <div className="mt-20 text-center py-12 bg-gray-900 rounded-3xl text-white px-6">
                         <h2 className="text-2xl md:text-3xl font-bold mb-4">
                             Hast du eine Tour mit Will gemacht?
@@ -102,6 +147,59 @@ export default async function BewertungenPage() {
                     </div>
                 )}
             </main>
+
+            {/* Lightbox UI */}
+            {lightbox && (
+                <div
+                    className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center animate-in fade-in duration-300"
+                    onClick={closeLightbox}
+                >
+                    <div
+                        className="relative max-w-5xl max-h-[90vh] mx-4"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <img
+                            src={lightbox.photos[lightbox.index]}
+                            alt={`Foto ${lightbox.index + 1}`}
+                            className="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl transition-all duration-300 transform scale-100"
+                        />
+
+                        {/* Contador */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2
+                            bg-black/60 backdrop-blur-md text-white text-xs px-4 py-1.5 rounded-full font-bold">
+                            {lightbox.index + 1} / {lightbox.photos.length}
+                        </div>
+
+                        {/* Setas de navegação */}
+                        {lightbox.photos.length > 1 && (
+                            <>
+                                <button onClick={prev}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2
+                                        bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full
+                                        w-12 h-12 flex items-center justify-center transition-all border border-white/20 hover:scale-110 active:scale-95 group">
+                                    <ChevronLeft className="w-6 h-6" />
+                                </button>
+                                <button onClick={next}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2
+                                        bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full
+                                        w-12 h-12 flex items-center justify-center transition-all border border-white/20 hover:scale-110 active:scale-95 group">
+                                    <ChevronRight className="w-6 h-6" />
+                                </button>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Fechar */}
+                    <button onClick={closeLightbox}
+                        className="absolute top-6 right-6 text-white/50 hover:text-white transition-all hover:scale-110 active:scale-90 p-2">
+                        <X className="w-8 h-8" />
+                    </button>
+                    
+                    <p className="absolute bottom-6 left-6 text-white/30 text-[10px] uppercase font-bold tracking-[2px]">
+                        Rio für Deutsche Gallery
+                    </p>
+                </div>
+            )}
 
             <footer className="max-w-7xl mx-auto py-12 px-4 text-center text-gray-400 text-sm">
                 &copy; {new Date().getFullYear()} Rio für Deutsche — Deine Experten in Rio de Janeiro

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Star, ChevronDown, ChevronUp } from 'lucide-react';
+import { Star, ChevronDown, ChevronUp, Camera } from 'lucide-react';
 
 export interface Review {
     id: string;
@@ -12,10 +12,17 @@ export interface Review {
     title: string;
     body: string;
     photo_urls?: string[];
+    will_photo_urls?: string[];
     consent_own_photos?: boolean;
+    consent_will_photos?: boolean;
 }
 
-export default function ReviewCard({ review }: { review: Review }) {
+interface ReviewCardProps {
+    review: Review;
+    onOpenPhotos?: (photos: string[]) => void;
+}
+
+export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     
     // Formatar data: Mês / Ano
@@ -27,6 +34,15 @@ export default function ReviewCard({ review }: { review: Review }) {
 
     const isLongText = review.body.length > 300;
     const displayText = isExpanded ? review.body : review.body.slice(0, 300);
+
+    const getPublicPhotos = (review: Review) => {
+        const photos: string[] = [];
+        if (review.consent_own_photos) photos.push(...(review.photo_urls ?? []));
+        if (review.consent_will_photos) photos.push(...(review.will_photo_urls ?? []));
+        return photos;
+    };
+
+    const publicPhotos = getPublicPhotos(review);
 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full font-sans group">
@@ -73,28 +89,15 @@ export default function ReviewCard({ review }: { review: Review }) {
                     </button>
                 )}
 
-                {/* Fotos do review — só mostrar se consent_own_photos = true */}
-                {review.photo_urls && 
-                 review.photo_urls.length > 0 && 
-                 review.consent_own_photos && (
-                  <div className="mt-3 flex gap-2 flex-wrap">
-                    {review.photo_urls.map((url: string, index: number) => (
-                      <a
-                        key={index}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block"
-                      >
-                        <img
-                          src={url}
-                          alt={`Foto von ${review.nickname}`}
-                          className="w-20 h-20 object-cover rounded-lg border border-gray-100
-                            hover:opacity-90 transition-opacity cursor-pointer"
-                        />
-                      </a>
-                    ))}
-                  </div>
+                {/* Camera Icon Button for Photos */}
+                {publicPhotos.length > 0 && onOpenPhotos && (
+                    <button
+                        onClick={() => onOpenPhotos(publicPhotos)}
+                        className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-yellow-500 transition-colors mt-2 font-medium"
+                    >
+                        <Camera className="w-4 h-4" />
+                        Fotos ansehen ({publicPhotos.length})
+                    </button>
                 )}
             </div>
 
