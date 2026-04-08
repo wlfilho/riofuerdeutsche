@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { EmailTemplate, SHORTCODES, applyExampleShortcodes } from '@/types/email-templates'
 import { saveEmailTemplate } from '@/app/actions/email-templates'
 import Link from 'next/link'
+import { Send, Loader2 } from 'lucide-react'
 
 export default function EmailTemplateEditorClient({ template }: { template: EmailTemplate }) {
   const router = useRouter()
@@ -15,6 +16,9 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
   const [error, setError] = useState<string | null>(null)
   const [showPreview, setShowPreview] = useState(false)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
+
+  const [sendingTest, setSendingTest] = useState(false)
+  const [testToast, setTestToast] = useState<string | null>(null)
 
   const handleSave = async () => {
     setSaving(true)
@@ -34,6 +38,29 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
     navigator.clipboard.writeText(`{{${key}}}`)
     setCopiedKey(key)
     setTimeout(() => setCopiedKey(null), 1500)
+  }
+
+  const handleTestSend = async () => {
+    setSendingTest(true)
+    setTestToast(null)
+    try {
+      const res = await fetch('/api/email-templates/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: template.slug, subject, htmlBody }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setTestToast('Test-E-Mail gesendet an lantelmew@gmail.com ✓')
+        setTimeout(() => setTestToast(null), 3000)
+      } else {
+        alert('Fehler: ' + data.error)
+      }
+    } catch (err: any) {
+      alert('Fehler: ' + err.message)
+    } finally {
+      setSendingTest(false)
+    }
   }
 
   return (
@@ -89,6 +116,30 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
             >
               Vorschau
             </button>
+            <div className="relative flex flex-col items-center">
+              <button
+                onClick={handleTestSend}
+                disabled={sendingTest}
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors disabled:opacity-50"
+              >
+                {sendingTest ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Wird gesendet…
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    Test senden
+                  </>
+                )}
+              </button>
+              {testToast && (
+                <span className="absolute top-full mt-1.5 whitespace-nowrap text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded shadow-sm z-10">
+                  {testToast}
+                </span>
+              )}
+            </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
           </div>
         </div>

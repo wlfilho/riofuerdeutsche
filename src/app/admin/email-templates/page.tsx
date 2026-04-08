@@ -1,5 +1,6 @@
 import { getEmailTemplates } from '@/app/actions/email-templates'
 import Link from 'next/link'
+import EmailTemplateListClient from './EmailTemplateListClient'
 
 export default async function EmailTemplatesPage() {
   const templates = await getEmailTemplates()
@@ -14,41 +15,7 @@ export default async function EmailTemplatesPage() {
         </p>
       </div>
 
-      <div className="grid gap-4">
-        {templates.map((template) => (
-          <div
-            key={template.slug}
-            className="bg-white border border-gray-200 rounded-xl p-5 flex items-center justify-between hover:border-green-300 transition-colors"
-          >
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-base font-semibold text-gray-900">{template.name}</span>
-                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-mono">
-                  {template.slug}
-                </span>
-              </div>
-              <p className="text-sm text-gray-500">
-                <span className="font-medium text-gray-700">Betreff:</span> {template.subject}
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                Zuletzt bearbeitet: {new Date(template.updated_at).toLocaleDateString('de-DE', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </p>
-            </div>
-            <Link
-              href={`/admin/email-templates/${template.slug}`}
-              className="ml-4 shrink-0 bg-green-700 hover:bg-green-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-            >
-              Bearbeiten
-            </Link>
-          </div>
-        ))}
-      </div>
+      <EmailTemplateListClient templates={templates} />
     </div>
   )
 }
