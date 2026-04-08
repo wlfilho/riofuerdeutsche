@@ -26,6 +26,11 @@ const navItems = [
     href: '/admin/bewertungen',
     icon: '⭐',
   },
+  {
+    label: 'Clientes',
+    href: '/admin/clientes',
+    icon: '🧳',
+  },
 ];
 
 export default function AdminSidebar() {

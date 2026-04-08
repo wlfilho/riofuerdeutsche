@@ -30,13 +30,15 @@
     "@tiptap/pm": "^3.20.4",
     "@tiptap/react": "^3.20.4",
     "@tiptap/starter-kit": "^3.20.4",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.34.0",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "resend": "^6.10.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
