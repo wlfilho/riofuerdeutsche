@@ -134,6 +134,43 @@ export default function ReviewsModeration() {
         setActioningId(null);
     };
 
+    const deleteReview = async (
+        reviewId: string,
+        photoUrls: string[],
+        willPhotoUrls: string[]
+    ) => {
+        const confirmed = window.confirm("Diesen Review wirklich löschen? Das pode não ser desfeito.");
+        if (!confirmed) return;
+
+        setActioningId(reviewId);
+
+        try {
+            // 1. Deletar fotos do Storage (pax + Will)
+            const allUrls = [...(photoUrls ?? []), ...(willPhotoUrls ?? [])];
+            const paths = allUrls
+                .map(url => url.split('/review-photos/')[1])
+                .filter(Boolean);
+            
+            if (paths.length > 0) {
+                await supabase.storage.from('review-photos').remove(paths);
+            }
+
+            // 2. Deletar o review do Supabase
+            const { error: dbError } = await supabase.from('reviews').delete().eq('id', reviewId);
+            
+            if (dbError) throw dbError;
+
+            // 3. Atualizar estado local
+            setReviews(reviews.filter(r => r.id !== reviewId));
+
+        } catch (err) {
+            console.error('Error deleting review:', err);
+            alert('Erro ao deletar avaliação');
+        } finally {
+            setActioningId(null);
+        }
+    };
+
     const toggleAttraction = (id: string, att: string) => {
         setEditingAttractions(prev => {
             const current = prev[id] || [];
@@ -278,7 +315,7 @@ export default function ReviewsModeration() {
                             <Clock className="w-10 h-10 text-gray-200" />
                         </div>
                         <p className="text-gray-500 font-bold text-lg">Keine Bewertungen vorhanden.</p>
-                        <p className="text-gray-400 text-sm mt-1">Hier erscheinen Einsendungen für die Kategorie "{activeTab}".</p>
+                        <p className="text-gray-400 text-sm mt-1">Hier erscheinen Einsendungen para a categoria "{activeTab}".</p>
                     </div>
                 ) : (
                     <div className="space-y-8">
@@ -402,8 +439,8 @@ export default function ReviewsModeration() {
                                     </div>
                                 </div>
 
-                                {activeTab === 'pending' && (
-                                    <div className="space-y-6 pt-6 border-t border-gray-100">
+                                <div className="space-y-6 pt-6 border-t border-gray-100">
+                                    {activeTab === 'pending' && (
                                         <div className="border rounded-2xl bg-white overflow-hidden shadow-sm">
                                             <button 
                                                 onClick={() => setShowAttractionPicker(showAttractionPicker === review.id ? null : review.id)}
@@ -429,27 +466,41 @@ export default function ReviewsModeration() {
                                                 </div>
                                             )}
                                         </div>
+                                    )}
 
-                                        <div className="flex flex-col sm:flex-row gap-4">
-                                            <button
-                                                onClick={() => handleApprove(review.id)}
-                                                disabled={!!actioningId}
-                                                className="flex-1 inline-flex items-center justify-center gap-2 px-8 py-4 bg-green-600 hover:bg-green-700 text-white text-sm font-extrabold rounded-xl transition-all shadow-lg hover:shadow-green-700/20 disabled:opacity-50"
-                                            >
-                                                <CheckCircle className="w-5 h-5" />
-                                                Bewertung Genehmigen
-                                            </button>
-                                            <button
-                                                onClick={() => handleReject(review.id)}
-                                                disabled={!!actioningId}
-                                                className="flex-1 inline-flex items-center justify-center gap-2 px-8 py-4 bg-red-600 hover:bg-red-700 text-white text-sm font-extrabold rounded-xl transition-all shadow-lg hover:shadow-red-700/20 disabled:opacity-50"
-                                            >
-                                                <XCircle className="w-5 h-5" />
-                                                Ablehnen
-                                            </button>
-                                        </div>
+                                    <div className="flex flex-col sm:flex-row gap-4">
+                                        {activeTab === 'pending' && (
+                                            <>
+                                                <button
+                                                    onClick={() => handleApprove(review.id)}
+                                                    disabled={!!actioningId}
+                                                    className="flex-1 inline-flex items-center justify-center gap-2 px-8 py-4 bg-green-600 hover:bg-green-700 text-white text-sm font-extrabold rounded-xl transition-all shadow-lg hover:shadow-green-700/20 disabled:opacity-50"
+                                                >
+                                                    <CheckCircle className="w-5 h-5" />
+                                                    Genehmigen
+                                                </button>
+                                                <button
+                                                    onClick={() => handleReject(review.id)}
+                                                    disabled={!!actioningId}
+                                                    className="flex-1 inline-flex items-center justify-center gap-2 px-8 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-extrabold rounded-xl transition-all shadow-sm disabled:opacity-50"
+                                                >
+                                                    <XCircle className="w-5 h-5" />
+                                                    Ablehnen
+                                                </button>
+                                            </>
+                                        )}
+                                        
+                                        <button
+                                            onClick={() => deleteReview(review.id, review.photo_urls || [], review.will_photo_urls || [])}
+                                            disabled={!!actioningId}
+                                            className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white text-sm font-extrabold rounded-xl transition-all shadow-lg hover:shadow-red-700/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                                            title="Review löschen"
+                                        >
+                                            <Trash2 className="w-5 h-5" />
+                                            Löschen
+                                        </button>
                                     </div>
-                                )}
+                                </div>
                             </div>
                         ))}
                     </div>
