@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
   let sendError: string | null = null
 
   const result = await sendTemplatedEmail({
-    slug: 'confirmacao-do-tour',
+    slug: 'confirmacao_reserva',
     to: email,
     data: replacements as any
   })
