@@ -76,7 +76,7 @@ export async function POST(
       total_amount: client.total_amount ?? null,
       deposit_amount: client.deposit_amount ?? null,
     })
-    if ('error' in result && result.error) {
+    if ('error' in result) {
       sendError = result.error
     } else {
       resendId = result.id || null
