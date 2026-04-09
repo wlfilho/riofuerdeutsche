@@ -426,6 +426,12 @@ export default function ClientesPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/admin/clientes/${client.id}`}
+                            className="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                          >
+                            Details
+                          </Link>
                           <button
                             onClick={() => setEditClient(client)}
                             title="Bearbeiten"
