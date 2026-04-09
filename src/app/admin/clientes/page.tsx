@@ -35,24 +35,6 @@ type FormData = {
   internal_notes: string;
 };
 
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString('de-DE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-}
-
-function formatEuro(value: number | null) {
-  if (value === null || value === undefined) return '—';
-  return `€ ${value.toFixed(2)}`;
-}
-
-function formatRestbetrag(total: number | null, deposit: number | null) {
-  if (total === null || total === undefined || deposit === null || deposit === undefined) return '—';
-  return `€ ${(total - deposit).toFixed(2)}`;
-}
-
 function StatusBadge({ status }: { status: Client['status'] }) {
   const map: Record<Client['status'], { label: string; className: string }> = {
     active: { label: 'Aktiv', className: 'bg-green-100 text-green-700' },
@@ -83,7 +65,7 @@ function Toast({ message, onDone }: { message: string; onDone: () => void }) {
 function SkeletonRow() {
   return (
     <tr>
-      {[...Array(11)].map((_, i) => (
+      {[...Array(5)].map((_, i) => (
         <td key={i} className="px-4 py-3">
           <div className="h-4 bg-gray-100 rounded animate-pulse" style={{ width: i === 0 ? '70%' : '60%' }} />
         </td>
@@ -407,17 +389,11 @@ export default function ClientesPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">Name</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap hidden lg:table-cell">E-Mail</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap hidden xl:table-cell">Telefon</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap hidden md:table-cell">Pax</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">Ankunft</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap hidden md:table-cell">Abreise</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">Status</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap hidden lg:table-cell">Gesamt</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap hidden lg:table-cell">Anzahlung</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap hidden lg:table-cell">Restbetrag</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">Aktionen</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Name</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">E-Mail</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Pax</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Aktionen</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -429,7 +405,7 @@ export default function ClientesPage() {
                   </>
                 ) : clients.length === 0 ? (
                   <tr>
-                    <td colSpan={11} className="px-4 py-16 text-center">
+                    <td colSpan={5} className="px-4 py-16 text-center">
                       <p className="text-gray-400 text-sm mb-3">Noch keine Kunden</p>
                       <Link
                         href="/admin/clientes/novo"
@@ -442,31 +418,14 @@ export default function ClientesPage() {
                 ) : (
                   clients.map(client => (
                     <tr key={client.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-gray-900 whitespace-nowrap">{client.name}</p>
-                        <p className="text-xs text-gray-400 lg:hidden">{client.email}</p>
-                      </td>
-                      <td className="px-4 py-3 text-gray-600 hidden lg:table-cell">{client.email}</td>
-                      <td className="px-4 py-3 text-gray-600 hidden xl:table-cell">{client.phone ?? '—'}</td>
-                      <td className="px-4 py-3 text-gray-700 tabular-nums hidden md:table-cell">{client.pax ?? 1}</td>
-                      <td className="px-4 py-3 text-gray-700 tabular-nums whitespace-nowrap">{formatDate(client.arrival_date)}</td>
-                      <td className="px-4 py-3 text-gray-700 tabular-nums whitespace-nowrap hidden md:table-cell">{formatDate(client.departure_date)}</td>
+                      <td className="px-4 py-3 font-medium text-gray-900">{client.name}</td>
+                      <td className="px-4 py-3 text-gray-600">{client.email}</td>
+                      <td className="px-4 py-3 text-gray-700 tabular-nums">{client.pax ?? 1}</td>
                       <td className="px-4 py-3">
                         <StatusBadge status={client.status} />
                       </td>
-                      <td className="px-4 py-3 text-right text-gray-700 tabular-nums hidden lg:table-cell">{formatEuro(client.total_amount)}</td>
-                      <td className="px-4 py-3 text-right text-gray-700 tabular-nums hidden lg:table-cell">{formatEuro(client.deposit_amount)}</td>
-                      <td className="px-4 py-3 text-right font-medium text-gray-900 tabular-nums hidden lg:table-cell">
-                        {formatRestbetrag(client.total_amount, client.deposit_amount)}
-                      </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Link
-                            href={`/admin/clientes/${client.id}`}
-                            className="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
-                          >
-                            Details
-                          </Link>
                           <button
                             onClick={() => setEditClient(client)}
                             title="Bearbeiten"
