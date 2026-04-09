@@ -22,7 +22,7 @@ export async function GET() {
 
   const { data: clients, error } = await supabase
     .from('tour_clients')
-    .select('id, name, email, arrival_date, departure_date, status, created_at')
+    .select('id, name, email, phone, pax, arrival_date, departure_date, tour_details, status, total_amount, deposit_amount, internal_notes, created_at')
     .order('arrival_date', { ascending: true })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   if (!authorized) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { name, email, arrival_date, departure_date, tour_details, total_amount, deposit_amount } = body
+  const { name, email, phone, pax, arrival_date, departure_date, tour_details, total_amount, deposit_amount, internal_notes } = body
 
   if (!name || !email || !arrival_date || !departure_date) {
     return NextResponse.json(
@@ -76,7 +76,16 @@ export async function POST(request: NextRequest) {
   // Inserir cliente
   const { data: client, error: clientError } = await supabase
     .from('tour_clients')
-    .insert({ name, email, arrival_date, departure_date, tour_details: tour_details ?? null, total_amount: total_amount ?? null, deposit_amount: deposit_amount ?? null })
+    .insert({
+      name, email,
+      phone: phone ?? null,
+      pax: pax ?? 1,
+      arrival_date, departure_date,
+      tour_details: tour_details ?? null,
+      total_amount: total_amount ?? null,
+      deposit_amount: deposit_amount ?? null,
+      internal_notes: internal_notes ?? null,
+    })
     .select()
     .single()
 

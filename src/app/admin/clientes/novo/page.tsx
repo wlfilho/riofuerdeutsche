@@ -4,16 +4,22 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+const INPUT_CLS =
+  'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400';
+
 export default function NovoClientePage() {
   const router = useRouter();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [pax, setPax] = useState('1');
   const [arrivalDate, setArrivalDate] = useState('');
   const [departureDate, setDepartureDate] = useState('');
   const [tourDetails, setTourDetails] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [depositAmount, setDepositAmount] = useState('');
+  const [internalNotes, setInternalNotes] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,11 +55,14 @@ export default function NovoClientePage() {
         body: JSON.stringify({
           name: name.trim(),
           email: email.trim(),
+          phone: phone.trim() || undefined,
+          pax: pax !== '' ? parseInt(pax) : 1,
           arrival_date: arrivalDate,
           departure_date: departureDate,
           tour_details: tourDetails.trim() || undefined,
           total_amount: totalAmount !== '' ? parseFloat(totalAmount) : undefined,
           deposit_amount: depositAmount !== '' ? parseFloat(depositAmount) : undefined,
+          internal_notes: internalNotes.trim() || undefined,
         }),
       });
 
@@ -78,13 +87,12 @@ export default function NovoClientePage() {
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
           <Link href="/admin/clientes" className="hover:text-gray-600 transition-colors">
-            Clientes
+            Kunden
           </Link>
           <span>→</span>
           <span className="text-gray-600">Neuer Kunde</span>
         </div>
 
-        {/* Header */}
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Neuen Kunden anlegen</h1>
 
         <form onSubmit={handleSubmit} noValidate>
@@ -101,7 +109,7 @@ export default function NovoClientePage() {
                 onChange={e => setName(e.target.value)}
                 placeholder="z.B. Maria Müller"
                 disabled={loading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+                className={INPUT_CLS}
               />
             </div>
 
@@ -116,8 +124,38 @@ export default function NovoClientePage() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="name@example.com"
                 disabled={loading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+                className={INPUT_CLS}
               />
+            </div>
+
+            {/* Phone + Pax */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Telefon / WhatsApp
+                </label>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  placeholder="+49 170 000 0000"
+                  disabled={loading}
+                  className={INPUT_CLS}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Anzahl Personen (Pax)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={pax}
+                  onChange={e => setPax(e.target.value)}
+                  disabled={loading}
+                  className={INPUT_CLS}
+                />
+              </div>
             </div>
 
             {/* Dates */}
@@ -131,7 +169,7 @@ export default function NovoClientePage() {
                   value={arrivalDate}
                   onChange={e => setArrivalDate(e.target.value)}
                   disabled={loading}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+                  className={INPUT_CLS}
                 />
               </div>
               <div>
@@ -144,7 +182,7 @@ export default function NovoClientePage() {
                   onChange={e => setDepartureDate(e.target.value)}
                   min={arrivalDate || undefined}
                   disabled={loading}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+                  className={INPUT_CLS}
                 />
               </div>
             </div>
@@ -160,7 +198,7 @@ export default function NovoClientePage() {
                 rows={3}
                 placeholder="z.B. Flughafen-Transfer, Klassiker Tour, Favela Tour Rocinha, Maracanã-Spiel"
                 disabled={loading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none disabled:bg-gray-50 disabled:text-gray-400"
+                className={`${INPUT_CLS} resize-none`}
               />
             </div>
 
@@ -178,7 +216,7 @@ export default function NovoClientePage() {
                   onChange={e => setTotalAmount(e.target.value)}
                   placeholder="0.00"
                   disabled={loading}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+                  className={INPUT_CLS}
                 />
               </div>
               <div>
@@ -193,20 +231,34 @@ export default function NovoClientePage() {
                   onChange={e => setDepositAmount(e.target.value)}
                   placeholder="0.00"
                   disabled={loading}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+                  className={INPUT_CLS}
                 />
               </div>
             </div>
+
+            {/* Internal Notes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Interne Notizen{' '}
+                <span className="text-xs text-gray-400">(nur für dich sichtbar)</span>
+              </label>
+              <textarea
+                value={internalNotes}
+                onChange={e => setInternalNotes(e.target.value)}
+                rows={3}
+                placeholder="Notizen, die nicht an den Kunden weitergeleitet werden"
+                disabled={loading}
+                className={`${INPUT_CLS} resize-none`}
+              />
+            </div>
           </div>
 
-          {/* Error */}
           {error && (
             <div className="mt-4 p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200">
               {error}
             </div>
           )}
 
-          {/* Actions */}
           <div className="mt-5 flex items-center gap-3">
             <Link
               href="/admin/clientes"
