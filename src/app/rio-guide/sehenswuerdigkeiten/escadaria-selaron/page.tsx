@@ -420,6 +420,29 @@ export default function EscadariaSelaronPage() {
                     </div>
                 </section>
 
+                {/* ── INFOGRÁFICO ─────────────────────────────────── */}
+                <section className="pb-12 lg:pb-16 bg-gray-50">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up">
+                            <figure className="max-w-[800px] mx-auto">
+                                <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+                                    <Image
+                                        src="/images/rio-guide/sehenswuerdigkeiten/infografik-selaron-01.webp"
+                                        alt="Infografik zur Escadaria Selarón: 215 Stufen, 125 m lang, über 2.000 Fliesen aus 60 Ländern, kostenloser Eintritt, erbaut 1990–2013"
+                                        width={1200}
+                                        height={900}
+                                        className="w-full h-auto"
+                                        loading="lazy"
+                                    />
+                                </div>
+                                <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
+                                    Zahlen &amp; Fakten zur Escadaria Selarón — 23 Jahre Arbeit, 215 Stufen, über 2.000 Fliesen aus aller Welt.
+                                </figcaption>
+                            </figure>
+                        </FadeIn>
+                    </div>
+                </section>
+
                 {/* ── SECÇÃO 5 — Wills Insider-Tipp ───────────────── */}
                 <section className="py-16 lg:py-20 bg-white border-t border-gray-100">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
