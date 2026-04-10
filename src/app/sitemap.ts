@@ -91,7 +91,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
         {
             url: `${baseUrl}/rio-guide/sehenswuerdigkeiten/zuckerhut`,
-            lastModified: new Date("2026-03-26"),
+            lastModified: today,
             changeFrequency: "monthly",
             priority: 0.8,
         },
