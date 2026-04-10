@@ -29,18 +29,17 @@ export default function ChristusErloeserPage() {
             <main className="flex-grow">
                 {/* ── HERO ─────────────────────────────────────────── */}
                 <section className="relative pt-32 pb-28 lg:pt-44 lg:pb-36 overflow-hidden">
-                    {/* Gradient background — placeholder sem imagem */}
-                    <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#071a0e] via-[#0d2818] to-[#142b1c]" />
-
-                    {/* Subtle texture overlay */}
-                    <div
-                        className="absolute inset-0 z-0 opacity-[0.04]"
-                        style={{
-                            backgroundImage:
-                                "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1px, transparent 0)",
-                            backgroundSize: "32px 32px",
-                        }}
+                    {/* Background image */}
+                    <Image
+                        src="/images/cristo-bg.webp"
+                        alt="Christus Erlöser auf dem Corcovado in Rio de Janeiro"
+                        fill
+                        className="object-cover object-top z-0"
+                        priority
                     />
+
+                    {/* Dark overlay */}
+                    <div className="absolute inset-0 z-0 bg-[#071a0e]/70" />
 
                     {/* Green glow accent */}
                     <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-[#22a262]/10 blur-3xl z-0 -translate-y-1/2 translate-x-1/4" />
@@ -262,7 +261,7 @@ export default function ChristusErloeserPage() {
                 </section>
 
                 {/* ── SECÇÃO 4 — Texto Introdutório ───────────────── */}
-                <section className="py-20 lg:py-28 bg-white">
+                <section className="pt-20 lg:pt-28 pb-8 bg-white">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-7 text-left">
@@ -304,6 +303,29 @@ export default function ChristusErloeserPage() {
                                 </p>
 
                             </div>
+                        </FadeIn>
+                    </div>
+                </section>
+
+                {/* ── IMAGEM 02 ───────────────────────────────────── */}
+                <section className="pt-2 pb-10 bg-white">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up">
+                            <figure className="max-w-[800px] mx-auto">
+                                <div className="rounded-2xl overflow-hidden shadow-sm">
+                                    <Image
+                                        src="/images/cristo-02.webp"
+                                        alt="Christus Erlöser Rio de Janeiro — Nahansicht der Statue auf dem Corcovado"
+                                        width={1200}
+                                        height={800}
+                                        className="w-full h-auto"
+                                        loading="lazy"
+                                    />
+                                </div>
+                                <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
+                                    Der Christus Erlöser thront auf 710 Metern Höhe auf dem Corcovado — mitten im größten urbanen Regenwald der Welt.
+                                </figcaption>
+                            </figure>
                         </FadeIn>
                     </div>
                 </section>
@@ -359,6 +381,23 @@ export default function ChristusErloeserPage() {
                                     und Taufen statt. Die allermeisten Touristen laufen direkt daran
                                     vorbei, ohne es je zu merken.
                                 </p>
+
+                                {/* Imagem 03 — meio do bloco */}
+                                <figure className="my-2">
+                                    <div className="rounded-2xl overflow-hidden shadow-sm">
+                                        <Image
+                                            src="/images/cristo-03.webp"
+                                            alt="Panoramablick vom Christus Erlöser über Rio de Janeiro"
+                                            width={1200}
+                                            height={800}
+                                            className="w-full h-auto"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                    <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
+                                        Das 360°-Panorama vom Corcovado: Ipanema, Copacabana, die Guanabara-Bucht und der Zuckerhut — alles auf einmal.
+                                    </figcaption>
+                                </figure>
 
                                 {/* P4 — A ligação com os alemães */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
