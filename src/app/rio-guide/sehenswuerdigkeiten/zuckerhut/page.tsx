@@ -28,12 +28,17 @@ export default function ZuckerhutPage() {
             <main className="flex-grow">
                 {/* ── HERO ─────────────────────────────────────────── */}
                 <section className="relative pt-32 pb-28 lg:pt-44 lg:pb-36 overflow-hidden">
-                    {/* Gradient background */}
-                    <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#071a0e] via-[#0d2818] to-[#142b1c]" />
+                    {/* Photo background */}
+                    <div
+                        className="absolute inset-0 z-0 bg-cover bg-center"
+                        style={{ backgroundImage: "url('/images/zuckerhut-pao-de-acucar-bg.webp')" }}
+                    />
+                    {/* Dark overlay */}
+                    <div className="absolute inset-0 z-0 bg-[#071a0e]/70" />
 
                     {/* Subtle texture overlay */}
                     <div
-                        className="absolute inset-0 z-0 opacity-[0.04]"
+                        className="absolute inset-0 z-0 opacity-[0.03]"
                         style={{
                             backgroundImage:
                                 "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1px, transparent 0)",
@@ -275,6 +280,26 @@ export default function ZuckerhutPage() {
                     </div>
                 </section>
 
+                {/* ── Foto 01 ─────────────────────────────────────── */}
+                <section className="pb-16 lg:pb-20 bg-white">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up">
+                            <div className="max-w-[800px] mx-auto">
+                                <figure>
+                                    <img
+                                        src="/images/zuckerhut-pao-de-acucar-01.webp"
+                                        alt="Blick auf den Zuckerhut von der Guanabara-Bucht aus"
+                                        className="w-full rounded-2xl shadow-md"
+                                    />
+                                    <figcaption className="mt-3 text-sm text-gray-400 text-center">
+                                        Der Zuckerhut erhebt sich 396 Meter über die Guanabara-Bucht — eines der bekanntesten Naturwahrzeichen der Welt.
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        </FadeIn>
+                    </div>
+                </section>
+
                 {/* ── SECÇÃO 4 — Geschichte & Wissenswertes ───────── */}
                 <section className="pt-20 lg:pt-28 pb-8 lg:pb-10 bg-gray-50 border-t border-gray-100">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
@@ -314,6 +339,18 @@ export default function ZuckerhutPage() {
                                     der Talstation bis zum Gipfel dauert insgesamt etwa 10 Minuten.
                                 </p>
 
+                                {/* Foto 02 */}
+                                <figure className="my-2">
+                                    <img
+                                        src="/images/zuckerhut-pao-de-acucar-02.webp"
+                                        alt="Aussicht vom Gipfel des Zuckerhuts auf Rio de Janeiro"
+                                        className="w-full rounded-2xl shadow-md"
+                                    />
+                                    <figcaption className="mt-3 mb-6 text-sm text-gray-400 text-center">
+                                        Blick vom Gipfel auf die Zona Sul: unten die Praia Vermelha am Fuß des Morro da Urca, dahinter der geschwungene Strand von Copacabana.
+                                    </figcaption>
+                                </figure>
+
                                 {/* P4 — James Bond */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     Für das deutsche Publikum gibt es eine besondere Verbindung: Im
@@ -339,6 +376,26 @@ export default function ZuckerhutPage() {
                                     Anblick für alle, die damals in Rio waren.
                                 </p>
 
+                            </div>
+                        </FadeIn>
+                    </div>
+                </section>
+
+                {/* ── Infografik Zuckerhut ─────────────────────────── */}
+                <section className="pb-16 lg:pb-20 bg-gray-50">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up">
+                            <div className="max-w-[800px] mx-auto">
+                                <figure>
+                                    <img
+                                        src="/images/rio-guide/sehenswuerdigkeiten/infografik-zuckerhut-01.webp"
+                                        alt="Infografik: Zuckerhut – Alle wichtigen Infos auf einen Blick"
+                                        className="w-full rounded-2xl shadow-md"
+                                    />
+                                    <figcaption className="mt-3 text-sm text-gray-400 text-center">
+                                        Zuckerhut auf einen Blick — Tickets, Öffnungszeiten, Anfahrt und Insider-Tipps zusammengefasst.
+                                    </figcaption>
+                                </figure>
                             </div>
                         </FadeIn>
                     </div>
