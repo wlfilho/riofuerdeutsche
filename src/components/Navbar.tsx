@@ -57,6 +57,7 @@ const navLinks: NavLink[] = [
                 items: [
                     { href: "/rio-guide/sehenswuerdigkeiten/christus-erloeser", label: "Christus-Erlöser" },
                     { href: "/rio-guide/sehenswuerdigkeiten/zuckerhut", label: "Zuckerhut" },
+                    { href: "/rio-guide/sehenswuerdigkeiten/escadaria-selaron", label: "Escadaria Selarón" },
                 ],
                 allHref: "/rio-guide/sehenswuerdigkeiten",
                 allLabel: "Alle ansehen",

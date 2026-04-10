@@ -61,7 +61,8 @@ const attractions = [
         tip: "Frühmorgens hast du die Treppe fast für dich allein — perfekt für Fotos ohne Menschenmassen.",
         effort: "Leicht",
         gradient: "from-red-100 to-red-200",
-        image: "/images/selaron.webp"
+        image: "/images/selaron.webp",
+        guideLink: "/rio-guide/sehenswuerdigkeiten/escadaria-selaron",
     },
     {
         name: "Santa Teresa",
