@@ -23,8 +23,39 @@ export const metadata: Metadata = {
     },
 };
 
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    name: "Escadaria Selarón",
+    description:
+        "Die berühmte Fliesentreppe zwischen Lapa und Santa Teresa in Rio de Janeiro — 215 Stufen, über 2.000 Fliesen aus 60 Ländern, kostenloser Eintritt.",
+    url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/escadaria-selaron",
+    image: "https://riofuerdeutsche.de/images/selaron-bg.webp",
+    touristType: "Cultural tourism",
+    isAccessibleForFree: true,
+    address: {
+        "@type": "PostalAddress",
+        streetAddress: "Rua Manuel Carneiro",
+        addressLocality: "Rio de Janeiro",
+        addressRegion: "RJ",
+        addressCountry: "BR",
+    },
+    geo: {
+        "@type": "GeoCoordinates",
+        latitude: -22.9122,
+        longitude: -43.1801,
+    },
+    inLanguage: "de",
+    knowsAbout: ["Escadaria Selarón", "Jorge Selarón", "Lapa", "Santa Teresa", "Rio de Janeiro"],
+};
+
 export default function EscadariaSelaronPage() {
     return (
+        <>
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
             <Navbar />
 
@@ -605,5 +636,6 @@ export default function EscadariaSelaronPage() {
 
             <Footer />
         </div>
+        </>
     );
 }

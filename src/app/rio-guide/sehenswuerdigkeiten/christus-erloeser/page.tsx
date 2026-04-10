@@ -21,8 +21,39 @@ export const metadata = {
     },
 };
 
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    name: "Christus Erlöser",
+    description:
+        "Der Christus Erlöser auf dem Corcovado in Rio de Janeiro — eines der Sieben Weltwunder der Neuzeit, 30 Meter hoch, auf 710 Metern Höhe mit 360°-Panorama über die Stadt.",
+    url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/christus-erloeser",
+    image: "https://riofuerdeutsche.de/images/cristo-bg.webp",
+    touristType: "Cultural tourism",
+    isAccessibleForFree: false,
+    address: {
+        "@type": "PostalAddress",
+        streetAddress: "Parque Nacional da Tijuca, Alto da Boa Vista",
+        addressLocality: "Rio de Janeiro",
+        addressRegion: "RJ",
+        addressCountry: "BR",
+    },
+    geo: {
+        "@type": "GeoCoordinates",
+        latitude: -22.9519,
+        longitude: -43.2105,
+    },
+    inLanguage: "de",
+    knowsAbout: ["Christus Erlöser", "Cristo Redentor", "Corcovado", "Rio de Janeiro", "Weltwunder"],
+};
+
 export default function ChristusErloeserPage() {
     return (
+        <>
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
             <Navbar />
 
@@ -640,5 +671,6 @@ export default function ChristusErloeserPage() {
 
             <Footer />
         </div>
+        </>
     );
 }

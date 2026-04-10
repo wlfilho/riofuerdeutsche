@@ -20,8 +20,39 @@ export const metadata = {
     },
 };
 
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    name: "Zuckerhut",
+    description:
+        "Der Zuckerhut (Pão de Açúcar) in Rio de Janeiro — 396 Meter hoch, erreichbar per Seilbahn in zwei Etappen, mit spektakulärem Blick auf die Guanabara-Bucht und den Sonnenuntergang.",
+    url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/zuckerhut",
+    image: "https://riofuerdeutsche.de/images/zuckerhut-pao-de-acucar-bg.webp",
+    touristType: "Cultural tourism",
+    isAccessibleForFree: false,
+    address: {
+        "@type": "PostalAddress",
+        streetAddress: "Praça General Tibúrcio, 85 — Urca",
+        addressLocality: "Rio de Janeiro",
+        addressRegion: "RJ",
+        addressCountry: "BR",
+    },
+    geo: {
+        "@type": "GeoCoordinates",
+        latitude: -22.9489,
+        longitude: -43.1545,
+    },
+    inLanguage: "de",
+    knowsAbout: ["Zuckerhut", "Pão de Açúcar", "Seilbahn", "Rio de Janeiro", "Urca"],
+};
+
 export default function ZuckerhutPage() {
     return (
+        <>
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
             <Navbar />
 
@@ -565,5 +596,6 @@ export default function ZuckerhutPage() {
 
             <Footer />
         </div>
+        </>
     );
 }

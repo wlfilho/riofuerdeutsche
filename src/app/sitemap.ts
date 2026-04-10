@@ -84,6 +84,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.8,
         },
         {
+            url: `${baseUrl}/rio-guide/sehenswuerdigkeiten`,
+            lastModified: today,
+            changeFrequency: "monthly",
+            priority: 0.8,
+        },
+        {
             url: `${baseUrl}/rio-guide/sehenswuerdigkeiten/christus-erloeser`,
             lastModified: today,
             changeFrequency: "monthly",
@@ -97,7 +103,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
         {
             url: `${baseUrl}/rio-guide/sehenswuerdigkeiten/escadaria-selaron`,
-            lastModified: new Date("2026-04-10"),
+            lastModified: today,
             changeFrequency: "monthly",
             priority: 0.8,
         },
