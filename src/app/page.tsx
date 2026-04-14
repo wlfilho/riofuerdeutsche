@@ -302,7 +302,7 @@ export default function Home() {
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
                     <Link
                       href="/ist-rio-gefaehrlich"
-                      className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-semibold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-4 sm:px-8 bg-rio-yellow text-gray-900 rounded-full font-semibold text-base sm:text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20 whitespace-nowrap"
                     >
                       <Camera className="w-5 h-5" />
                       Kostenlosen Sicherheits-Guide sichern
