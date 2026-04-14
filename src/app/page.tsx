@@ -304,7 +304,9 @@ export default function Home() {
                       href="/ist-rio-gefaehrlich"
                       className="inline-flex items-center justify-center gap-2 px-5 py-4 sm:px-8 bg-rio-yellow text-gray-900 rounded-full font-semibold text-base sm:text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20 whitespace-nowrap"
                     >
-                      <Camera className="w-5 h-5" />
+                      <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 1.5C9.677 1.5 7.37 1.863 5.204 2.535A.75.75 0 0 0 4.5 3.25v.794c0 4.83 2.783 9.252 7.032 11.33a.75.75 0 0 0 .936 0C16.717 13.296 19.5 8.874 19.5 4.044V3.25a.75.75 0 0 0-.704-.715A22.458 22.458 0 0 0 12 1.5Z" />
+                      </svg>
                       Schlauer reisen als 90% der Touristen
                     </Link>
                     <Link
