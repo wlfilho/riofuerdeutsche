@@ -4,6 +4,8 @@ export type EmailTemplate = {
   name: string
   subject: string
   html_body: string
+  category: string
+  sort_order: number
   updated_at: string
 }
 

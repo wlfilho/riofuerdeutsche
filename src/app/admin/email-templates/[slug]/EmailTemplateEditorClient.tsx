@@ -73,6 +73,11 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
         <span className="text-gray-300">/</span>
         <h1 className="text-xl font-bold text-gray-900">{template.name}</h1>
         <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-mono">{template.slug}</span>
+        {template.category && (
+          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+            {template.category}
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">

@@ -1,7 +1,6 @@
 import { getEmailTemplates } from '@/app/actions/email-templates'
 import { getEmailSignature } from '@/app/actions/email-signature'
-import Link from 'next/link'
-import EmailTemplateListClient from './EmailTemplateListClient'
+import EmailTemplateList from '@/components/admin/EmailTemplateList'
 import EmailSignatureEditor from '@/components/admin/EmailSignatureEditor'
 
 export default async function EmailTemplatesPage() {
@@ -20,13 +19,13 @@ export default async function EmailTemplatesPage() {
         </p>
       </div>
 
-      <EmailSignatureEditor initialValue={signature} />
-
-      <hr className="border-gray-100 mb-6" />
-
       <h2 className="text-base font-semibold text-gray-700 mb-4">Templates</h2>
 
-      <EmailTemplateListClient templates={templates} />
+      <EmailTemplateList initialTemplates={templates} />
+
+      <hr className="border-gray-100 my-10" />
+
+      <EmailSignatureEditor initialValue={signature} />
     </div>
   )
 }
