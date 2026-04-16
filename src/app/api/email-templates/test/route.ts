@@ -40,10 +40,10 @@ export async function POST(request: Request) {
       replacedHtml = replacedHtml.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value)
     }
 
-    const emailSubject = '[TEST] Buchungsbestätigung – Rio für Deutsche'
+    const emailSubject = `[TEST] ${finalSubject}`
 
     const { error } = await resend.emails.send({
-      from: 'Will · Rio für Deutsche <will@riofuerdeutsche.de>',
+      from: 'Rio für Deutsche <noreply@riofuerdeutsche.de>',
       to: 'lantelmew@gmail.com',
       subject: emailSubject,
       html: replacedHtml,

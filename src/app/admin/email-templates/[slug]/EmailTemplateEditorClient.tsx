@@ -1,11 +1,110 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { EmailTemplate, SHORTCODES, applyExampleShortcodes } from '@/types/email-templates'
 import { saveEmailTemplate } from '@/app/actions/email-templates'
 import Link from 'next/link'
-import { Send, Loader2 } from 'lucide-react'
+import { Send, Loader2, Users } from 'lucide-react'
+
+interface Client {
+  id: string
+  name: string
+  email: string
+}
+
+function SendToClientModal({
+  onClose,
+  onSend,
+  sending,
+}: {
+  onClose: () => void
+  onSend: (clientId: string) => void
+  sending: boolean
+}) {
+  const [clients, setClients] = useState<Client[]>([])
+  const [loadingClients, setLoadingClients] = useState(true)
+  const [selected, setSelected] = useState<string>('')
+
+  useEffect(() => {
+    fetch('/api/admin/clients')
+      .then(r => r.json())
+      .then(data => {
+        if (data.clients) setClients(data.clients)
+      })
+      .finally(() => setLoadingClients(false))
+  }, [])
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+          <h2 className="text-base font-bold text-gray-900">An Kunden senden</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+        </div>
+        <div className="px-6 py-5 space-y-4">
+          <p className="text-sm text-gray-500">
+            Wähle einen Kunden aus. Die Shortcodes werden automatisch mit seinen Daten befüllt.
+          </p>
+          {loadingClients ? (
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <Loader2 className="w-4 h-4 animate-spin" /> Wird geladen…
+            </div>
+          ) : clients.length === 0 ? (
+            <p className="text-sm text-gray-400">Keine Kunden gefunden.</p>
+          ) : (
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {clients.map(c => (
+                <label
+                  key={c.id}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-colors ${
+                    selected === c.id
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="client"
+                    value={c.id}
+                    checked={selected === c.id}
+                    onChange={() => setSelected(c.id)}
+                    className="accent-green-600"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{c.name}</p>
+                    <p className="text-xs text-gray-500">{c.email}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="flex items-center justify-end gap-3 px-6 pb-6">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            Abbrechen
+          </button>
+          <button
+            onClick={() => selected && onSend(selected)}
+            disabled={!selected || sending}
+            className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {sending ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> Wird gesendet…</>
+            ) : (
+              <><Send className="w-4 h-4" /> Senden</>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function EmailTemplateEditorClient({ template }: { template: EmailTemplate }) {
   const router = useRouter()
@@ -19,6 +118,10 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
 
   const [sendingTest, setSendingTest] = useState(false)
   const [testToast, setTestToast] = useState<string | null>(null)
+
+  const [showSendModal, setShowSendModal] = useState(false)
+  const [sendingToClient, setSendingToClient] = useState(false)
+  const [clientSentToast, setClientSentToast] = useState<string | null>(null)
 
   const handleSave = async () => {
     setSaving(true)
@@ -38,6 +141,29 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
     navigator.clipboard.writeText(`{{${key}}}`)
     setCopiedKey(key)
     setTimeout(() => setCopiedKey(null), 1500)
+  }
+
+  const handleSendToClient = async (clientId: string) => {
+    setSendingToClient(true)
+    try {
+      const res = await fetch('/api/email-templates/send-to-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: template.slug, subject, htmlBody, clientId }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setShowSendModal(false)
+        setClientSentToast('E-Mail erfolgreich gesendet ✓')
+        setTimeout(() => setClientSentToast(null), 3500)
+      } else {
+        alert('Fehler: ' + data.error)
+      }
+    } catch (err: any) {
+      alert('Fehler: ' + err.message)
+    } finally {
+      setSendingToClient(false)
+    }
   }
 
   const handleTestSend = async () => {
@@ -145,6 +271,20 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
                 </span>
               )}
             </div>
+            <div className="relative flex flex-col items-center">
+              <button
+                onClick={() => setShowSendModal(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-green-600 bg-green-600 text-white hover:bg-green-700 transition-colors"
+              >
+                <Users className="w-3.5 h-3.5" />
+                An Kunden senden
+              </button>
+              {clientSentToast && (
+                <span className="absolute top-full mt-1.5 whitespace-nowrap text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded shadow-sm z-10">
+                  {clientSentToast}
+                </span>
+              )}
+            </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
           </div>
         </div>
@@ -171,6 +311,15 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
           </div>
         </div>
       </div>
+
+      {/* Send to Client Modal */}
+      {showSendModal && (
+        <SendToClientModal
+          onClose={() => setShowSendModal(false)}
+          onSend={handleSendToClient}
+          sending={sendingToClient}
+        />
+      )}
 
       {/* Preview Modal */}
       {showPreview && (
