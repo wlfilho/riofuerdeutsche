@@ -23,21 +23,45 @@ export async function GET(
 
   const { id } = await params
 
-  const [{ data: client, error: clientError }, { data: emails, error: emailsError }] =
-    await Promise.all([
-      supabase.from('tour_clients').select('*').eq('id', id).single(),
-      supabase
-        .from('email_sequence_log')
-        .select('*')
-        .eq('client_id', id)
-        .order('email_number', { ascending: true }),
-    ])
+  const [
+    { data: client, error: clientError },
+    { data: sequenceDef, error: defError },
+    { data: logs, error: logsError }
+  ] = await Promise.all([
+    supabase.from('tour_clients').select('*').eq('id', id).single(),
+    supabase
+      .from('email_sequence_definition')
+      .select('sort_order, phase, template_slug, label')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('email_sequence_log')
+      .select('*')
+      .eq('client_id', id),
+  ])
 
   if (clientError) {
     const status = clientError.code === 'PGRST116' ? 404 : 500
     return NextResponse.json({ error: clientError.message }, { status })
   }
-  if (emailsError) return NextResponse.json({ error: emailsError.message }, { status: 500 })
+  if (defError) return NextResponse.json({ error: defError.message }, { status: 500 })
+  if (logsError) return NextResponse.json({ error: logsError.message }, { status: 500 })
+
+  const emails = sequenceDef.map((def, index) => {
+    const log = logs?.find(l => l.template_slug === def.template_slug)
+    return {
+      id: log?.id ?? 'pending-' + def.template_slug,
+      email_number: index + 1,
+      email_name: def.label,
+      template_slug: def.template_slug,
+      phase: def.phase,
+      scheduled_date: log?.scheduled_date ?? null,
+      sent_at: log?.sent_at ?? null,
+      status: log?.status ?? 'not_sent',
+      error_message: log?.error_message ?? null,
+      resend_id: log?.resend_id ?? null,
+    }
+  })
 
   return NextResponse.json({ client, emails })
 }

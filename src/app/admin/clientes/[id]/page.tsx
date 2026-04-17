@@ -19,9 +19,11 @@ interface EmailLog {
   id: string;
   email_number: number;
   email_name: string;
-  scheduled_date: string;
+  template_slug: string;
+  phase: 'pre_tour' | 'pos_tour';
+  scheduled_date: string | null;
   sent_at: string | null;
-  status: 'pending' | 'sent' | 'error' | 'skipped';
+  status: 'pending' | 'sent' | 'error' | 'skipped' | 'not_sent';
   error_message: string | null;
   resend_id: string | null;
 }
@@ -71,6 +73,7 @@ const EMAIL_BORDER: Record<EmailLog['status'], string> = {
   pending: 'border-l-yellow-400',
   error: 'border-l-red-500',
   skipped: 'border-l-gray-300',
+  not_sent: 'border-l-gray-200',
 };
 
 const EMAIL_ICON: Record<EmailLog['status'], string> = {
@@ -78,7 +81,20 @@ const EMAIL_ICON: Record<EmailLog['status'], string> = {
   pending: '⏳',
   error: '❌',
   skipped: '⏭',
+  not_sent: '🔲',
 };
+
+function PhaseDivider({ label }: { label: string }) {
+  return (
+    <div className="relative flex items-center py-6">
+      <div className="flex-grow border-t border-gray-100"></div>
+      <span className="flex-shrink mx-4 text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">
+        {label}
+      </span>
+      <div className="flex-grow border-t border-gray-100"></div>
+    </div>
+  );
+}
 
 function EmailCard({
   log,
@@ -120,33 +136,70 @@ function EmailCard({
     }
   };
 
+  const handleSendNow = async () => {
+    setSending(true);
+    setSendError(null);
+    try {
+      const res = await fetch(`/api/admin/clients/${clientId}/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ template_slug: log.template_slug }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSendError(data.error ?? 'Fehler beim Senden.');
+      } else {
+        onUpdated({
+          ...log,
+          id: data.log_id ?? log.id,
+          status: 'sent',
+          sent_at: new Date().toISOString(),
+          resend_id: data.resend_id ?? null,
+          error_message: null,
+        });
+      }
+    } catch {
+      setSendError('Netzwerkfehler.');
+    } finally {
+      setSending(false);
+    }
+  };
+
   const showResend = log.status === 'error' || log.status === 'sent';
+  const showSendNow = log.status === 'not_sent';
 
   return (
     <div className={`bg-white rounded-xl border border-gray-200 border-l-4 ${EMAIL_BORDER[log.status]} p-5`}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          {/* Title */}
           <p className="text-sm font-semibold text-gray-900">
             {EMAIL_ICON[log.status]}{' '}
             {log.email_number} — {log.email_name}
           </p>
 
-          {/* Status line */}
           <p className="mt-1 text-sm text-gray-500">
-            {log.status === 'pending' && `Geplant für ${formatDate(log.scheduled_date)}`}
+            {log.status === 'not_sent' && 'Noch nicht gesendet'}
+            {log.status === 'pending' && log.scheduled_date && `Geplant für ${formatDate(log.scheduled_date)}`}
             {log.status === 'sent' && log.sent_at && `Gesendet am ${formatDateTime(log.sent_at)} Uhr`}
             {log.status === 'error' && `Fehler: ${log.error_message ?? 'Unbekannter Fehler'}`}
             {log.status === 'skipped' && 'Übersprungen (Datum bereits vergangen)'}
           </p>
 
-          {/* Inline send error */}
           {sendError && (
             <p className="mt-1.5 text-xs text-red-600">{sendError}</p>
           )}
         </div>
 
-        {/* Resend button */}
+        {showSendNow && (
+          <button
+            onClick={handleSendNow}
+            disabled={sending}
+            className="shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-green-50 text-green-700 hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {sending ? 'Wird gesendet...' : 'Jetzt senden'}
+          </button>
+        )}
+
         {showResend && (
           <button
             onClick={handleResend}
@@ -202,8 +255,11 @@ export default function ClienteDetailPage({
   }, [id]);
 
   const handleEmailUpdated = (updated: EmailLog) => {
-    setEmails(prev => prev.map(e => (e.id === updated.id ? updated : e)));
+    setEmails(prev => prev.map(e => (e.template_slug === updated.template_slug ? updated : e)));
   };
+
+  const preTourEmails = emails.filter(e => e.phase === 'pre_tour');
+  const posTourEmails = emails.filter(e => e.phase === 'pos_tour');
 
   return (
     <div className="p-6 md:p-10">
@@ -310,19 +366,41 @@ export default function ClienteDetailPage({
 
             {/* Email timeline */}
             <div>
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
                 E-Mail Sequenz
               </h2>
-              <div className="space-y-3">
-                {emails.map(log => (
-                  <EmailCard
-                    key={log.id}
-                    log={log}
-                    clientId={id}
-                    onUpdated={handleEmailUpdated}
-                  />
-                ))}
-              </div>
+              
+              {preTourEmails.length > 0 && (
+                <>
+                  <PhaseDivider label="Vor der Reise" />
+                  <div className="space-y-3">
+                    {preTourEmails.map(log => (
+                      <EmailCard
+                        key={log.template_slug}
+                        log={log}
+                        clientId={id}
+                        onUpdated={handleEmailUpdated}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {posTourEmails.length > 0 && (
+                <>
+                  <PhaseDivider label="Nach der Reise" />
+                  <div className="space-y-3">
+                    {posTourEmails.map(log => (
+                      <EmailCard
+                        key={log.template_slug}
+                        log={log}
+                        clientId={id}
+                        onUpdated={handleEmailUpdated}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </>
         )}
