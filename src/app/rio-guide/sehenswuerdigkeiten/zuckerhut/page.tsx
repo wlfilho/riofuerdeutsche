@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
@@ -486,67 +487,88 @@ export default function ZuckerhutPage() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                             {/* Card 1 — Christus Erlöser */}
-                            <FadeIn delay={0} direction="up">
+                            <FadeIn delay={0} direction="up" className="flex">
                                 <Link
                                     href="/rio-guide/sehenswuerdigkeiten/christus-erloeser"
-                                    className="group p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-rio-yellow hover:shadow-md transition-all duration-300 flex flex-col h-full"
+                                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden w-full"
                                 >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <span className="text-3xl" role="img" aria-label="Berg">⛪</span>
-                                        <span className="bg-white/90 px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
+                                    <div className="relative h-48 overflow-hidden">
+                                        <Image
+                                            src="/images/cristo-bg.webp"
+                                            alt="Christus Erlöser auf dem Corcovado in Rio de Janeiro"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green uppercase tracking-wider">
                                             Klassiker
                                         </span>
                                     </div>
-                                    <h3 className="text-xl font-bold font-heading text-gray-900 mb-2">Christus Erlöser</h3>
-                                    <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-grow">
-                                        Vom Zuckerhut siehst du ihn perfekt — der nächste logische Schritt.
-                                    </p>
-                                    <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors">
-                                        Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Christus Erlöser</h3>
+                                        <p className="text-gray-500 text-sm leading-relaxed flex-grow">
+                                            Vom Zuckerhut siehst du ihn perfekt — der nächste logische Schritt auf deiner Rio-Tour.
+                                        </p>
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
+                                            Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                        </div>
                                     </div>
                                 </Link>
                             </FadeIn>
 
                             {/* Card 2 — Urca */}
-                            <FadeIn delay={0.08} direction="up">
+                            <FadeIn delay={0.08} direction="up" className="flex">
                                 <Link
                                     href="/rio-guide/sehenswuerdigkeiten/urca"
-                                    className="group p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-rio-yellow hover:shadow-md transition-all duration-300 flex flex-col h-full"
+                                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden w-full"
                                 >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <span className="text-3xl" role="img" aria-label="Viertel">🏘️</span>
-                                        <span className="bg-white/90 px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
+                                    <div className="relative h-48 overflow-hidden">
+                                        <Image
+                                            src="/images/urca.webp"
+                                            alt="Urca — das ruhigste Viertel am Fuß des Zuckerhuts"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green uppercase tracking-wider">
                                             Geheimtipp
                                         </span>
                                     </div>
-                                    <h3 className="text-xl font-bold font-heading text-gray-900 mb-2">Urca</h3>
-                                    <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-grow">
-                                        Das ruhigste Viertel Rios liegt direkt am Fuß des Zuckerhuts — perfekt für danach.
-                                    </p>
-                                    <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors">
-                                        Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Urca</h3>
+                                        <p className="text-gray-500 text-sm leading-relaxed flex-grow">
+                                            Das ruhigste Viertel Rios liegt direkt am Fuß des Zuckerhuts — perfekt für danach.
+                                        </p>
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
+                                            Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                        </div>
                                     </div>
                                 </Link>
                             </FadeIn>
 
                             {/* Card 3 — Pedra do Arpoador */}
-                            <FadeIn delay={0.16} direction="up">
+                            <FadeIn delay={0.16} direction="up" className="flex">
                                 <Link
                                     href="/rio-guide/sehenswuerdigkeiten/pedra-do-arpoador"
-                                    className="group p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-rio-yellow hover:shadow-md transition-all duration-300 flex flex-col h-full"
+                                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden w-full"
                                 >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <span className="text-3xl" role="img" aria-label="Sonnenuntergang">🌅</span>
-                                        <span className="bg-white/90 px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
+                                    <div className="relative h-48 overflow-hidden">
+                                        <Image
+                                            src="/images/arpoador-v2.webp"
+                                            alt="Pedra do Arpoador — Sonnenuntergang mit Blick auf den Zuckerhut"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green uppercase tracking-wider">
                                             Sonnenuntergang
                                         </span>
                                     </div>
-                                    <h3 className="text-xl font-bold font-heading text-gray-900 mb-2">Pedra do Arpoador</h3>
-                                    <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-grow">
-                                        Auch ein legendärer Sonnenuntergang — diesmal mit Blick auf den Zuckerhut.
-                                    </p>
-                                    <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors">
-                                        Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Pedra do Arpoador</h3>
+                                        <p className="text-gray-500 text-sm leading-relaxed flex-grow">
+                                            Auch ein legendärer Sonnenuntergang — diesmal mit Blick auf den Zuckerhut.
+                                        </p>
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
+                                            Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                        </div>
                                     </div>
                                 </Link>
                             </FadeIn>

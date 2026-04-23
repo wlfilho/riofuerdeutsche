@@ -304,6 +304,29 @@ export default function RocinhaPage() {
                     </div>
                 </section>
 
+                {/* ── IMAGEM — Rocinha Tour ────────────────────────── */}
+                <section className="pt-2 pb-10 bg-white">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up">
+                            <figure className="max-w-[800px] mx-auto">
+                                <div className="rounded-2xl overflow-hidden shadow-sm">
+                                    <Image
+                                        src="/images/rocinha-tour.webp"
+                                        alt="Blick auf die Rocinha — die größte Favela Brasiliens zwischen den Bergen und dem Meer von Rio de Janeiro"
+                                        width={1200}
+                                        height={800}
+                                        className="w-full h-auto"
+                                        loading="lazy"
+                                    />
+                                </div>
+                                <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
+                                    Die Rocinha zwischen Pedra da Gávea und São Conrado — über 100.000 Menschen, eine eigene Wirtschaft, eine eigene Kultur. Alles auf einem einzigen Berghang.
+                                </figcaption>
+                            </figure>
+                        </FadeIn>
+                    </div>
+                </section>
+
                 {/* ── SECÇÃO 4b — Das Drohnen-Video ───────────────── */}
                 <section className="py-16 lg:py-20 bg-white border-t border-gray-100">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
@@ -468,6 +491,29 @@ export default function RocinhaPage() {
                                 </p>
 
                             </div>
+                        </FadeIn>
+                    </div>
+                </section>
+
+                {/* ── INFOGRÁFICO ─────────────────────────────────── */}
+                <section className="pb-12 lg:pb-16 bg-gray-50">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up">
+                            <figure className="max-w-[800px] mx-auto">
+                                <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+                                    <Image
+                                        src="/images/rio-guide/sehenswuerdigkeiten/infografik-rocinha.webp"
+                                        alt="Infografik zur Rocinha in Rio de Janeiro: Einwohner, Fläche, Gründung und kulturelle Highlights der größten Favela Brasiliens"
+                                        width={1200}
+                                        height={900}
+                                        className="w-full h-auto"
+                                        loading="lazy"
+                                    />
+                                </div>
+                                <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
+                                    Zahlen &amp; Fakten zur Rocinha — die größte Favela Brasiliens, eine lebendige Gemeinschaft mit über 100.000 Einwohnern zwischen den Bergen und dem Meer von Rio de Janeiro.
+                                </figcaption>
+                            </figure>
                         </FadeIn>
                     </div>
                 </section>
