@@ -481,15 +481,17 @@ export default function ChristusErloeserPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up">
                             <figure className="max-w-[800px] mx-auto">
-                                <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+                                <div className="rounded-2xl shadow-md">
+                                    <div className="rounded-2xl overflow-hidden border border-gray-100">
                                     <Image
                                         src="/images/rio-guide/sehenswuerdigkeiten/infografik-cristo-01.webp"
                                         alt="Infografik zum Christus Erlöser in Rio de Janeiro: Höhe 38 Meter, Armspannweite 28 Meter, Gewicht 635 Tonnen, Höhe über dem Meeresspiegel 710 Meter, erbaut 1922–1931"
                                         width={1200}
                                         height={900}
-                                        className="w-full h-auto"
+                                        className="w-full h-auto block"
                                         loading="lazy"
                                     />
+                                    </div>
                                 </div>
                                 <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
                                     Zahlen &amp; Fakten zum Christus Erlöser — eines der meistbesuchten Wahrzeichen der Welt.

@@ -419,11 +419,18 @@ export default function ZuckerhutPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto">
                                 <figure>
-                                    <img
-                                        src="/images/rio-guide/sehenswuerdigkeiten/infografik-zuckerhut-01.webp"
-                                        alt="Infografik: Zuckerhut – Alle wichtigen Infos auf einen Blick"
-                                        className="w-full rounded-2xl shadow-md"
-                                    />
+                                    <div className="rounded-2xl shadow-md">
+                                        <div className="rounded-2xl overflow-hidden border border-gray-100">
+                                            <Image
+                                                src="/images/rio-guide/sehenswuerdigkeiten/infografik-zuckerhut-01.webp"
+                                                alt="Infografik: Zuckerhut – Alle wichtigen Infos auf einen Blick"
+                                                width={1200}
+                                                height={900}
+                                                className="w-full h-auto block"
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                    </div>
                                     <figcaption className="mt-3 text-sm text-gray-400 text-center">
                                         Zuckerhut auf einen Blick — Tickets, Öffnungszeiten, Anfahrt und Insider-Tipps zusammengefasst.
                                     </figcaption>

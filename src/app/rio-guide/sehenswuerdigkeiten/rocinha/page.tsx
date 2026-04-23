@@ -500,15 +500,17 @@ export default function RocinhaPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up">
                             <figure className="max-w-[800px] mx-auto">
-                                <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-                                    <Image
-                                        src="/images/rio-guide/sehenswuerdigkeiten/infografik-rocinha.webp"
-                                        alt="Infografik zur Rocinha in Rio de Janeiro: Einwohner, Fläche, Gründung und kulturelle Highlights der größten Favela Brasiliens"
-                                        width={1200}
-                                        height={900}
-                                        className="w-full h-auto"
-                                        loading="lazy"
-                                    />
+                                <div className="rounded-2xl shadow-md">
+                                    <div className="rounded-2xl overflow-hidden border border-gray-100">
+                                        <Image
+                                            src="/images/rio-guide/sehenswuerdigkeiten/infografik-rocinha.webp"
+                                            alt="Infografik zur Rocinha in Rio de Janeiro: Einwohner, Fläche, Gründung und kulturelle Highlights der größten Favela Brasiliens"
+                                            width={1200}
+                                            height={900}
+                                            className="w-full h-auto block"
+                                            loading="lazy"
+                                        />
+                                    </div>
                                 </div>
                                 <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
                                     Zahlen &amp; Fakten zur Rocinha — die größte Favela Brasiliens, eine lebendige Gemeinschaft mit über 100.000 Einwohnern zwischen den Bergen und dem Meer von Rio de Janeiro.
