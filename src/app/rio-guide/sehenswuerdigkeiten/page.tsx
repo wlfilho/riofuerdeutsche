@@ -42,6 +42,13 @@ const sehenswuerdigkeiten = [
         href: "/rio-guide/sehenswuerdigkeiten/escadaria-selaron",
         emoji: "🪜",
     },
+    {
+        name: "Rocinha",
+        badge: "Favela-Tour",
+        tagline: "Die größte Favela Brasiliens — und ein Ort, den du nicht aus dem Taxi sehen solltest.",
+        href: "/rio-guide/sehenswuerdigkeiten/rocinha",
+        emoji: "🏘️",
+    },
 ];
 
 export default function SehenswuerdigkeitenPage() {

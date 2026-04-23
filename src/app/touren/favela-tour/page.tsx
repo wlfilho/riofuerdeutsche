@@ -31,8 +31,9 @@ const favelaExperiences = [
         time: "~3 Stunden",
         effort: "Leicht",
         image: "/images/rocinha.webp",
-        desc: "Favela Rocinha ist die größte Favela Rio de Janeiros — und gleichzeitig eines der faszinierendsten Viertel der Stadt. Mit über 70.000 Einwohnern ist sie eine Stadt in der Stadt: eigene Geschäfte, Restaurants, Schulen und ein pulsierendes Straßenleben. Rocinha eignet sich besonders für Besucher, die bereits erste Favela-Erfahrungen gesammelt haben und tiefer eintauchen möchten.",
-        tip: "Die beste Zeit für einen Besuch ist vormittags, wenn die Straßen lebendig sind und du das echte Alltagsleben mitbekommst. Ich kenne die Bewohner persönlich und zeige dir Orte, die kein normaler Tourist sieht.",
+        link: "/rio-guide/sehenswuerdigkeiten/rocinha",
+        desc: "Rocinha ist die größte Favela Brasiliens — mit über 100.000 Einwohnern eine Stadt in der Stadt. Bäckereien, Restaurants, Schulen, Handwerker und Künstler, die ihre eigene Wirtschaft aufgebaut haben. Was hier auf den ersten Blick wie ein Viertel aussieht, ist in Wirklichkeit eine pulsierende Gemeinschaft voller Kreativität und Energie — mit einer der besten Aussichten auf Rio, die kein Reiseführer kennt.",
+        tip: "Ich kenne die Familien in der Rocinha seit Jahren. Wir trinken Kaffee, hören Geschichten, sehen Orte, die kein normaler Tourist betritt. Tourismus, der hier ankommt, stärkt die lokale Wirtschaft direkt.",
         style: { objectPosition: "50% 5%" }
     },
     {
@@ -47,7 +48,7 @@ const favelaExperiences = [
         name: "Favela Santa Marta",
         time: "~2 Stunden",
         effort: "Leicht",
-        image: "https://images.unsplash.com/photo-1593102089898-4f5e6a5a5e5a?w=600&h=400&fit=crop&q=80",
+        image: "/images/rio-favela.webp",
         desc: "Favela Santa Marta ist eine der geschichtsträchtigsten Favelas Rio de Janeiros — und weltberühmt als Drehort von Michael Jacksons Musikvideo \"They Don't Care About Us\" (1996). Mit rund 8.000 Einwohnern liegt sie auf einem steilen Hügel in Botafogo und bietet von oben einen atemberaubenden Blick auf den Cristo Redentor, die Lagoa und die Bucht von Botafogo. Als erste offiziell befriedete (pacificada) Favela Rios gilt sie als Vorbild für die gesamte Stadt — und ist ideal für deine erste Favela-Erfahrung.",
         tip: "Die lebensgroße Michael-Jackson-Statue auf dem Platz, wo das berühmte Video gedreht wurde, ist ein beliebter Fotospot. Nimm den Teleférico (Seilbahn) — er ist kostenlos und ersetzt die steilen Stufen mit einem Panoramablick über Rio.",
         badge: "Botafogo"

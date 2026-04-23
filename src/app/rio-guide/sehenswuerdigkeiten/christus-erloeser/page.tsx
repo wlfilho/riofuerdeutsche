@@ -560,67 +560,88 @@ export default function ChristusErloeserPage() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                             {/* Card 1 — Zuckerhut */}
-                            <FadeIn delay={0} direction="up">
+                            <FadeIn delay={0} direction="up" className="flex">
                                 <Link
                                     href="/rio-guide/sehenswuerdigkeiten/zuckerhut"
-                                    className="group p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-rio-yellow hover:shadow-md transition-all duration-300 flex flex-col h-full"
+                                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden w-full"
                                 >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <span className="text-3xl" role="img" aria-label="Seilbahn">🚡</span>
-                                        <span className="bg-white/90 px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
+                                    <div className="relative h-48 overflow-hidden">
+                                        <Image
+                                            src="/images/zuckerhut-pao-de-acucar-01.webp"
+                                            alt="Zuckerhut — Pão de Açúcar in Rio de Janeiro"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green uppercase tracking-wider">
                                             Klassiker
                                         </span>
                                     </div>
-                                    <h3 className="text-xl font-bold font-heading text-gray-900 mb-2">Zuckerhut</h3>
-                                    <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-grow">
-                                        Der perfekte Gegenpol — vom Zuckerhut aus siehst du den Christus in seiner ganzen Größe.
-                                    </p>
-                                    <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors">
-                                        Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Zuckerhut</h3>
+                                        <p className="text-gray-500 text-sm leading-relaxed flex-grow">
+                                            Der perfekte Gegenpol — vom Zuckerhut aus siehst du den Christus in seiner ganzen Größe, eingebettet im Regenwald.
+                                        </p>
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
+                                            Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                        </div>
                                     </div>
                                 </Link>
                             </FadeIn>
 
                             {/* Card 2 — Mirante Dona Marta */}
-                            <FadeIn delay={0.08} direction="up">
+                            <FadeIn delay={0.08} direction="up" className="flex">
                                 <Link
                                     href="/rio-guide/sehenswuerdigkeiten/mirante-dona-marta"
-                                    className="group p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-rio-yellow hover:shadow-md transition-all duration-300 flex flex-col h-full"
+                                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden w-full"
                                 >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <span className="text-3xl" role="img" aria-label="Fernrohr">🔭</span>
-                                        <span className="bg-white/90 px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
+                                    <div className="relative h-48 overflow-hidden">
+                                        <Image
+                                            src="/images/dona-marta.webp"
+                                            alt="Mirante Dona Marta — Aussichtspunkt über Rio de Janeiro"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green uppercase tracking-wider">
                                             Insider-Tipp
                                         </span>
                                     </div>
-                                    <h3 className="text-xl font-bold font-heading text-gray-900 mb-2">Mirante Dona Marta</h3>
-                                    <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-grow">
-                                        Der beste Blick AUF den Christus — kostenlos, kaum Touristen, und du siehst ihn wie die Cariocas.
-                                    </p>
-                                    <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors">
-                                        Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Mirante Dona Marta</h3>
+                                        <p className="text-gray-500 text-sm leading-relaxed flex-grow">
+                                            Der beste Blick AUF den Christus — kostenlos, kaum Touristen, und du siehst ihn genau so, wie die Cariocas ihn kennen.
+                                        </p>
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
+                                            Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                        </div>
                                     </div>
                                 </Link>
                             </FadeIn>
 
                             {/* Card 3 — Tijuca Regenwald */}
-                            <FadeIn delay={0.16} direction="up">
+                            <FadeIn delay={0.16} direction="up" className="flex">
                                 <Link
                                     href="/rio-guide/sehenswuerdigkeiten/tijuca-regenwald"
-                                    className="group p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-rio-yellow hover:shadow-md transition-all duration-300 flex flex-col h-full"
+                                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden w-full"
                                 >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <span className="text-3xl" role="img" aria-label="Pflanze">🌿</span>
-                                        <span className="bg-white/90 px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green border border-gray-100 uppercase tracking-wider">
+                                    <div className="relative h-48 overflow-hidden">
+                                        <Image
+                                            src="/images/floresta-da-tijuca.webp"
+                                            alt="Floresta da Tijuca — der größte urbane Regenwald der Welt"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green uppercase tracking-wider">
                                             Natur
                                         </span>
                                     </div>
-                                    <h3 className="text-xl font-bold font-heading text-gray-900 mb-2">Tijuca Regenwald</h3>
-                                    <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-grow">
-                                        Der Christus steht mitten drin — entdecke die größte städtische Regenwaldwelt der Welt.
-                                    </p>
-                                    <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors">
-                                        Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Tijuca Regenwald</h3>
+                                        <p className="text-gray-500 text-sm leading-relaxed flex-grow">
+                                            Der Christus steht mitten drin — der Tijuca ist der größte urbane Regenwald der Welt und beginnt direkt hinter der Statue.
+                                        </p>
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
+                                            Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                        </div>
                                     </div>
                                 </Link>
                             </FadeIn>
