@@ -243,6 +243,16 @@ export default function ReviewsModeration() {
         fetchNpsResponses(); // Refresh list to show the new pending token
     };
 
+    const toggleWillPhotoConsent = async (reviewId: string, current: boolean) => {
+        const next = !current;
+        const { error } = await supabase
+            .from('reviews')
+            .update({ consent_will_photos: next })
+            .eq('id', reviewId);
+        if (error) { alert('Fehler beim Aktualisieren'); return; }
+        setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, consent_will_photos: next } : r));
+    };
+
     const copyToClipboard = (text: string, id: string) => {
         navigator.clipboard.writeText(text);
         setCopiedId(id);
@@ -625,12 +635,22 @@ export default function ReviewsModeration() {
 
                                         {/* Will's Photos */}
                                         <div>
-                                            <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-[1px] mb-3 flex items-center gap-2">
-                                                Fotos do Will
-                                                {review.consent_will_photos
-                                                    ? <span className="text-[10px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full border border-green-100 normal-case font-bold">✓ Veröffentlichung autorisiert</span>
-                                                    : <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100 normal-case font-bold">✗ Keine Autorisierung vom Pax</span>}
-                                            </p>
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-[1px]">
+                                                    Fotos do Will
+                                                </p>
+                                                <button
+                                                    onClick={() => toggleWillPhotoConsent(review.id, review.consent_will_photos ?? false)}
+                                                    className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all ${
+                                                        review.consent_will_photos
+                                                            ? 'text-green-600 bg-green-50 border-green-200 hover:bg-green-100'
+                                                            : 'text-gray-400 bg-gray-50 border-gray-200 hover:bg-gray-100'
+                                                    }`}
+                                                    title="Manuelles Einverständnis umschalten"
+                                                >
+                                                    {review.consent_will_photos ? '✓ Autorisiert' : '✗ Nicht autorisiert'}
+                                                </button>
+                                            </div>
                                             <div className="flex gap-3 flex-wrap">
                                                 {review.will_photo_urls?.map((url: string, i: number) => (
                                                     <div key={i} className="relative group overflow-hidden rounded-xl shadow-sm">
