@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Star, ChevronDown, ChevronUp } from 'lucide-react';
+import React from 'react';
+import { Star } from 'lucide-react';
 
 export interface Review {
     id: string;
@@ -23,17 +23,11 @@ interface ReviewCardProps {
 }
 
 export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
-    const [isExpanded, setIsExpanded] = useState(false);
-    
-    // Formatar data: Mês / Ano
     const date = new Date(review.created_at);
     const formattedDate = date.toLocaleDateString('de-DE', {
         month: 'long',
         year: 'numeric'
     });
-
-    const isLongText = review.body.length > 300;
-    const displayText = isExpanded ? review.body : review.body.slice(0, 300);
 
     const getPublicPhotos = (review: Review) => {
         const photos: string[] = [];
@@ -70,29 +64,9 @@ export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
 
             {/* Body */}
             <div className="flex-grow">
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                    {displayText}
-                    {!isExpanded && isLongText && "..."}
+                <p className="text-gray-600 leading-relaxed whitespace-pre-line line-clamp-5">
+                    {review.body}
                 </p>
-
-                {isLongText && (
-                    <button
-                        onClick={() => setIsExpanded(!isExpanded)}
-                        className="inline-flex items-center text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors mt-4 group/btn"
-                    >
-                        {isExpanded ? (
-                            <>
-                                Weniger lesen
-                                <ChevronUp className="ml-1 w-4 h-4 group-hover/btn:-translate-y-0.5 transition-transform" />
-                            </>
-                        ) : (
-                            <>
-                                Mehr lesen
-                                <ChevronDown className="ml-1 w-4 h-4 group-hover/btn:translate-y-0.5 transition-transform" />
-                            </>
-                        )}
-                    </button>
-                )}
             </div>
 
             {/* Footer: Attractions + Thumbnails */}
