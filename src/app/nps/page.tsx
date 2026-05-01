@@ -177,40 +177,10 @@ function NpsFormContent() {
         <div className="min-h-screen bg-gray-50 py-12 px-4 font-sans">
             <div className="max-w-2xl mx-auto">
 
-                {/* Progress bar — nur bei score >= 9 (step bewertung) */}
-                {step === 'bewertung' && (
-                    <div className="mb-6 flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
-                                <CheckCircle2 className="w-4 h-4 text-white" />
-                            </div>
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Schritt 1</span>
-                        </div>
-                        <div className="flex-1 h-0.5 bg-yellow-400 rounded-full" />
-                        <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center">
-                                <span className="text-xs font-black text-black">2</span>
-                            </div>
-                            <span className="text-xs font-bold text-gray-700 uppercase tracking-widest">Schritt 2</span>
-                        </div>
-                    </div>
-                )}
-
                 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
 
                     {step === 'nps' && (
                         <div className="p-8 md:p-10">
-                            {/* Progress indicator NPS */}
-                            <div className="flex items-center gap-2 mb-8">
-                                <div className="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center">
-                                    <span className="text-xs font-black text-black">1</span>
-                                </div>
-                                <div className="flex-1 h-0.5 bg-gray-100 rounded-full" />
-                                <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
-                                    <span className="text-xs font-bold text-gray-400">2</span>
-                                </div>
-                            </div>
-
                             <div className="text-center mb-10">
                                 <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest mb-2">
                                     Feedback-Formular
@@ -291,6 +261,25 @@ function NpsFormContent() {
                                             focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all resize-none leading-relaxed"
                                     />
                                 </div>
+
+                                {/* Stepper — só aparece quando score >= 9 */}
+                                {score !== null && score >= 9 && (
+                                    <div className="flex items-center gap-3 p-4 bg-yellow-50 border border-yellow-100 rounded-2xl">
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <div className="w-7 h-7 rounded-full bg-yellow-400 flex items-center justify-center">
+                                                <span className="text-xs font-black text-black">1</span>
+                                            </div>
+                                            <span className="text-xs font-bold text-gray-500">Feedback</span>
+                                        </div>
+                                        <div className="flex-1 h-0.5 bg-yellow-300 rounded-full" />
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <div className="w-7 h-7 rounded-full bg-white border-2 border-yellow-400 flex items-center justify-center">
+                                                <span className="text-xs font-black text-yellow-500">2</span>
+                                            </div>
+                                            <span className="text-xs font-bold text-gray-500">Bewertung</span>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <button
                                     type="button"
