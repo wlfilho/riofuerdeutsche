@@ -157,7 +157,7 @@ export default function BewertungenPage() {
                                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
                                     <Mail className="w-5 h-5" />
-                                    Kontaktformular
+                                    E-Mail schreiben
                                 </Link>
                             </div>
                         </div>
