@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Star, ChevronDown, ChevronUp, Camera } from 'lucide-react';
+import { Star, ChevronDown, ChevronUp } from 'lucide-react';
 
 export interface Review {
     id: string;
@@ -61,14 +61,30 @@ export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
                     ))}
                 </div>
 
-                {/* Camera Icon Button (Positioned Top Right) */}
+                {/* Photo thumbnails (top right) */}
                 {publicPhotos.length > 0 && onOpenPhotos && (
                     <button
                         onClick={() => onOpenPhotos(publicPhotos)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-yellow-50 text-gray-400 hover:text-yellow-600 rounded-full transition-all border border-gray-100 hover:border-yellow-200 text-xs font-bold shadow-sm active:scale-95"
+                        className="flex items-center gap-1 shrink-0 active:scale-95 transition-transform"
+                        aria-label={`${publicPhotos.length} Fotos anzeigen`}
                     >
-                        <Camera className="w-4 h-4" />
-                        <span>{publicPhotos.length} {publicPhotos.length === 1 ? 'Foto' : 'Fotos'}</span>
+                        {publicPhotos.slice(0, 3).map((url, i) => {
+                            const isLast = i === 2 && publicPhotos.length > 3;
+                            return (
+                                <div key={i} className="relative w-10 h-10 rounded-lg overflow-hidden border border-gray-100 shadow-sm">
+                                    <img
+                                        src={url}
+                                        alt=""
+                                        className="w-full h-full object-cover"
+                                    />
+                                    {isLast && (
+                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                            <span className="text-white text-[11px] font-bold">+{publicPhotos.length - 3}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </button>
                 )}
             </div>
