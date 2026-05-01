@@ -573,7 +573,7 @@ export default async function Home() {
               <FadeIn direction="up" className="text-center mt-10">
                 <Link
                   href="/bewertungen"
-                  className="inline-flex items-center gap-2 text-rio-green font-bold hover:text-rio-green/80 transition-colors group"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-rio-green text-rio-green rounded-full font-bold text-base hover:bg-rio-green/5 transition-all group"
                 >
                   Alle Bewertungen lesen
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
