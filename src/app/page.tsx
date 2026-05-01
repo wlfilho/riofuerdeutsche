@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
 import FaqAccordion from "@/components/FaqAccordion";
+import { createClient } from "@/utils/supabase/server";
 import {
   ArrowRight,
   MapPin,
@@ -227,26 +228,19 @@ const tours = [
   },
 ];
 
-const reviews = [
-  {
-    text: "Beste Entscheidung unseres Rio Urlaubs! Super sicher und extrem informativ. Danke an das tolle Team!",
-    name: "Michael & Sarah",
-    rating: 5,
-  },
-  {
-    text: "Wir haben uns zu jeder Zeit absolut sicher gefühlt. Die Tour zur Christusstatue war perfekt organisiert.",
-    name: "Thomas M.",
-    rating: 5,
-  },
-  {
-    text: "Tolle Insidertipps und ein fantastischer Tag. Ohne unseren Guide hätten wir das wahre Rio nie so erlebt.",
-    name: "Familie Weber",
-    rating: 5,
-  },
-];
 
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: dbReviews } = await supabase
+    .from('reviews')
+    .select('nickname, rating, body')
+    .eq('status', 'approved')
+    .order('approved_at', { ascending: false })
+    .limit(3);
+
+  const reviews = dbReviews ?? [];
+
   return (
     <>
       {/* JSON-LD Structured Data */}
@@ -570,11 +564,21 @@ export default function Home() {
                         <Star key={j} className="w-5 h-5 fill-rio-yellow text-rio-yellow" />
                       ))}
                     </div>
-                    <p className="text-gray-600 mb-6 flex-grow italic">&ldquo;{review.text}&rdquo;</p>
-                    <p className="font-bold text-gray-900 border-t border-gray-100 pt-4">{review.name}</p>
+                    <p className="text-gray-600 mb-6 flex-grow italic">&ldquo;{review.body}&rdquo;</p>
+                    <p className="font-bold text-gray-900 border-t border-gray-100 pt-4">{review.nickname}</p>
                   </FadeIn>
                 ))}
               </div>
+
+              <FadeIn direction="up" className="text-center mt-10">
+                <Link
+                  href="/bewertungen"
+                  className="inline-flex items-center gap-2 text-rio-green font-bold hover:text-rio-green/80 transition-colors group"
+                >
+                  Alle Bewertungen lesen
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </FadeIn>
             </div>
           </section>
 
