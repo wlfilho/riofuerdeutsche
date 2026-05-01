@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from "@/utils/supabase/client";
-import { Star, ArrowRight, X, ChevronLeft, ChevronRight, Camera, Loader2 } from "lucide-react";
+import { Star, ArrowRight, X, ChevronLeft, ChevronRight, Loader2, MessageCircle, Mail } from "lucide-react";
 import Link from "next/link";
 import ReviewCard, { Review } from "@/components/ReviewCard";
 
@@ -130,20 +130,40 @@ export default function BewertungenPage() {
 
                 {/* Final CTA */}
                 {!loading && hasReviews && (
-                    <div className="mt-20 text-center py-12 bg-gray-900 rounded-3xl text-white px-6">
-                        <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                            Hast du eine Tour mit Will gemacht?
-                        </h2>
-                        <p className="text-gray-400 mb-8 max-w-lg mx-auto">
-                            Teile deine Erlebnisse und hilf anderen Reisenden bei ihrer Planung.
-                        </p>
-                        <Link
-                            href="/bewertung-schreiben"
-                            className="inline-flex items-center justify-center bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3.5 px-10 rounded-xl transition-all shadow-sm hover:shadow-lg group"
-                        >
-                            Deine Bewertung schreiben
-                            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                        </Link>
+                    <div className="mt-20 rounded-3xl overflow-hidden shadow-xl">
+                        <div className="bg-gray-900 px-8 py-14 md:px-16 md:py-16 text-center relative">
+                            {/* Accent top bar */}
+                            <div className="absolute top-0 left-0 right-0 h-1 bg-yellow-400" />
+
+                            <p className="text-yellow-400 text-xs font-extrabold uppercase tracking-[3px] mb-4">
+                                Rio de Janeiro auf Deutsch
+                            </p>
+                            <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight mb-5 max-w-2xl mx-auto">
+                                Erlebe Rio mit einem Guide, dem du vertrauen kannst.
+                            </h2>
+                            <p className="text-gray-400 text-base leading-relaxed max-w-xl mx-auto mb-10">
+                                Die Erfahrungen unserer Gäste sprechen für sich. Mit Will erkundest du Rio auf Deutsch — sicher, authentisch und unvergesslich. Kein Touristenpfad, sondern echtes Rio.
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                <a
+                                    href="https://wa.me/573148704374"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-green-500 hover:bg-green-400 text-white font-extrabold py-4 px-8 rounded-2xl transition-all shadow-lg hover:shadow-green-500/30 active:scale-95"
+                                >
+                                    <MessageCircle className="w-5 h-5" />
+                                    WhatsApp schreiben
+                                </a>
+                                <Link
+                                    href="/kontakt"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-white/10 hover:bg-white/20 text-white font-extrabold py-4 px-8 rounded-2xl transition-all border border-white/20 hover:border-white/40 active:scale-95"
+                                >
+                                    <Mail className="w-5 h-5" />
+                                    Kontaktformular
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 )}
             </main>
