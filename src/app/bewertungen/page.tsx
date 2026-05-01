@@ -134,14 +134,14 @@ export default function BewertungenPage() {
                 {/* Final CTA */}
                 {!loading && hasReviews && (
                     <div className="mt-20 rounded-3xl overflow-hidden shadow-xl">
-                        <div className="bg-gray-900 px-8 py-14 md:px-16 md:py-16 text-center">
-                            <p className="text-yellow-400 text-xs font-extrabold uppercase tracking-[3px] mb-4">
+                        <div className="bg-rio-yellow px-8 py-14 md:px-16 md:py-16 text-center">
+                            <p className="text-gray-900/60 text-xs font-extrabold uppercase tracking-[3px] mb-4">
                                 Rio de Janeiro auf Deutsch
                             </p>
-                            <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight mb-5 max-w-2xl mx-auto">
+                            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-5 max-w-2xl mx-auto">
                                 Erlebe Rio mit einem Guide, dem du vertrauen kannst.
                             </h2>
-                            <p className="text-gray-400 text-base leading-relaxed max-w-xl mx-auto mb-10">
+                            <p className="text-gray-800 text-base leading-relaxed max-w-xl mx-auto mb-10">
                                 Die Erfahrungen unserer Gäste sprechen für sich. Mit Will erkundest du Rio auf Deutsch — sicher, authentisch und unvergesslich. Kein Touristenpfad, sondern echtes Rio.
                             </p>
 
@@ -150,14 +150,14 @@ export default function BewertungenPage() {
                                     href="https://wa.me/573148704374"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-full font-bold text-lg hover:bg-gray-800 hover:scale-[1.02] transition-all shadow-xl shadow-black/20"
                                 >
                                     <MessageCircle className="w-5 h-5" />
                                     WhatsApp schreiben
                                 </a>
                                 <Link
                                     href="/kontakt"
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-black/10 border border-black/20 text-gray-900 rounded-full font-bold text-lg hover:bg-black/15 transition-all"
                                 >
                                     <Mail className="w-5 h-5" />
                                     E-Mail schreiben
