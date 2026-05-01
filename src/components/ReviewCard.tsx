@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Star } from 'lucide-react';
+import React, { useState } from 'react';
+import { Star, ChevronDown, ChevronUp } from 'lucide-react';
 
 export interface Review {
     id: string;
@@ -23,11 +23,15 @@ interface ReviewCardProps {
 }
 
 export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
+    const [isExpanded, setIsExpanded] = useState(false);
     const date = new Date(review.created_at);
     const formattedDate = date.toLocaleDateString('de-DE', {
         month: 'long',
         year: 'numeric'
     });
+
+    const isLongText = review.body.length > 300;
+    const displayText = isExpanded ? review.body : review.body.slice(0, 300);
 
     const getPublicPhotos = (review: Review) => {
         const photos: string[] = [];
@@ -57,6 +61,8 @@ export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
                 </div>
             </div>
 
+            <hr className="border-gray-100 my-4" />
+
             {/* Title */}
             <h3 className="text-xl font-bold text-gray-900 mb-3 leading-snug">
                 {review.title}
@@ -64,9 +70,21 @@ export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
 
             {/* Body */}
             <div className="flex-grow">
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line line-clamp-5">
-                    {review.body}
+                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+                    {displayText}{!isExpanded && isLongText && '...'}
                 </p>
+                {isLongText && (
+                    <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="inline-flex items-center gap-1 mt-4 px-3.5 py-1.5 rounded-full border border-gray-200 text-xs font-bold text-gray-500 hover:border-yellow-300 hover:text-yellow-700 hover:bg-yellow-50 transition-all"
+                    >
+                        {isExpanded ? (
+                            <><ChevronUp className="w-3.5 h-3.5" />Weniger lesen</>
+                        ) : (
+                            <><ChevronDown className="w-3.5 h-3.5" />Mehr lesen</>
+                        )}
+                    </button>
+                )}
             </div>
 
             {/* Footer: Attractions + Thumbnails */}

@@ -243,6 +243,16 @@ export default function ReviewsModeration() {
         fetchNpsResponses(); // Refresh list to show the new pending token
     };
 
+    const saveAttractions = async (reviewId: string) => {
+        const attractions = editingAttractions[reviewId] || [];
+        const { error } = await supabase
+            .from('reviews')
+            .update({ attractions })
+            .eq('id', reviewId);
+        if (error) { alert('Fehler beim Speichern'); return; }
+        setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, attractions } : r));
+    };
+
     const toggleWillPhotoConsent = async (reviewId: string, current: boolean) => {
         const next = !current;
         const { error } = await supabase
@@ -691,22 +701,22 @@ export default function ReviewsModeration() {
                                     </div>
 
                                     <div className="space-y-6 pt-6 border-t border-gray-100">
-                                        {activeTab === 'pending' && (
-                                            <div className="border rounded-2xl bg-white overflow-hidden shadow-sm">
-                                                <button 
-                                                    onClick={() => setShowAttractionPicker(showAttractionPicker === review.id ? null : review.id)}
-                                                    className="w-full flex items-center justify-between p-4 text-sm font-extrabold text-gray-700 hover:bg-gray-50 transition-colors"
-                                                >
-                                                    Attraktionen bearbeiten ({editingAttractions[review.id]?.length || 0} ausgewählt)
-                                                    {showAttractionPicker === review.id ? <ChevronUp className="w-5 h-5 text-yellow-500" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
-                                                </button>
-                                                
-                                                {showAttractionPicker === review.id && (
+                                        <div className="border rounded-2xl bg-white overflow-hidden shadow-sm">
+                                            <button
+                                                onClick={() => setShowAttractionPicker(showAttractionPicker === review.id ? null : review.id)}
+                                                className="w-full flex items-center justify-between p-4 text-sm font-extrabold text-gray-700 hover:bg-gray-50 transition-colors"
+                                            >
+                                                Attraktionen bearbeiten ({editingAttractions[review.id]?.length || 0} ausgewählt)
+                                                {showAttractionPicker === review.id ? <ChevronUp className="w-5 h-5 text-yellow-500" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                                            </button>
+
+                                            {showAttractionPicker === review.id && (
+                                                <>
                                                     <div className="p-4 border-t grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 bg-gray-50/50">
                                                         {ATTRACTIONS.map(att => (
                                                             <label key={att} className={`flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-all ${editingAttractions[review.id]?.includes(att) ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-gray-100 hover:border-gray-200 shadow-sm'}`}>
-                                                                <input 
-                                                                    type="checkbox" 
+                                                                <input
+                                                                    type="checkbox"
                                                                     checked={editingAttractions[review.id]?.includes(att)}
                                                                     onChange={() => toggleAttraction(review.id, att)}
                                                                     className="w-4 h-4 rounded border-gray-300 text-yellow-500 focus:ring-yellow-400"
@@ -715,9 +725,19 @@ export default function ReviewsModeration() {
                                                             </label>
                                                         ))}
                                                     </div>
-                                                )}
-                                            </div>
-                                        )}
+                                                    {activeTab !== 'pending' && (
+                                                        <div className="p-3 border-t bg-white flex justify-end">
+                                                            <button
+                                                                onClick={() => saveAttractions(review.id)}
+                                                                className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-xs font-extrabold rounded-xl transition-all shadow-sm"
+                                                            >
+                                                                Speichern
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
 
                                         <div className="flex flex-col sm:flex-row gap-4">
                                             {activeTab === 'pending' && (
