@@ -157,7 +157,7 @@ export default function BewertungenPage() {
                                 </a>
                                 <Link
                                     href="/kontakt"
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-black/10 border border-black/20 text-gray-900 rounded-full font-bold text-lg hover:bg-black/15 transition-all"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-gray-900 rounded-full font-bold text-lg hover:bg-gray-50 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
                                 >
                                     <Mail className="w-5 h-5" />
                                     E-Mail schreiben
