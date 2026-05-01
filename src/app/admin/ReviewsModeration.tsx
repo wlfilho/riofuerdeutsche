@@ -92,21 +92,28 @@ export default function ReviewsModeration() {
 
     const fetchReviews = async () => {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('reviews')
-            .select('id, created_at, nickname, email, rating, title, body, status, attractions, photo_urls, will_photo_urls, consent_own_photos, consent_will_photos')
-            .eq('status', activeTab)
-            .order(activeTab === 'approved' ? 'approved_at' : 'created_at', { ascending: false });
+        try {
+            const response = await fetch(`/api/admin/reviews?status=${encodeURIComponent(activeTab)}&full=1`, {
+                method: 'GET',
+                cache: 'no-store'
+            });
+            const payload = await response.json();
 
-        if (error) {
-            console.error('Error fetching reviews:', error);
-        } else {
-            setReviews(data || []);
+            if (!response.ok) {
+                throw new Error(payload?.error || 'Failed to fetch reviews');
+            }
+
+            const fetchedReviews: Review[] = Array.isArray(payload?.reviews) ? payload.reviews : [];
+            setReviews(fetchedReviews);
             const initialMap: Record<string, string[]> = {};
-            (data || []).forEach(r => {
+            fetchedReviews.forEach(r => {
                 initialMap[r.id] = r.attractions || [];
             });
             setEditingAttractions(initialMap);
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+            setReviews([]);
+            setEditingAttractions({});
         }
         setLoading(false);
     };
@@ -135,39 +142,49 @@ export default function ReviewsModeration() {
     const handleApprove = async (id: string) => {
         setActioningId(id);
         const finalAttractions = editingAttractions[id] || [];
-
-        const { error } = await supabase
-            .from('reviews')
-            .update({ 
-                status: 'approved', 
-                approved_at: new Date().toISOString(),
-                attractions: finalAttractions
-            })
-            .eq('id', id);
-
-        if (error) {
+        try {
+            const response = await fetch(`/api/admin/reviews/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'approve',
+                    attractions: finalAttractions
+                })
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                throw new Error(payload?.error || 'Failed to approve review');
+            }
+            setReviews(prev => prev.filter(r => r.id !== id));
+        } catch (error) {
+            console.error('Error approving review:', error);
             alert('Erro ao aprovar review');
-        } else {
-            setReviews(reviews.filter(r => r.id !== id));
+        } finally {
+            setActioningId(null);
         }
-        setActioningId(null);
     };
 
     const handleReject = async (id: string) => {
         if (!confirm('Deseja realmente rejeitar esta avaliação?')) return;
         
         setActioningId(id);
-        const { error } = await supabase
-            .from('reviews')
-            .update({ status: 'rejected' })
-            .eq('id', id);
-
-        if (error) {
+        try {
+            const response = await fetch(`/api/admin/reviews/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reject' })
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                throw new Error(payload?.error || 'Failed to reject review');
+            }
+            setReviews(prev => prev.filter(r => r.id !== id));
+        } catch (error) {
+            console.error('Error rejecting review:', error);
             alert('Erro ao rejeitar review');
-        } else {
-            setReviews(reviews.filter(r => r.id !== id));
+        } finally {
+            setActioningId(null);
         }
-        setActioningId(null);
     };
 
     const deleteReview = async (
@@ -181,19 +198,19 @@ export default function ReviewsModeration() {
         setActioningId(reviewId);
 
         try {
-            const allUrls = [...(photoUrls ?? []), ...(willPhotoUrls ?? [])];
-            const paths = allUrls
-                .map(url => url.split('/review-photos/')[1])
-                .filter(Boolean);
-            
-            if (paths.length > 0) {
-                await supabase.storage.from('review-photos').remove(paths);
+            const response = await fetch(`/api/admin/reviews/${reviewId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    photoUrls,
+                    willPhotoUrls
+                })
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                throw new Error(payload?.error || 'Failed to delete review');
             }
-
-            const { error: dbError } = await supabase.from('reviews').delete().eq('id', reviewId);
-            if (dbError) throw dbError;
-
-            setReviews(reviews.filter(r => r.id !== reviewId));
+            setReviews(prev => prev.filter(r => r.id !== reviewId));
 
         } catch (err) {
             console.error('Error deleting review:', err);
