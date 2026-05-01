@@ -131,10 +131,7 @@ export default function BewertungenPage() {
                 {/* Final CTA */}
                 {!loading && hasReviews && (
                     <div className="mt-20 rounded-3xl overflow-hidden shadow-xl">
-                        <div className="bg-gray-900 px-8 py-14 md:px-16 md:py-16 text-center relative">
-                            {/* Accent top bar */}
-                            <div className="absolute top-0 left-0 right-0 h-1 bg-yellow-400" />
-
+                        <div className="bg-gray-900 px-8 py-14 md:px-16 md:py-16 text-center">
                             <p className="text-yellow-400 text-xs font-extrabold uppercase tracking-[3px] mb-4">
                                 Rio de Janeiro auf Deutsch
                             </p>
@@ -150,14 +147,14 @@ export default function BewertungenPage() {
                                     href="https://wa.me/573148704374"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-green-500 hover:bg-green-400 text-white font-extrabold py-4 px-8 rounded-2xl transition-all shadow-lg hover:shadow-green-500/30 active:scale-95"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
                                 >
                                     <MessageCircle className="w-5 h-5" />
                                     WhatsApp schreiben
                                 </a>
                                 <Link
                                     href="/kontakt"
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-white/10 hover:bg-white/20 text-white font-extrabold py-4 px-8 rounded-2xl transition-all border border-white/20 hover:border-white/40 active:scale-95"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
                                     <Mail className="w-5 h-5" />
                                     Kontaktformular
