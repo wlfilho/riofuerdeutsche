@@ -9,21 +9,18 @@ import ReviewFormInline from '@/app/bewertung-schreiben/ReviewFormInline';
 
 type Step = 'nps' | 'bewertung' | 'done';
 
-interface NpsData {
-    nickname: string;
-    tour_date: string | null;
-    used_at: string | null;
-}
-
 function NpsFormContent() {
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
 
-    const [loading, setLoading] = useState(true);
-    const [tokenValid, setTokenValid] = useState<boolean | null>(null);
-    const [nps, setNps] = useState<NpsData | null>(null);
-    const [step, setStep] = useState<Step>('nps');
+    const [loading, setLoading] = useState(!!token);
+    const [tokenValid, setTokenValid] = useState<boolean | null>(token ? null : true);
 
+    // When arriving via token, nickname comes from DB. Without token, user types it.
+    const [nickname, setNickname] = useState('');
+    const [tourDate, setTourDate] = useState<string | null>(null);
+
+    const [step, setStep] = useState<Step>('nps');
     const [score, setScore] = useState<number | null>(null);
     const [bestPart, setBestPart] = useState('');
     const [improvement, setImprovement] = useState('');
@@ -33,11 +30,7 @@ function NpsFormContent() {
     const supabase = createClient();
 
     useEffect(() => {
-        if (!token) {
-            setTokenValid(false);
-            setLoading(false);
-            return;
-        }
+        if (!token) return;
         const fetchNps = async () => {
             const { data, error } = await supabase
                 .from('nps_responses')
@@ -47,36 +40,54 @@ function NpsFormContent() {
             if (error || !data || data.used_at) {
                 setTokenValid(false);
             } else {
-                setNps(data);
+                setNickname(data.nickname);
+                setTourDate(data.tour_date);
                 setTokenValid(true);
             }
             setLoading(false);
         };
         fetchNps();
-    }, [token, supabase]);
+    }, [token]);
 
     const handleSubmit = async () => {
-        if (score === null || bestPart.trim().length === 0 || !token) return;
+        if (score === null || bestPart.trim().length === 0) return;
+        if (!nickname.trim()) return;
         setIsSubmitting(true);
 
         const redirected = score >= 9;
 
         try {
-            const { error } = await supabase
-                .from('nps_responses')
-                .update({
-                    score,
-                    best_part: bestPart.trim(),
-                    improvement: improvement.trim() || null,
-                    used_at: new Date().toISOString(),
-                    redirected_to_review: redirected,
-                })
-                .eq('token', token);
-
-            if (error) throw error;
+            if (token) {
+                // Token flow: update existing row
+                const { error } = await supabase
+                    .from('nps_responses')
+                    .update({
+                        score,
+                        best_part: bestPart.trim(),
+                        improvement: improvement.trim() || null,
+                        used_at: new Date().toISOString(),
+                        redirected_to_review: redirected,
+                    })
+                    .eq('token', token);
+                if (error) throw error;
+            } else {
+                // QR code / tokenless flow: insert new row
+                const { error } = await supabase
+                    .from('nps_responses')
+                    .insert({
+                        token: `qr-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                        nickname: nickname.trim(),
+                        tour_date: null,
+                        score,
+                        best_part: bestPart.trim(),
+                        improvement: improvement.trim() || null,
+                        used_at: new Date().toISOString(),
+                        redirected_to_review: redirected,
+                    });
+                if (error) throw error;
+            }
 
             setFinalScore(score);
-
             if (redirected) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 setStep('bewertung');
@@ -131,7 +142,7 @@ function NpsFormContent() {
                                 <CheckCircle2 className="w-10 h-10 text-green-600" />
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                                Vielen Dank, {nps?.nickname}!
+                                Vielen Dank, {nickname}!
                             </h2>
                             <p className="text-gray-600 leading-relaxed max-w-sm mx-auto">
                                 Deine Bewertung wurde erfolgreich eingereicht. Wir freuen uns riesig über dein Feedback!
@@ -143,7 +154,7 @@ function NpsFormContent() {
                                 😊
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                                Vielen Dank, {nps?.nickname}!
+                                Vielen Dank, {nickname}!
                             </h2>
                             <p className="text-gray-600 leading-relaxed max-w-sm mx-auto">
                                 Schön, dass es dir gefallen hat! Dein Feedback hilft mir,
@@ -157,7 +168,7 @@ function NpsFormContent() {
                                 🙏
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
-                                Vielen Dank für dein ehrliches Feedback, {nps?.nickname}!
+                                Vielen Dank für dein ehrliches Feedback, {nickname}!
                             </h2>
                             <p className="text-gray-600 leading-relaxed max-w-sm mx-auto">
                                 Deine Rückmeldung ist wertvoll und hilft mir, meine Touren
@@ -176,7 +187,6 @@ function NpsFormContent() {
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4 font-sans">
             <div className="max-w-2xl mx-auto">
-
                 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
 
                     {step === 'nps' && (
@@ -185,11 +195,13 @@ function NpsFormContent() {
                                 <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest mb-2">
                                     Feedback-Formular
                                 </p>
-                                <div className="flex justify-center mb-4">
-                                    <div className="px-4 py-1.5 bg-gray-50 rounded-full border border-gray-100 text-[11px] font-bold text-gray-400">
-                                        Hallo {nps?.nickname}!
+                                {nickname ? (
+                                    <div className="flex justify-center mb-4">
+                                        <div className="px-4 py-1.5 bg-gray-50 rounded-full border border-gray-100 text-[11px] font-bold text-gray-400">
+                                            Hallo {nickname}!
+                                        </div>
                                     </div>
-                                </div>
+                                ) : null}
                                 <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">
                                     Wie war deine Tour mit Will?
                                 </h1>
@@ -199,7 +211,23 @@ function NpsFormContent() {
                             </div>
 
                             <div className="space-y-10">
-                                {/* Pergunta 1 — NPS */}
+                                {/* Name field — only shown when no token */}
+                                {!token && (
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-bold text-gray-800">
+                                            Dein Name <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={nickname}
+                                            onChange={e => setNickname(e.target.value)}
+                                            placeholder="z.B. Klaus"
+                                            className="w-full border border-gray-100 bg-gray-50/30 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all"
+                                        />
+                                    </div>
+                                )}
+
+                                {/* NPS score */}
                                 <div className="space-y-4">
                                     <label className="block text-sm font-bold text-gray-800 leading-snug">
                                         Wie wahrscheinlich ist es, dass du Will als Guide
@@ -229,7 +257,7 @@ function NpsFormContent() {
                                     </div>
                                 </div>
 
-                                {/* Pergunta 2 */}
+                                {/* Best part */}
                                 <div className="space-y-2">
                                     <label className="block text-sm font-bold text-gray-800">
                                         Was hat dir an der Tour am besten gefallen?
@@ -246,7 +274,7 @@ function NpsFormContent() {
                                     <p className="text-[10px] text-gray-400 text-right">Erzähl es uns in deinen eigenen Worten.</p>
                                 </div>
 
-                                {/* Pergunta 3 */}
+                                {/* Improvement */}
                                 <div className="space-y-2">
                                     <label className="block text-sm font-bold text-gray-800">
                                         Gibt es etwas, das wir beim nächsten Mal besser machen könnten?
@@ -262,7 +290,7 @@ function NpsFormContent() {
                                     />
                                 </div>
 
-                                {/* Stepper — só aparece quando score >= 9 */}
+                                {/* Stepper — only when score >= 9 */}
                                 {score !== null && score >= 9 && (
                                     <div className="flex items-center gap-3 p-4 bg-yellow-50 border border-yellow-100 rounded-2xl">
                                         <div className="flex items-center gap-2 shrink-0">
@@ -284,7 +312,7 @@ function NpsFormContent() {
                                 <button
                                     type="button"
                                     onClick={handleSubmit}
-                                    disabled={score === null || bestPart.trim().length === 0 || isSubmitting}
+                                    disabled={score === null || bestPart.trim().length === 0 || !nickname.trim() || isSubmitting}
                                     className="w-full py-4 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-100
                                         disabled:text-gray-400 text-gray-900 font-bold rounded-2xl transition-all shadow-sm hover:shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"
                                 >
@@ -314,7 +342,7 @@ function NpsFormContent() {
                                 </p>
                             </div>
                             <ReviewFormInline
-                                nickname={nps?.nickname ?? ''}
+                                nickname={nickname}
                                 onSuccess={() => {
                                     setStep('done');
                                     window.scrollTo({ top: 0, behavior: 'smooth' });
