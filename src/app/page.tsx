@@ -234,7 +234,7 @@ export default async function Home() {
   const supabase = await createClient();
   const { data: dbReviews } = await supabase
     .from('reviews')
-    .select('nickname, rating, body')
+    .select('nickname, rating, body, photo_urls, will_photo_urls, consent_own_photos, consent_will_photos')
     .eq('status', 'approved')
     .order('approved_at', { ascending: false })
     .limit(3);
@@ -557,17 +557,32 @@ export default async function Home() {
               </FadeIn>
 
               <div className="grid md:grid-cols-3 gap-8">
-                {reviews.map((review, i) => (
-                  <FadeIn key={i} delay={i * 0.15} direction="up" className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-full">
-                    <div className="flex gap-1 mb-4" aria-label={`${review.rating} von 5 Sternen`}>
-                      {[...Array(review.rating)].map((_, j) => (
-                        <Star key={j} className="w-5 h-5 fill-rio-yellow text-rio-yellow" />
-                      ))}
-                    </div>
-                    <p className="text-gray-600 mb-6 flex-grow italic">&ldquo;{review.body}&rdquo;</p>
-                    <p className="font-bold text-gray-900 border-t border-gray-100 pt-4">{review.nickname}</p>
-                  </FadeIn>
-                ))}
+                {reviews.map((review, i) => {
+                  const avatarUrl =
+                    (review.consent_will_photos && review.will_photo_urls?.[0]) ||
+                    (review.consent_own_photos && review.photo_urls?.[0]) ||
+                    null;
+                  return (
+                    <FadeIn key={i} delay={i * 0.15} direction="up" className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-full">
+                      <div className="flex gap-1 mb-4" aria-label={`${review.rating} von 5 Sternen`}>
+                        {[...Array(review.rating)].map((_, j) => (
+                          <Star key={j} className="w-5 h-5 fill-rio-yellow text-rio-yellow" />
+                        ))}
+                      </div>
+                      <p className="text-gray-600 mb-6 flex-grow italic">&ldquo;{review.body}&rdquo;</p>
+                      <div className="flex items-center gap-3 border-t border-gray-100 pt-4">
+                        {avatarUrl ? (
+                          <img src={avatarUrl} alt={review.nickname} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-rio-green/10 flex items-center justify-center shrink-0">
+                            <span className="text-rio-green font-bold text-sm">{review.nickname?.charAt(0).toUpperCase()}</span>
+                          </div>
+                        )}
+                        <p className="font-bold text-gray-900">{review.nickname}</p>
+                      </div>
+                    </FadeIn>
+                  );
+                })}
               </div>
 
               <FadeIn direction="up" className="text-center mt-10">
