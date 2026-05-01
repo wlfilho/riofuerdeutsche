@@ -49,7 +49,6 @@ export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
             <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
                     <span className="font-bold text-gray-900 text-lg leading-tight block">{review.nickname}</span>
-                    <span className="text-gray-400 text-sm">{formattedDate}</span>
                 </div>
                 <div className="flex gap-0.5 shrink-0 mt-0.5">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -87,15 +86,20 @@ export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
                 )}
             </div>
 
-            {/* Footer: Attractions + Thumbnails */}
+            {/* Attractions */}
+            {review.attractions && review.attractions.length > 0 && (
+                <div className="mt-5 flex flex-wrap gap-1.5">
+                    {review.attractions.map(att => (
+                        <span key={att} className="px-2.5 py-1 bg-yellow-50 text-yellow-700 text-[10px] font-bold rounded-full border border-yellow-100 uppercase tracking-wide">
+                            {att}
+                        </span>
+                    ))}
+                </div>
+            )}
+
+            {/* Footer: Date + Thumbnails */}
             <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between gap-4">
-                {review.attractions && review.attractions.length > 0 ? (
-                    <div className="px-3.5 py-1.5 bg-yellow-50 text-yellow-700 text-[10px] font-bold rounded-full border border-yellow-200 uppercase tracking-wider">
-                        {review.attractions.length > 1
-                            ? `${review.attractions[0]} +${review.attractions.length - 1}`
-                            : review.attractions[0]}
-                    </div>
-                ) : <div />}
+                <span className="text-gray-400 text-sm">{formattedDate}</span>
 
                 {/* Photo thumbnails */}
                 {publicPhotos.length > 0 && onOpenPhotos && (
