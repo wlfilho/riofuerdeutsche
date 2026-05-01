@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Star, Loader2 } from 'lucide-react';
 
@@ -84,11 +84,6 @@ export default function ReviewFormInline({ nickname, onSuccess }: ReviewFormInli
     const [errors, setErrors] = useState<FormErrors>({});
     const [hoveredRating, setHoveredRating] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [mountTime, setMountTime] = useState(0);
-
-    useEffect(() => {
-        setMountTime(Date.now());
-    }, []);
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
@@ -130,12 +125,6 @@ export default function ReviewFormInline({ nickname, onSuccess }: ReviewFormInli
         setErrors({});
 
         if (formData.website) {
-            onSuccess();
-            return;
-        }
-
-        const timeElapsed = Date.now() - mountTime;
-        if (timeElapsed < 3000) {
             onSuccess();
             return;
         }
