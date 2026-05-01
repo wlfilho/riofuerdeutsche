@@ -63,6 +63,7 @@ interface Review {
 
 interface NpsResponse {
     id: string;
+    token: string;
     nickname: string;
     tour_date: string | null;
     score: number | null;
@@ -87,6 +88,7 @@ export default function ReviewsModeration() {
     const [generatedLink, setGeneratedLink] = useState('');
     const [npsResponses, setNpsResponses] = useState<NpsResponse[]>([]);
     const [loadingNps, setLoadingNps] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
 
     const supabase = createClient();
 
@@ -122,9 +124,9 @@ export default function ReviewsModeration() {
         setLoadingNps(true);
         const { data, error } = await supabase
             .from('nps_responses')
-            .select('id, nickname, tour_date, score, best_part, redirected_to_review, used_at, created_at')
+            .select('id, token, nickname, tour_date, score, best_part, redirected_to_review, used_at, created_at')
             .order('created_at', { ascending: false })
-            .limit(20);
+            .limit(40);
 
         if (error) {
             console.error('Error fetching NPS:', error);
@@ -241,6 +243,12 @@ export default function ReviewsModeration() {
         fetchNpsResponses(); // Refresh list to show the new pending token
     };
 
+    const copyToClipboard = (text: string, id: string) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
+
     const toggleAttraction = (id: string, att: string) => {
         setEditingAttractions(prev => {
             const current = prev[id] || [];
@@ -299,17 +307,43 @@ export default function ReviewsModeration() {
                         <Smile className="w-6 h-6 text-yellow-500" />
                         NPS Satisfaction System
                     </h2>
+                    {/* Stats summary */}
+                    {!loadingNps && npsResponses.length > 0 && (() => {
+                        const pending = npsResponses.filter(r => !r.used_at);
+                        const answered = npsResponses.filter(r => r.used_at && r.score !== null);
+                        const avg = answered.length > 0
+                            ? (answered.reduce((s, r) => s + (r.score ?? 0), 0) / answered.length).toFixed(1)
+                            : null;
+                        return (
+                            <div className="hidden sm:flex items-center gap-3 text-xs font-bold">
+                                {pending.length > 0 && (
+                                    <span className="flex items-center gap-1.5 bg-orange-50 text-orange-600 border border-orange-100 px-2.5 py-1 rounded-full">
+                                        <Clock className="w-3 h-3" />
+                                        {pending.length} ausstehend
+                                    </span>
+                                )}
+                                <span className="flex items-center gap-1.5 bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">
+                                    {answered.length} beantwortet
+                                </span>
+                                {avg && (
+                                    <span className="flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-100 px-2.5 py-1 rounded-full">
+                                        Ø {avg}
+                                    </span>
+                                )}
+                            </div>
+                        );
+                    })()}
                 </div>
 
-                <div className="p-6 lg:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="p-6 lg:p-8 flex flex-col gap-6">
                     {/* Link Generator */}
-                    <div className="space-y-4">
+                    <div>
                         <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                             <h3 className="text-sm font-extrabold text-gray-900 uppercase tracking-widest mb-4 flex items-center gap-2">
                                 <LinkIcon className="w-4 h-4 text-yellow-500" />
                                 Link generieren
                             </h3>
-                            
+
                             <div className="space-y-3">
                                 <div className="relative group">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-yellow-500 transition-colors" />
@@ -338,21 +372,18 @@ export default function ReviewsModeration() {
                                     Generieren
                                 </button>
                             </div>
-                            
+
                             {generatedLink && (
                                 <div className="mt-4 p-3 bg-white rounded-xl border border-yellow-200 animate-in fade-in slide-in-from-top-2">
-                                    <p className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest mb-1">Link bereit para Senden:</p>
+                                    <p className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest mb-1">Link bereit zum Senden:</p>
                                     <div className="flex items-center gap-3">
                                         <span className="text-[11px] text-gray-500 flex-1 truncate font-medium">{generatedLink}</span>
                                         <button
-                                            onClick={() => {
-                                                navigator.clipboard.writeText(generatedLink);
-                                                alert('Copiado!');
-                                            }}
-                                            className="text-yellow-600 hover:text-yellow-700 bg-yellow-50 p-2 rounded-lg transition-colors border border-yellow-100"
+                                            onClick={() => copyToClipboard(generatedLink, 'generated')}
+                                            className={`p-2 rounded-lg transition-all border ${copiedId === 'generated' ? 'bg-green-50 text-green-600 border-green-200' : 'text-yellow-600 hover:text-yellow-700 bg-yellow-50 border-yellow-100'}`}
                                             title="Kopieren"
                                         >
-                                            <Copy className="w-4 h-4" />
+                                            {copiedId === 'generated' ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                                         </button>
                                     </div>
                                 </div>
@@ -360,71 +391,97 @@ export default function ReviewsModeration() {
                         </div>
                     </div>
 
-                    {/* Last Responses List */}
-                    <div className="space-y-4">
-                        <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-[2px] mb-4 flex items-center gap-2">
-                            <Clock className="w-4 h-4" />
-                            Letzte NPS-Antworten
-                        </h3>
-                        
-                        <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-                            {loadingNps ? (
-                                <div className="py-10 text-center flex flex-col items-center">
-                                    <Loader2 className="w-6 h-6 animate-spin text-gray-200 mb-2" />
-                                    <p className="text-gray-400 text-xs font-bold uppercase">Laden...</p>
-                                </div>
-                            ) : npsResponses.length === 0 ? (
-                                <div className="py-12 border-2 border-dashed border-gray-100 rounded-2xl text-center">
-                                    <p className="text-gray-400 text-xs font-bold uppercase">Keine NPS-Daten</p>
-                                </div>
-                            ) : (
-                                npsResponses.map(r => (
-                                    <div key={r.id} className="group bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-start gap-4 transition-all hover:bg-white hover:shadow-md hover:border-gray-200">
-                                        {/* Score Visual */}
-                                        <div className={`
-                                            w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg shrink-0 shadow-sm
-                                            ${r.score && r.score >= 9 
-                                                ? 'bg-green-100 text-green-600' 
-                                                : r.score && r.score >= 7 
-                                                ? 'bg-yellow-100 text-yellow-600' 
-                                                : r.score !== null
-                                                ? 'bg-red-100 text-red-600'
-                                                : 'bg-white text-gray-300'}
-                                        `}>
-                                            {r.score ?? '?'}
+                    {/* Responses List — split into Pending / Answered */}
+                    <div className="flex flex-col gap-6">
+                        {loadingNps ? (
+                            <div className="py-10 text-center flex flex-col items-center">
+                                <Loader2 className="w-6 h-6 animate-spin text-gray-200 mb-2" />
+                                <p className="text-gray-400 text-xs font-bold uppercase">Laden...</p>
+                            </div>
+                        ) : npsResponses.length === 0 ? (
+                            <div className="py-12 border-2 border-dashed border-gray-100 rounded-2xl text-center">
+                                <p className="text-gray-400 text-xs font-bold uppercase">Keine NPS-Daten</p>
+                            </div>
+                        ) : (() => {
+                            const pending = npsResponses.filter(r => !r.used_at);
+                            const answered = npsResponses.filter(r => r.used_at);
+                            return (
+                                <>
+                                    {/* Pending tokens */}
+                                    {pending.length > 0 && (
+                                        <div>
+                                            <h3 className="text-[10px] font-extrabold text-orange-500 uppercase tracking-[2px] mb-2 flex items-center gap-1.5">
+                                                <Clock className="w-3 h-3" />
+                                                Ausstehend ({pending.length})
+                                            </h3>
+                                            <div className="space-y-2">
+                                                {pending.map(r => {
+                                                    const link = `${window.location.origin}/nps?token=${r.token}`;
+                                                    return (
+                                                        <div key={r.id} className="bg-orange-50/60 border border-orange-100 rounded-xl px-4 py-3 flex items-center gap-3">
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="font-extrabold text-gray-900 text-sm truncate">{r.nickname}</p>
+                                                                <p className="text-[10px] text-gray-400 font-medium mt-0.5">
+                                                                    Erstellt: {new Date(r.created_at).toLocaleDateString('de-DE')}
+                                                                    {r.tour_date && ` · Tour: ${new Date(r.tour_date).toLocaleDateString('de-DE')}`}
+                                                                </p>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => copyToClipboard(link, r.id)}
+                                                                className={`shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all border ${copiedId === r.id ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white text-orange-600 border-orange-200 hover:bg-orange-100'}`}
+                                                            >
+                                                                {copiedId === r.id ? <CheckCircle className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                                                                {copiedId === r.id ? 'Kopiert' : 'Link'}
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
+                                    )}
 
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <p className="font-extrabold text-gray-900 truncate leading-tight">{r.nickname}</p>
-                                                {r.redirected_to_review && (
-                                                    <span className="flex items-center gap-1 text-[10px] text-green-600 font-black uppercase tracking-tighter bg-green-50 px-1.5 py-0.5 rounded border border-green-100">
-                                                        → Review
-                                                    </span>
-                                                )}
+                                    {/* Answered responses */}
+                                    {answered.length > 0 && (
+                                        <div>
+                                            <h3 className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[2px] mb-2 flex items-center gap-1.5">
+                                                <MessageSquareHeart className="w-3 h-3" />
+                                                Beantwortet ({answered.length})
+                                            </h3>
+                                            <div className="space-y-2">
+                                                {answered.map(r => (
+                                                    <div key={r.id} className="group bg-gray-50 border border-gray-100 p-3 rounded-xl flex items-start gap-3 transition-all hover:bg-white hover:shadow-sm hover:border-gray-200">
+                                                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-black text-base shrink-0
+                                                            ${r.score !== null && r.score >= 9 ? 'bg-green-100 text-green-600'
+                                                            : r.score !== null && r.score >= 7 ? 'bg-yellow-100 text-yellow-600'
+                                                            : r.score !== null ? 'bg-red-100 text-red-600'
+                                                            : 'bg-gray-100 text-gray-400'}`}>
+                                                            {r.score ?? '—'}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex justify-between items-center">
+                                                                <p className="font-extrabold text-gray-900 text-sm truncate">{r.nickname}</p>
+                                                                {r.redirected_to_review && (
+                                                                    <span className="text-[10px] text-green-600 font-black bg-green-50 px-1.5 py-0.5 rounded border border-green-100 shrink-0">
+                                                                        → Review
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-[10px] text-gray-400 font-medium mt-0.5">
+                                                                {new Date(r.used_at!).toLocaleDateString('de-DE')}
+                                                                {r.tour_date && ` · Tour: ${new Date(r.tour_date).toLocaleDateString('de-DE')}`}
+                                                            </p>
+                                                            {r.best_part && (
+                                                                <p className="text-[11px] text-gray-500 italic mt-1.5 line-clamp-2">"{r.best_part}"</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                                    {r.used_at 
-                                                        ? new Date(r.used_at).toLocaleDateString('de-DE') 
-                                                        : <span className="text-orange-400">Ausstehend</span>}
-                                                </p>
-                                                {r.tour_date && <span className="text-[10px] text-gray-300">•</span>}
-                                                <p className="text-[10px] text-gray-400 font-medium">
-                                                    {r.tour_date && `Tour: ${new Date(r.tour_date).toLocaleDateString('de-DE')}`}
-                                                </p>
-                                            </div>
-                                            {r.best_part && (
-                                                <div className="relative">
-                                                    <MessageSquareHeart className="absolute -left-1 -top-1 w-3 h-3 text-pink-200" />
-                                                    <p className="text-[11px] text-gray-500 italic pl-3 line-clamp-2">"{r.best_part}"</p>
-                                                </div>
-                                            )}
                                         </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>

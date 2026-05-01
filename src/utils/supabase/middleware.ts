@@ -112,7 +112,7 @@ export async function updateSession(request: NextRequest) {
 
     // --- REGRA GERAL: apenas rotas explicitamente protegidas requerem autenticação ---
     // Rotas desconhecidas são deixadas passar para o Next.js renderizar o not-found.tsx
-    const protectedPrefixes = ["/nps"];
+    const protectedPrefixes: string[] = [];
     const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix));
 
     if (!user && isProtected) {
