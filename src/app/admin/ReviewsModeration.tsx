@@ -245,11 +245,12 @@ export default function ReviewsModeration() {
 
     const saveAttractions = async (reviewId: string) => {
         const attractions = editingAttractions[reviewId] || [];
-        const { error } = await supabase
-            .from('reviews')
-            .update({ attractions })
-            .eq('id', reviewId);
-        if (error) { alert('Fehler beim Speichern'); return; }
+        const response = await fetch(`/api/admin/reviews/${reviewId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'update-attractions', attractions }),
+        });
+        if (!response.ok) { alert('Fehler beim Speichern'); return; }
         setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, attractions } : r));
     };
 

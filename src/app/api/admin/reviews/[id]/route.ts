@@ -36,7 +36,7 @@ export async function PATCH(
   const body = await request.json().catch(() => ({}));
   const action = body?.action;
 
-  if (action !== 'approve' && action !== 'reject') {
+  if (!['approve', 'reject', 'update-attractions'].includes(action)) {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   }
 
@@ -51,6 +51,13 @@ export async function PATCH(
 
   if (action === 'reject') {
     updateData.status = 'rejected';
+  }
+
+  if (action === 'update-attractions') {
+    if (!Array.isArray(body?.attractions)) {
+      return NextResponse.json({ error: 'attractions must be an array' }, { status: 400 });
+    }
+    updateData.attractions = body.attractions;
   }
 
   const { data: review, error } = await supabaseAdmin
