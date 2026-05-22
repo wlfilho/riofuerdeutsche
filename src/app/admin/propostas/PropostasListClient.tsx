@@ -1,0 +1,262 @@
+'use client';
+
+import { useState, useCallback } from 'react';
+import Link from 'next/link';
+import type { Proposal, ProposalStatus } from '@/lib/proposals';
+
+function formatDate(iso: string | null): string {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-');
+  return `${d}.${m}.${y}`;
+}
+
+function formatEur(amount: number | null): string {
+  if (amount === null) return '—';
+  return `€${amount.toFixed(2).replace('.', ',')}`;
+}
+
+function buildWhatsAppText(p: Proposal): string {
+  const greeting = p.treatment === 'Sie' ? `Guten Tag, ${p.client_name}!` : `Hallo, ${p.client_name}!`;
+  const lines: string[] = [greeting, ''];
+
+  if (p.arrival_date || p.departure_date) {
+    if (p.arrival_date) lines.push(`📅 Ankunft: ${formatDate(p.arrival_date)}`);
+    if (p.departure_date) lines.push(`📅 Abreise: ${formatDate(p.departure_date)}`);
+  }
+  lines.push(`👥 Personen: ${p.pax}`);
+  lines.push('');
+
+  if (p.items.length > 0) {
+    lines.push('🗓 Ihr Programm:');
+    for (const item of p.items) {
+      const date = formatDate(item.day);
+      const price = `€${item.total_eur.toFixed(2).replace('.', ',')}`;
+      lines.push(`• ${date} – ${item.service_name} (${price})`);
+      if (item.note) lines.push(`  ↳ ${item.note}`);
+    }
+    lines.push('');
+  }
+
+  if (p.total_amount !== null) {
+    lines.push(`💰 Gesamtbetrag: ${formatEur(p.total_amount)}`);
+    lines.push('');
+  }
+
+  lines.push('Beste Grüße,\nRio für Deutsche');
+
+  return lines.join('\n');
+}
+
+const STATUS_CONFIG: Record<ProposalStatus, { label: string; className: string }> = {
+  draft: { label: 'Rascunho', className: 'bg-gray-100 text-gray-600' },
+  sent: { label: 'Enviada', className: 'bg-blue-100 text-blue-700' },
+  accepted: { label: 'Aceita', className: 'bg-green-100 text-green-700' },
+  rejected: { label: 'Recusada', className: 'bg-red-100 text-red-700' },
+};
+
+function StatusBadge({ status }: { status: ProposalStatus }) {
+  const { label, className } = STATUS_CONFIG[status];
+  return (
+    <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${className}`}>
+      {label}
+    </span>
+  );
+}
+
+function Toast({ message, onDone }: { message: string; onDone: () => void }) {
+  useState(() => {
+    const t = setTimeout(onDone, 3000);
+    return () => clearTimeout(t);
+  });
+  return (
+    <div className="fixed bottom-6 right-6 z-50 px-4 py-3 bg-gray-900 text-white text-sm rounded-xl shadow-lg">
+      {message}
+    </div>
+  );
+}
+
+function DeleteModal({
+  proposal,
+  onCancel,
+  onConfirm,
+  loading,
+}: {
+  proposal: Proposal;
+  onCancel: () => void;
+  onConfirm: () => void;
+  loading: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-2">Proposta löschen?</h2>
+        <p className="text-sm text-gray-600 mb-6">
+          Die Proposta für <strong>{proposal.client_name}</strong> wird unwiderruflich gelöscht.
+        </p>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+          >
+            Abbrechen
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Wird gelöscht...' : 'Löschen'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function PropostasListClient({ initialProposals }: { initialProposals: Proposal[] }) {
+  const [proposals, setProposals] = useState<Proposal[]>(initialProposals);
+  const [deleteTarget, setDeleteTarget] = useState<Proposal | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const clearToast = useCallback(() => setToast(null), []);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/admin/proposals/${deleteTarget.id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error ?? 'Fehler beim Löschen.');
+        return;
+      }
+      setProposals(prev => prev.filter(p => p.id !== deleteTarget.id));
+      setToast('Proposta gelöscht');
+      setDeleteTarget(null);
+    } catch {
+      alert('Netzwerkfehler.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleCopyWhatsApp = async (p: Proposal) => {
+    const text = buildWhatsAppText(p);
+    try {
+      await navigator.clipboard.writeText(text);
+      setToast('WhatsApp-Text kopiert ✓');
+    } catch {
+      alert('Kopieren fehlgeschlagen. Bitte manuell kopieren.');
+    }
+  };
+
+  if (proposals.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="text-5xl mb-4">📄</div>
+        <p className="text-gray-500 text-sm mb-4">Noch keine Propostas vorhanden</p>
+        <Link
+          href="/admin/propostas/nova"
+          className="px-4 py-2 text-sm font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+        >
+          Erste Proposta erstellen
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Cliente</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">PAX</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Chegada</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Partida</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Total</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {proposals.map(p => (
+                <tr key={p.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-900">{p.client_name}</td>
+                  <td className="px-4 py-3 text-gray-700 tabular-nums">{p.pax}</td>
+                  <td className="px-4 py-3 text-gray-600 tabular-nums">{formatDate(p.arrival_date)}</td>
+                  <td className="px-4 py-3 text-gray-600 tabular-nums">{formatDate(p.departure_date)}</td>
+                  <td className="px-4 py-3 text-right text-gray-700 tabular-nums font-medium">
+                    {formatEur(p.total_amount)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={p.status} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-end gap-1">
+                      {/* Ver PDF */}
+                      <a
+                        href={p.pdf_url ?? undefined}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="PDF öffnen"
+                        aria-disabled={!p.pdf_url}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          p.pdf_url
+                            ? 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'
+                            : 'text-gray-200 cursor-not-allowed pointer-events-none'
+                        }`}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                        </svg>
+                      </a>
+
+                      {/* Copiar WhatsApp */}
+                      <button
+                        onClick={() => handleCopyWhatsApp(p)}
+                        title="WhatsApp-Text kopieren"
+                        className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                        </svg>
+                      </button>
+
+                      {/* Deletar */}
+                      <button
+                        onClick={() => setDeleteTarget(p)}
+                        title="Löschen"
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {deleteTarget && (
+        <DeleteModal
+          proposal={deleteTarget}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={handleDelete}
+          loading={deleteLoading}
+        />
+      )}
+
+      {toast && <Toast message={toast} onDone={clearToast} />}
+    </>
+  );
+}

@@ -4,12 +4,21 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const navItems = [
+type NavChild = { label: string; href: string };
+type NavItem = {
+  label: string;
+  href: string;
+  icon: string;
+  exact?: boolean;
+  children?: NavChild[];
+};
+
+const navItems: NavItem[] = [
   {
     label: 'Übersicht',
     href: '/admin',
     icon: '📊',
-    exact: true, // Só ativo quando é exatamente /admin
+    exact: true,
   },
   {
     label: 'Benutzer',
@@ -27,6 +36,15 @@ const navItems = [
     icon: '⭐',
   },
   {
+    label: 'Propostas',
+    href: '/admin/propostas',
+    icon: '📋',
+    children: [
+      { label: 'Atividades',  href: '/admin/propostas/atividades' },
+      { label: 'Transportes', href: '/admin/propostas/transportes' },
+    ],
+  },
+  {
     label: 'Clientes',
     href: '/admin/clientes',
     icon: '🧳',
@@ -41,10 +59,12 @@ const navItems = [
 export default function AdminSidebar() {
   const pathname = usePathname();
 
-  const isActive = (item: (typeof navItems)[number]) => {
+  const isActive = (item: NavItem) => {
     if (item.exact) return pathname === item.href;
     return pathname.startsWith(item.href);
   };
+
+  const isChildActive = (href: string) => pathname.startsWith(href);
 
   return (
     <aside className="w-56 bg-white border-r border-gray-200 min-h-screen flex flex-col">
@@ -57,20 +77,36 @@ export default function AdminSidebar() {
       </div>
 
       {/* Navegação */}
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-3 space-y-0.5">
         {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              isActive(item)
-                ? 'bg-green-50 text-green-800 border border-green-200'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-            }`}
-          >
-            <span>{item.icon}</span>
-            <span>{item.label}</span>
-          </Link>
+          <div key={item.href}>
+            <Link
+              href={item.href}
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                isActive(item)
+                  ? 'bg-green-50 text-green-800 border border-green-200'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <span>{item.icon}</span>
+              <span>{item.label}</span>
+            </Link>
+
+            {item.children && item.children.map((child) => (
+              <Link
+                key={child.href}
+                href={child.href}
+                className={`flex items-center gap-2 ml-8 pl-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  isChildActive(child.href)
+                    ? 'text-green-700 bg-green-50'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-gray-300">›</span>
+                <span>{child.label}</span>
+              </Link>
+            ))}
+          </div>
         ))}
       </nav>
 
