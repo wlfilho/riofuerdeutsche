@@ -60,6 +60,31 @@ const PRICE_TYPE_LABELS = { fixed: 'Fixo', per_pax: 'Por pessoa', per_hour: 'Por
 const INPUT_CLS =
   'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent';
 
+// Decimal hours ↔ "HH:MM" for <input type="time">
+function hoursToTime(h: number | null | undefined): string {
+  if (h == null || isNaN(h)) return '';
+  const totalMin = Math.round(h * 60);
+  const hh = Math.floor(totalMin / 60);
+  const mm = totalMin % 60;
+  return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+}
+
+function timeToHours(s: string): number | null {
+  if (!s) return null;
+  const [hh, mm] = s.split(':').map(Number);
+  const total = (hh || 0) + (mm || 0) / 60;
+  return total > 0 ? Math.round(total * 1000) / 1000 : null;
+}
+
+function formatHours(h: number): string {
+  const totalMin = Math.round(h * 60);
+  const hh = Math.floor(totalMin / 60);
+  const mm = totalMin % 60;
+  if (hh === 0) return `${mm}min`;
+  if (mm === 0) return `${hh}h`;
+  return `${hh}h ${mm}min`;
+}
+
 // ─── CategoryBadge ────────────────────────────────────────────────────────────
 
 function CategoryBadge({ category }: { category: ProposalServiceCategory }) {
@@ -151,9 +176,9 @@ function ActivityModal({
       pdf_note: service.pdf_note ?? '',
       notes: service.notes ?? '',
       is_active: service.is_active,
-      duration_hours: service.duration_hours?.toString() ?? '',
-      transfer_hours_to: service.transfer_hours_to?.toString() ?? '',
-      transfer_hours_back: service.transfer_hours_back?.toString() ?? '',
+      duration_hours: hoursToTime(service.duration_hours),
+      transfer_hours_to: hoursToTime(service.transfer_hours_to),
+      transfer_hours_back: hoursToTime(service.transfer_hours_back),
       suggested_period: service.suggested_period ?? '',
       transport_type_id: service.transport_type_id ?? '',
     };
@@ -182,17 +207,15 @@ function ActivityModal({
     if (!selectedTransport) return null;
     if (selectedTransport.is_included) return 'Nenhum custo de transporte adicional — já está nos itens de custo.';
     if (selectedTransport.is_manual) return 'Valor ajustado manualmente ao montar a proposta.';
-    if (selectedTransport.price_per_hour) {
-      const sym = selectedTransport.currency === 'EUR' ? '€' : 'R$';
-      return `Custo calculado automaticamente: ${sym}${selectedTransport.price_per_hour}/h × (horas ida + horas volta).`;
-    }
+    if (selectedTransport.tiers.length > 0)
+      return `Custo calculado automaticamente por faixa de pessoas × (horas ida + horas volta).`;
     return 'Sem custo de transporte.';
   }, [selectedTransport]);
 
   const totalHours = useMemo(() => {
-    const to = parseFloat(form.transfer_hours_to) || 0;
-    const dur = parseFloat(form.duration_hours) || 0;
-    const back = parseFloat(form.transfer_hours_back) || 0;
+    const to = timeToHours(form.transfer_hours_to) ?? 0;
+    const dur = timeToHours(form.duration_hours) ?? 0;
+    const back = timeToHours(form.transfer_hours_back) ?? 0;
     return to + dur + back;
   }, [form.transfer_hours_to, form.duration_hours, form.transfer_hours_back]);
 
@@ -222,9 +245,9 @@ function ActivityModal({
         pdf_note: form.pdf_note.trim() || null,
         notes: form.notes.trim() || null,
         is_active: form.is_active,
-        duration_hours: parseFloat(form.duration_hours) || null,
-        transfer_hours_to: parseFloat(form.transfer_hours_to) || null,
-        transfer_hours_back: parseFloat(form.transfer_hours_back) || null,
+        duration_hours: timeToHours(form.duration_hours),
+        transfer_hours_to: timeToHours(form.transfer_hours_to),
+        transfer_hours_back: timeToHours(form.transfer_hours_back),
         suggested_period: form.suggested_period || null,
         transport_type_id: form.transport_type_id || null,
         costs: costs.map(c => ({
@@ -349,21 +372,21 @@ function ActivityModal({
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Tempo</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Duração (h)</label>
-                <input type="number" min="0" step="0.5" value={form.duration_hours} onChange={set('duration_hours')} className={INPUT_CLS} placeholder="2" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Duração</label>
+                <input type="time" value={form.duration_hours} onChange={set('duration_hours')} className={INPUT_CLS} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ida (h)</label>
-                <input type="number" min="0" step="0.5" value={form.transfer_hours_to} onChange={set('transfer_hours_to')} className={INPUT_CLS} placeholder="0.5" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ida</label>
+                <input type="time" value={form.transfer_hours_to} onChange={set('transfer_hours_to')} className={INPUT_CLS} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Volta (h)</label>
-                <input type="number" min="0" step="0.5" value={form.transfer_hours_back} onChange={set('transfer_hours_back')} className={INPUT_CLS} placeholder="0.5" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Volta</label>
+                <input type="time" value={form.transfer_hours_back} onChange={set('transfer_hours_back')} className={INPUT_CLS} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Total estimado</label>
                 <div className={`${INPUT_CLS} bg-gray-50 text-gray-700 font-semibold pointer-events-none`}>
-                  {totalHours > 0 ? `${totalHours}h` : '—'}
+                  {totalHours > 0 ? formatHours(totalHours) : '—'}
                 </div>
               </div>
             </div>
@@ -632,7 +655,7 @@ export default function AtividadesPage() {
                           {transportName ?? <span className="text-gray-300">—</span>}
                         </td>
                         <td className="px-4 py-3 text-gray-600 tabular-nums">
-                          {total > 0 ? `${total}h` : '—'}
+                          {total > 0 ? formatHours(total) : '—'}
                         </td>
                         <td className="px-4 py-3 text-gray-600">
                           {period ? `${period.icon} ${period.label}` : '—'}

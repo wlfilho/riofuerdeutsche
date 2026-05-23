@@ -8,53 +8,49 @@ import type { ProposalTransportType } from '@/lib/proposals';
 
 type CostMode = 'auto' | 'manual' | 'included' | 'free';
 
+type TierDraft = {
+  _id: string;
+  min_pax: number | '';
+  max_pax: number | '' | null;  // null = sem limite
+  price_per_hour: number | '';
+  currency: 'BRL' | 'EUR';
+  editing: boolean;
+};
+
 type FormState = {
   name: string;
   cost_mode: CostMode;
-  price_per_hour: string;
-  currency: 'BRL' | 'EUR';
   is_active: boolean;
 };
 
 const EMPTY_FORM: FormState = {
-  name: '',
-  cost_mode: 'auto',
-  price_per_hour: '',
-  currency: 'BRL',
-  is_active: true,
+  name: '', cost_mode: 'auto', is_active: true,
 };
 
 function modeFromTransport(t: ProposalTransportType): CostMode {
   if (t.is_included) return 'included';
   if (t.is_manual) return 'manual';
-  if (t.price_per_hour !== null) return 'auto';
+  if (t.tiers.length > 0) return 'auto';
   return 'free';
 }
 
-function formFromTransport(t: ProposalTransportType): FormState {
-  return {
-    name: t.name,
-    cost_mode: modeFromTransport(t),
-    price_per_hour: t.price_per_hour !== null ? String(t.price_per_hour) : '',
-    currency: (t.currency as 'BRL' | 'EUR') ?? 'BRL',
-    is_active: t.is_active,
-  };
+function tiersFromTransport(t: ProposalTransportType): TierDraft[] {
+  return [...t.tiers]
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map(tier => ({
+      _id: tier.id,
+      min_pax: tier.min_pax,
+      max_pax: tier.max_pax,
+      price_per_hour: tier.price_per_hour,
+      currency: tier.currency,
+      editing: false,
+    }));
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function priceBadge(t: ProposalTransportType): string {
-  if (t.is_included) return 'Incluso';
-  if (t.is_manual) return 'Manual';
-  if (t.price_per_hour !== null) {
-    const sym = t.currency === 'EUR' ? '€' : 'R$';
-    return `${sym}${t.price_per_hour}/h`;
-  }
-  return 'Sem custo';
-}
-
 const TYPE_BADGE: Record<CostMode, { label: string; cls: string }> = {
-  auto:     { label: 'Automático', cls: 'bg-green-100 text-green-700' },
+  auto:     { label: 'Por faixas', cls: 'bg-green-100 text-green-700' },
   manual:   { label: 'Manual',     cls: 'bg-amber-100 text-amber-700' },
   included: { label: 'Incluso',    cls: 'bg-blue-100 text-blue-700' },
   free:     { label: 'Sem custo',  cls: 'bg-gray-100 text-gray-500' },
@@ -62,6 +58,208 @@ const TYPE_BADGE: Record<CostMode, { label: string; cls: string }> = {
 
 const INPUT_CLS =
   'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent';
+
+function newTierDraft(): TierDraft {
+  return {
+    _id: Math.random().toString(36).slice(2),
+    min_pax: '', max_pax: '', price_per_hour: '', currency: 'BRL', editing: true,
+  };
+}
+
+function validateTiers(tiers: TierDraft[]): string | null {
+  for (const t of tiers) {
+    if (t.min_pax === '' || Number(t.min_pax) < 1) return 'Mínimo de pax inválido em uma faixa.';
+    if (t.max_pax !== null && (t.max_pax === '' || Number(t.max_pax) < Number(t.min_pax)))
+      return 'Máximo de pax deve ser ≥ mínimo.';
+    if (t.price_per_hour === '' || Number(t.price_per_hour) <= 0) return 'Preço/hora inválido em uma faixa.';
+  }
+  const ranges = tiers.map(t => ({
+    min: Number(t.min_pax),
+    max: t.max_pax === null ? Infinity : Number(t.max_pax),
+  }));
+  for (let i = 0; i < ranges.length; i++) {
+    for (let j = i + 1; j < ranges.length; j++) {
+      if (ranges[i].min <= ranges[j].max && ranges[j].min <= ranges[i].max)
+        return 'Faixas se sobrepõem. Corrija os intervalos antes de salvar.';
+    }
+  }
+  return null;
+}
+
+function findGaps(tiers: TierDraft[]): number[] {
+  const valid = tiers.filter(t => t.min_pax !== '' && (t.max_pax === null || t.max_pax !== ''));
+  if (valid.length < 2) return [];
+  const sorted = [...valid].sort((a, b) => Number(a.min_pax) - Number(b.min_pax));
+  const gaps: number[] = [];
+  for (let i = 0; i < sorted.length - 1; i++) {
+    if (sorted[i].max_pax === null) break;
+    const nextMin = Number(sorted[i + 1].min_pax);
+    const curMax = Number(sorted[i].max_pax);
+    for (let p = curMax + 1; p < nextMin && gaps.length < 6; p++) gaps.push(p);
+  }
+  return gaps;
+}
+
+// ─── TiersSection ─────────────────────────────────────────────────────────────
+
+function TiersSection({
+  tiers,
+  onChange,
+}: {
+  tiers: TierDraft[];
+  onChange: (tiers: TierDraft[]) => void;
+}) {
+  const update = (id: string, patch: Partial<TierDraft>) =>
+    onChange(tiers.map(t => t._id === id ? { ...t, ...patch } : t));
+  const remove = (id: string) => onChange(tiers.filter(t => t._id !== id));
+  const add = () => onChange([...tiers, newTierDraft()]);
+
+  const gaps = findGaps(tiers);
+
+  const rowCls = 'grid grid-cols-[auto_auto_1fr_auto_auto] gap-2 items-center';
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          Faixas de preço por nº de pessoas
+        </span>
+        <button
+          type="button"
+          onClick={add}
+          className="text-xs font-semibold text-green-600 hover:text-green-800 transition-colors"
+        >
+          + Nova faixa
+        </button>
+      </div>
+
+      {tiers.length === 0 && (
+        <p className="text-sm text-gray-400 italic mb-2">Nenhuma faixa. Clique em "+ Nova faixa" para começar.</p>
+      )}
+
+      <div className="space-y-2">
+        {tiers.map(tier => (
+          <div key={tier._id}>
+            {tier.editing ? (
+              /* ── Edit mode ── */
+              <div className={`${rowCls} bg-gray-50 rounded-lg p-2`}>
+                {/* Min pax */}
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-gray-500 whitespace-nowrap">De</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={tier.min_pax}
+                    onChange={e => update(tier._id, { min_pax: parseInt(e.target.value) || '' })}
+                    className="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center focus:outline-none focus:ring-1 focus:ring-green-500"
+                    placeholder="1"
+                  />
+                </div>
+                {/* Max pax */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-gray-500 whitespace-nowrap">até</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={tier.max_pax === null ? '' : (tier.max_pax ?? '')}
+                    disabled={tier.max_pax === null}
+                    onChange={e => update(tier._id, { max_pax: parseInt(e.target.value) || '' })}
+                    className="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-100 disabled:text-gray-400"
+                    placeholder={tier.max_pax === null ? '∞' : ''}
+                  />
+                  <label className="flex items-center gap-1 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={tier.max_pax === null}
+                      onChange={e => update(tier._id, { max_pax: e.target.checked ? null : '' })}
+                      className="rounded"
+                    />
+                    <span className="text-xs text-gray-500">∞</span>
+                  </label>
+                </div>
+                {/* Price */}
+                <div className="flex items-center gap-1.5">
+                  <select
+                    value={tier.currency}
+                    onChange={e => update(tier._id, { currency: e.target.value as 'BRL' | 'EUR' })}
+                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+                  >
+                    <option value="BRL">R$</option>
+                    <option value="EUR">€</option>
+                  </select>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={tier.price_per_hour}
+                    onChange={e => update(tier._id, { price_per_hour: parseFloat(e.target.value) || '' })}
+                    className="w-24 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+                    placeholder="0,00"
+                  />
+                  <span className="text-xs text-gray-500">/h</span>
+                </div>
+                {/* Save btn */}
+                <button
+                  type="button"
+                  onClick={() => update(tier._id, { editing: false })}
+                  className="px-2 py-1 text-xs font-semibold text-green-700 hover:text-green-900 transition-colors"
+                >
+                  OK
+                </button>
+                {/* Delete btn */}
+                <button
+                  type="button"
+                  onClick={() => remove(tier._id)}
+                  className="p-1 text-gray-300 hover:text-red-500 transition-colors text-base leading-none"
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              /* ── View mode ── */
+              <div className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-gray-50 group">
+                <span className="text-sm text-gray-700">
+                  <span className="font-medium tabular-nums">
+                    {tier.min_pax}–{tier.max_pax === null ? '∞' : tier.max_pax}
+                  </span>
+                  {' '}pax
+                  <span className="mx-2 text-gray-300">·</span>
+                  <span className="text-gray-600">
+                    {tier.currency === 'EUR' ? '€' : 'R$'}{Number(tier.price_per_hour).toFixed(0)}/h
+                  </span>
+                </span>
+                <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    type="button"
+                    onClick={() => update(tier._id, { editing: true })}
+                    className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => remove(tier._id)}
+                    className="text-xs text-gray-400 hover:text-red-600 transition-colors"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {gaps.length > 0 && (
+        <div className="mt-2 p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-700">
+          ⚠️ Atenção: {gaps.length === 1
+            ? `o número ${gaps[0]} não está coberto por nenhuma faixa.`
+            : `os números ${gaps.slice(0, 5).join(', ')}${gaps.length > 5 ? '…' : ''} não estão cobertos por nenhuma faixa.`}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── TransportModal ────────────────────────────────────────────────────────────
 
@@ -71,12 +269,15 @@ function TransportModal({
   onClose,
 }: {
   initial: ProposalTransportType | null;
-  onSave: (payload: Partial<ProposalTransportType>) => Promise<void>;
+  onSave: (transportPayload: Partial<ProposalTransportType>, tiers: TierDraft[]) => Promise<void>;
   onClose: () => void;
 }) {
   const [form, setForm] = useState<FormState>(
-    initial ? formFromTransport(initial) : EMPTY_FORM,
+    initial
+      ? { name: initial.name, cost_mode: modeFromTransport(initial), is_active: initial.is_active }
+      : EMPTY_FORM,
   );
+  const [tiers, setTiers] = useState<TierDraft[]>(initial ? tiersFromTransport(initial) : []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,23 +286,23 @@ function TransportModal({
   const handleSave = async () => {
     setError(null);
     if (!form.name.trim()) { setError('Nome é obrigatório.'); return; }
+
     if (form.cost_mode === 'auto') {
-      const v = parseFloat(form.price_per_hour);
-      if (isNaN(v) || v <= 0) { setError('Preço/hora inválido.'); return; }
+      const tierError = validateTiers(tiers);
+      if (tierError) { setError(tierError); return; }
+      if (tiers.length === 0) { setError('Adicione ao menos uma faixa de preço.'); return; }
     }
 
     const payload: Partial<ProposalTransportType> = {
       name: form.name.trim(),
-      is_manual:   form.cost_mode === 'manual',
+      is_manual: form.cost_mode === 'manual',
       is_included: form.cost_mode === 'included',
-      is_active:   form.is_active,
-      price_per_hour: form.cost_mode === 'auto' ? parseFloat(form.price_per_hour) : null,
-      currency:    form.cost_mode === 'auto' ? form.currency : null,
+      is_active: form.is_active,
     };
 
     setSaving(true);
     try {
-      await onSave(payload);
+      await onSave(payload, form.cost_mode === 'auto' ? tiers : []);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao salvar.');
     } finally {
@@ -112,15 +313,16 @@ function TransportModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
+
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <h3 className="text-base font-bold text-gray-900">
             {initial ? 'Editar Transporte' : 'Novo Tipo de Transporte'}
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="overflow-y-auto px-6 py-5 space-y-5">
           {error && (
             <div className="p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200">{error}</div>
           )}
@@ -149,51 +351,22 @@ function TransportModal({
               onChange={e => set({ cost_mode: e.target.value as CostMode })}
               className={INPUT_CLS}
             >
-              <option value="auto">Automático (preço/hora)</option>
+              <option value="auto">Por faixas (preço por nº de pessoas)</option>
               <option value="manual">Manual (ex: Uber)</option>
               <option value="included">Incluso no pacote</option>
               <option value="free">Sem custo</option>
             </select>
           </div>
 
-          {/* Preço e moeda — só para Automático */}
+          {/* Faixas — só para modo auto */}
           {form.cost_mode === 'auto' && (
-            <>
-              <div className="p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
-                O custo será calculado automaticamente: preço/hora × (horas ida + horas volta) de cada atividade.
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Preço por hora <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    value={form.price_per_hour}
-                    onChange={e => set({ price_per_hour: e.target.value })}
-                    className={INPUT_CLS}
-                    placeholder="50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Moeda</label>
-                  <select
-                    value={form.currency}
-                    onChange={e => set({ currency: e.target.value as 'BRL' | 'EUR' })}
-                    className={INPUT_CLS}
-                  >
-                    <option value="BRL">BRL (R$)</option>
-                    <option value="EUR">EUR (€)</option>
-                  </select>
-                </div>
-              </div>
-            </>
+            <div className="border border-gray-200 rounded-xl p-4">
+              <TiersSection tiers={tiers} onChange={setTiers} />
+            </div>
           )}
 
           {/* Ativo */}
-          <div className="flex items-center gap-3 pt-1">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => set({ is_active: !form.is_active })}
@@ -211,7 +384,7 @@ function TransportModal({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
           <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">
             Cancelar
           </button>
@@ -265,10 +438,7 @@ function DeleteModal({
           </button>
           {usageCount === 0 && (
             <button
-              onClick={async () => {
-                setDeleting(true);
-                await onConfirm();
-              }}
+              onClick={async () => { setDeleting(true); await onConfirm(); }}
               disabled={deleting}
               className="px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
             >
@@ -314,11 +484,19 @@ export default function TransportesPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleCreate = async (payload: Partial<ProposalTransportType>) => {
+  const handleCreate = async (payload: Partial<ProposalTransportType>, tiers: TierDraft[]) => {
     const res = await fetch('/api/admin/proposals/transports', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        ...payload,
+        tiers: tiers.map(t => ({
+          min_pax: Number(t.min_pax),
+          max_pax: t.max_pax === null ? null : Number(t.max_pax),
+          price_per_hour: Number(t.price_per_hour),
+          currency: t.currency,
+        })),
+      }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? 'Erro ao criar.');
@@ -326,12 +504,20 @@ export default function TransportesPage() {
     await load();
   };
 
-  const handleEdit = async (payload: Partial<ProposalTransportType>) => {
+  const handleEdit = async (payload: Partial<ProposalTransportType>, tiers: TierDraft[]) => {
     if (!editing) return;
     const res = await fetch(`/api/admin/proposals/transports/${editing.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        ...payload,
+        tiers: tiers.map(t => ({
+          min_pax: Number(t.min_pax),
+          max_pax: t.max_pax === null ? null : Number(t.max_pax),
+          price_per_hour: Number(t.price_per_hour),
+          currency: t.currency,
+        })),
+      }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? 'Erro ao salvar.');
@@ -410,7 +596,7 @@ export default function TransportesPage() {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Nome</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Preço/hora</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Faixas</th>
                   <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tipo</th>
                   <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Ativo</th>
                   <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Ações</th>
@@ -423,7 +609,29 @@ export default function TransportesPage() {
                   return (
                     <tr key={t.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-5 py-3 font-medium text-gray-800">{t.name}</td>
-                      <td className="px-5 py-3 text-gray-500">{priceBadge(t)}</td>
+                      <td className="px-5 py-3">
+                        {t.is_included || t.is_manual ? (
+                          <span className="text-gray-400 text-xs">—</span>
+                        ) : t.tiers.length === 0 ? (
+                          <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-700">
+                            Sem faixas
+                          </span>
+                        ) : (
+                          <div className="flex flex-col gap-0.5">
+                            {[...t.tiers]
+                              .sort((a, b) => a.sort_order - b.sort_order)
+                              .map(tier => {
+                                const sym = tier.currency === 'EUR' ? '€' : 'R$';
+                                const maxLabel = tier.max_pax === null ? '∞' : tier.max_pax;
+                                return (
+                                  <span key={tier.id} className="text-xs text-gray-600 tabular-nums">
+                                    {tier.min_pax}–{maxLabel} pax · {sym}{tier.price_per_hour}/h
+                                  </span>
+                                );
+                              })}
+                          </div>
+                        )}
+                      </td>
                       <td className="px-5 py-3">
                         <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${badge.cls}`}>
                           {badge.label}

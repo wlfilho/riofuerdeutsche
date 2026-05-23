@@ -22,12 +22,38 @@ export async function PATCH(
   const { transportId } = await params;
   const body = await request.json();
 
-  const { error } = await supabase
-    .from('proposal_transport_types')
-    .update(body)
-    .eq('id', transportId);
+  // Extract tiers before passing the rest to .update()
+  const { tiers, ...transportFields } = body;
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (Object.keys(transportFields).length > 0) {
+    const { error } = await supabase
+      .from('proposal_transport_types')
+      .update(transportFields)
+      .eq('id', transportId);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // If tiers is explicitly provided, replace all tiers for this transport
+  if (Array.isArray(tiers)) {
+    await supabase
+      .from('proposal_transport_tiers')
+      .delete()
+      .eq('transport_type_id', transportId);
+
+    if (tiers.length > 0) {
+      const tierRows = tiers.map((t: { min_pax: number; max_pax: number | null; price_per_hour: number; currency: string }, i: number) => ({
+        transport_type_id: transportId,
+        min_pax: t.min_pax,
+        max_pax: t.max_pax ?? null,
+        price_per_hour: t.price_per_hour,
+        currency: t.currency,
+        sort_order: i * 10,
+      }));
+      const { error } = await supabase.from('proposal_transport_tiers').insert(tierRows);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+  }
+
   return NextResponse.json({ success: true });
 }
 

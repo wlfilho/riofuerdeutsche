@@ -27,7 +27,7 @@ export async function GET() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('proposal_transport_types')
-    .select('*')
+    .select('*, tiers:proposal_transport_tiers(*)')
     .order('sort_order');
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createClient();
   const body = await request.json();
-  const { name, is_manual, is_included, is_active, price_per_hour, currency } = body;
+  const { name, is_manual, is_included, is_active, tiers } = body;
 
   if (!name?.trim()) {
     return NextResponse.json({ error: 'nome é obrigatório.' }, { status: 400 });
@@ -57,21 +57,25 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
   const sort_order = (maxRow?.sort_order ?? -1) + 1;
 
-  const { data, error } = await supabase
+  const { data: transport, error } = await supabase
     .from('proposal_transport_types')
-    .insert({
-      slug,
-      name: name.trim(),
-      is_manual: is_manual ?? false,
-      is_included: is_included ?? false,
-      is_active: is_active ?? true,
-      price_per_hour: price_per_hour ?? null,
-      currency: currency ?? null,
-      sort_order,
-    })
+    .insert({ slug, name: name.trim(), is_manual: is_manual ?? false, is_included: is_included ?? false, is_active: is_active ?? true, sort_order })
     .select()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ transport: data }, { status: 201 });
+
+  if (Array.isArray(tiers) && tiers.length > 0) {
+    const tierRows = tiers.map((t: { min_pax: number; max_pax: number | null; price_per_hour: number; currency: string }, i: number) => ({
+      transport_type_id: transport.id,
+      min_pax: t.min_pax,
+      max_pax: t.max_pax ?? null,
+      price_per_hour: t.price_per_hour,
+      currency: t.currency,
+      sort_order: i * 10,
+    }));
+    await supabase.from('proposal_transport_tiers').insert(tierRows);
+  }
+
+  return NextResponse.json({ transport }, { status: 201 });
 }

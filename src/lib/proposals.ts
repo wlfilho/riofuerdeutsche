@@ -17,16 +17,25 @@ export interface ProposalServiceCost {
   sort_order: number;
 }
 
+export interface ProposalTransportTier {
+  id: string;
+  transport_type_id: string;
+  min_pax: number;
+  max_pax: number | null;
+  price_per_hour: number;
+  currency: 'EUR' | 'BRL';
+  sort_order: number;
+}
+
 export interface ProposalTransportType {
   id: string;
   slug: string;
   name: string;
-  price_per_hour: number | null;
-  currency: 'EUR' | 'BRL' | null;
   is_manual: boolean;
   is_included: boolean;
   is_active: boolean;
   sort_order: number;
+  tiers: ProposalTransportTier[];
 }
 
 export interface ProposalService {
@@ -48,22 +57,34 @@ export interface ProposalService {
   costs: ProposalServiceCost[];
 }
 
+export function getTransportTierForPax(
+  transportType: ProposalTransportType,
+  pax: number,
+): ProposalTransportTier | null {
+  return transportType.tiers.find(
+    t => pax >= t.min_pax && (t.max_pax === null || pax <= t.max_pax),
+  ) ?? null;
+}
+
 export function calcTransportCost(
   service: ProposalService,
+  pax: number,
   _exchangeRate: number,
 ): { description: string; base_price: number; currency: 'EUR' | 'BRL'; price_type: 'fixed' } | null {
   const t = service.transport_type;
   if (!t || t.is_included || t.slug === 'a-pe') return null;
   if (t.is_manual) return null;
-  if (!t.price_per_hour || !t.currency) return null;
+
+  const tier = getTransportTierForPax(t, pax);
+  if (!tier) return null;
 
   const hours = (service.transfer_hours_to ?? 0) + (service.transfer_hours_back ?? 0);
   if (hours === 0) return null;
 
   return {
     description: `${t.name} (${hours}h)`,
-    base_price: t.price_per_hour * hours,
-    currency: t.currency as 'EUR' | 'BRL',
+    base_price: tier.price_per_hour * hours,
+    currency: tier.currency,
     price_type: 'fixed',
   };
 }
@@ -122,7 +143,7 @@ export async function getTransportTypes(): Promise<ProposalTransportType[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('proposal_transport_types')
-    .select('*')
+    .select('*, tiers:proposal_transport_tiers(*)')
     .eq('is_active', true)
     .order('sort_order');
 
@@ -137,7 +158,7 @@ export async function getProposalServices(): Promise<ProposalService[]> {
     .select(`
       *,
       costs:proposal_service_costs(*),
-      transport_type:proposal_transport_types(*)
+      transport_type:proposal_transport_types(*, tiers:proposal_transport_tiers(*))
     `)
     .eq('is_active', true)
     .order('sort_order');
