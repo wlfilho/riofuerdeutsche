@@ -294,7 +294,8 @@ export default function RocinhaPage() {
                                     Familien, die mich seit Jahren kennen. Wir trinken Kaffee,
                                     schauen uns Aussichten von Terrassen an, die kein Reiseführer
                                     kennt, hören Geschichten, die man nirgendwo lesen kann. Die{" "}
-                                    <em>Favela Tour auf Deutsch</em> mit mir ist kein Ausflug in
+                                    <Link href="/touren/favela-tour" className="text-[#2D6A4F] underline underline-offset-2 hover:text-[#1a4a35] transition-colors">Favela Tour auf Deutsch</Link>{" "}
+                                    mit mir ist kein Ausflug in
                                     eine fremde Welt — es ist ein Einblick in einen Teil von Rio,
                                     der genauso zur Stadt gehört wie Ipanema und Copacabana.
                                 </p>
