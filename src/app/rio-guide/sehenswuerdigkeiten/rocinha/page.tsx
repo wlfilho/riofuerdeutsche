@@ -7,7 +7,7 @@ import AndereTouren from "@/components/AndereTouren";
 import { ChevronRight, MapPin, ArrowRight, Phone } from "lucide-react";
 
 export const metadata = {
-    title: "Rocinha Rio de Janeiro — Favela besuchen, Tipps & Insider-Guide | Rio für Deutsche",
+    title: "Favela Tour Rio de Janeiro auf Deutsch — mit echtem Carioca | Rio für Deutsche",
     description:
         "Die Rocinha in Rio de Janeiro: Geschichte, Kultur und was du wirklich sehen solltest. Favela tour rio de janeiro — aber richtig, auf Deutsch, mit einem Carioca. Kein Touristen-Klischee.",
     alternates: {
