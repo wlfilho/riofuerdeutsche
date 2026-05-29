@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { ProposalService, ProposalTreatment } from '@/lib/proposals';
@@ -287,6 +287,7 @@ function DayBlock({
   onAddItem,
   onUpdateItem,
   onRemoveItem,
+  onRemoveDay,
 }: {
   day: string;
   items: EditableItem[];
@@ -296,6 +297,7 @@ function DayBlock({
   onAddItem: (day: string, service: ProposalService) => void;
   onUpdateItem: (id: string, updates: Partial<EditableItem>) => void;
   onRemoveItem: (id: string) => void;
+  onRemoveDay: () => void;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -320,12 +322,23 @@ function DayBlock({
             </p>
           )}
         </div>
-        <button
-          onClick={() => setPickerOpen(true)}
-          className="px-3 py-1.5 text-xs font-semibold bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-green-50 hover:border-green-300 hover:text-green-700 transition-colors shrink-0 ml-4"
-        >
-          + Leistung
-        </button>
+        <div className="flex items-center gap-2 ml-4 shrink-0">
+          <button
+            onClick={() => setPickerOpen(true)}
+            className="px-3 py-1.5 text-xs font-semibold bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-green-50 hover:border-green-300 hover:text-green-700 transition-colors"
+          >
+            + Leistung
+          </button>
+          <button
+            onClick={onRemoveDay}
+            title="Tag entfernen"
+            className="p-1.5 text-gray-300 hover:text-red-500 transition-colors rounded"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {items.length > 0 && (
@@ -365,14 +378,27 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
   const [pax, setPax] = useState(2);
   const [arrivalDate, setArrivalDate] = useState('');
   const [departureDate, setDepartureDate] = useState('');
-  const [treatment, setTreatment] = useState<ProposalTreatment>('Sie');
+  const [treatment, setTreatment] = useState<ProposalTreatment>('du-ihr');
   const [exchangeRate, setExchangeRate] = useState(0.17);
   const [internalNotes, setInternalNotes] = useState('');
   const [items, setItems] = useState<EditableItem[]>([]);
+  const [activeDays, setActiveDays] = useState<string[]>([]);
+  const [showDayPicker, setShowDayPicker] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const days = useMemo(() => {
+  useEffect(() => {
+    fetch('https://api.frankfurter.app/latest?from=BRL&to=EUR')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.rates?.EUR) {
+          setExchangeRate(parseFloat(data.rates.EUR.toFixed(4)));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const allDaysInRange = useMemo(() => {
     if (!arrivalDate || !departureDate) return [];
     const arrival = new Date(arrivalDate + 'T12:00:00');
     const departure = new Date(departureDate + 'T12:00:00');
@@ -383,15 +409,32 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
     return generateDays(arrivalDate, departureDate);
   }, [arrivalDate, departureDate]);
 
+  const availableDaysToAdd = useMemo(
+    () => allDaysInRange.filter(d => !activeDays.includes(d)),
+    [allDaysInRange, activeDays],
+  );
+
   const summaryItems = useMemo(
-    () => days.flatMap(day => items.filter(i => i.day === day)),
-    [days, items],
+    () => activeDays.flatMap(day => items.filter(i => i.day === day)),
+    [activeDays, items],
   );
 
   const grandTotal = useMemo(
     () => summaryItems.reduce((sum, i) => sum + calcItemTotalEur(i.costs, pax, exchangeRate), 0),
     [summaryItems, pax, exchangeRate],
   );
+
+  // ─── Day handlers ─────────────────────────────────────────────────────────────
+
+  const handleAddDay = useCallback((date: string) => {
+    setActiveDays(prev => [...prev, date].sort());
+    setShowDayPicker(false);
+  }, []);
+
+  const handleRemoveDay = useCallback((date: string) => {
+    setActiveDays(prev => prev.filter(d => d !== date));
+    setItems(prev => prev.filter(i => i.day !== date));
+  }, []);
 
   // ─── Item handlers ────────────────────────────────────────────────────────────
 
@@ -557,7 +600,7 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
                 Taxa de câmbio BRL→EUR <span className="text-red-500">*</span>
               </label>
               <input type="number" min="0.001" step="0.001" value={exchangeRate} onChange={e => setExchangeRate(parseFloat(e.target.value) || 0)} className={INPUT_CLS} placeholder="0.17" />
-              <p className="text-xs text-gray-400 mt-1">Usada para converter R$ em € nos serviços em reais.</p>
+              <p className="text-xs text-gray-400 mt-1">Cotação do dia carregada automaticamente. Você pode ajustar se necessário.</p>
             </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -572,14 +615,22 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
         {/* ── Section 2: Itinerary ── */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-base font-bold text-gray-900 mb-5">Itinerário</h2>
-          {days.length === 0 ? (
+
+          {allDaysInRange.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center text-gray-400">
               <div className="text-3xl mb-3">🗓</div>
-              <p className="text-sm">Preencha as datas de chegada e saída para gerar o itinerário.</p>
+              <p className="text-sm">Preencha as datas de chegada e saída para começar.</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {days.map(day => (
+              {activeDays.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-10 text-center text-gray-400">
+                  <div className="text-3xl mb-3">🗓</div>
+                  <p className="text-sm mb-4">Nenhum dia adicionado ainda.</p>
+                </div>
+              )}
+
+              {activeDays.map(day => (
                 <DayBlock
                   key={day}
                   day={day}
@@ -590,8 +641,42 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
                   onAddItem={handleAddItem}
                   onUpdateItem={handleUpdateItem}
                   onRemoveItem={handleRemoveItem}
+                  onRemoveDay={() => handleRemoveDay(day)}
                 />
               ))}
+
+              {availableDaysToAdd.length > 0 && (
+                <div className="pt-1">
+                  {showDayPicker ? (
+                    <div className="flex items-center gap-2">
+                      <select
+                        autoFocus
+                        defaultValue=""
+                        onChange={e => { if (e.target.value) handleAddDay(e.target.value); }}
+                        className={`${INPUT_CLS} max-w-xs`}
+                      >
+                        <option value="" disabled>Selecionar dia…</option>
+                        {availableDaysToAdd.map(d => (
+                          <option key={d} value={d}>{formatGermanDay(d)}</option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => setShowDayPicker(false)}
+                        className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        Abbrechen
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowDayPicker(true)}
+                      className="px-4 py-2 text-sm font-semibold border border-dashed border-gray-300 text-gray-500 rounded-lg hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-colors w-full"
+                    >
+                      + Tag hinzufügen
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
