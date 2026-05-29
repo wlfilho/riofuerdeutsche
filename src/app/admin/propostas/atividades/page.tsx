@@ -108,7 +108,7 @@ function CostRow({
   onRemove: () => void;
 }) {
   return (
-    <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-2 items-center">
+    <div className="grid grid-cols-[1fr_6rem_5rem_9rem_2rem] gap-2 items-center">
       <input
         type="text"
         value={cost.description}
@@ -123,12 +123,12 @@ function CostRow({
         value={cost.base_price}
         onChange={e => onChange({ base_price: parseFloat(e.target.value) || '' })}
         placeholder="0"
-        className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
       />
       <select
         value={cost.currency}
         onChange={e => onChange({ currency: e.target.value as CostDraft['currency'] })}
-        className="px-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+        className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
       >
         <option value="EUR">EUR</option>
         <option value="BRL">BRL</option>
@@ -136,7 +136,7 @@ function CostRow({
       <select
         value={cost.price_type}
         onChange={e => onChange({ price_type: e.target.value as CostDraft['price_type'] })}
-        className="px-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+        className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
       >
         <option value="fixed">Fixo</option>
         <option value="per_pax">Por pessoa</option>
@@ -420,9 +420,9 @@ function ActivityModal({
               </p>
             ) : (
               <div className="space-y-2">
-                <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-2 mb-1">
+                <div className="grid grid-cols-[1fr_6rem_5rem_9rem_2rem] gap-2 mb-1">
                   <span className="text-xs text-gray-400">Descrição</span>
-                  <span className="text-xs text-gray-400 w-24">Valor</span>
+                  <span className="text-xs text-gray-400">Valor</span>
                   <span className="text-xs text-gray-400">Moeda</span>
                   <span className="text-xs text-gray-400">Tipo</span>
                   <span />
