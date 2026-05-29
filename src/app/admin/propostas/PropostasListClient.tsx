@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import type { Proposal, ProposalStatus } from '@/lib/proposals';
 
+
 function formatDate(iso: string | null): string {
   if (!iso) return '—';
   const [y, m, d] = iso.split('-');
@@ -199,23 +200,28 @@ export default function PropostasListClient({ initialProposals }: { initialPropo
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      {/* Ver PDF */}
-                      <a
-                        href={p.pdf_url ?? undefined}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="PDF öffnen"
-                        aria-disabled={!p.pdf_url}
-                        className={`p-1.5 rounded-lg transition-colors ${
-                          p.pdf_url
-                            ? 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'
-                            : 'text-gray-200 cursor-not-allowed pointer-events-none'
-                        }`}
+                      {/* Ver proposta */}
+                      <Link
+                        href={`/admin/propostas/${p.id}/output`}
+                        title="Proposta visualisieren"
+                        className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
                         </svg>
-                      </a>
+                      </Link>
+
+                      {/* Editar proposta */}
+                      <Link
+                        href={`/admin/propostas/${p.id}/editar`}
+                        title="Proposta bearbeiten"
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                      </Link>
 
                       {/* Copiar WhatsApp */}
                       <button

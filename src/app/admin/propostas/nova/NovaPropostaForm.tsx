@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import type { ProposalService, ProposalTreatment } from '@/lib/proposals';
+import type { Proposal, ProposalService, ProposalTreatment } from '@/lib/proposals';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -46,20 +46,59 @@ function formatGermanDay(iso: string): string {
   });
 }
 
-function calcItemTotalEur(
-  costs: EditableItem['costs'] | null | undefined,
-  pax: number,
-  exchangeRate: number,
+// Guide hours for one item, sharing adjacent transfers with neighbours to avoid
+// double-counting when multiple activities sit in the same day.
+function calcItemGuideHours(
+  item: EditableItem,
+  isFirst: boolean,
+  isLast: boolean,
 ): number {
-  return (costs ?? []).reduce((sum, cost) => {
+  const toH = (item.transfer_hours_to ?? 0) * (isFirst ? 1 : 0.5);
+  const backH = (item.transfer_hours_back ?? 0) * (isLast ? 1 : 0.5);
+  return toH + (item.duration_hours ?? 0) + backH;
+}
+
+function calcItemAdditionalCosts(item: EditableItem, pax: number, exchangeRate: number): number {
+  return (item.costs ?? []).reduce((sum, cost) => {
     let amount = cost.base_price;
     if (cost.price_type === 'per_pax') amount = cost.base_price * pax;
-    // per_hour: base_price is already the total for the activity
     const eur = cost.currency === 'BRL'
-      ? (exchangeRate > 0 ? amount / exchangeRate : 0)
+      ? (exchangeRate > 0 ? amount * exchangeRate : 0)
       : amount;
     return sum + eur;
   }, 0);
+}
+
+// Returns the total EUR per item, distributing the day's ceiled guide fee
+// proportionally so that the sum across items equals ceil(dayHours) × guideRate.
+function calcDayItemTotals(
+  dayItems: EditableItem[],
+  pax: number,
+  exchangeRate: number,
+  guideRate: number,
+): number[] {
+  if (dayItems.length === 0) return [];
+  const rawHours = dayItems.map((item, idx) =>
+    calcItemGuideHours(item, idx === 0, idx === dayItems.length - 1),
+  );
+  const dayRawHours = rawHours.reduce((s, h) => s + h, 0);
+  const ceiledGuideFee = Math.ceil(dayRawHours) * guideRate;
+  return dayItems.map((item, idx) => {
+    const ratio = dayRawHours > 0 ? rawHours[idx] / dayRawHours : 1 / dayItems.length;
+    return ceiledGuideFee * ratio + calcItemAdditionalCosts(item, pax, exchangeRate);
+  });
+}
+
+function calcItemTotalEur(
+  item: EditableItem,
+  pax: number,
+  exchangeRate: number,
+  guideRate: number,
+  isFirst = true,
+  isLast = true,
+): number {
+  const guideFee = calcItemGuideHours(item, isFirst, isLast) * guideRate;
+  return guideFee + calcItemAdditionalCosts(item, pax, exchangeRate);
 }
 
 function formatEur(n: number): string {
@@ -194,16 +233,24 @@ function ServiceRow({
   item,
   pax,
   exchangeRate,
+  guideRate,
+  isFirst,
+  isLast,
   onChange,
   onRemove,
 }: {
   item: EditableItem;
   pax: number;
   exchangeRate: number;
+  guideRate: number;
+  isFirst: boolean;
+  isLast: boolean;
   onChange: (updates: Partial<EditableItem>) => void;
   onRemove: () => void;
 }) {
-  const totalEur = calcItemTotalEur(item.costs, pax, exchangeRate);
+  const guideHours = calcItemGuideHours(item, isFirst, isLast);
+  const guideFee = guideHours * guideRate;
+  const totalEur = calcItemTotalEur(item, pax, exchangeRate, guideRate, isFirst, isLast);
   const hasBrl = (item.costs ?? []).some(c => c.currency === 'BRL');
 
   const timeLabel = [
@@ -231,29 +278,34 @@ function ServiceRow({
         </button>
       </div>
 
-      {/* Costs — read-only display */}
-      {(item.costs ?? []).length === 0 ? (
-        <p className="text-xs text-gray-400 italic">Sem custo adicional</p>
-      ) : (
-        <div className="space-y-1">
-          {(item.costs ?? []).map((cost, idx) => {
-            let amount = cost.base_price;
-            if (cost.price_type === 'per_pax') amount = cost.base_price * pax;
-            const eur = cost.currency === 'BRL'
-              ? (exchangeRate > 0 ? amount / exchangeRate : 0)
-              : amount;
-            return (
-              <div key={idx} className="flex items-center justify-between text-xs">
-                <span className="text-gray-500">
-                  {cost.description}
-                  <span className="text-gray-400"> · {formatCostPrice(cost)}</span>
-                </span>
-                <span className="tabular-nums text-gray-600 ml-4 shrink-0">{formatEur(eur)}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* Cost breakdown */}
+      <div className="space-y-1">
+        {guideHours > 0 && (
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-gray-500">
+              Honorário guia
+              <span className="text-gray-400"> · {guideHours}h × {guideRate} EUR/h</span>
+            </span>
+            <span className="tabular-nums text-gray-600 ml-4 shrink-0">{formatEur(guideFee)}</span>
+          </div>
+        )}
+        {(item.costs ?? []).map((cost, idx) => {
+          let amount = cost.base_price;
+          if (cost.price_type === 'per_pax') amount = cost.base_price * pax;
+          const eur = cost.currency === 'BRL'
+            ? (exchangeRate > 0 ? amount * exchangeRate : 0)
+            : amount;
+          return (
+            <div key={idx} className="flex items-center justify-between text-xs">
+              <span className="text-gray-500">
+                {cost.description}
+                <span className="text-gray-400"> · {formatCostPrice(cost)}</span>
+              </span>
+              <span className="tabular-nums text-gray-600 ml-4 shrink-0">{formatEur(eur)}</span>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Note — only editable field */}
       <input
@@ -284,6 +336,8 @@ function DayBlock({
   services,
   pax,
   exchangeRate,
+  guideRate,
+  maxHoursPerDay,
   onAddItem,
   onUpdateItem,
   onRemoveItem,
@@ -294,6 +348,8 @@ function DayBlock({
   services: ProposalService[];
   pax: number;
   exchangeRate: number;
+  guideRate: number;
+  maxHoursPerDay: number;
   onAddItem: (day: string, service: ProposalService) => void;
   onUpdateItem: (id: string, updates: Partial<EditableItem>) => void;
   onRemoveItem: (id: string) => void;
@@ -301,9 +357,9 @@ function DayBlock({
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const dayTotal = items.reduce((sum, i) => sum + calcItemTotalEur(i.costs, pax, exchangeRate), 0);
+  const dayTotal = calcDayItemTotals(items, pax, exchangeRate, guideRate).reduce((s, v) => s + v, 0);
   const dayHours = calcDayHours(items);
-  const overloaded = dayHours > 10;
+  const overloaded = dayHours > maxHoursPerDay;
 
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden">
@@ -318,7 +374,7 @@ function DayBlock({
           )}
           {overloaded && (
             <p className="text-xs text-amber-600 font-medium mt-1">
-              ⚠️ Mais de 10h neste dia — verifique o programa.
+              ⚠️ Mais de {maxHoursPerDay}h neste dia — verifique o programa.
             </p>
           )}
         </div>
@@ -343,12 +399,15 @@ function DayBlock({
 
       {items.length > 0 && (
         <div className="p-3 space-y-2">
-          {items.map(item => (
+          {items.map((item, idx) => (
             <ServiceRow
               key={item._id}
               item={item}
               pax={pax}
               exchangeRate={exchangeRate}
+              guideRate={guideRate}
+              isFirst={idx === 0}
+              isLast={idx === items.length - 1}
               onChange={updates => onUpdateItem(item._id, updates)}
               onRemove={() => onRemoveItem(item._id)}
             />
@@ -369,30 +428,65 @@ function DayBlock({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function NovaPropostaForm({ services }: { services: ProposalService[] }) {
+export default function NovaPropostaForm({
+  services,
+  defaultGuideRate,
+  defaultExchangeRate,
+  maxHoursPerDay,
+  initialData,
+  proposalId,
+}: {
+  services: ProposalService[];
+  defaultGuideRate: number;
+  defaultExchangeRate: number;
+  maxHoursPerDay: number;
+  initialData?: Proposal;
+  proposalId?: string;
+}) {
   const router = useRouter();
+  const isEditing = !!proposalId;
 
-  const [clientName, setClientName] = useState('');
-  const [clientEmail, setClientEmail] = useState('');
-  const [clientPhone, setClientPhone] = useState('');
-  const [pax, setPax] = useState(2);
-  const [arrivalDate, setArrivalDate] = useState('');
-  const [departureDate, setDepartureDate] = useState('');
-  const [treatment, setTreatment] = useState<ProposalTreatment>('du-ihr');
-  const [exchangeRate, setExchangeRate] = useState(0.17);
-  const [internalNotes, setInternalNotes] = useState('');
-  const [items, setItems] = useState<EditableItem[]>([]);
-  const [activeDays, setActiveDays] = useState<string[]>([]);
+  const initialItems: EditableItem[] = (initialData?.items ?? []).map(item => ({
+    _id: Math.random().toString(36).slice(2),
+    day: item.day,
+    service_slug: item.service_slug,
+    service_name: item.service_name,
+    duration_hours: item.duration_hours,
+    transfer_hours_to: item.transfer_hours_to,
+    transfer_hours_back: item.transfer_hours_back,
+    costs: item.costs.map(c => ({
+      description: c.description,
+      base_price: c.base_price,
+      currency: c.currency,
+      price_type: c.price_type,
+    })),
+    note: item.note,
+  }));
+
+  const [clientName, setClientName] = useState(initialData?.client_name ?? '');
+  const [clientEmail, setClientEmail] = useState(initialData?.client_email ?? '');
+  const [clientPhone, setClientPhone] = useState(initialData?.client_phone ?? '');
+  const [pax, setPax] = useState(initialData?.pax ?? 2);
+  const [arrivalDate, setArrivalDate] = useState(initialData?.arrival_date ?? '');
+  const [departureDate, setDepartureDate] = useState(initialData?.departure_date ?? '');
+  const [treatment, setTreatment] = useState<ProposalTreatment>(initialData?.treatment ?? 'du-ihr');
+  const [exchangeRate, setExchangeRate] = useState(initialData?.exchange_rate ?? defaultExchangeRate);
+  const [guideRate, setGuideRate] = useState(initialData?.guide_rate ?? defaultGuideRate);
+  const [internalNotes, setInternalNotes] = useState(initialData?.internal_notes ?? '');
+  const [items, setItems] = useState<EditableItem[]>(initialItems);
+  const [activeDays, setActiveDays] = useState<string[]>(
+    [...new Set(initialItems.map(i => i.day))].sort()
+  );
   const [showDayPicker, setShowDayPicker] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('https://api.frankfurter.app/latest?from=BRL&to=EUR')
+    fetch('/api/admin/exchange-rate')
       .then(res => res.json())
       .then(data => {
-        if (data?.rates?.EUR) {
-          setExchangeRate(parseFloat(data.rates.EUR.toFixed(4)));
+        if (data?.rate) {
+          setExchangeRate(parseFloat(data.rate.toFixed(4)));
         }
       })
       .catch(() => {});
@@ -420,8 +514,11 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
   );
 
   const grandTotal = useMemo(
-    () => summaryItems.reduce((sum, i) => sum + calcItemTotalEur(i.costs, pax, exchangeRate), 0),
-    [summaryItems, pax, exchangeRate],
+    () => activeDays.reduce((total, day) => {
+      const dayItems = items.filter(i => i.day === day);
+      return total + calcDayItemTotals(dayItems, pax, exchangeRate, guideRate).reduce((s, v) => s + v, 0);
+    }, 0),
+    [activeDays, items, pax, exchangeRate, guideRate],
   );
 
   // ─── Day handlers ─────────────────────────────────────────────────────────────
@@ -479,21 +576,30 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
 
     setSubmitting(true);
     try {
-      const cleanItems = summaryItems.map(({ _id: _skip, costs, ...rest }) => ({
-        ...rest,
-        costs: costs.map(cost => {
-          let amount = cost.base_price;
-          if (cost.price_type === 'per_pax') amount = cost.base_price * pax;
-          const eur = cost.currency === 'BRL'
-            ? (exchangeRate > 0 ? amount / exchangeRate : 0)
-            : amount;
-          return { ...cost, total_eur: eur };
-        }),
-        total_eur: calcItemTotalEur(costs, pax, exchangeRate),
-      }));
+      const cleanItems = activeDays.flatMap(day => {
+        const dayItems = summaryItems.filter(i => i.day === day);
+        const dayTotals = calcDayItemTotals(dayItems, pax, exchangeRate, guideRate);
+        return dayItems.map((item, idx) => {
+          const { _id: _skip, costs, ...rest } = item;
+          return {
+            ...rest,
+            costs: costs.map(cost => {
+              let amount = cost.base_price;
+              if (cost.price_type === 'per_pax') amount = cost.base_price * pax;
+              const eur = cost.currency === 'BRL'
+                ? (exchangeRate > 0 ? amount * exchangeRate : 0)
+                : amount;
+              return { ...cost, total_eur: eur };
+            }),
+            total_eur: dayTotals[idx],
+          };
+        });
+      });
 
-      const res = await fetch('/api/admin/proposals', {
-        method: 'POST',
+      const url = isEditing ? `/api/admin/proposals/${proposalId}` : '/api/admin/proposals';
+      const method = isEditing ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_name: clientName.trim(),
@@ -506,6 +612,7 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
           internal_notes: internalNotes.trim(),
           items: cleanItems,
           exchange_rate: exchangeRate,
+          guide_rate: guideRate,
         }),
       });
 
@@ -533,14 +640,24 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
               ← Propostas
             </Link>
             <span className="text-gray-200">/</span>
-            <h1 className="text-2xl font-bold text-gray-900">Nova Proposta</h1>
+            {isEditing && (
+              <>
+                <Link href={`/admin/propostas/${proposalId}/output`} className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
+                  {initialData?.client_name}
+                </Link>
+                <span className="text-gray-200">/</span>
+              </>
+            )}
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isEditing ? 'Proposta bearbeiten' : 'Nova Proposta'}
+            </h1>
           </div>
           <button
             onClick={handleSubmit}
             disabled={submitting}
             className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Wird gespeichert…' : 'Gerar Proposta'}
+            {submitting ? 'Wird gespeichert…' : isEditing ? 'Änderungen speichern' : 'Gerar Proposta'}
           </button>
         </div>
 
@@ -602,6 +719,13 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
               <input type="number" min="0.001" step="0.001" value={exchangeRate} onChange={e => setExchangeRate(parseFloat(e.target.value) || 0)} className={INPUT_CLS} placeholder="0.17" />
               <p className="text-xs text-gray-400 mt-1">Cotação do dia carregada automaticamente. Você pode ajustar se necessário.</p>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Honorário do guia (EUR/h) <span className="text-red-500">*</span>
+              </label>
+              <input type="number" min="1" step="1" value={guideRate} onChange={e => setGuideRate(parseFloat(e.target.value) || 0)} className={INPUT_CLS} placeholder="40" />
+              <p className="text-xs text-gray-400 mt-1">Tarifa por hora do guia. Padrão: 40 EUR/h.</p>
+            </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Observações internas{' '}
@@ -638,6 +762,8 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
                   services={services}
                   pax={pax}
                   exchangeRate={exchangeRate}
+                  guideRate={guideRate}
+                  maxHoursPerDay={maxHoursPerDay}
                   onAddItem={handleAddItem}
                   onUpdateItem={handleUpdateItem}
                   onRemoveItem={handleRemoveItem}
@@ -686,19 +812,23 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="text-base font-bold text-gray-900 mb-4">Resumo de Preços</h2>
             <div className="space-y-2">
-              {summaryItems.map(item => (
-                <div key={item._id} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-gray-400 text-xs shrink-0">
-                      {formatGermanDay(item.day).split(',')[0]}
+              {activeDays.flatMap(day => {
+                const dayItems = items.filter(i => i.day === day);
+                const dayTotals = calcDayItemTotals(dayItems, pax, exchangeRate, guideRate);
+                return dayItems.map((item, idx) => (
+                  <div key={item._id} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-gray-400 text-xs shrink-0">
+                        {formatGermanDay(item.day).split(',')[0]}
+                      </span>
+                      <span className="text-gray-700 truncate">{item.service_name}</span>
+                    </div>
+                    <span className="tabular-nums text-gray-700 font-medium ml-4 shrink-0">
+                      {formatEur(dayTotals[idx])}
                     </span>
-                    <span className="text-gray-700 truncate">{item.service_name}</span>
                   </div>
-                  <span className="tabular-nums text-gray-700 font-medium ml-4 shrink-0">
-                    {formatEur(calcItemTotalEur(item.costs, pax, exchangeRate))}
-                  </span>
-                </div>
-              ))}
+                ));
+              })}
             </div>
             <div className="mt-4 pt-4 border-t-2 border-gray-200 flex items-center justify-between">
               <span className="font-semibold text-gray-600">Gesamtbetrag</span>
@@ -716,7 +846,7 @@ export default function NovaPropostaForm({ services }: { services: ProposalServi
             disabled={submitting}
             className="px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Wird gespeichert…' : 'Gerar Proposta →'}
+            {submitting ? 'Wird gespeichert…' : isEditing ? 'Änderungen speichern →' : 'Gerar Proposta →'}
           </button>
         </div>
 

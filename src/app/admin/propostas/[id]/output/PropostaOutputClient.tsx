@@ -21,6 +21,28 @@ function formatEur(n: number): string {
   return `€${n.toFixed(2).replace('.', ',')}`;
 }
 
+function formatDuration(hours: number): string {
+  const totalMinutes = Math.round(hours * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h === 0) return `${m} Min.`;
+  if (m === 0) return `${h} Std.`;
+  return `${h} Std. ${m} Min.`;
+}
+
+function calcDayHours(items: { duration_hours: number | null; transfer_hours_to: number | null; transfer_hours_back: number | null }[]): number {
+  if (items.length === 0) return 0;
+  let total = items[0].transfer_hours_to ?? 0;
+  for (let i = 0; i < items.length; i++) {
+    total += items[i].duration_hours ?? 0;
+    if (i < items.length - 1) {
+      total += ((items[i].transfer_hours_back ?? 0) + (items[i + 1].transfer_hours_to ?? 0)) / 2;
+    }
+  }
+  total += items[items.length - 1].transfer_hours_back ?? 0;
+  return total;
+}
+
 const FULL_WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const ABBR_WEEKDAYS = ['So.', 'Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.'];
 
@@ -76,7 +98,7 @@ function generateWhatsAppText(proposal: Proposal): string {
     lines.push('');
     lines.push(fullGermanDay(day));
     for (const item of dayItems) {
-      const dur = item.duration_hours ? ` (${item.duration_hours} Std.)` : '';
+      const dur = item.duration_hours ? ` (${formatDuration(item.duration_hours)})` : '';
       lines.push(`• ${item.service_name}${dur} — ${formatEur(item.total_eur)}`);
     }
   }
@@ -216,7 +238,7 @@ async function downloadPDF(proposal: Proposal): Promise<void> {
       const nameLines = doc.splitTextToSize(item.service_name, 75);
       doc.text(nameLines[0] as string, COL.prog + 2, y + 5);
 
-      doc.text(item.duration_hours ? `${item.duration_hours} Std.` : '—', COL.dur + 2, y + 5);
+      doc.text(item.duration_hours ? formatDuration(item.duration_hours) : '—', COL.dur + 2, y + 5);
       doc.text(formatEur(item.total_eur), COL.priceR - 2, y + 5, { align: 'right' });
 
       doc.setDrawColor(SEPARATOR);
@@ -301,6 +323,14 @@ export default function PropostaOutputClient({ proposal: initial }: { proposal: 
     [initial.items]
   );
 
+  const grandTotalHours = useMemo(
+    () => sortedDays.reduce((sum, day) => {
+      const dayItems = initial.items.filter(i => i.day === day);
+      return sum + calcDayHours(dayItems);
+    }, 0),
+    [initial.items, sortedDays]
+  );
+
   const handleStatusChange = async (newStatus: ProposalStatus) => {
     setStatusSaving(true);
     try {
@@ -351,6 +381,12 @@ export default function PropostaOutputClient({ proposal: initial }: { proposal: 
             </h1>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href={`/admin/propostas/${initial.id}/editar`}
+              className="px-4 py-2 text-sm font-semibold bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Editar
+            </Link>
             <button
               onClick={handleDownloadPDF}
               disabled={pdfLoading}
@@ -425,51 +461,87 @@ export default function PropostaOutputClient({ proposal: initial }: { proposal: 
         </div>
 
         {/* ── Card 2: Itinerário */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-base font-bold text-gray-900 mb-5">Itinerário</h2>
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-6 pt-6 pb-4">
+            <h2 className="text-base font-bold text-gray-900">Itinerário</h2>
+          </div>
 
           {sortedDays.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-6">Nenhuma leistung adicionada.</p>
+            <p className="text-sm text-gray-400 text-center py-8">Nenhuma leistung adicionada.</p>
           ) : (
-            <div className="space-y-5">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-y border-gray-100">
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-6 py-2.5">Atividade</th>
+                  <th className="text-right text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-2.5 whitespace-nowrap">Duração</th>
+                  <th className="text-right text-xs font-semibold text-gray-400 uppercase tracking-wide px-6 py-2.5">Valor</th>
+                </tr>
+              </thead>
               {sortedDays.map(day => {
                 const dayItems = initial.items.filter(i => i.day === day);
                 const dayTotal = dayItems.reduce((sum, i) => sum + i.total_eur, 0);
+                const dayHours = calcDayHours(dayItems);
                 return (
-                  <div key={day}>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-semibold text-gray-700">{fullGermanDay(day)}</p>
-                      <p className="text-xs text-gray-400 tabular-nums">{formatEur(dayTotal)}</p>
-                    </div>
-                    <div className="space-y-1 pl-3 border-l-2 border-green-100">
-                      {dayItems.map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between text-sm">
-                          <div className="text-gray-700">
-                            {item.service_name}
-                            {item.duration_hours && (
-                              <span className="text-gray-400 ml-1">({item.duration_hours} Std.)</span>
-                            )}
-                            {item.note && (
-                              <span className="text-gray-400 ml-1 text-xs">— {item.note}</span>
-                            )}
-                          </div>
-                          <span className="tabular-nums text-gray-600 ml-4 shrink-0">
-                            {formatEur(item.total_eur)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <tbody key={day}>
+                    <tr className="bg-green-50 border-t border-green-100">
+                      <td className="px-6 py-2">
+                        <span className="text-xs font-bold text-green-700 uppercase tracking-wide">
+                          {fullGermanDay(day)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-right whitespace-nowrap">
+                        {dayHours > 0 && (
+                          <span className="text-xs font-semibold text-green-600 tabular-nums">{formatDuration(dayHours)}</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-2 text-right whitespace-nowrap">
+                        <span className="text-xs font-semibold text-green-600 tabular-nums">{formatEur(dayTotal)}</span>
+                      </td>
+                    </tr>
+                    {dayItems.map((item, idx) => (
+                      <tr key={`${day}-${idx}`} className="border-t border-gray-50 hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-3">
+                          <span className="text-gray-800 font-medium">{item.service_name}</span>
+                          {item.note && (
+                            <span className="block text-xs text-gray-400 mt-0.5">{item.note}</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right whitespace-nowrap">
+                          {item.duration_hours ? (
+                            <span className="text-gray-500 tabular-nums">{formatDuration(item.duration_hours)}</span>
+                          ) : (
+                            <span className="text-gray-300">—</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-3 text-right whitespace-nowrap">
+                          <span className="text-gray-700 font-medium tabular-nums">{formatEur(item.total_eur)}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
                 );
               })}
-
-              <div className="flex items-center justify-between pt-4 border-t-2 border-gray-200">
-                <span className="text-sm font-semibold text-gray-600">Gesamtbetrag</span>
-                <span className="text-xl font-bold text-green-600 tabular-nums">
-                  {formatEur(initial.total_amount ?? grandTotal)}
-                </span>
-              </div>
-            </div>
+              <tfoot>
+                <tr className="border-t-2 border-gray-200 bg-gray-50">
+                  <td className="px-6 py-4">
+                    <span className="text-sm font-semibold text-gray-600">Gesamtbetrag</span>
+                    <span className="ml-3 text-xs text-gray-400 tabular-nums">
+                      {sortedDays.length} {sortedDays.length === 1 ? 'Tag' : 'Tage'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 text-right whitespace-nowrap">
+                    {grandTotalHours > 0 && (
+                      <span className="text-sm font-semibold text-gray-500 tabular-nums">{formatDuration(grandTotalHours)}</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <span className="text-xl font-bold text-green-600 tabular-nums">
+                      {formatEur(initial.total_amount ?? grandTotal)}
+                    </span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
           )}
         </div>
 

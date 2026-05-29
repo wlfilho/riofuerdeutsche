@@ -54,6 +54,11 @@ const navItems: NavItem[] = [
     href: '/admin/email-templates',
     icon: '✉️',
   },
+  {
+    label: 'Configurações',
+    href: '/admin/configuracoes',
+    icon: '⚙️',
+  },
 ];
 
 export default function AdminSidebar() {

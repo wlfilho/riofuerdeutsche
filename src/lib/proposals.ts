@@ -119,6 +119,7 @@ export interface Proposal {
   items: ProposalItem[];
   total_amount: number | null;
   exchange_rate: number | null;
+  guide_rate: number | null;
   status: ProposalStatus;
   internal_notes: string | null;
   pdf_url: string | null;
@@ -137,6 +138,7 @@ export interface ProposalFormData {
   internal_notes: string;
   items: ProposalItem[];
   exchange_rate: number;
+  guide_rate: number;
 }
 
 export async function getTransportTypes(): Promise<ProposalTransportType[]> {
@@ -190,6 +192,19 @@ export async function getProposalById(id: string): Promise<Proposal | null> {
     if (error.code === 'PGRST116') return null;
     throw new Error(error.message);
   }
+  return data as Proposal;
+}
+
+export async function updateProposal(id: string, formData: ProposalFormData): Promise<Proposal> {
+  const supabase = await createClient();
+  const total_amount = formData.items.reduce((sum, item) => sum + item.total_eur, 0);
+  const { data, error } = await supabase
+    .from('proposals')
+    .update({ ...formData, total_amount })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
   return data as Proposal;
 }
 
