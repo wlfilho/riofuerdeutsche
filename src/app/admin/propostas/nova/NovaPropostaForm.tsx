@@ -96,6 +96,28 @@ function formatServiceHours(s: ProposalService): string {
   return total > 0 ? `${total}h total` : '—';
 }
 
+function calcDayHours(items: EditableItem[]): number {
+  if (items.length === 0) return 0;
+
+  let total = 0;
+
+  total += items[0].transfer_hours_to ?? 0;
+
+  for (let i = 0; i < items.length; i++) {
+    total += items[i].duration_hours ?? 0;
+
+    if (i < items.length - 1) {
+      const between =
+        ((items[i].transfer_hours_back ?? 0) + (items[i + 1].transfer_hours_to ?? 0)) / 2;
+      total += between;
+    }
+  }
+
+  total += items[items.length - 1].transfer_hours_back ?? 0;
+
+  return total;
+}
+
 const INPUT_CLS =
   'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent';
 
@@ -278,10 +300,7 @@ function DayBlock({
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const dayTotal = items.reduce((sum, i) => sum + calcItemTotalEur(i.costs, pax, exchangeRate), 0);
-  const dayHours = items.reduce(
-    (sum, i) => sum + (i.transfer_hours_to ?? 0) + (i.duration_hours ?? 0) + (i.transfer_hours_back ?? 0),
-    0,
-  );
+  const dayHours = calcDayHours(items);
   const overloaded = dayHours > 10;
 
   return (
