@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import ReviewFormInline from '@/app/bewertung-schreiben/ReviewFormInline';
@@ -27,22 +26,21 @@ function NpsFormContent() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [finalScore, setFinalScore] = useState<number>(0);
 
-    const supabase = createClient();
-
     useEffect(() => {
         if (!token) return;
         const fetchNps = async () => {
-            const { data, error } = await supabase
-                .from('nps_responses')
-                .select('nickname, tour_date, used_at')
-                .eq('token', token)
-                .single();
-            if (error || !data || data.used_at) {
+            try {
+                const res = await fetch(`/api/nps?token=${encodeURIComponent(token)}`);
+                const data = await res.json();
+                if (!res.ok || !data.valid) {
+                    setTokenValid(false);
+                } else {
+                    setNickname(data.nickname);
+                    setTourDate(data.tour_date);
+                    setTokenValid(true);
+                }
+            } catch {
                 setTokenValid(false);
-            } else {
-                setNickname(data.nickname);
-                setTourDate(data.tour_date);
-                setTokenValid(true);
             }
             setLoading(false);
         };
@@ -57,35 +55,19 @@ function NpsFormContent() {
         const redirected = score >= 9;
 
         try {
-            if (token) {
-                // Token flow: update existing row
-                const { error } = await supabase
-                    .from('nps_responses')
-                    .update({
-                        score,
-                        best_part: bestPart.trim(),
-                        improvement: improvement.trim() || null,
-                        used_at: new Date().toISOString(),
-                        redirected_to_review: redirected,
-                    })
-                    .eq('token', token);
-                if (error) throw error;
-            } else {
-                // QR code / tokenless flow: insert new row
-                const { error } = await supabase
-                    .from('nps_responses')
-                    .insert({
-                        token: `qr-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-                        nickname: nickname.trim(),
-                        tour_date: null,
-                        score,
-                        best_part: bestPart.trim(),
-                        improvement: improvement.trim() || null,
-                        used_at: new Date().toISOString(),
-                        redirected_to_review: redirected,
-                    });
-                if (error) throw error;
-            }
+            const res = await fetch('/api/nps', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token: token || undefined,
+                    nickname: nickname.trim(),
+                    score,
+                    best_part: bestPart.trim(),
+                    improvement: improvement.trim() || null,
+                    redirected_to_review: redirected,
+                }),
+            });
+            if (!res.ok) throw new Error('NPS submit failed');
 
             setFinalScore(score);
             if (redirected) {

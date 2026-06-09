@@ -2,11 +2,25 @@ import { NextResponse } from "next/server";
 // The client you created from the server-side auth instructions
 import { createClient } from "@/utils/supabase/server";
 
+// Apenas hosts confiáveis podem ser destino do redirect pós-login.
+// Evita open redirect via header x-forwarded-host falsificado.
+function isAllowedHost(host: string): boolean {
+    return (
+        host === "riofuerdeutsche.de" ||
+        host === "www.riofuerdeutsche.de" ||
+        host.endsWith(".vercel.app") // previews do Vercel
+    );
+}
+
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url);
     const code = searchParams.get("code");
-    // if "next" is in param, use it as the redirect URL
-    const next = searchParams.get("next") ?? "/admin";
+    // "next" deve ser um caminho relativo interno (começa com "/", mas não "//").
+    const rawNext = searchParams.get("next");
+    const next =
+        rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")
+            ? rawNext
+            : "/admin";
 
     if (code) {
         const supabase = await createClient();
@@ -30,7 +44,7 @@ export async function GET(request: Request) {
             if (isLocalHost) {
                 // we can be sure that originated from the local dev-server
                 return NextResponse.redirect(`${origin}${next}`);
-            } else if (forwardedHost) {
+            } else if (forwardedHost && isAllowedHost(forwardedHost)) {
                 return NextResponse.redirect(`https://${forwardedHost}${next}`);
             } else {
                 return NextResponse.redirect(`${origin}${next}`);

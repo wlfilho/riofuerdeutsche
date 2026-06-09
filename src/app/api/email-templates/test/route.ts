@@ -1,10 +1,27 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { createClient } from '@/utils/supabase/server'
 import { getEmailTemplateBySlug } from '@/app/actions/email-templates'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+async function verifyAdmin() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return false
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  return profile?.role === 'admin'
+}
+
 export async function POST(request: Request) {
+  if (!(await verifyAdmin())) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { slug, htmlBody, subject } = await request.json()
 
@@ -54,7 +71,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true })
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Internal server error'
+    return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
 }
