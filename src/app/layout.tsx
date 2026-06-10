@@ -4,6 +4,7 @@ import "./globals.css";
 import FramerMotionProvider from "@/components/FramerMotionProvider";
 import CookieBanner from "@/components/CookieBanner";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -88,6 +89,7 @@ export default function RootLayout({
           <CookieBanner />
         </FramerMotionProvider>
         <GoogleAnalytics />
+        <Analytics />
       </body>
     </html>
   );
