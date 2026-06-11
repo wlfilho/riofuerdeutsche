@@ -54,7 +54,7 @@ export default function KontaktPage() {
                     Schnellste Antwort — ideal für konkrete Fragen
                   </p>
                   <a
-                    href="https://wa.me/573148704374"
+                    href="https://wa.me/5521990564944"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#25D366] text-white rounded-full font-bold text-lg hover:bg-[#22c35e] transition-all shadow-lg shadow-[#25D366]/20"

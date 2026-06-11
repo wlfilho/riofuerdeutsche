@@ -62,7 +62,7 @@ const nightExperiences = [
 ];
 
 export default function RioByNightPage() {
-    const whatsappLink = "https://wa.me/573148704374";
+    const whatsappLink = "https://wa.me/5521990564944";
     const customWhatsappMsg = encodeURIComponent("Hallo! Ich interessiere mich für eine Rio by Night Tour. Kannst du mir mehr erzählen?");
 
     return (

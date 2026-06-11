@@ -56,7 +56,7 @@ const favelaExperiences = [
 ];
 
 export default function FavelaTourPage() {
-    const whatsappLink = "https://wa.me/573148704374";
+    const whatsappLink = "https://wa.me/5521990564944";
     const customWhatsappMsg = encodeURIComponent("Hallo! Ich interessiere mich für eine Favela Tour in Rio de Janeiro. Kannst du mir mehr erzählen?");
 
     return (

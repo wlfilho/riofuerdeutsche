@@ -264,7 +264,7 @@ export default function KlassikerTourPage() {
 
                                 <div className="pt-6">
                                     <a
-                                        href="https://wa.me/573148704374"
+                                        href="https://wa.me/5521990564944"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
@@ -436,7 +436,7 @@ export default function KlassikerTourPage() {
 
                                     <div className="pt-6 border-t border-gray-100">
                                         <a
-                                            href={`https://wa.me/573148704374?text=${encodeURIComponent(`Hallo! Ich interessiere mich für die Tour „${program.title}". Könnten Sie mir mehr Informationen zu Verfügbarkeit und Preisen geben?`)}`}
+                                            href={`https://wa.me/5521990564944?text=${encodeURIComponent(`Hallo! Ich interessiere mich für die Tour „${program.title}". Könnten Sie mir mehr Informationen zu Verfügbarkeit und Preisen geben?`)}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-rio-green text-white rounded-xl font-bold hover:bg-green-700 transition-all hover:scale-[1.01]"
@@ -467,7 +467,7 @@ export default function KlassikerTourPage() {
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a
-                                    href="https://wa.me/573148704374"
+                                    href="https://wa.me/5521990564944"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"

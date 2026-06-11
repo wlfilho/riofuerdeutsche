@@ -46,7 +46,7 @@ export default function Footer() {
                                 <span className="sr-only">YouTube</span>
                             </a>
                             <a
-                                href="https://wa.me/573148704374"
+                                href="https://wa.me/5521990564944"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-[#25D366] hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-[#25D366] shadow-lg"
@@ -88,7 +88,7 @@ export default function Footer() {
                             <li>Rio de Janeiro, Brasilien</li>
                             <li className="flex items-center gap-2">
                                 <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
-                                <a href="https://wa.me/573148704374" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">+57 314 870 4374</a>
+                                <a href="https://wa.me/5521990564944" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">+55 21 99056 4944</a>
                             </li>
                             <li className="flex items-center gap-2">
                                 <Mail className="h-4 w-4 text-rio-blue" />

@@ -110,7 +110,7 @@ export default function SportUndAbenteuerPage() {
 
                                 <div className="pt-6">
                                     <a
-                                        href={`https://wa.me/573148704374?text=${encodeURIComponent("Hallo! Ich interessiere mich für Sport & Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?")}`}
+                                        href={`https://wa.me/5521990564944?text=${encodeURIComponent("Hallo! Ich interessiere mich für Sport & Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?")}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
@@ -230,7 +230,7 @@ export default function SportUndAbenteuerPage() {
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a
-                                    href={`https://wa.me/573148704374?text=${encodeURIComponent("Hallo! Ich interessiere mich für Sport & Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?")}`}
+                                    href={`https://wa.me/5521990564944?text=${encodeURIComponent("Hallo! Ich interessiere mich für Sport & Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?")}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"

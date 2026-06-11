@@ -102,7 +102,7 @@ const naturalAttractions = [
 ];
 
 export default function NaturTourPage() {
-    const whatsappLink = "https://wa.me/573148704374";
+    const whatsappLink = "https://wa.me/5521990564944";
     const customWhatsappMsg = encodeURIComponent("Hallo! Ich interessiere mich für eine Natur & Strände Tour in Rio...");
 
     return (

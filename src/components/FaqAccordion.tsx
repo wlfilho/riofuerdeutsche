@@ -30,7 +30,7 @@ const items: FaqItem[] = [
     a: (
       <>
         Schreib mir einfach auf{" "}
-        <a href="https://wa.me/573148704374" target="_blank" rel="noopener noreferrer" className={linkClass}>
+        <a href="https://wa.me/5521990564944" target="_blank" rel="noopener noreferrer" className={linkClass}>
           WhatsApp
         </a>{" "}
         oder per{" "}

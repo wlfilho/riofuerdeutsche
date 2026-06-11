@@ -86,7 +86,7 @@ const jsonLd = {
       description:
         "Deutschsprachige Stadtführungen und Ausflüge in Rio de Janeiro. Maßgeschneidert, sicher und unvergesslich.",
       url: "https://riofuerdeutsche.de",
-      telephone: "+573148704374",
+      telephone: "+5521990564944",
       email: "lantelmew@gmail.com",
       image: "/images/rio-background.webp",
       address: {

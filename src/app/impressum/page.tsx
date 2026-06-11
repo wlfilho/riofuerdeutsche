@@ -53,7 +53,7 @@ export default function ImpressumPage() {
                   <h2 className="text-xl font-bold text-gray-900 mb-4 uppercase tracking-wider">Kontakt</h2>
                   <p className="text-lg">
                     E-Mail: <a href="mailto:lantelmew@gmail.com" className="text-rio-blue hover:underline">lantelmew@gmail.com</a><br />
-                    WhatsApp: <a href="https://wa.me/573148704374" target="_blank" rel="noopener noreferrer" className="text-rio-green hover:underline">+57 314 870 4374</a>
+                    WhatsApp: <a href="https://wa.me/5521990564944" target="_blank" rel="noopener noreferrer" className="text-rio-green hover:underline">+55 21 99056 4944</a>
                   </p>
                 </section>
 

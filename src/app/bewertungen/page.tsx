@@ -147,7 +147,7 @@ export default function BewertungenPage() {
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                 <a
-                                    href="https://wa.me/573148704374"
+                                    href="https://wa.me/5521990564944"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-full font-bold text-lg hover:bg-gray-800 hover:scale-[1.02] transition-all shadow-xl shadow-black/20"

@@ -357,9 +357,9 @@ export default function Navbar() {
                     <div className="mt-auto pt-10 text-center border-t border-gray-100 pb-10">
                         <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-4">Kontaktieren Sie uns</p>
                         <div className="flex flex-col items-center gap-4">
-                            <a href="tel:+573148704374" className="flex items-center gap-3 text-gray-700 font-semibold text-xl">
+                            <a href="tel:+5521990564944" className="flex items-center gap-3 text-gray-700 font-semibold text-xl">
                                 <Phone className="h-6 w-6 text-rio-green" />
-                                <span>+57 314 870 4374</span>
+                                <span>+55 21 99056 4944</span>
                             </a>
                             <div className="flex gap-4 mt-2">
                                 <a href="https://instagram.com/riofuerdeutsche" target="_blank" rel="noopener noreferrer" className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-full text-gray-600 hover:text-rio-green hover:bg-gray-100 transition-all">
