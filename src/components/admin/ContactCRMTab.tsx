@@ -285,25 +285,94 @@ function NotesSection({ lead, onUpdated }: { lead: Lead; onUpdated: (notes: stri
   );
 }
 
-// ── ClaudeCard ────────────────────────────────────────────────────────────────
+// ── ClaudeSection ─────────────────────────────────────────────────────────────
 
-function ClaudeCard({ url }: { url: string }) {
+function ClaudeSection({ lead, onUpdated }: { lead: Lead; onUpdated: (url: string | null) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(lead.claude_chat_url ?? '');
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/leads/${lead.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claude_chat_url: draft.trim() || null }),
+      });
+      if (res.ok) {
+        onUpdated(draft.trim() || null);
+        setEditing(false);
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="mb-6">
-      <SectionLabel>Conversa</SectionLabel>
-      <button
-        onClick={() => window.open(url, '_blank')}
-        className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-left"
-      >
-        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
-          <MessageCircle className="w-4 h-4 text-blue-700" />
+      <div className="flex items-center justify-between mb-3">
+        <SectionLabel>Conversa no Claude</SectionLabel>
+        {!editing && (
+          <button
+            onClick={() => { setDraft(lead.claude_chat_url ?? ''); setEditing(true); }}
+            className="p-1 -mt-2 rounded text-gray-300 hover:text-gray-500 hover:bg-gray-100 transition-colors"
+          >
+            <Pencil className="w-3 h-3" />
+          </button>
+        )}
+      </div>
+
+      {editing ? (
+        <div className="bg-gray-100 rounded-xl p-3.5 space-y-2.5">
+          <input
+            type="url"
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+            placeholder="https://claude.ai/chat/..."
+            className="w-full text-sm text-gray-800 bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+          <div className="flex items-center gap-2 justify-end">
+            <button
+              onClick={() => setEditing(false)}
+              className="px-3 py-1.5 text-xs text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-3 py-1.5 text-xs text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+            >
+              {saving ? 'Salvando…' : 'Salvar'}
+            </button>
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-800">Conversa no Claude</p>
-          <p className="text-xs text-gray-400">Abrir contexto completo desta negociação</p>
-        </div>
-        <ExternalLink className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" />
-      </button>
+      ) : lead.claude_chat_url ? (
+        <button
+          onClick={() => window.open(lead.claude_chat_url!, '_blank')}
+          className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-left"
+        >
+          <div className="flex-shrink-0 w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+            <MessageCircle className="w-4 h-4 text-blue-700" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-800">Abrir conversa</p>
+            <p className="text-xs text-gray-400 truncate">{lead.claude_chat_url}</p>
+          </div>
+          <ExternalLink className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" />
+        </button>
+      ) : (
+        <p className="text-sm text-gray-400 italic">
+          Sem link.{' '}
+          <button
+            onClick={() => { setDraft(''); setEditing(true); }}
+            className="text-green-600 hover:underline not-italic"
+          >
+            Adicionar
+          </button>
+        </p>
+      )}
     </div>
   );
 }
@@ -575,7 +644,10 @@ export default function ContactCRMTab({ leads: initialLeads, lead_contacts: init
       />
 
       {/* Claude chat */}
-      {lead.claude_chat_url && <ClaudeCard url={lead.claude_chat_url} />}
+      <ClaudeSection
+        lead={lead}
+        onUpdated={url => setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, claude_chat_url: url } : l))}
+      />
 
       {/* Contact history */}
       <ContactHistory
