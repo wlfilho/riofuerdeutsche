@@ -120,13 +120,6 @@ function ProductSidebar() {
     );
 }
 
-const infoChips = [
-    "⏱ 2–3 Stunden",
-    "👤 Privattour",
-    "🇩🇪 Auf Deutsch",
-    "🚗 Abholung inklusive",
-];
-
 export default function RocinhaV2Page() {
     return (
         <>
@@ -182,23 +175,11 @@ export default function RocinhaV2Page() {
                                         Rocinha
                                     </h1>
 
-                                    <p className="text-xl lg:text-2xl text-white/70 font-medium leading-snug max-w-2xl mb-6">
+                                    <p className="text-xl lg:text-2xl text-white/70 font-medium leading-snug max-w-2xl mb-10">
                                         Die größte Favela Brasiliens — und ein Ort,
                                         den du nicht aus dem Fenster eines Taxis
                                         sehen solltest
                                     </p>
-
-                                    {/* ── Info Chips ─────────────────────── */}
-                                    <div className="flex flex-wrap gap-2 mb-8">
-                                        {infoChips.map((chip) => (
-                                            <span
-                                                key={chip}
-                                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-sm text-white/90 font-medium"
-                                            >
-                                                {chip}
-                                            </span>
-                                        ))}
-                                    </div>
 
                                     <div className="flex flex-col sm:flex-row gap-4">
                                         <Link
