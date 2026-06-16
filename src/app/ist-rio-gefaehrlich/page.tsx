@@ -353,7 +353,7 @@ export default function IstRioGefaehrlich() {
                   
                   <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 mt-auto">
                     <p className="text-[#0d1f15] font-semibold text-[15px] leading-relaxed">
-                      Santa Teresa (nachts aufpassen), Lapa (nur in Gruppen oder am frühen Abend).
+                      Santa Teresa (nachts aufpassen), Lapa (nur in Gruppen oder am frühen Abend), <Link href="/rio-guide/sehenswuerdigkeiten/rocinha" className="text-rio-green underline underline-offset-2 hover:text-[#1a4a35] transition-colors">Favelas mit Guide</Link>.
                     </p>
                   </div>
                 </div>

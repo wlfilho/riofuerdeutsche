@@ -114,8 +114,20 @@ const allTours: Tour[] = [
     }
 ];
 
-export default function AndereTouren({ currentSlug }: { currentSlug: string }) {
-    const toursToShow = allTours.filter(tour => tour.slug !== currentSlug);
+export default function AndereTouren({
+    currentSlug,
+    prioritySlugs = [],
+}: {
+    currentSlug: string;
+    prioritySlugs?: string[];
+}) {
+    const filtered = allTours.filter(tour => tour.slug !== currentSlug);
+    const toursToShow = prioritySlugs.length > 0
+        ? [
+            ...prioritySlugs.map(s => filtered.find(t => t.slug === s)).filter(Boolean) as typeof filtered,
+            ...filtered.filter(t => !prioritySlugs.includes(t.slug)),
+          ]
+        : filtered;
 
     return (
         <section className="py-20 bg-white border-t border-gray-100">

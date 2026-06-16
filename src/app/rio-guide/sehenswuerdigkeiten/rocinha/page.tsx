@@ -4,12 +4,21 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
 import AndereTouren from "@/components/AndereTouren";
-import { ChevronRight, MapPin, ArrowRight, Phone } from "lucide-react";
+import RocinhaFaq from "@/components/RocinhaFaq";
+import { ChevronRight, Home, ArrowRight, Phone } from "lucide-react";
 
 export const metadata = {
-    title: "Favela Tour Rio de Janeiro auf Deutsch — mit echtem Carioca | Rio für Deutsche",
+    title: {
+        absolute: "Favela Tour Rocinha Rio de Janeiro auf Deutsch — mit echtem Carioca | Rio für Deutsche",
+    },
     description:
         "Die Rocinha in Rio de Janeiro: Geschichte, Kultur und was du wirklich sehen solltest. Favela tour rio de janeiro — aber richtig, auf Deutsch, mit einem Carioca. Kein Touristen-Klischee.",
+    keywords: [
+        "Favela Tour Rocinha",
+        "Rocinha besuchen",
+        "Drohnen Video Favela",
+        "Rocinha Karneval",
+    ],
     alternates: {
         canonical: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/rocinha",
     },
@@ -44,12 +53,78 @@ const jsonLd = {
     inLanguage: "de",
 };
 
+const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Startseite", item: "https://riofuerdeutsche.de" },
+        { "@type": "ListItem", position: 2, name: "Rio-Guide", item: "https://riofuerdeutsche.de/rio-guide" },
+        { "@type": "ListItem", position: 3, name: "Sehenswürdigkeiten", item: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten" },
+        { "@type": "ListItem", position: 4, name: "Rocinha", item: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/rocinha" },
+    ],
+};
+
+const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+        {
+            "@type": "Question",
+            name: "Ist die Rocinha sicher für Touristen?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "Mit einem ortskundigen Guide ist ein Besuch der Rocinha sicher. Will ist in der Nähe aufgewachsen, kennt die Gemeinschaft seit Jahren und bewegt sich dort mit Respekt und Lokalkenntnis. Allein und ohne Begleitung wird ein Besuch nicht empfohlen.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "Kann man die Rocinha alleine besuchen?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "Technisch ja, aber ohne Begleitung verpasst du das Wesentliche — und bewegst dich in einem Ort, dessen Codes du nicht kennst. Mit Will bekommst du Zugang zu Familien, Aussichten und Geschichten, die man allein nie findet.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "Was kostet eine Favela Tour in der Rocinha?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "Die Favela Tour mit Will startet ab ca. 80 €. Der Eintritt in die Rocinha selbst ist kostenlos — bezahlt wird die Begleitung, die Lokalkenntnis und die Verbindung zur Community.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "Wie macht man das berühmte Drohnen-Video in der Rocinha?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "Das Drohnen-Video wird von lokalen Anbietern direkt in der Rocinha angeboten und kostet rund 200 Reais pro Person. Will zeigt dir, wo und wann du es am besten machst — ohne lange Schlange.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "Wie lange dauert ein Besuch der Rocinha?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "Ein Besuch mit Will dauert in der Regel etwa 3 Stunden. Beste Zeit ist tagsüber zwischen 10:00 und 16:00 Uhr.",
+            },
+        },
+    ],
+};
+
 export default function RocinhaPage() {
     return (
         <>
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
             />
             <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
                 <Navbar />
@@ -83,8 +158,9 @@ export default function RocinhaPage() {
                                     <Link
                                         href="/"
                                         className="hover:text-white transition-colors"
+                                        aria-label="Startseite"
                                     >
-                                        Startseite
+                                        <Home className="w-4 h-4" />
                                     </Link>
                                     <ChevronRight className="w-4 h-4 mx-2 text-white/25 shrink-0" />
                                     <Link
@@ -106,16 +182,10 @@ export default function RocinhaPage() {
                                     </span>
                                 </nav>
 
-                                {/* Supertítulo */}
-                                <p className="text-xs font-bold tracking-widest uppercase text-[#22a262] mb-4 flex items-center gap-2">
-                                    <MapPin className="w-3.5 h-3.5" />
-                                    Rio-Guide · Sehenswürdigkeiten
-                                </p>
-
                                 {/* H1 */}
                                 <div className="max-w-4xl">
                                     <h1 className="text-5xl lg:text-[clamp(40px,5vw,72px)] font-heading font-black text-white leading-[1.08] tracking-tight mb-6">
-                                        Rocinha
+                                        Favela besuchen: Rocinha, die größte Favela in Rio de Janeiro
                                     </h1>
 
                                     {/* Tagline */}
@@ -232,9 +302,9 @@ export default function RocinhaPage() {
                                     </div>
 
                                     {/* Título */}
-                                    <h3 className="text-xl lg:text-2xl font-heading font-bold text-white mb-4 leading-tight">
-                                        Ein Besuch, der etwas zurückgibt
-                                    </h3>
+                                    <h2 className="text-xl lg:text-2xl font-heading font-bold text-white mb-4 leading-tight">
+                                        Favela Tour Rocinha — Tourismus, der der Gemeinschaft hilft
+                                    </h2>
 
                                     {/* Texto */}
                                     <p className="text-white/75 text-base leading-relaxed">
@@ -259,6 +329,10 @@ export default function RocinhaPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-7 text-left">
+
+                                <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                                    Die Rocinha besuchen — eine Stadt in der Stadt
+                                </h2>
 
                                 {/* Parágrafo 1 — O primeiro contato */}
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
@@ -352,9 +426,9 @@ export default function RocinhaPage() {
                                         </div>
 
                                         {/* Título */}
-                                        <h3 className="text-2xl lg:text-3xl font-heading font-bold text-white mb-5 leading-tight">
-                                            Das Drohnen-Video, das die Welt sehen will
-                                        </h3>
+                                        <h2 className="text-2xl lg:text-3xl font-heading font-bold text-white mb-5 leading-tight">
+                                            Das Drohnen-Video in der Rocinha — der virale TikTok-Hype
+                                        </h2>
 
                                         {/* Texto */}
                                         <div className="space-y-4 text-white/75 text-base leading-relaxed">
@@ -391,8 +465,13 @@ export default function RocinhaPage() {
                                             </p>
                                         </div>
 
+                                        {/* H3 — Drohnen keyword anchor */}
+                                        <h3 className="text-lg font-heading font-bold text-white mt-6 mb-3 leading-tight">
+                                            Wie und wo du das Rocinha-Drohnenvideo machst
+                                        </h3>
+
                                         {/* Divider */}
-                                        <div className="mt-7 pt-6 border-t border-white/10">
+                                        <div className="pt-4 border-t border-white/10">
                                             <p className="text-white/50 text-sm italic">
                                                 💡 Mit Will erfährst du, wo und wann du das Video am besten
                                                 machen kannst — ohne zwei Stunden in der Schlange zu stehen.
@@ -411,7 +490,7 @@ export default function RocinhaPage() {
                         <FadeIn direction="up" className="mb-10">
                             <div className="max-w-[800px] mx-auto">
                                 <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                    Geschichte &amp;{" "}
+                                    Favela Rocinha — Geschichte, Kultur und{" "}
                                     <span className="text-rio-green">Wissenswertes</span>
                                 </h2>
                             </div>
@@ -469,7 +548,7 @@ export default function RocinhaPage() {
                                     Was viele Besucher nicht erwarten, ist die kulturelle Dichte.
                                     Die Rocinha hat eine eigene Sambaschule — die GRES Unidos da
                                     Rocinha — die beim{" "}
-                                    <em>Rocinha Karneval</em> in Rio de Janeiro antritt. Es gibt
+                                    <Link href="/touren/karneval-tour" className="text-[#2D6A4F] underline underline-offset-2 hover:text-[#1a4a35] transition-colors"><em>Rocinha Karneval</em></Link> in Rio de Janeiro antritt. Es gibt
                                     Kinos, Gemeinschaftstheater, bildende Künstler, Musiker, die
                                     in der ganzen Stadt bekannt sind. Der Funk Carioca, der heute
                                     in Playlists weltweit zu finden ist, hat seine Wurzeln zu
@@ -483,8 +562,8 @@ export default function RocinhaPage() {
                                     Es gibt etwas, das alle Reiseführer ignorieren: Die Aussicht
                                     von der Rocinha ist außergewöhnlich. Von ganz oben, vom Gipfel
                                     der Gemeinschaft, sieht man São Conrado, die Lagoa Rodrigo de
-                                    Freitas, den Dois Irmãos, und in der Ferne den Corcovado mit
-                                    dem Christus. Es ist eine der besten Aussichten in Rio — und
+                                    Freitas, den Dois Irmãos, und in der Ferne den{" "}
+                                    <Link href="/rio-guide/sehenswuerdigkeiten/christus-erloeser" className="text-[#2D6A4F] underline underline-offset-2 hover:text-[#1a4a35] transition-colors">Corcovado mit dem Christus</Link>. Es ist eine der besten Aussichten in Rio — und
                                     sie gehört den Menschen, die ihre Häuser hier Stein für Stein
                                     über Jahrzehnte aufgebaut haben. Kein offizieller Aussichtspunkt,
                                     kein Eintrittsgeld. Nur die ganze Stadt, für den, der weiß,
@@ -541,6 +620,9 @@ export default function RocinhaPage() {
                                         </div>
 
                                         {/* Título */}
+                                        <h2 className="text-sm font-heading font-bold text-[#22a262] mb-2 leading-tight tracking-wide uppercase">
+                                            Wills Tipp für deinen Rocinha-Besuch
+                                        </h2>
                                         <h3 className="text-2xl lg:text-3xl font-heading font-bold text-white mb-5 leading-tight">
                                             Das Viertel, das du nach dem Besuch anders siehst
                                         </h3>
@@ -564,6 +646,24 @@ export default function RocinhaPage() {
                                         </p>
                                     </div>
                                 </div>
+                            </div>
+                        </FadeIn>
+                    </div>
+                </section>
+
+                {/* ── FAQ ─────────────────────────────────────────── */}
+                <section className="py-20 lg:py-24 bg-white border-t border-gray-100">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up" className="mb-10">
+                            <div className="max-w-[800px] mx-auto">
+                                <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                                    Häufige Fragen zur Rocinha
+                                </h2>
+                            </div>
+                        </FadeIn>
+                        <FadeIn direction="up">
+                            <div className="max-w-[800px] mx-auto">
+                                <RocinhaFaq />
                             </div>
                         </FadeIn>
                     </div>
@@ -681,9 +781,9 @@ export default function RocinhaPage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6 leading-tight">
-                                Die Rocinha{" "}
+                                Favela Tour Rocinha auf Deutsch{" "}
                                 <br className="hidden sm:block" />
-                                <span className="text-rio-yellow">mit Will erleben</span>
+                                <span className="text-rio-yellow">— mit Will erleben</span>
                             </h2>
                             <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
                                 Ich zeige dir nicht die Armut — ich stelle dir die Menschen vor.
@@ -710,7 +810,10 @@ export default function RocinhaPage() {
                 </section>
 
                 {/* ── SECÇÃO 9 — Andere Touren ─────────────────────── */}
-                <AndereTouren currentSlug="__rocinha__" />
+                <AndereTouren
+                    currentSlug="__rocinha__"
+                    prioritySlugs={["favela-tour", "klassiker", "kultur-geschichte", "sport-und-abenteuer"]}
+                />
 
                 </main>
 

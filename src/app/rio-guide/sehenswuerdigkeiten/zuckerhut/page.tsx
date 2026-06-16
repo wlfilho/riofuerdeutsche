@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
 import AndereTouren from "@/components/AndereTouren";
-import { ChevronRight, MapPin, ArrowRight, Phone } from "lucide-react";
+import { ChevronRight, Home, ArrowRight, Phone } from "lucide-react";
 
 export const metadata = {
     title: "Zuckerhut Rio de Janeiro — Tipps, Tickets & Sonnenuntergang | Rio für Deutsche",
@@ -92,8 +92,9 @@ export default function ZuckerhutPage() {
                                 <Link
                                     href="/"
                                     className="hover:text-white transition-colors"
+                                    aria-label="Startseite"
                                 >
-                                    Startseite
+                                    <Home className="w-4 h-4" />
                                 </Link>
                                 <ChevronRight className="w-4 h-4 mx-2 text-white/25 shrink-0" />
                                 <Link
@@ -114,12 +115,6 @@ export default function ZuckerhutPage() {
                                     Zuckerhut
                                 </span>
                             </nav>
-
-                            {/* Supertítulo */}
-                            <p className="text-xs font-bold tracking-widest uppercase text-[#22a262] mb-4 flex items-center gap-2">
-                                <MapPin className="w-3.5 h-3.5" />
-                                Rio-Guide · Sehenswürdigkeiten
-                            </p>
 
                             {/* H1 */}
                             <div className="max-w-4xl">

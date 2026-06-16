@@ -113,7 +113,7 @@ export default function Footer({ contact = FALLBACK }: { contact?: ContactUrls }
                             {contact.whatsappHref && (
                             <li className="flex items-center gap-2">
                                 <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
-                                <a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">{contact.phone}</a>
+                                <a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" suppressHydrationWarning>{contact.phone}</a>
                             </li>
                             )}
                             {contact.emailHref && (

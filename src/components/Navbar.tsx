@@ -367,7 +367,7 @@ export default function Navbar({ contact = NAVBAR_FALLBACK }: { contact?: Pick<C
                         <div className="flex flex-col items-center gap-4">
                             <a href={contact.phoneHref} className="flex items-center gap-3 text-gray-700 font-semibold text-xl">
                                 <Phone className="h-6 w-6 text-rio-green" />
-                                <span>{contact.phone}</span>
+                                <span suppressHydrationWarning>{contact.phone}</span>
                             </a>
                             <div className="flex gap-4 mt-2">
                                 {contact.instagramHref && (
