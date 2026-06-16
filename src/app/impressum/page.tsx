@@ -47,7 +47,7 @@ export default async function ImpressumPage() {
                   <h2 className="text-xl font-bold text-gray-900 mb-4 uppercase tracking-wider">Angaben gemäß § 5 TMG</h2>
                   <p className="text-lg">
                     William Lantelme Filho<br />
-                    {settings.business_address || 'Rio de Janeiro, Brasilien'}
+                    Rio de Janeiro, Brasilien
                   </p>
                 </section>
 

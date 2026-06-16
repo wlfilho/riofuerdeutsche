@@ -47,7 +47,7 @@ export default async function DatenschutzPage() {
                   <h2 className="text-xl font-bold text-gray-900 mb-4 uppercase tracking-wider">1. Verantwortlicher</h2>
                   <p>
                     William Lantelme Filho<br />
-                    {settings.business_address || 'Rio de Janeiro, Brasilien'}<br />
+                    Rio de Janeiro, Brasilien<br />
                     {c.emailHref && (
                       <>E-Mail: <a href={c.emailHref} className="text-rio-blue hover:underline">{c.email}</a></>
                     )}

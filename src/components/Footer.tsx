@@ -110,7 +110,6 @@ export default function Footer({ contact = FALLBACK }: { contact?: ContactUrls }
                     <div>
                         <h3 className="text-white font-bold mb-4">Kontakt</h3>
                         <ul className="space-y-2 text-sm">
-                            <li>{contact.address || 'Rio de Janeiro, Brasilien'}</li>
                             {contact.whatsappHref && (
                             <li className="flex items-center gap-2">
                                 <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
