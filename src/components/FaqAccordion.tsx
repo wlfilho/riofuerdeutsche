@@ -12,47 +12,56 @@ type FaqItem = {
 
 const linkClass = "text-rio-green underline decoration-rio-green/40 underline-offset-2 hover:decoration-rio-green transition-colors";
 
-const items: FaqItem[] = [
-  {
-    q: "Sprichst du wirklich fließend Deutsch?",
-    a: "Ja — ich bin in Rio auf eine deutsche Schule gegangen und habe vier Jahre in Köln gelebt und studiert. Deutsch ist für mich keine Fremdsprache, sondern ein echter Teil meiner Identität.",
-  },
-  {
-    q: "Ist Rio de Janeiro wirklich so gefährlich?",
-    a: "Rio hat Risiken — aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben.",
-    cta: {
-      label: "Die 7 häufigsten Fehler — und wie du sie vermeidest →",
-      href: "/ist-rio-gefaehrlich",
+function buildItems(whatsappHref: string, emailHref: string): FaqItem[] {
+  return [
+    {
+      q: "Sprichst du wirklich fließend Deutsch?",
+      a: "Ja — ich bin in Rio auf eine deutsche Schule gegangen und habe vier Jahre in Köln gelebt und studiert. Deutsch ist für mich keine Fremdsprache, sondern ein echter Teil meiner Identität.",
     },
-  },
-  {
-    q: "Wie buche ich eine Tour?",
-    a: (
-      <>
-        Schreib mir einfach auf{" "}
-        <a href="https://wa.me/5521990564944" target="_blank" rel="noopener noreferrer" className={linkClass}>
-          WhatsApp
-        </a>{" "}
-        oder per{" "}
-        <a href="mailto:lantelmew@gmail.com" className={linkClass}>
-          E-Mail
-        </a>{" "}
-        — ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.
-      </>
-    ),
-  },
-  {
-    q: "Fahre ich allein oder in einer Gruppe?",
-    a: "Alle Touren sind privat oder in sehr kleinen Gruppen (max. 6 Personen) — niemals ein Touristenbus. Du buchst direkt bei mir, nicht über eine Agentur.",
-  },
-  {
-    q: "Was kostet eine Tour?",
-    a: "Der Preis hängt von der Dauer, der Gruppengröße und den gewählten Aktivitäten ab. Schreib mir — ich erstelle dir ein persönliches Angebot, das zu deinem Budget passt.",
-  },
-];
+    {
+      q: "Ist Rio de Janeiro wirklich so gefährlich?",
+      a: "Rio hat Risiken — aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben.",
+      cta: {
+        label: "Die 7 häufigsten Fehler — und wie du sie vermeidest →",
+        href: "/ist-rio-gefaehrlich",
+      },
+    },
+    {
+      q: "Wie buche ich eine Tour?",
+      a: (
+        <>
+          Schreib mir einfach auf{" "}
+          <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className={linkClass}>
+            WhatsApp
+          </a>{" "}
+          oder per{" "}
+          <a href={emailHref} className={linkClass}>
+            E-Mail
+          </a>{" "}
+          — ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.
+        </>
+      ),
+    },
+    {
+      q: "Fahre ich allein oder in einer Gruppe?",
+      a: "Alle Touren sind privat oder in sehr kleinen Gruppen (max. 6 Personen) — niemals ein Touristenbus. Du buchst direkt bei mir, nicht über eine Agentur.",
+    },
+    {
+      q: "Was kostet eine Tour?",
+      a: "Der Preis hängt von der Dauer, der Gruppengröße und den gewählten Aktivitäten ab. Schreib mir — ich erstelle dir ein persönliches Angebot, das zu deinem Budget passt.",
+    },
+  ];
+}
 
-export default function FaqAccordion() {
+export default function FaqAccordion({
+  whatsappHref = "https://wa.me/5521990564944",
+  emailHref = "mailto:lantelmew@gmail.com",
+}: {
+  whatsappHref?: string;
+  emailHref?: string;
+}) {
   const [open, setOpen] = useState<number | null>(null);
+  const items = buildItems(whatsappHref, emailHref);
 
   return (
     <div className="divide-y divide-gray-100">

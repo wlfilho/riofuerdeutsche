@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { MapPin, Instagram, Youtube, Mail, Send } from "lucide-react";
+import type { ContactUrls } from "@/lib/settings";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
     <svg 
@@ -14,7 +15,21 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-export default function Footer() {
+const FALLBACK: ContactUrls = {
+  phone: '+55 21 99056-4944',
+  phoneHref: 'tel:+5521990564944',
+  whatsappHref: 'https://wa.me/5521990564944',
+  email: 'lantelmew@gmail.com',
+  emailHref: 'mailto:lantelmew@gmail.com',
+  instagramHref: 'https://instagram.com/riofuerdeutsche',
+  youtubeHref: 'https://youtube.com/@riofuerdeutsche',
+  facebookHref: '',
+  telegramHref: 'https://t.me/wlfilho',
+  telegram: 'wlfilho',
+  address: 'Rio de Janeiro, Brasilien',
+}
+
+export default function Footer({ contact = FALLBACK }: { contact?: ContactUrls }) {
     return (
         <footer className="bg-gray-900 text-gray-400 py-12">
             <div className="max-w-7xl mx-auto px-5 lg:px-8">
@@ -27,8 +42,9 @@ export default function Footer() {
                         <p className="text-sm mb-3">Dein deutschsprachiger Insider Guide in der wunderbaren Stadt Rio de Janeiro.</p>
                         <p className="text-sm mb-6 text-gray-500">RioFürDeutsche bietet deutschsprachige Reiseleitung, Citytouren und Ausflüge in Rio de Janeiro — geführt von einem echten Carioca, der fließend Deutsch spricht.</p>
                         <div className="flex items-center gap-3">
+                            {contact.instagramHref && (
                             <a
-                                href="https://instagram.com/riofuerdeutsche"
+                                href={contact.instagramHref}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-rio-green hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-rio-green shadow-lg"
@@ -36,8 +52,10 @@ export default function Footer() {
                                 <Instagram className="h-[20px] w-[20px]" />
                                 <span className="sr-only">Instagram</span>
                             </a>
+                            )}
+                            {contact.youtubeHref && (
                             <a
-                                href="https://youtube.com/@riofuerdeutsche"
+                                href={contact.youtubeHref}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-rio-green hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-rio-green shadow-lg"
@@ -45,8 +63,10 @@ export default function Footer() {
                                 <Youtube className="h-[20px] w-[20px]" />
                                 <span className="sr-only">YouTube</span>
                             </a>
+                            )}
+                            {contact.whatsappHref && (
                             <a
-                                href="https://wa.me/5521990564944"
+                                href={contact.whatsappHref}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-[#25D366] hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-[#25D366] shadow-lg"
@@ -54,8 +74,10 @@ export default function Footer() {
                                 <WhatsAppIcon className="h-[20px] w-[20px]" />
                                 <span className="sr-only">WhatsApp</span>
                             </a>
+                            )}
+                            {contact.telegramHref && (
                             <a
-                                href="https://t.me/wlfilho"
+                                href={contact.telegramHref}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-[#0088cc] hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-[#0088cc] shadow-lg"
@@ -63,13 +85,16 @@ export default function Footer() {
                                 <Send className="h-[18px] w-[18px]" />
                                 <span className="sr-only">Telegram</span>
                             </a>
+                            )}
+                            {contact.emailHref && (
                             <a
-                                href="mailto:lantelmew@gmail.com"
+                                href={contact.emailHref}
                                 className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-rio-blue hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-rio-blue shadow-lg"
                             >
                                 <Mail className="h-[18px] w-[18px]" />
                                 <span className="sr-only">Email</span>
                             </a>
+                            )}
                         </div>
                     </div>
                     <div>
@@ -85,15 +110,19 @@ export default function Footer() {
                     <div>
                         <h3 className="text-white font-bold mb-4">Kontakt</h3>
                         <ul className="space-y-2 text-sm">
-                            <li>Rio de Janeiro, Brasilien</li>
+                            <li>{contact.address || 'Rio de Janeiro, Brasilien'}</li>
+                            {contact.whatsappHref && (
                             <li className="flex items-center gap-2">
                                 <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
-                                <a href="https://wa.me/5521990564944" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">+55 21 99056 4944</a>
+                                <a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">{contact.phone}</a>
                             </li>
+                            )}
+                            {contact.emailHref && (
                             <li className="flex items-center gap-2">
                                 <Mail className="h-4 w-4 text-rio-blue" />
-                                <a href="mailto:lantelmew@gmail.com" className="hover:text-white transition-colors">lantelmew@gmail.com</a>
+                                <a href={contact.emailHref} className="hover:text-white transition-colors">{contact.email}</a>
                             </li>
+                            )}
                             <li className="pt-2 text-rio-yellow">Dein Buddy in Rio!</li>
                         </ul>
                     </div>

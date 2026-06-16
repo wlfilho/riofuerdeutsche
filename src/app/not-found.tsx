@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { MapPin, Compass, Phone, Map, ShieldCheck } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 
 export default function NotFound() {
   return (
     <>
-      <Navbar />
+      <NavbarServer />
       <main className="min-h-screen bg-[#F7F3EB] flex flex-col items-center justify-center px-4 py-24">
         {/* 404 number */}
         <div className="relative mb-6 select-none">
@@ -97,7 +97,7 @@ export default function NotFound() {
           </div>
         </div>
       </main>
-      <Footer />
+      <FooterServer />
     </>
   );
 }

@@ -1,9 +1,10 @@
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import { ChevronRight } from "lucide-react";
 import { Metadata } from "next";
+import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata: Metadata = {
   title: "Impressum",
@@ -16,10 +17,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ImpressumPage() {
+export default async function ImpressumPage() {
+  const settings = await getSettings()
+  const c = buildContactUrls(settings)
+
   return (
     <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
-      <Navbar />
+      <NavbarServer />
 
       <main className="flex-grow pt-32 pb-24 lg:pt-40 lg:pb-32">
         <div className="max-w-7xl mx-auto px-5 lg:px-8">
@@ -37,23 +41,25 @@ export default function ImpressumPage() {
               <h1 className="text-5xl lg:text-7xl font-heading font-black text-gray-900 leading-tight mb-16">
                 Impressum
               </h1>
-              
+
               <div className="space-y-12 text-gray-700 leading-relaxed">
                 <section>
                   <h2 className="text-xl font-bold text-gray-900 mb-4 uppercase tracking-wider">Angaben gemäß § 5 TMG</h2>
                   <p className="text-lg">
                     William Lantelme Filho<br />
-                    Rua Toneleros, 60 — Apto 302 — Bloco 2<br />
-                    CEP 22061-000 — Copacabana<br />
-                    Rio de Janeiro — Brasilien
+                    {settings.business_address || 'Rio de Janeiro, Brasilien'}
                   </p>
                 </section>
 
                 <section>
                   <h2 className="text-xl font-bold text-gray-900 mb-4 uppercase tracking-wider">Kontakt</h2>
                   <p className="text-lg">
-                    E-Mail: <a href="mailto:lantelmew@gmail.com" className="text-rio-blue hover:underline">lantelmew@gmail.com</a><br />
-                    WhatsApp: <a href="https://wa.me/5521990564944" target="_blank" rel="noopener noreferrer" className="text-rio-green hover:underline">+55 21 99056 4944</a>
+                    {c.emailHref && (
+                      <>E-Mail: <a href={c.emailHref} className="text-rio-blue hover:underline">{c.email}</a><br /></>
+                    )}
+                    {c.whatsappHref && (
+                      <>WhatsApp: <a href={c.whatsappHref} target="_blank" rel="noopener noreferrer" className="text-rio-green hover:underline">{c.phone}</a></>
+                    )}
                   </p>
                 </section>
 
@@ -76,7 +82,7 @@ export default function ImpressumPage() {
         </div>
       </main>
 
-      <Footer />
+      <FooterServer />
     </div>
   );
 }

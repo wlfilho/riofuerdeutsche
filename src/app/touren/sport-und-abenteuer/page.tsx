@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import { ChevronRight, Phone, CalendarDays, MapPin, Clock } from "lucide-react";
 import AndereTouren from "@/components/AndereTouren";
+import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
     title: "Sport & Abenteuer in Rio — Surfen, Paragliding & mehr",
@@ -62,10 +63,13 @@ const activities = [
     }
 ];
 
-export default function SportUndAbenteuerPage() {
+export default async function SportUndAbenteuerPage() {
+  const settings = await getSettings()
+  const { whatsappHref } = buildContactUrls(settings)
+
     return (
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
-            <Navbar />
+            <NavbarServer />
 
             <main className="flex-grow">
                 {/* SEÇÃO A — Hero */}
@@ -110,7 +114,7 @@ export default function SportUndAbenteuerPage() {
 
                                 <div className="pt-6">
                                     <a
-                                        href={`https://wa.me/5521990564944?text=${encodeURIComponent("Hallo! Ich interessiere mich für Sport & Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?")}`}
+                                        href={`${whatsappHref}?text=${encodeURIComponent("Hallo! Ich interessiere mich für Sport & Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?")}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
@@ -230,7 +234,7 @@ export default function SportUndAbenteuerPage() {
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a
-                                    href={`https://wa.me/5521990564944?text=${encodeURIComponent("Hallo! Ich interessiere mich für Sport & Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?")}`}
+                                    href={`${whatsappHref}?text=${encodeURIComponent("Hallo! Ich interessiere mich für Sport & Abenteuer-Aktivitäten in Rio. Kannst du mir mehr erzählen?")}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
@@ -253,7 +257,7 @@ export default function SportUndAbenteuerPage() {
                 <AndereTouren currentSlug="sport-und-abenteuer" />
             </main>
 
-            <Footer />
+            <FooterServer />
         </div>
     );
 }

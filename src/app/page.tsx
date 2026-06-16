@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import FaqAccordion from "@/components/FaqAccordion";
 import { createClient } from "@/utils/supabase/server";
+import { getSettings, buildContactUrls } from "@/lib/settings";
 import {
   ArrowRight,
   MapPin,
@@ -75,8 +76,8 @@ const faqJsonLd = {
   ],
 };
 
-// JSON-LD structured data for Google rich results
-const jsonLd = {
+// JSON-LD structured data is built dynamically inside Home() from settings
+const buildJsonLd = (telephone: string, email: string, instagramHref: string, youtubeHref: string) => ({
   "@context": "https://schema.org",
   "@graph": [
     {
@@ -86,8 +87,8 @@ const jsonLd = {
       description:
         "Deutschsprachige Stadtführungen und Ausflüge in Rio de Janeiro. Maßgeschneidert, sicher und unvergesslich.",
       url: "https://riofuerdeutsche.de",
-      telephone: "+5521990564944",
-      email: "lantelmew@gmail.com",
+      telephone,
+      email,
       image: "/images/rio-background.webp",
       address: {
         "@type": "PostalAddress",
@@ -106,10 +107,7 @@ const jsonLd = {
         reviewCount: "3",
         bestRating: "5",
       },
-      sameAs: [
-        "https://instagram.com/riofuerdeutsche",
-        "https://youtube.com/@riofuerdeutsche",
-      ],
+      sameAs: [instagramHref, youtubeHref].filter(Boolean),
       knowsLanguage: [
         {
           "@type": "Language",
@@ -169,7 +167,7 @@ const jsonLd = {
       provider: { "@id": "https://riofuerdeutsche.de/#business" },
     },
   ],
-};
+})
 
 const tours = [
   {
@@ -231,7 +229,10 @@ const tours = [
 
 
 export default async function Home() {
-  const supabase = await createClient();
+  const [settings, supabase] = await Promise.all([getSettings(), createClient()])
+  const c = buildContactUrls(settings)
+  const jsonLd = buildJsonLd(settings.business_phone || settings.business_whatsapp, settings.business_email, c.instagramHref, c.youtubeHref)
+
   const { data: dbReviews } = await supabase
     .from('reviews')
     .select('nickname, rating, body, photo_urls, will_photo_urls, consent_own_photos, consent_will_photos')
@@ -254,8 +255,7 @@ export default async function Home() {
       />
 
       <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white pb-0 font-sans">
-        {/* Client Component: Navbar with mobile menu state */}
-        <Navbar />
+        <NavbarServer />
 
         <main>
           {/* HERO SECTION */}
@@ -609,7 +609,7 @@ export default async function Home() {
                 </p>
               </FadeIn>
 
-              <FaqAccordion />
+              <FaqAccordion whatsappHref={c.whatsappHref} emailHref={c.emailHref} />
             </div>
           </section>
 
@@ -643,7 +643,7 @@ export default async function Home() {
         </main>
 
         {/* FOOTER */}
-        <Footer />
+        <FooterServer />
       </div>
     </>
   );

@@ -1,9 +1,10 @@
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import { MessageCircle, Mail, Send, ChevronRight, CheckCircle2, Instagram, Youtube } from "lucide-react";
 import { Metadata } from "next";
+import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata: Metadata = {
   title: "Kontakt",
@@ -16,10 +17,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function KontaktPage() {
+export default async function KontaktPage() {
+  const settings = await getSettings()
+  const c = buildContactUrls(settings)
+
   return (
     <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
-      <Navbar />
+      <NavbarServer />
 
       <main className="flex-grow pt-32 pb-24 lg:pt-40 lg:pb-32">
         <div className="max-w-7xl mx-auto px-5 lg:px-8">
@@ -44,6 +48,7 @@ export default function KontaktPage() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               {/* WhatsApp Block */}
+              {c.whatsappHref && (
               <FadeIn direction="up" delay={0.1}>
                 <div className="bg-white rounded-[40px] p-10 shadow-sm border border-gray-100 flex flex-col h-full hover:shadow-xl transition-all duration-300 group">
                   <div className="w-16 h-16 bg-[#25D366]/10 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
@@ -54,7 +59,7 @@ export default function KontaktPage() {
                     Schnellste Antwort — ideal für konkrete Fragen
                   </p>
                   <a
-                    href="https://wa.me/5521990564944"
+                    href={c.whatsappHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#25D366] text-white rounded-full font-bold text-lg hover:bg-[#22c35e] transition-all shadow-lg shadow-[#25D366]/20"
@@ -63,8 +68,10 @@ export default function KontaktPage() {
                   </a>
                 </div>
               </FadeIn>
+              )}
 
               {/* Telegram Block */}
+              {c.telegramHref && (
               <FadeIn direction="up" delay={0.15}>
                 <div className="bg-white rounded-[40px] p-10 shadow-sm border border-gray-100 flex flex-col h-full hover:shadow-xl transition-all duration-300 group">
                   <div className="w-16 h-16 bg-[#0088cc]/10 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
@@ -75,7 +82,7 @@ export default function KontaktPage() {
                     Alternative für schnellen Chat & Sicherheit
                   </p>
                   <a
-                    href="https://t.me/wlfilho"
+                    href={c.telegramHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#0088cc] text-white rounded-full font-bold text-lg hover:bg-[#0077b5] transition-all shadow-lg shadow-[#0088cc]/20"
@@ -84,8 +91,10 @@ export default function KontaktPage() {
                   </a>
                 </div>
               </FadeIn>
+              )}
 
               {/* Email Block */}
+              {c.emailHref && (
               <FadeIn direction="up" delay={0.2}>
                 <div className="bg-white rounded-[40px] p-10 shadow-sm border border-gray-100 flex flex-col h-full hover:shadow-xl transition-all duration-300 group">
                   <div className="w-16 h-16 bg-rio-blue/10 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
@@ -96,13 +105,14 @@ export default function KontaktPage() {
                     Für längere Anfragen oder Buchungen
                   </p>
                   <a
-                    href="mailto:lantelmew@gmail.com"
+                    href={c.emailHref}
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-blue text-white rounded-full font-bold text-lg hover:bg-rio-blue/90 transition-all shadow-lg shadow-rio-blue/20"
                   >
                     E-Mail schreiben
                   </a>
                 </div>
               </FadeIn>
+              )}
             </div>
 
             <FadeIn direction="up" delay={0.3}>
@@ -117,8 +127,9 @@ export default function KontaktPage() {
                 <div className="flex items-center gap-6">
                   <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Folge mir:</p>
                   <div className="flex items-center gap-4">
+                    {c.instagramHref && (
                     <a
-                      href="https://instagram.com/riofuerdeutsche"
+                      href={c.instagramHref}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white shadow-sm border border-gray-100 text-gray-400 hover:text-white hover:bg-gradient-to-tr hover:from-[#f9ce34] hover:via-[#ee2a7b] hover:to-[#6228d7] hover:scale-110 transition-all duration-300"
@@ -126,8 +137,10 @@ export default function KontaktPage() {
                       <Instagram className="w-6 h-6" />
                       <span className="sr-only">Instagram</span>
                     </a>
+                    )}
+                    {c.youtubeHref && (
                     <a
-                      href="https://youtube.com/@riofuerdeutsche"
+                      href={c.youtubeHref}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white shadow-sm border border-gray-100 text-gray-400 hover:text-white hover:bg-[#FF0000] hover:scale-110 transition-all duration-300"
@@ -135,6 +148,7 @@ export default function KontaktPage() {
                       <Youtube className="w-6 h-6" />
                       <span className="sr-only">YouTube</span>
                     </a>
+                    )}
                   </div>
                 </div>
               </div>
@@ -143,7 +157,7 @@ export default function KontaktPage() {
         </div>
       </main>
 
-      <Footer />
+      <FooterServer />
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import { ChevronRight, Phone, CalendarDays } from "lucide-react";
+import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
     title: "Touren & Stadtrundfahrten in Rio de Janeiro auf Deutsch | RioFürDeutsche",
@@ -92,7 +93,10 @@ const itemListSchema = {
     ]
 };
 
-export default function TourenPage() {
+export default async function TourenPage() {
+  const settings = await getSettings()
+  const { whatsappHref } = buildContactUrls(settings)
+
     return (
         <>
         <script
@@ -104,7 +108,7 @@ export default function TourenPage() {
             dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
         />
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
-            <Navbar />
+            <NavbarServer />
 
             <main className="flex-grow">
                 {/* SEÇÃO A — Hero */}
@@ -147,7 +151,7 @@ export default function TourenPage() {
 
                                 <div className="pt-6">
                                     <a
-                                        href="https://wa.me/5521990564944"
+                                        href={whatsappHref}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
@@ -540,7 +544,7 @@ export default function TourenPage() {
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a
-                                    href="https://wa.me/5521990564944"
+                                    href={whatsappHref}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
@@ -561,7 +565,7 @@ export default function TourenPage() {
 
             </main>
 
-            <Footer />
+            <FooterServer />
         </div>
         </>
     );

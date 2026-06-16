@@ -104,7 +104,109 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
         </div>
       </div>
 
-      {/* Seção 2: Contato e Assinatura */}
+      {/* Seção 2: Dados do Negócio */}
+      <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+        <div className="mb-5">
+          <h2 className="text-base font-semibold text-gray-900">Dados do Negócio</h2>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Informações de contato centralizadas — use{' '}
+            <code className="bg-gray-100 px-1 rounded text-xs font-mono">{'{{telefone}}'}</code>,{' '}
+            <code className="bg-gray-100 px-1 rounded text-xs font-mono">{'{{whatsapp}}'}</code> etc. em templates e páginas do site.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+            <input
+              type="tel"
+              placeholder="+55 21 9 9999-9999"
+              value={form.business_phone}
+              onChange={(e) => set('business_phone', e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+            <input
+              type="tel"
+              placeholder="+55 21 9 9999-9999"
+              value={form.business_whatsapp}
+              onChange={(e) => set('business_whatsapp', e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+            <input
+              type="email"
+              placeholder="contato@riofuerdeutsche.de"
+              value={form.business_email}
+              onChange={(e) => set('business_email', e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+            <input
+              type="text"
+              placeholder="@riofuerdeutsche"
+              value={form.business_instagram}
+              onChange={(e) => set('business_instagram', e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Facebook</label>
+            <input
+              type="text"
+              placeholder="facebook.com/riofuerdeutsche"
+              value={form.business_facebook}
+              onChange={(e) => set('business_facebook', e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">YouTube</label>
+            <input
+              type="text"
+              placeholder="youtube.com/@riofuerdeutsche"
+              value={form.business_youtube}
+              onChange={(e) => set('business_youtube', e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Telegram</label>
+            <input
+              type="text"
+              placeholder="@wlfilho"
+              value={form.business_telegram}
+              onChange={(e) => set('business_telegram', e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+            <input
+              type="text"
+              placeholder="Rio de Janeiro, RJ, Brasil"
+              value={form.business_address}
+              onChange={(e) => set('business_address', e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Seção 3: Assinatura de E-mail */}
       <div className="bg-white border border-gray-200 rounded-xl p-6">
         <div className="flex items-start justify-between mb-4">
           <div>

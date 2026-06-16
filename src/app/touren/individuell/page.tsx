@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import { ChevronRight, Phone, CalendarDays } from "lucide-react";
 import AndereTouren from "@/components/AndereTouren";
+import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
     title: "Individuelle Tour in Rio — dein Wunschtag mit Guide",
@@ -17,10 +18,13 @@ export const metadata = {
     },
 };
 
-export default function IndividuelleTourPage() {
+export default async function IndividuelleTourPage() {
+  const settings = await getSettings()
+  const { whatsappHref } = buildContactUrls(settings)
+
     return (
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
-            <Navbar />
+            <NavbarServer />
 
             <main className="flex-grow">
                 {/* Hero Section */}
@@ -218,7 +222,7 @@ export default function IndividuelleTourPage() {
                 <AndereTouren currentSlug="individuell" />
             </main>
 
-            <Footer />
+            <FooterServer />
         </div>
     );
 }

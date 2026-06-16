@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import {
     ChevronRight,
@@ -9,6 +9,7 @@ import {
     CalendarDays,
 } from "lucide-react";
 import AndereTouren from "@/components/AndereTouren";
+import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
     title: "Fußball Tour in Rio — Maracanã, Flamengo & Live-Spiele",
@@ -53,13 +54,15 @@ const fussballPlaces = [
     },
 ];
 
-export default function FussballTourPage() {
-    const whatsappLink = "https://wa.me/5521990564944";
+export default async function FussballTourPage() {
+    const settings = await getSettings()
+
+    const { whatsappHref: whatsappLink } = buildContactUrls(settings)
     const customWhatsappMsg = encodeURIComponent("Hallo! Ich interessiere mich für eine Fußball Tour in Rio. Kannst du mir mehr erzählen?");
 
     return (
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
-            <Navbar />
+            <NavbarServer />
 
             <main className="flex-grow">
                 {/* SEÇÃO A — Hero */}
@@ -238,7 +241,7 @@ export default function FussballTourPage() {
                 <AndereTouren currentSlug="fussball" />
             </main>
 
-            <Footer />
+            <FooterServer />
         </div>
     );
 }

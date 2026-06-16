@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import AndereTouren from "@/components/AndereTouren";
 import { ChevronRight, ArrowRight, Mail, ShieldCheck } from "lucide-react";
+import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
     title: "Favela Tour Rio de Janeiro auf Deutsch — mit echtem Carioca | Rio für Deutsche",
@@ -66,7 +67,10 @@ const includes = [
     "Lokaler Guide",
 ];
 
-export default function RocinhaV2Page() {
+export default async function RocinhaV2Page() {
+  const settings = await getSettings()
+  const { whatsappHref } = buildContactUrls(settings)
+
     return (
         <>
             <script
@@ -74,7 +78,7 @@ export default function RocinhaV2Page() {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
             <div className="flex flex-col min-h-screen bg-white selection:bg-[#22a262] selection:text-white font-sans">
-                <Navbar />
+                <NavbarServer />
 
                 <main className="flex-grow pt-24 lg:pt-28">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
@@ -626,7 +630,7 @@ export default function RocinhaV2Page() {
 
                 </main>
 
-                <Footer />
+                <FooterServer />
             </div>
         </>
     );
