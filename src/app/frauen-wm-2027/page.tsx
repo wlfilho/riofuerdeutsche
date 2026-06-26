@@ -68,6 +68,7 @@ const spielorte = [
         stadion: "Mineirão",
         kapazitaet: "66.000",
         slug: "mineirao",
+        imgPos: "center 25%",
     },
     {
         stadt: "Fortaleza",
@@ -80,6 +81,7 @@ const spielorte = [
         stadion: "Beira-Rio",
         kapazitaet: "50.848",
         slug: "beira-rio",
+        imgPos: "center 25%",
     },
     {
         stadt: "Salvador",
@@ -323,6 +325,7 @@ export default function Page() {
                                                 alt={`${ort.stadion} in ${ort.stadt}`}
                                                 fill
                                                 loading="lazy"
+                                                style={{ objectPosition: (ort as { imgPos?: string }).imgPos }}
                                                 className="object-cover group-hover:scale-105 transition-transform duration-700"
                                             />
                                             {ort.badge && (
