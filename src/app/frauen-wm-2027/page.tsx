@@ -68,7 +68,7 @@ const spielorte = [
         stadion: "Mineirão",
         kapazitaet: "66.000",
         slug: "mineirao",
-        imgPos: "center 25%",
+        imgPos: "center bottom",
     },
     {
         stadt: "Fortaleza",
@@ -81,7 +81,7 @@ const spielorte = [
         stadion: "Beira-Rio",
         kapazitaet: "50.848",
         slug: "beira-rio",
-        imgPos: "center 25%",
+        imgPos: "center bottom",
     },
     {
         stadt: "Salvador",
