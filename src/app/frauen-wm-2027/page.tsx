@@ -319,7 +319,7 @@ export default function Page() {
                                     <>
                                         <div className="h-52 w-full relative overflow-hidden bg-gray-100">
                                             <Image
-                                                src={`/images/wm-2027/stadien/${ort.slug}-placeholder.jpg`}
+                                                src={`/images/wm-2027/stadien/${ort.slug}.webp`}
                                                 alt={`${ort.stadion} in ${ort.stadt}`}
                                                 fill
                                                 loading="lazy"
