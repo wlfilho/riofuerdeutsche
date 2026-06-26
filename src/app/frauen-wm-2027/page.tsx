@@ -650,59 +650,56 @@ export default function Page() {
                 <section className="py-20 lg:py-28 bg-white border-t border-gray-100">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up">
-                            <div className="grid grid-cols-1 md:grid-cols-5 gap-10 lg:gap-16 items-center">
-                                <div className="md:col-span-2">
-                                    <div className="relative aspect-[3/4] w-full max-w-sm mx-auto md:mx-0 rounded-3xl overflow-hidden bg-gray-100 ring-1 ring-gray-100 shadow-md">
-                                        <Image
-                                            src="/images/wm-2027/will-portrait-placeholder.jpg"
-                                            alt="Will, deutschsprachiger Rio Guide in Rio de Janeiro"
-                                            fill
-                                            loading="lazy"
-                                            className="object-cover object-top"
-                                        />
-                                    </div>
+                            <div className="max-w-2xl mx-auto text-center">
+                                <div className="relative w-32 h-32 lg:w-40 lg:h-40 mx-auto rounded-full overflow-hidden bg-gray-100 ring-4 ring-rio-green/10 shadow-md">
+                                    <Image
+                                        src="/images/wm-2027/will-portrait-placeholder.jpg"
+                                        alt="Will, deutschsprachiger Rio Guide in Rio de Janeiro"
+                                        fill
+                                        loading="lazy"
+                                        className="object-cover object-top"
+                                    />
                                 </div>
-                                <div className="md:col-span-3">
-                                    <span className="text-xs font-bold uppercase tracking-wider text-rio-green">
-                                        Dein Guide vor Ort
+
+                                <span className="mt-6 inline-block text-xs font-bold uppercase tracking-wider text-rio-green">
+                                    Dein Guide vor Ort
+                                </span>
+                                <h2 className="mt-3 text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                                    Will, dein deutschsprachiger Rio Guide
+                                </h2>
+
+                                <div className="mt-5 flex flex-wrap justify-center gap-2">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rio-green/10 text-rio-green text-sm font-semibold">
+                                        <MapPin className="w-4 h-4" />
+                                        Geborener Carioca
                                     </span>
-                                    <h2 className="mt-3 text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                        Will, dein deutschsprachiger Rio Guide
-                                    </h2>
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rio-green/10 text-rio-green text-sm font-semibold">
+                                        <GraduationCap className="w-4 h-4" />
+                                        Deutsche Schule Rio
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rio-green/10 text-rio-green text-sm font-semibold">
+                                        <Plane className="w-4 h-4" />
+                                        4 Jahre in Köln
+                                    </span>
+                                </div>
 
-                                    <div className="mt-5 flex flex-wrap gap-2">
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rio-green/10 text-rio-green text-sm font-semibold">
-                                            <MapPin className="w-4 h-4" />
-                                            Geborener Carioca
-                                        </span>
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rio-green/10 text-rio-green text-sm font-semibold">
-                                            <GraduationCap className="w-4 h-4" />
-                                            Deutsche Schule Rio
-                                        </span>
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rio-green/10 text-rio-green text-sm font-semibold">
-                                            <Plane className="w-4 h-4" />
-                                            4 Jahre in Köln
-                                        </span>
-                                    </div>
-
-                                    <div className="mt-6 space-y-5 text-gray-600 text-lg leading-relaxed">
-                                        <p>
-                                            Ich heiße <strong className="font-semibold text-gray-900">Will</strong>, geboren und aufgewachsen in Rio de
-                                            Janeiro. Meine gesamte Schulzeit habe ich auf der Deutschen
-                                            Schule in Rio absolviert, und vier Jahre meines Lebens habe
-                                            ich in Köln verbracht. So habe ich beide Kulturen tief
-                                            kennengelernt: die deutsche Mentalität und die brasilianische
-                                            Lebensart.
-                                        </p>
-                                        <p>
-                                            Heute arbeite ich als deutschsprachiger Guide in meiner
-                                            Heimatstadt. Ich weiß, was deutsche Besucher erwarten, und
-                                            ich kenne Rio aus jeder Perspektive. Während der WM 2027
-                                            begleite ich dich vor Ort: mit lokalem Wissen, persönlichem
-                                            Kontakt und der Sicherheit eines Cariocas, der hier zuhause
-                                            ist.
-                                        </p>
-                                    </div>
+                                <div className="mt-6 space-y-5 text-gray-600 text-lg leading-relaxed">
+                                    <p>
+                                        Ich heiße <strong className="font-semibold text-gray-900">Will</strong>, geboren und aufgewachsen in Rio de
+                                        Janeiro. Meine gesamte Schulzeit habe ich auf der Deutschen
+                                        Schule in Rio absolviert, und vier Jahre meines Lebens habe
+                                        ich in Köln verbracht. So habe ich beide Kulturen tief
+                                        kennengelernt: die deutsche Mentalität und die brasilianische
+                                        Lebensart.
+                                    </p>
+                                    <p>
+                                        Heute arbeite ich als deutschsprachiger Guide in meiner
+                                        Heimatstadt. Ich weiß, was deutsche Besucher erwarten, und
+                                        ich kenne Rio aus jeder Perspektive. Während der WM 2027
+                                        begleite ich dich vor Ort: mit lokalem Wissen, persönlichem
+                                        Kontakt und der Sicherheit eines Cariocas, der hier zuhause
+                                        ist.
+                                    </p>
                                 </div>
                             </div>
                         </FadeIn>
