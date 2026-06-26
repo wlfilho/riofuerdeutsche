@@ -34,7 +34,7 @@ export const metadata: Metadata = {
             "FIFA Frauen-WM 2027: Spielorte, Termine, Tickets und dein deutscher Guide in Rio.",
         url: "https://riofuerdeutsche.de/frauen-wm-2027",
         type: "website",
-        images: [{ url: "/images/wm-2027/hub-og-placeholder.jpg" }],
+        images: [{ url: "/images/wm-2027/bg-wm-2027.webp" }],
     },
 };
 
