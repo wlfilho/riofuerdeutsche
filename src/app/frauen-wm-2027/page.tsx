@@ -538,7 +538,7 @@ export default function Page() {
                                 Alles, was du für deine Reise nach Rio während der WM 2027 brauchst,
                                 findest du gebündelt im Reiseguide für Rio während der WM:
                             </p>
-                            <div className="mt-8">
+                            <div className="mt-8 text-center">
                                 <Link
                                     href="/frauen-wm-2027/rio-de-janeiro"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-lg"
@@ -565,7 +565,7 @@ export default function Page() {
                                 Gruppenphase fest. Diese ist voraussichtlich für Ende 2026 oder Anfang
                                 2027 vorgesehen.
                             </p>
-                            <div className="mt-10">
+                            <div className="mt-10 text-center">
                                 <Link
                                     href="/frauen-wm-2027/deutschland"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-green text-white rounded-full font-bold text-lg hover:bg-green-700 hover:scale-[1.02] transition-all shadow-lg"
@@ -594,7 +594,7 @@ export default function Page() {
                                 der Gruppenphase. Wer sich frühzeitig registriert, wird über alle
                                 Verkaufsphasen benachrichtigt.
                             </p>
-                            <div className="mt-10">
+                            <div className="mt-10 text-center">
                                 <Link
                                     href="/frauen-wm-2027/tickets"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-lg"
