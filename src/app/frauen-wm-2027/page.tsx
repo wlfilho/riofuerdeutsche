@@ -81,7 +81,7 @@ const spielorte = [
         stadion: "Beira-Rio",
         kapazitaet: "50.848",
         slug: "beira-rio",
-        imgPos: "center 85%",
+        imgPos: "center 78%",
     },
     {
         stadt: "Salvador",
