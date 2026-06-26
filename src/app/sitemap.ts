@@ -84,6 +84,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.8,
         },
         {
+            url: `${baseUrl}/frauen-wm-2027`,
+            lastModified: today,
+            changeFrequency: "monthly",
+            priority: 0.9,
+        },
+        {
             url: `${baseUrl}/rio-guide/sehenswuerdigkeiten`,
             lastModified: today,
             changeFrequency: "monthly",
