@@ -5,9 +5,12 @@ import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
 import AndereTouren from "@/components/AndereTouren";
 import { ChevronRight, Home, ArrowRight, Phone } from "lucide-react";
+import Faq from "@/components/Faq";
 
 export const metadata = {
-    title: "Zuckerhut Rio de Janeiro — Tipps, Tickets & Sonnenuntergang | Rio für Deutsche",
+    title: {
+        absolute: "Zuckerhut Rio de Janeiro (Pão de Açúcar): Tickets & Tipps | Rio für Deutsche",
+    },
     description:
         "Alles über den Zuckerhut in Rio: Tickets, beste Reisezeit, Insider-Tipps vom Carioca. Sugarloaf Mountain Rio — so erlebst du ihn richtig. Auf Deutsch, mit lokalem Wissen.",
     openGraph: {
@@ -47,12 +50,49 @@ const jsonLd = {
     knowsAbout: ["Zuckerhut", "Pão de Açúcar", "Seilbahn", "Rio de Janeiro", "Urca"],
 };
 
+const faqItems = [
+    {
+        q: "Was kostet die Seilbahn zum Zuckerhut?",
+        a: "Das Ticket kostet rund 25 € (R$ 130 bis 150) für beide Seilbahn-Etappen. Mit Will ist der Transfer zur Talstation inklusive.",
+    },
+    {
+        q: "Wann ist die beste Zeit für den Zuckerhut?",
+        a: "Zum Sonnenuntergang zwischen 17 und 19 Uhr für die schönste Aussicht, oder früh morgens für kurze Wartezeiten. Klare Tage gibt es vor allem von Juni bis August.",
+    },
+    {
+        q: "Wie funktioniert die Seilbahn?",
+        a: "In zwei Etappen. Die erste bringt dich auf den Morro da Urca, die zweite auf den Gipfel in 396 Metern Höhe. Plane Zeit für den Zwischenstopp ein, die meisten Touristen lassen ihn aus.",
+    },
+    {
+        q: "Lohnt sich der Morro da Urca als Zwischenstopp?",
+        a: "Absolut. Dort hast du fast keine Menschenmassen, eine fantastische Aussicht und eine Bar mit Caipirinha und Blick auf den Corcovado. Bleib 30 bis 40 Minuten, bevor du weiter nach oben fährst.",
+    },
+    {
+        q: "Fährt die Seilbahn bei schlechtem Wetter?",
+        a: "Bei starkem Wind oder Gewitter wird der Betrieb gestoppt. An klaren Tagen ist die Sicht auf Niterói, die Zona Sul und den Corcovado unschlagbar.",
+    },
+];
+
+const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+};
+
 export default function ZuckerhutPage() {
     return (
         <>
         <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
             <Navbar />
@@ -579,6 +619,24 @@ export default function ZuckerhutPage() {
                     </div>
                 </section>
 
+                {/* ── FAQ ─────────────────────────────────────────── */}
+                <section className="py-20 lg:py-24 bg-white border-t border-gray-100">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up" className="mb-10">
+                            <div className="max-w-[800px] mx-auto">
+                                <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                                    Häufige Fragen zum Zuckerhut
+                                </h2>
+                            </div>
+                        </FadeIn>
+                        <FadeIn direction="up">
+                            <div className="max-w-[800px] mx-auto">
+                                <Faq items={faqItems} />
+                            </div>
+                        </FadeIn>
+                    </div>
+                </section>
+
                 {/* ── SECÇÃO 7 — CTA Final ─────────────────────────── */}
                 <section className="py-24 relative overflow-hidden bg-[#0d1f15] border-t-4 border-rio-yellow">
                     <div className="absolute inset-0 bg-[url('/images/rio-background.webp')] bg-cover bg-center mix-blend-overlay opacity-10" />
@@ -588,7 +646,7 @@ export default function ZuckerhutPage() {
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6 leading-tight">
                                 Den Zuckerhut{" "}
                                 <br className="hidden sm:block" />
-                                <span className="text-rio-yellow">mit Will erleben</span>
+                                <span className="text-rio-yellow">mit deinem deutschsprachigen Tourguide erleben</span>
                             </h2>
                             <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
                                 Als Carioca zeige ich dir nicht nur die Aussicht — ich zeige dir den Moment,

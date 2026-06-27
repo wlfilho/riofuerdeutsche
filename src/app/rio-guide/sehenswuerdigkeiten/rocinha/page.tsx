@@ -712,27 +712,27 @@ export default function RocinhaPage() {
                                 </Link>
                             </FadeIn>
 
-                            {/* Card 2 — Santa Teresa */}
+                            {/* Card 2 — Favela Santa Marta */}
                             <FadeIn delay={0.08} direction="up" className="flex">
                                 <Link
-                                    href="/rio-guide/sehenswuerdigkeiten/santa-teresa"
+                                    href="/rio-guide/sehenswuerdigkeiten/santa-marta"
                                     className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden w-full"
                                 >
                                     <div className="relative h-48 overflow-hidden">
                                         <Image
-                                            src="/images/santa-teresa.webp"
-                                            alt="Santa Teresa — das Künstlerviertel von Rio de Janeiro"
+                                            src="/images/rio-favela.webp"
+                                            alt="Favela Santa Marta in Botafogo, Rio de Janeiro"
                                             fill
                                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
                                         <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green uppercase tracking-wider">
-                                            Kultur
+                                            Botafogo
                                         </span>
                                     </div>
                                     <div className="p-5 flex flex-col flex-grow">
-                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Santa Teresa</h3>
+                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Favela Santa Marta</h3>
                                         <p className="text-gray-500 text-sm leading-relaxed flex-grow">
-                                            Das Künstlerviertel über der Stadt — Straßenkunst, alte Villen, Bars und eine Energie, die an kein anderes Viertel Rios erinnert.
+                                            Die kleinere Schwester der Rocinha. Erste befriedete Favela Rios, Michael Jackson Video, Cristo-Blick vom Teleférico.
                                         </p>
                                         <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
                                             Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -781,9 +781,9 @@ export default function RocinhaPage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6 leading-tight">
-                                Favela Tour Rocinha auf Deutsch{" "}
+                                Die Rocinha{" "}
                                 <br className="hidden sm:block" />
-                                <span className="text-rio-yellow">— mit Will erleben</span>
+                                <span className="text-rio-yellow">mit deutschsprachigem Guide besuchen</span>
                             </h2>
                             <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
                                 Ich zeige dir nicht die Armut — ich stelle dir die Menschen vor.

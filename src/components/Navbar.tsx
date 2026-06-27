@@ -60,6 +60,7 @@ const navLinks: NavLink[] = [
                     { href: "/rio-guide/sehenswuerdigkeiten/zuckerhut", label: "Zuckerhut" },
                     { href: "/rio-guide/sehenswuerdigkeiten/escadaria-selaron", label: "Escadaria Selarón" },
                     { href: "/rio-guide/sehenswuerdigkeiten/rocinha", label: "Rocinha" },
+                    { href: "/rio-guide/sehenswuerdigkeiten/santa-marta", label: "Favela Santa Marta" },
                 ],
                 allHref: "/rio-guide/sehenswuerdigkeiten",
                 allLabel: "Alle ansehen",
