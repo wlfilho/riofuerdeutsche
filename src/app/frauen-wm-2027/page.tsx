@@ -653,7 +653,7 @@ export default function Page() {
                             <div className="max-w-2xl mx-auto text-center">
                                 <div className="relative w-32 h-32 lg:w-40 lg:h-40 mx-auto rounded-full overflow-hidden bg-gray-100 ring-4 ring-rio-green/10 shadow-md">
                                     <Image
-                                        src="/images/wm-2027/will-portrait-placeholder.jpg"
+                                        src="/images/wm-2027/will.webp"
                                         alt="Will, deutschsprachiger Rio Guide in Rio de Janeiro"
                                         fill
                                         loading="lazy"
