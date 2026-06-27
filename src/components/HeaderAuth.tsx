@@ -62,7 +62,8 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
 
     const initAuth = async () => {
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const authUser = session?.user ?? null;
 
         if (authUser && mounted) {
           // Fallback imediato com os dados do Auth
