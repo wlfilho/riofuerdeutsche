@@ -132,7 +132,7 @@ const faqItems = [
     {
         question: "Wann findet die Auslosung der Gruppenphase statt?",
         answer:
-            "Der genaue Termin ist noch nicht bekannt. Erfahrungsgemäß findet die Auslosung mehrere Monate vor Turnierbeginn statt, voraussichtlich Ende 2026 oder Anfang 2027.",
+            "Der genaue Termin ist noch nicht offiziell bestätigt. Voraussichtlich findet die Endrundenauslosung Anfang 2027 statt, nach Abschluss der interkontinentalen Play-offs im Februar 2027, wenn alle 32 Teilnehmer feststehen.",
     },
     {
         question: "Wer ist als Gastgeber automatisch qualifiziert?",
@@ -556,14 +556,18 @@ export default function Page() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="max-w-[800px] mx-auto">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Wie die deutsche Mannschaft zur WM 2027 kommt
+                                Die DFB-Frauen bei der WM 2027
                             </h2>
                             <p className="mt-4 text-gray-600 text-lg leading-relaxed">
-                                Die DFB-Frauen müssen sich noch qualifizieren. Die Qualifikation für
-                                Europa läuft im Format der UEFA Women&apos;s Nations League. Die
-                                endgültigen Spiele Deutschlands stehen erst nach der Auslosung der
-                                Gruppenphase fest. Diese ist voraussichtlich für Ende 2026 oder Anfang
-                                2027 vorgesehen.
+                                Die DFB-Frauen sind bei der WM 2027 dabei. Am 5. Juni 2026 sicherte
+                                sich die Mannschaft von Bundestrainer Christian Wück mit einem 2:0
+                                gegen Norwegen in Köln vorzeitig das WM-Ticket als Gruppensieger.
+                            </p>
+                            <p className="mt-4 text-gray-600 text-lg leading-relaxed">
+                                Die endgültigen Gruppengegner Deutschlands stehen erst nach der
+                                Endrundenauslosung fest. Diese wird voraussichtlich Anfang 2027
+                                stattfinden, nachdem im Februar 2027 die letzten Startplätze über die
+                                interkontinentalen Play-offs vergeben sind.
                             </p>
                             <div className="mt-10 text-center">
                                 <Link
