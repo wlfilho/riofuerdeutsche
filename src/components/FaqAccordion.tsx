@@ -54,8 +54,8 @@ function buildItems(whatsappHref: string, emailHref: string): FaqItem[] {
 }
 
 export default function FaqAccordion({
-  whatsappHref = "https://wa.me/5521990564944",
-  emailHref = "mailto:lantelmew@gmail.com",
+  whatsappHref = "https://wa.me/5521979277472",
+  emailHref = "mailto:riofuerdeutsche@gmail.com",
 }: {
   whatsappHref?: string;
   emailHref?: string;

@@ -10,6 +10,7 @@ import CTAGuideCompleto from '@/components/members/CTAGuideCompleto';
 import EditionsPreview from '@/components/members/EditionsPreview';
 import CTABeratung from '@/components/members/CTABeratung';
 import { getAllProgress } from '@/app/actions/guideProgress';
+import { getPublicContact } from '@/app/actions/contact';
 
 export default function GuidePage({
   searchParams,
@@ -24,6 +25,7 @@ export default function GuidePage({
   const [firstName, setFirstName] = useState<string | null>(null);
   const [userPlan, setUserPlan] = useState<'free' | 'premium'>('free');
   const [chapters, setChapters] = useState<import('@/components/members/ChapterCard').Chapter[]>([]);
+  const [whatsappHref, setWhatsappHref] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,7 +33,7 @@ export default function GuidePage({
         const { createClient } = await import('@/utils/supabase/client');
         const supabase = createClient();
 
-        const [{ data: { user } }, { data: chaptersData }, allProgress] = await Promise.all([
+        const [{ data: { user } }, { data: chaptersData }, allProgress, contact] = await Promise.all([
           supabase.auth.getUser(),
           supabase
             .from('guide_chapters')
@@ -39,7 +41,10 @@ export default function GuidePage({
             .eq('status', 'published')
             .order('sort_order'),
           getAllProgress(),
+          getPublicContact(),
         ]);
+
+        setWhatsappHref(contact.whatsappHref);
 
         if (chaptersData) {
           setChapters(chaptersData.map((ch) => ({
@@ -131,7 +136,7 @@ export default function GuidePage({
             </div>
             <div className="flex flex-wrap items-center gap-4">
               <a
-                href="https://wa.me/5521999999999?text=Hallo%20Will!%20Ich%20möchte%20den%20Rio-Guide%20kaufen."
+                href={whatsappHref ? `${whatsappHref}?text=Hallo%20Will!%20Ich%20möchte%20den%20Rio-Guide%20kaufen.` : '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block px-6 py-3 bg-yellow-400 text-gray-900 font-bold rounded-lg hover:bg-yellow-300 transition-all"

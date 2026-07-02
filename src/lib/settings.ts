@@ -18,27 +18,44 @@ export type Settings = {
 
 export const getSettings = cache(async (): Promise<Settings> => {
   const supabase = await createClient()
-  const { data } = await supabase
-    .from('site_settings')
-    .select(
-      'guide_rate_eur, default_exchange_rate, max_hours_per_day, value, business_phone, business_whatsapp, business_email, business_instagram, business_facebook, business_youtube, business_telegram, business_address'
-    )
-    .eq('key', 'email_assinatura')
-    .single()
+
+  // Contact fields come from the public_contact_info view (readable by anon).
+  // The internal config lives in site_settings, which is admin-only under RLS,
+  // so for public visitors those fields fall back to the defaults below.
+  const [contactRes, configRes] = await Promise.all([
+    supabase
+      .from('public_contact_info')
+      .select(
+        'business_phone, business_whatsapp, business_email, business_instagram, business_facebook, business_youtube, business_telegram, business_address'
+      )
+      .single(),
+    supabase
+      .from('site_settings')
+      .select('guide_rate_eur, default_exchange_rate, max_hours_per_day, value')
+      .eq('key', 'email_assinatura')
+      .single(),
+  ])
+
+  if (contactRes.error) {
+    console.error('[getSettings] failed to load public_contact_info:', contactRes.error.message)
+  }
+
+  const contact = contactRes.data
+  const config = configRes.data
 
   return {
-    guide_rate_eur: Number(data?.guide_rate_eur ?? 40),
-    default_exchange_rate: Number(data?.default_exchange_rate ?? 0.17),
-    max_hours_per_day: Number(data?.max_hours_per_day ?? 10),
-    email_assinatura: data?.value ?? '',
-    business_phone: data?.business_phone ?? '',
-    business_whatsapp: data?.business_whatsapp ?? '',
-    business_email: data?.business_email ?? '',
-    business_instagram: data?.business_instagram ?? '',
-    business_facebook: data?.business_facebook ?? '',
-    business_youtube: data?.business_youtube ?? '',
-    business_telegram: data?.business_telegram ?? '',
-    business_address: data?.business_address ?? '',
+    guide_rate_eur: Number(config?.guide_rate_eur ?? 40),
+    default_exchange_rate: Number(config?.default_exchange_rate ?? 0.17),
+    max_hours_per_day: Number(config?.max_hours_per_day ?? 10),
+    email_assinatura: config?.value ?? '',
+    business_phone: contact?.business_phone ?? '',
+    business_whatsapp: contact?.business_whatsapp ?? '',
+    business_email: contact?.business_email ?? '',
+    business_instagram: contact?.business_instagram ?? '',
+    business_facebook: contact?.business_facebook ?? '',
+    business_youtube: contact?.business_youtube ?? '',
+    business_telegram: contact?.business_telegram ?? '',
+    business_address: contact?.business_address ?? '',
   }
 })
 
@@ -60,7 +77,7 @@ export function buildContactUrls(s: Settings): ContactUrls {
   const waNum = s.business_whatsapp.replace(/\D/g, '')
   const igHandle = s.business_instagram.replace(/^@/, '')
   const ytRaw = s.business_youtube
-  const ytHref = ytRaw.startsWith('http') ? ytRaw : `https://${ytRaw}`
+  const ytHref = ytRaw ? (ytRaw.startsWith('http') ? ytRaw : `https://${ytRaw}`) : ''
   const fbRaw = s.business_facebook
   const fbHref = fbRaw.startsWith('http') ? fbRaw : fbRaw ? `https://${fbRaw}` : ''
   const tgHandle = s.business_telegram.replace(/^@/, '')

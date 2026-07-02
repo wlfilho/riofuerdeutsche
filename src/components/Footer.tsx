@@ -16,11 +16,11 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 );
 
 const FALLBACK: ContactUrls = {
-  phone: '+55 21 99056-4944',
-  phoneHref: 'tel:+5521990564944',
-  whatsappHref: 'https://wa.me/5521990564944',
-  email: 'lantelmew@gmail.com',
-  emailHref: 'mailto:lantelmew@gmail.com',
+  phone: '+55 21 97927-7472',
+  phoneHref: 'tel:+5521979277472',
+  whatsappHref: 'https://wa.me/5521979277472',
+  email: 'riofuerdeutsche@gmail.com',
+  emailHref: 'mailto:riofuerdeutsche@gmail.com',
   instagramHref: 'https://instagram.com/riofuerdeutsche',
   youtubeHref: 'https://youtube.com/@riofuerdeutsche',
   facebookHref: '',
@@ -101,7 +101,7 @@ export default function Footer({ contact = FALLBACK }: { contact?: ContactUrls }
                         <h3 className="text-white font-bold mb-4">Quick Links</h3>
                         <ul className="space-y-2 text-sm">
                             <li><Link href="/touren" className="hover:text-white transition-colors">Touren und Ausflüge</Link></li>
-                            <li><Link href="/#ueber-uns" className="hover:text-white transition-colors">Über Uns</Link></li>
+                            <li><Link href="/ueber-will" className="hover:text-white transition-colors">Über Uns</Link></li>
                             <li><Link href="/rio-guide/sehenswuerdigkeiten" className="hover:text-white transition-colors">Rio-Guide</Link></li>
                             <li><Link href="/rio-guide/sehenswuerdigkeiten/christus-erloeser" className="hover:text-white transition-colors">Christus-Erlöser</Link></li>
                             <li><Link href="/kontakt" className="hover:text-white transition-colors">Kontakt</Link></li>
