@@ -69,19 +69,31 @@ const navLinks: NavLink[] = [
             { href: "/ist-rio-gefaehrlich", label: "Sicherheit" },
         ],
     },
-    { href: "/#ueber-uns", label: "Über Uns" },
+    { href: "/ueber-will", label: "Über Uns" },
     { href: "/#bewertungen", label: "Bewertungen" },
     { href: "/kontakt", label: "Kontakt" },
 ];
 
 const NAVBAR_FALLBACK: Pick<ContactUrls, 'phone' | 'phoneHref' | 'instagramHref' | 'youtubeHref'> = {
-  phone: '+55 21 99056 4944',
-  phoneHref: 'tel:+5521990564944',
+  phone: '+55 21 97927-7472',
+  phoneHref: 'tel:+5521979277472',
   instagramHref: 'https://instagram.com/riofuerdeutsche',
   youtubeHref: 'https://youtube.com/@riofuerdeutsche',
 }
 
-export default function Navbar({ contact = NAVBAR_FALLBACK }: { contact?: Pick<ContactUrls, 'phone' | 'phoneHref' | 'instagramHref' | 'youtubeHref'> }) {
+export default function Navbar({ contact: contactProp }: { contact?: Pick<ContactUrls, 'phone' | 'phoneHref' | 'instagramHref' | 'youtubeHref'> }) {
+    // Merge per-field: use each DB value when present, otherwise the fallback.
+    // A default parameter only applies when `contact` is undefined, so an object
+    // with empty strings (DB miss) would otherwise defeat NAVBAR_FALLBACK entirely.
+    const contact: Pick<ContactUrls, 'phone' | 'phoneHref' | 'instagramHref' | 'youtubeHref'> = {
+        phone: contactProp?.phone?.trim() || NAVBAR_FALLBACK.phone,
+        phoneHref: contactProp?.phoneHref?.trim() && contactProp.phoneHref.trim() !== 'tel:'
+            ? contactProp.phoneHref
+            : NAVBAR_FALLBACK.phoneHref,
+        instagramHref: contactProp?.instagramHref?.trim() || NAVBAR_FALLBACK.instagramHref,
+        youtubeHref: contactProp?.youtubeHref?.trim() || NAVBAR_FALLBACK.youtubeHref,
+    };
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [mobileTourenOpen, setMobileTourenOpen] = useState(false);
     const [mobileGuideOpen, setMobileGuideOpen] = useState(false);

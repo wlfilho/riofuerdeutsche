@@ -186,7 +186,7 @@ export default async function RocinhaV2Page() {
                                     {/* CTAs */}
                                     <div className="px-5 pb-5 border-t border-gray-100 pt-4 space-y-2">
                                         <a
-                                            href="https://wa.me/5521990564944?text=Hallo%20Will!%20Ich%20interessiere%20mich%20f%C3%BCr%20die%20Rocinha%20Tour.%20Kannst%20du%20mir%20mehr%20erz%C3%A4hlen%3F"
+                                            href={`${whatsappHref}?text=Hallo%20Will!%20Ich%20interessiere%20mich%20f%C3%BCr%20die%20Rocinha%20Tour.%20Kannst%20du%20mir%20mehr%20erz%C3%A4hlen%3F`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 bg-[#2D6A4F] text-white rounded-xl font-bold text-sm hover:bg-[#245c43] active:scale-[0.98] transition-all"
