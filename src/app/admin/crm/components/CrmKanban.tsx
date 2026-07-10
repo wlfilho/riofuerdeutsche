@@ -14,6 +14,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import TourDateKanbanFlow, { type KanbanStatusChange } from '@/components/admin/TourDateKanbanFlow';
 import type { CrmLead, LeadStatus } from '../page';
 
 type ColumnConfig = {
@@ -176,6 +177,7 @@ export default function CrmKanban({
   const [leads, setLeads] = useState<CrmLead[]>(initialLeads);
   const [activeLead, setActiveLead] = useState<CrmLead | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [tourFlow, setTourFlow] = useState<KanbanStatusChange | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
 
   useEffect(() => {
@@ -217,6 +219,14 @@ export default function CrmKanban({
         setLeads(prev);
         onStatusChange(lead);
         setToast(`Erro: ${data.error ?? 'Falha ao atualizar status'}`);
+      } else {
+        setTourFlow({
+          leadId: lead.id,
+          leadName: lead.name,
+          pax: lead.pax ?? null,
+          oldStatus: lead.status,
+          newStatus,
+        });
       }
     } catch {
       setLeads(prev);
@@ -252,6 +262,8 @@ export default function CrmKanban({
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      <TourDateKanbanFlow change={tourFlow} onClose={() => setTourFlow(null)} />
 
       {toast && <Toast message={toast} onDone={clearToast} />}
     </>

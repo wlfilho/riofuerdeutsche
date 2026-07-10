@@ -33,6 +33,11 @@ const navItems: NavItem[] = [
     icon: '🎯',
   },
   {
+    label: 'Calendário',
+    href: '/admin/calendario',
+    icon: '📅',
+  },
+  {
     label: 'Guide-Inhalte',
     href: '/admin/guide',
     icon: '📖',
