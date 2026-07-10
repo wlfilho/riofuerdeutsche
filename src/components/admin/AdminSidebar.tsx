@@ -62,6 +62,11 @@ const navItems: NavItem[] = [
     icon: '✉️',
   },
   {
+    label: 'Cadastur',
+    href: '/admin/cadastur',
+    icon: '🧭',
+  },
+  {
     label: 'Configurações',
     href: '/admin/configuracoes',
     icon: '⚙️',
