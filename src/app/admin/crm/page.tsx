@@ -13,12 +13,14 @@ export interface CrmLead {
   email: string;
   phone: string | null;
   pax: number;
+  children: number | null;
   days: number | null;
   estimated_min: number | null;
   estimated_max: number | null;
   source: LeadSource;
   status: LeadStatus;
   proposal_id: string | null;
+  requested_days: string[] | null;
   notes: string | null;
   created_at: string;
   updated_at: string;

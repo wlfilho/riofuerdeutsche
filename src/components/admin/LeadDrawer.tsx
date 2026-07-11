@@ -211,7 +211,12 @@ export default function LeadDrawer({
             )}
             <div className="flex items-center gap-3 text-sm">
               <span className="text-gray-400 w-16 shrink-0">PAX</span>
-              <span className="text-gray-800">{lead.pax} Personen</span>
+              <span className="text-gray-800">
+                {lead.pax} Personen
+                {(lead.children ?? 0) > 0 && (
+                  <span className="text-gray-500"> + {lead.children} Kind{lead.children !== 1 ? 'er' : ''}</span>
+                )}
+              </span>
             </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="text-gray-400 w-16 shrink-0">Origem</span>
@@ -221,6 +226,21 @@ export default function LeadDrawer({
               <div className="flex items-center gap-3 text-sm">
                 <span className="text-gray-400 w-16 shrink-0">Preço</span>
                 <span className="text-gray-800 font-medium">{estimate}</span>
+              </div>
+            )}
+            {(lead.requested_days?.length ?? 0) > 0 && (
+              <div className="flex items-start gap-3 text-sm">
+                <span className="text-gray-400 w-16 shrink-0 pt-0.5">Dias</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {(lead.requested_days ?? []).map(d => (
+                    <span
+                      key={d}
+                      className="px-2 py-0.5 bg-green-50 border border-green-200 text-green-800 rounded-full text-xs font-medium"
+                    >
+                      {formatDate(d)}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
           </div>

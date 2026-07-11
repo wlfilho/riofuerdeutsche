@@ -20,9 +20,21 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
+  const { lead_id, ...formData } = body;
 
   try {
-    const proposal = await createProposal(body);
+    const proposal = await createProposal(formData);
+
+    // Link the CRM lead to the proposal it originated (best-effort).
+    if (lead_id) {
+      const supabase = await createClient();
+      await supabase
+        .from('price_leads')
+        .update({ proposal_id: proposal.id })
+        .eq('id', lead_id)
+        .is('proposal_id', null);
+    }
+
     return NextResponse.json(proposal);
   } catch (err) {
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });

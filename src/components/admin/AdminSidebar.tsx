@@ -33,6 +33,11 @@ const navItems: NavItem[] = [
     icon: '🎯',
   },
   {
+    label: 'Calendário',
+    href: '/admin/calendario',
+    icon: '📅',
+  },
+  {
     label: 'Guide-Inhalte',
     href: '/admin/guide',
     icon: '📖',
@@ -55,6 +60,11 @@ const navItems: NavItem[] = [
     label: 'E-Mail Templates',
     href: '/admin/email-templates',
     icon: '✉️',
+  },
+  {
+    label: 'Cadastur',
+    href: '/admin/cadastur',
+    icon: '🧭',
   },
   {
     label: 'Configurações',

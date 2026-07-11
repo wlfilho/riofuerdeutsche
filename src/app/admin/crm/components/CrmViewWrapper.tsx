@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import CrmKanban from './CrmKanban';
 import CrmTable from './CrmTable';
 import LeadDrawer from '@/components/admin/LeadDrawer';
@@ -13,6 +13,7 @@ const STORAGE_KEY = 'crm-view';
 
 export default function CrmViewWrapper({ leads: initialLeads }: { leads: CrmLead[] }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [view, setView] = useState<View>('kanban');
   const [leads, setLeads] = useState<CrmLead[]>(initialLeads);
   const [selectedLead, setSelectedLead] = useState<CrmLead | null>(null);
@@ -21,6 +22,15 @@ export default function CrmViewWrapper({ leads: initialLeads }: { leads: CrmLead
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === 'kanban' || saved === 'table') setView(saved as View);
   }, []);
+
+  // Deep link from the calendar ("Ver no CRM"): open the lead's drawer
+  useEffect(() => {
+    const leadId = searchParams.get('lead');
+    if (!leadId) return;
+    const lead = initialLeads.find(l => l.id === leadId);
+    if (lead) setSelectedLead(lead);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Sync when server re-renders (e.g. after creating a lead)
   useEffect(() => {
