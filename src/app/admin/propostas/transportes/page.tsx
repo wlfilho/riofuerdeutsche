@@ -12,7 +12,8 @@ type TierDraft = {
   _id: string;
   min_pax: number | '';
   max_pax: number | '' | null;  // null = sem limite
-  price_per_hour: number | '';
+  car_daily_rate: number | '';        // diária fixa do veículo
+  driver_price_per_hour: number | ''; // motorista terceirizado, por hora
   currency: 'BRL' | 'EUR';
   editing: boolean;
 };
@@ -41,7 +42,8 @@ function tiersFromTransport(t: ProposalTransportType): TierDraft[] {
       _id: tier.id,
       min_pax: tier.min_pax,
       max_pax: tier.max_pax,
-      price_per_hour: tier.price_per_hour,
+      car_daily_rate: tier.car_daily_rate,
+      driver_price_per_hour: tier.driver_price_per_hour,
       currency: tier.currency,
       editing: false,
     }));
@@ -62,7 +64,7 @@ const INPUT_CLS =
 function newTierDraft(): TierDraft {
   return {
     _id: Math.random().toString(36).slice(2),
-    min_pax: '', max_pax: '', price_per_hour: '', currency: 'BRL', editing: true,
+    min_pax: '', max_pax: '', car_daily_rate: '', driver_price_per_hour: '', currency: 'BRL', editing: true,
   };
 }
 
@@ -71,7 +73,9 @@ function validateTiers(tiers: TierDraft[]): string | null {
     if (t.min_pax === '' || Number(t.min_pax) < 1) return 'Mínimo de pax inválido em uma faixa.';
     if (t.max_pax !== null && (t.max_pax === '' || Number(t.max_pax) < Number(t.min_pax)))
       return 'Máximo de pax deve ser ≥ mínimo.';
-    if (t.price_per_hour === '' || Number(t.price_per_hour) <= 0) return 'Preço/hora inválido em uma faixa.';
+    // 0 é permitido: as faixas podem ficar com placeholder até os valores reais serem definidos.
+    if (t.car_daily_rate === '' || Number(t.car_daily_rate) < 0) return 'Diária do carro inválida em uma faixa.';
+    if (t.driver_price_per_hour === '' || Number(t.driver_price_per_hour) < 0) return 'Preço/hora do motorista inválido em uma faixa.';
   }
   const ranges = tiers.map(t => ({
     min: Number(t.min_pax),
@@ -122,7 +126,7 @@ function TiersSection({
     <div>
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Faixas de preço por nº de pessoas
+          Faixas por nº de pessoas — diária do carro + motorista por hora
         </span>
         <button
           type="button"
@@ -177,8 +181,8 @@ function TiersSection({
                     <span className="text-xs text-gray-500">∞</span>
                   </label>
                 </div>
-                {/* Price */}
-                <div className="flex items-center gap-1.5">
+                {/* Prices: car daily rate + driver hourly rate */}
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <select
                     value={tier.currency}
                     onChange={e => update(tier._id, { currency: e.target.value as 'BRL' | 'EUR' })}
@@ -189,14 +193,32 @@ function TiersSection({
                   </select>
                   <input
                     type="number"
-                    min="0.01"
+                    min="0"
                     step="0.01"
-                    value={tier.price_per_hour}
-                    onChange={e => update(tier._id, { price_per_hour: parseFloat(e.target.value) || '' })}
-                    className="w-24 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
-                    placeholder="0,00"
+                    value={tier.car_daily_rate}
+                    onChange={e => {
+                      const v = parseFloat(e.target.value);
+                      update(tier._id, { car_daily_rate: Number.isNaN(v) ? '' : v });
+                    }}
+                    title="Diária do carro"
+                    className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+                    placeholder="Diária"
                   />
-                  <span className="text-xs text-gray-500">/h</span>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">carro/dia +</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={tier.driver_price_per_hour}
+                    onChange={e => {
+                      const v = parseFloat(e.target.value);
+                      update(tier._id, { driver_price_per_hour: Number.isNaN(v) ? '' : v });
+                    }}
+                    title="Motorista por hora"
+                    className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+                    placeholder="Motorista"
+                  />
+                  <span className="text-xs text-gray-500 whitespace-nowrap">motorista/h</span>
                 </div>
                 {/* Save btn */}
                 <button
@@ -225,7 +247,9 @@ function TiersSection({
                   {' '}pax
                   <span className="mx-2 text-gray-300">·</span>
                   <span className="text-gray-600">
-                    {tier.currency === 'EUR' ? '€' : 'R$'}{Number(tier.price_per_hour).toFixed(0)}/h
+                    {tier.currency === 'EUR' ? '€' : 'R$'}{Number(tier.car_daily_rate).toFixed(0)} diária carro
+                    {' + '}
+                    {tier.currency === 'EUR' ? '€' : 'R$'}{Number(tier.driver_price_per_hour).toFixed(0)}/h motorista
                   </span>
                 </span>
                 <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -493,7 +517,8 @@ export default function TransportesPage() {
         tiers: tiers.map(t => ({
           min_pax: Number(t.min_pax),
           max_pax: t.max_pax === null ? null : Number(t.max_pax),
-          price_per_hour: Number(t.price_per_hour),
+          car_daily_rate: Number(t.car_daily_rate),
+          driver_price_per_hour: Number(t.driver_price_per_hour),
           currency: t.currency,
         })),
       }),
@@ -514,7 +539,8 @@ export default function TransportesPage() {
         tiers: tiers.map(t => ({
           min_pax: Number(t.min_pax),
           max_pax: t.max_pax === null ? null : Number(t.max_pax),
-          price_per_hour: Number(t.price_per_hour),
+          car_daily_rate: Number(t.car_daily_rate),
+          driver_price_per_hour: Number(t.driver_price_per_hour),
           currency: t.currency,
         })),
       }),
@@ -625,7 +651,7 @@ export default function TransportesPage() {
                                 const maxLabel = tier.max_pax === null ? '∞' : tier.max_pax;
                                 return (
                                   <span key={tier.id} className="text-xs text-gray-600 tabular-nums">
-                                    {tier.min_pax}–{maxLabel} pax · {sym}{tier.price_per_hour}/h
+                                    {tier.min_pax}–{maxLabel} pax · {sym}{tier.car_daily_rate} diária + {sym}{tier.driver_price_per_hour}/h motorista
                                   </span>
                                 );
                               })}

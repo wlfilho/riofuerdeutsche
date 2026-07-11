@@ -1,4 +1,4 @@
-import { getProposalServices } from '@/lib/proposals';
+import { getProposalServices, getTransportTypes } from '@/lib/proposals';
 import { getSettings } from '@/lib/settings';
 import { createClient } from '@/utils/supabase/server';
 import NovaPropostaForm, { type InitialLead } from './NovaPropostaForm';
@@ -9,8 +9,9 @@ export default async function NovaPropostaPage({
   searchParams: Promise<{ lead_id?: string }>;
 }) {
   const { lead_id } = await searchParams;
-  const [services, settings] = await Promise.all([
+  const [services, transportTypes, settings] = await Promise.all([
     getProposalServices(),
+    getTransportTypes(),
     getSettings(),
   ]);
 
@@ -28,6 +29,7 @@ export default async function NovaPropostaPage({
   return (
     <NovaPropostaForm
       services={services}
+      transportTypes={transportTypes}
       defaultGuideRate={settings.guide_rate_eur}
       defaultExchangeRate={settings.default_exchange_rate}
       maxHoursPerDay={settings.max_hours_per_day}

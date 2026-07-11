@@ -286,8 +286,8 @@ async function downloadPDF(proposal: Proposal): Promise<void> {
   for (const line of [
     'William Lantelme Filho',
     'riofuerdeutsche.de',
-    'lantelmew@gmail.com',
-    'WhatsApp: +55 21 99999-9999',
+    'riofuerdeutsche@gmail.com',
+    'WhatsApp: +55 21 99056-4944',
   ]) {
     doc.text(line, mL, y);
     y += 5;

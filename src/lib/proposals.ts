@@ -22,7 +22,10 @@ export interface ProposalTransportTier {
   transport_type_id: string;
   min_pax: number;
   max_pax: number | null;
-  price_per_hour: number;
+  // Diária fixa do veículo, cobrada uma vez por dia de tour em que ele é usado.
+  car_daily_rate: number;
+  // Motorista terceirizado, cobrado pelas horas de deslocamento do dia.
+  driver_price_per_hour: number;
   currency: 'EUR' | 'BRL';
   sort_order: number;
 }
@@ -57,39 +60,10 @@ export interface ProposalService {
   costs: ProposalServiceCost[];
 }
 
-export function getTransportTierForPax(
-  transportType: ProposalTransportType,
-  pax: number,
-): ProposalTransportTier | null {
-  return transportType.tiers.find(
-    t => pax >= t.min_pax && (t.max_pax === null || pax <= t.max_pax),
-  ) ?? null;
-}
-
-export function calcTransportCost(
-  service: ProposalService,
-  pax: number,
-  _exchangeRate: number,
-): { description: string; base_price: number; currency: 'EUR' | 'BRL'; price_type: 'fixed' } | null {
-  const t = service.transport_type;
-  if (!t || t.is_included || t.slug === 'a-pe') return null;
-  if (t.is_manual) return null;
-
-  const tier = getTransportTierForPax(t, pax);
-  if (!tier) return null;
-
-  const hours = (service.transfer_hours_to ?? 0) + (service.transfer_hours_back ?? 0);
-  if (hours === 0) return null;
-
-  return {
-    description: `${t.name} (${hours}h)`,
-    base_price: tier.price_per_hour * hours,
-    currency: tier.currency,
-    price_type: 'fixed',
-  };
-}
-
 export interface ProposalItem {
+  // 'day_transport' marca a linha sintética de carro + motorista de um dia;
+  // ausente/'activity' para atividades normais.
+  kind?: 'activity' | 'day_transport';
   day: string;
   service_slug: string;
   service_name: string;
@@ -104,6 +78,10 @@ export interface ProposalItem {
     total_eur: number;
   }>;
   total_eur: number;
+  // Snapshot: a atividade usa veículo próprio (transporte por faixa)?
+  uses_vehicle?: boolean;
+  // Só em itens 'day_transport': horas de deslocamento cobradas do motorista.
+  transport_hours?: number;
   note: string;
 }
 
