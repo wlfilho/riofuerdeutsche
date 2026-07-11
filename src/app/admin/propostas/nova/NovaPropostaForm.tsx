@@ -7,6 +7,16 @@ import type { Proposal, ProposalService, ProposalTreatment } from '@/lib/proposa
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export type InitialLead = {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  pax: number | null;
+  children: number | null;
+  requested_days: string[] | null;
+};
+
 type EditableItem = {
   _id: string;
   day: string;
@@ -25,17 +35,6 @@ type EditableItem = {
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function generateDays(arrival: string, departure: string): string[] {
-  const days: string[] = [];
-  const cur = new Date(arrival + 'T12:00:00');
-  const end = new Date(departure + 'T12:00:00');
-  while (cur <= end) {
-    days.push(cur.toISOString().split('T')[0]);
-    cur.setDate(cur.getDate() + 1);
-  }
-  return days;
-}
 
 function formatGermanDay(iso: string): string {
   return new Date(iso + 'T12:00:00').toLocaleDateString('de-DE', {
@@ -435,6 +434,7 @@ export default function NovaPropostaForm({
   maxHoursPerDay,
   initialData,
   proposalId,
+  initialLead,
 }: {
   services: ProposalService[];
   defaultGuideRate: number;
@@ -442,6 +442,7 @@ export default function NovaPropostaForm({
   maxHoursPerDay: number;
   initialData?: Proposal;
   proposalId?: string;
+  initialLead?: InitialLead;
 }) {
   const router = useRouter();
   const isEditing = !!proposalId;
@@ -463,25 +464,35 @@ export default function NovaPropostaForm({
     note: item.note,
   }));
 
-  const [clientName, setClientName] = useState(initialData?.client_name ?? '');
-  const [clientEmail, setClientEmail] = useState(initialData?.client_email ?? '');
-  const [clientPhone, setClientPhone] = useState(initialData?.client_phone ?? '');
-  const [pax, setPax] = useState(initialData?.pax ?? 2);
-  const [arrivalDate, setArrivalDate] = useState(initialData?.arrival_date ?? '');
-  const [departureDate, setDepartureDate] = useState(initialData?.departure_date ?? '');
+  const [clientName, setClientName] = useState(initialData?.client_name ?? initialLead?.name ?? '');
+  const [clientEmail, setClientEmail] = useState(initialData?.client_email ?? initialLead?.email ?? '');
+  const [clientPhone, setClientPhone] = useState(initialData?.client_phone ?? initialLead?.phone ?? '');
+  const [pax, setPax] = useState(initialData?.pax ?? initialLead?.pax ?? 2);
   const [treatment, setTreatment] = useState<ProposalTreatment>(initialData?.treatment ?? 'du-ihr');
   const [exchangeRate, setExchangeRate] = useState(initialData?.exchange_rate ?? defaultExchangeRate);
   const [guideRate, setGuideRate] = useState(initialData?.guide_rate ?? defaultGuideRate);
-  const [internalNotes, setInternalNotes] = useState(initialData?.internal_notes ?? '');
+  const [internalNotes, setInternalNotes] = useState(
+    initialData?.internal_notes
+      ?? ((initialLead?.children ?? 0) > 0
+        ? `Grupo com ${initialLead!.children} criança${initialLead!.children !== 1 ? 's' : ''} (não contam no preço).`
+        : '')
+  );
   const [items, setItems] = useState<EditableItem[]>(initialItems);
   const [activeDays, setActiveDays] = useState<string[]>(
-    [...new Set(initialItems.map(i => i.day))].sort()
+    initialItems.length > 0
+      ? [...new Set(initialItems.map(i => i.day))].sort()
+      : [...(initialLead?.requested_days ?? [])].sort()
   );
   const [showDayPicker, setShowDayPicker] = useState(false);
+  const [dayInput, setDayInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<1 | 2>(1);
 
+  // Live daily rate for new proposals only; when editing, the rate stored on
+  // the proposal is a price snapshot and must not silently change.
   useEffect(() => {
+    if (isEditing) return;
     fetch('/api/admin/exchange-rate')
       .then(res => res.json())
       .then(data => {
@@ -490,23 +501,7 @@ export default function NovaPropostaForm({
         }
       })
       .catch(() => {});
-  }, []);
-
-  const allDaysInRange = useMemo(() => {
-    if (!arrivalDate || !departureDate) return [];
-    const arrival = new Date(arrivalDate + 'T12:00:00');
-    const departure = new Date(departureDate + 'T12:00:00');
-    if (isNaN(arrival.getTime()) || isNaN(departure.getTime())) return [];
-    if (departure < arrival) return [];
-    const diffDays = (departure.getTime() - arrival.getTime()) / (1000 * 60 * 60 * 24);
-    if (diffDays > 60) return [];
-    return generateDays(arrivalDate, departureDate);
-  }, [arrivalDate, departureDate]);
-
-  const availableDaysToAdd = useMemo(
-    () => allDaysInRange.filter(d => !activeDays.includes(d)),
-    [allDaysInRange, activeDays],
-  );
+  }, [isEditing]);
 
   const summaryItems = useMemo(
     () => activeDays.flatMap(day => items.filter(i => i.day === day)),
@@ -524,7 +519,8 @@ export default function NovaPropostaForm({
   // ─── Day handlers ─────────────────────────────────────────────────────────────
 
   const handleAddDay = useCallback((date: string) => {
-    setActiveDays(prev => [...prev, date].sort());
+    setActiveDays(prev => (prev.includes(date) ? prev : [...prev, date].sort()));
+    setDayInput('');
     setShowDayPicker(false);
   }, []);
 
@@ -565,13 +561,28 @@ export default function NovaPropostaForm({
     setItems(prev => prev.filter(i => i._id !== id));
   }, []);
 
+  // ─── Step navigation ──────────────────────────────────────────────────────────
+
+  const handleGoToItinerary = () => {
+    setError(null);
+    if (!clientName.trim()) { setError('Name ist Pflichtfeld.'); return; }
+    if (pax < 1) { setError('Mindestens 1 Person.'); return; }
+    setStep(2);
+    window.scrollTo({ top: 0 });
+  };
+
+  const handleBackToData = () => {
+    setError(null);
+    setStep(1);
+    window.scrollTo({ top: 0 });
+  };
+
   // ─── Submit ───────────────────────────────────────────────────────────────────
 
   const handleSubmit = async () => {
     setError(null);
     if (!clientName.trim()) { setError('Name ist Pflichtfeld.'); return; }
     if (pax < 1) { setError('Mindestens 1 Person.'); return; }
-    if (!arrivalDate || !departureDate) { setError('Ankunft und Abreise sind Pflichtfelder.'); return; }
     if (summaryItems.length === 0) { setError('Mindestens eine Leistung im Itinerar hinzufügen.'); return; }
 
     setSubmitting(true);
@@ -596,6 +607,10 @@ export default function NovaPropostaForm({
         });
       });
 
+      // Arrival/departure are derived from the tour days so the proposals
+      // list and the German output (Reisezeitraum) keep working unchanged.
+      const tourDays = [...new Set(cleanItems.map(i => i.day))].sort();
+
       const url = isEditing ? `/api/admin/proposals/${proposalId}` : '/api/admin/proposals';
       const method = isEditing ? 'PUT' : 'POST';
       const res = await fetch(url, {
@@ -606,8 +621,9 @@ export default function NovaPropostaForm({
           client_email: clientEmail.trim(),
           client_phone: clientPhone.trim(),
           pax,
-          arrival_date: arrivalDate,
-          departure_date: departureDate,
+          lead_id: !isEditing ? initialLead?.id : undefined,
+          arrival_date: tourDays[0],
+          departure_date: tourDays[tourDays.length - 1],
           treatment,
           internal_notes: internalNotes.trim(),
           items: cleanItems,
@@ -652,13 +668,42 @@ export default function NovaPropostaForm({
               {isEditing ? 'Proposta bearbeiten' : 'Nova Proposta'}
             </h1>
           </div>
+          {step === 1 ? (
+            <button
+              onClick={handleGoToItinerary}
+              className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Continuar →
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? 'Wird gespeichert…' : isEditing ? 'Änderungen speichern' : 'Gerar Proposta'}
+            </button>
+          )}
+        </div>
+
+        {/* Step indicator */}
+        <div className="flex items-center gap-3 text-sm">
           <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={step === 2 ? handleBackToData : undefined}
+            className={`flex items-center gap-2 ${step === 1 ? 'text-green-700 font-semibold' : 'text-gray-400 hover:text-gray-600 transition-colors'}`}
           >
-            {submitting ? 'Wird gespeichert…' : isEditing ? 'Änderungen speichern' : 'Gerar Proposta'}
+            <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${step === 1 ? 'bg-green-600 text-white' : 'bg-green-100 text-green-700'}`}>
+              {step === 2 ? '✓' : '1'}
+            </span>
+            Dados do cliente
           </button>
+          <div className={`h-px w-10 ${step === 2 ? 'bg-green-300' : 'bg-gray-200'}`} />
+          <div className={`flex items-center gap-2 ${step === 2 ? 'text-green-700 font-semibold' : 'text-gray-400'}`}>
+            <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${step === 2 ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+              2
+            </span>
+            Itinerário
+          </div>
         </div>
 
         {error && (
@@ -667,7 +712,9 @@ export default function NovaPropostaForm({
           </div>
         )}
 
-        {/* ── Section 1: Client data ── */}
+        {/* ── Step 1: Client data ── */}
+        {step === 1 && (
+        <>
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-base font-bold text-gray-900 mb-5">Dados do Cliente</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -693,31 +740,12 @@ export default function NovaPropostaForm({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Data de chegada <span className="text-red-500">*</span>
-              </label>
-              <input type="date" value={arrivalDate} onChange={e => setArrivalDate(e.target.value)} className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Data de saída <span className="text-red-500">*</span>
-              </label>
-              <input type="date" value={departureDate} min={arrivalDate || undefined} onChange={e => setDepartureDate(e.target.value)} className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tratamento <span className="text-red-500">*</span>
               </label>
               <select value={treatment} onChange={e => setTreatment(e.target.value as ProposalTreatment)} className={INPUT_CLS}>
                 <option value="Sie">Sie (formal)</option>
                 <option value="du-ihr">du/ihr (informal)</option>
               </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Taxa de câmbio BRL→EUR <span className="text-red-500">*</span>
-              </label>
-              <input type="number" min="0.001" step="0.001" value={exchangeRate} onChange={e => setExchangeRate(parseFloat(e.target.value) || 0)} className={INPUT_CLS} placeholder="0.17" />
-              <p className="text-xs text-gray-400 mt-1">Cotação do dia carregada automaticamente. Você pode ajustar se necessário.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -736,75 +764,99 @@ export default function NovaPropostaForm({
           </div>
         </div>
 
-        {/* ── Section 2: Itinerary ── */}
+        {/* Step 1 footer */}
+        <div className="flex justify-end pb-10">
+          <button
+            onClick={handleGoToItinerary}
+            className="px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors"
+          >
+            Continuar para o itinerário →
+          </button>
+        </div>
+        </>
+        )}
+
+        {/* ── Step 2: Itinerary ── */}
+        {step === 2 && (
+        <>
+        {/* Client data recap */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-600">
+          <span className="font-semibold text-gray-800">{clientName}</span>
+          <span>{pax} {pax === 1 ? 'pessoa' : 'pessoas'}</span>
+          {activeDays.length > 0 && (
+            <span>{activeDays.length} {activeDays.length === 1 ? 'dia' : 'dias'} de tour</span>
+          )}
+          <span className="text-gray-400">{guideRate} EUR/h · câmbio {exchangeRate}</span>
+          <button
+            onClick={handleBackToData}
+            className="ml-auto text-xs font-semibold text-green-700 hover:text-green-900 transition-colors"
+          >
+            Editar dados
+          </button>
+        </div>
+
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-base font-bold text-gray-900 mb-5">Itinerário</h2>
 
-          {allDaysInRange.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center text-gray-400">
-              <div className="text-3xl mb-3">🗓</div>
-              <p className="text-sm">Preencha as datas de chegada e saída para começar.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {activeDays.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-10 text-center text-gray-400">
-                  <div className="text-3xl mb-3">🗓</div>
-                  <p className="text-sm mb-4">Nenhum dia adicionado ainda.</p>
-                </div>
-              )}
+          <div className="space-y-3">
+            {activeDays.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-10 text-center text-gray-400">
+                <div className="text-3xl mb-3">🗓</div>
+                <p className="text-sm mb-4">Adicione os dias de tour do cliente para montar o itinerário.</p>
+              </div>
+            )}
 
-              {activeDays.map(day => (
-                <DayBlock
-                  key={day}
-                  day={day}
-                  items={items.filter(i => i.day === day)}
-                  services={services}
-                  pax={pax}
-                  exchangeRate={exchangeRate}
-                  guideRate={guideRate}
-                  maxHoursPerDay={maxHoursPerDay}
-                  onAddItem={handleAddItem}
-                  onUpdateItem={handleUpdateItem}
-                  onRemoveItem={handleRemoveItem}
-                  onRemoveDay={() => handleRemoveDay(day)}
-                />
-              ))}
+            {activeDays.map(day => (
+              <DayBlock
+                key={day}
+                day={day}
+                items={items.filter(i => i.day === day)}
+                services={services}
+                pax={pax}
+                exchangeRate={exchangeRate}
+                guideRate={guideRate}
+                maxHoursPerDay={maxHoursPerDay}
+                onAddItem={handleAddItem}
+                onUpdateItem={handleUpdateItem}
+                onRemoveItem={handleRemoveItem}
+                onRemoveDay={() => handleRemoveDay(day)}
+              />
+            ))}
 
-              {availableDaysToAdd.length > 0 && (
-                <div className="pt-1">
-                  {showDayPicker ? (
-                    <div className="flex items-center gap-2">
-                      <select
-                        autoFocus
-                        defaultValue=""
-                        onChange={e => { if (e.target.value) handleAddDay(e.target.value); }}
-                        className={`${INPUT_CLS} max-w-xs`}
-                      >
-                        <option value="" disabled>Selecionar dia…</option>
-                        {availableDaysToAdd.map(d => (
-                          <option key={d} value={d}>{formatGermanDay(d)}</option>
-                        ))}
-                      </select>
-                      <button
-                        onClick={() => setShowDayPicker(false)}
-                        className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        Abbrechen
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowDayPicker(true)}
-                      className="px-4 py-2 text-sm font-semibold border border-dashed border-gray-300 text-gray-500 rounded-lg hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-colors w-full"
-                    >
-                      + Tag hinzufügen
-                    </button>
-                  )}
+            <div className="pt-1">
+              {showDayPicker ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    autoFocus
+                    value={dayInput}
+                    onChange={e => setDayInput(e.target.value)}
+                    className={`${INPUT_CLS} max-w-xs`}
+                  />
+                  <button
+                    onClick={() => { if (dayInput) handleAddDay(dayInput); }}
+                    disabled={!dayInput}
+                    className="px-3 py-2 text-xs font-semibold bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-green-50 hover:border-green-300 hover:text-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Adicionar
+                  </button>
+                  <button
+                    onClick={() => { setShowDayPicker(false); setDayInput(''); }}
+                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    Abbrechen
+                  </button>
                 </div>
+              ) : (
+                <button
+                  onClick={() => setShowDayPicker(true)}
+                  className="px-4 py-2 text-sm font-semibold border border-dashed border-gray-300 text-gray-500 rounded-lg hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-colors w-full"
+                >
+                  + Tag hinzufügen
+                </button>
               )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* ── Section 3: Price Summary ── */}
@@ -839,8 +891,14 @@ export default function NovaPropostaForm({
           </div>
         )}
 
-        {/* Bottom submit */}
-        <div className="flex justify-end pb-10">
+        {/* Step 2 footer */}
+        <div className="flex items-center justify-between pb-10">
+          <button
+            onClick={handleBackToData}
+            className="px-4 py-3 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors"
+          >
+            ← Voltar aos dados
+          </button>
           <button
             onClick={handleSubmit}
             disabled={submitting}
@@ -849,6 +907,8 @@ export default function NovaPropostaForm({
             {submitting ? 'Wird gespeichert…' : isEditing ? 'Änderungen speichern →' : 'Gerar Proposta →'}
           </button>
         </div>
+        </>
+        )}
 
       </div>
     </div>
