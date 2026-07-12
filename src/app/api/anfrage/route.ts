@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { adminWhatsAppNumbers, sendWhatsAppText } from '@/lib/uazapi';
 
 const VALID_SOURCES = ['whatsapp', 'email', 'instagram'] as const;
 
@@ -141,6 +142,24 @@ export async function POST(request: NextRequest) {
         </p>
       `,
     });
+  } catch {
+    // notification failure must not break the client flow
+  }
+
+  // Best-effort WhatsApp notification via uazapi, independent of the email above.
+  try {
+    const daysList = days.map(d => `• ${formatGermanDay(d)}`).join('\n');
+    const text =
+      `🔔 *Nova Anfrage: ${name}*\n\n` +
+      `👥 ${pax} adulto(s)${children > 0 ? ` + ${children} criança(s)` : ''}\n` +
+      `📧 ${email}\n` +
+      `📱 ${phone || '—'}\n` +
+      `🏷️ Origem: ${source}\n\n` +
+      `📅 Dias desejados:\n${daysList}\n\n` +
+      `👉 https://riofuerdeutsche.de/admin/propostas/nova?lead_id=${lead.id}`;
+    await Promise.allSettled(
+      adminWhatsAppNumbers().map(n => sendWhatsAppText(n, text)),
+    );
   } catch {
     // notification failure must not break the client flow
   }
