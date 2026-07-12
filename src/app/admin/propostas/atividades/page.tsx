@@ -576,18 +576,18 @@ export default function AtividadesPage() {
   void editTarget; void setEditTarget;
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
             <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
               <Link href="/admin/propostas" className="hover:text-gray-700 transition-colors">Propostas</Link>
               <span>/</span>
               <span className="text-gray-600">Atividades</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Atividades</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Atividades</h1>
           </div>
           <button
             onClick={openCreate}

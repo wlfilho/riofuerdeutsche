@@ -1160,7 +1160,7 @@ export default function NovaPropostaForm({
   // ─── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-3xl space-y-6">
 
         {/* Header */}

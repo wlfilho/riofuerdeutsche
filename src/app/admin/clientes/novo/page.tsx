@@ -82,7 +82,7 @@ export default function NovoClientePage() {
   };
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-xl">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
@@ -93,7 +93,7 @@ export default function NovoClientePage() {
           <span className="text-gray-600">Neuer Kunde</span>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Neuen Kunden anlegen</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Neuen Kunden anlegen</h1>
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">

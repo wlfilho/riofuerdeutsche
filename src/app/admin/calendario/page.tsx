@@ -25,10 +25,10 @@ export default async function CalendarioPage() {
   const leadOptions = (leadsResult.data ?? []) as TourDateLeadOption[];
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Calendário</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Calendário</h1>
           <p className="text-gray-500 mt-1">Tours fechados e propostas enviadas</p>
         </div>
 

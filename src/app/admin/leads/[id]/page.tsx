@@ -49,7 +49,7 @@ export default async function LeadDetailPage({
   const contacts: LeadContact[] = (contactsResult.data ?? []) as LeadContact[];
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-6xl">
         {/* Header */}
         <LeadHeader lead={lead} />

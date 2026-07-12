@@ -166,10 +166,10 @@ export default function GuideChaptersList() {
   const draftCount = chapters.filter((c) => c.status === 'draft').length;
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <Link
@@ -179,7 +179,7 @@ export default function GuideChaptersList() {
                 ← Übersicht
               </Link>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
               📖 Guide verwalten
             </h1>
             <p className="text-gray-500 mt-1">

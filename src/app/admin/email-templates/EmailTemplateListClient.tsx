@@ -37,7 +37,7 @@ export default function EmailTemplateListClient({ templates }: { templates: Emai
       {templates.map((template) => (
         <div
           key={template.slug}
-          className="bg-white border border-gray-200 rounded-xl p-5 flex items-center justify-between hover:border-green-300 transition-colors"
+          className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-green-300 transition-colors"
         >
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -59,7 +59,7 @@ export default function EmailTemplateListClient({ templates }: { templates: Emai
               })}
             </p>
           </div>
-          <div className="flex items-center gap-3 ml-4 shrink-0">
+          <div className="flex items-center gap-3 sm:ml-4 shrink-0">
             <div className="flex flex-col items-center relative">
               <button
                 onClick={() => handleTestSend(template.slug)}

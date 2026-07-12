@@ -15,8 +15,8 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar fixa */}
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+      {/* Topbar mobile + sidebar desktop */}
       <AdminSidebar />
 
       {/* Conteúdo principal */}

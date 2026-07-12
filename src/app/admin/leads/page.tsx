@@ -68,12 +68,12 @@ export default async function LeadsPage({
   ];
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Leads</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Leads</h1>
             <p className="text-gray-500 mt-1">Anfragen da calculadora e contatos diretos</p>
           </div>
           <LeadManualSheet />

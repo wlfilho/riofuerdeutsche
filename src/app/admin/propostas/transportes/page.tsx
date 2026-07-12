@@ -582,11 +582,11 @@ export default function TransportesPage() {
   };
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-4xl space-y-6">
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Link href="/admin/propostas" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
               Propostas
@@ -618,6 +618,7 @@ export default function TransportesPage() {
               </button>
             </div>
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
@@ -699,6 +700,7 @@ export default function TransportesPage() {
                 })}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>

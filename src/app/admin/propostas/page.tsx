@@ -94,11 +94,11 @@ export default async function PropostasPage() {
   ]);
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Propostas</h1>
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Propostas</h1>
+          <div className="flex flex-wrap items-center gap-2">
             <AnfrageLinkButton />
             <Link
               href="/admin/propostas/nova"

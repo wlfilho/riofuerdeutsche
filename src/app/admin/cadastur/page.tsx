@@ -143,11 +143,11 @@ export default async function CadasturPage({
   };
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Cadastur</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Cadastur</h1>
           <p className="text-gray-500 mt-1">
             Base pública do Ministério do Turismo — guias e agências para prospecção B2B
           </p>
@@ -330,7 +330,7 @@ export default async function CadasturPage({
 
         {/* Paginação */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
+          <div className="flex flex-wrap items-center justify-between gap-2 mt-4 text-sm text-gray-600">
             <p>
               Página {page} de {totalPages.toLocaleString('pt-BR')} · {filteredTotal.toLocaleString('pt-BR')} registros
             </p>

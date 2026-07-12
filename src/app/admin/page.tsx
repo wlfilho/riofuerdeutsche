@@ -187,10 +187,10 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-[1600px]">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-500 mt-1">Visão geral do negócio e da plataforma</p>
         </div>
 
@@ -361,7 +361,7 @@ export default async function DashboardPage() {
               className="bg-white rounded-xl border border-gray-200 p-5 hover:border-green-300 hover:shadow-sm transition-all"
             >
               <p className="text-sm text-gray-500 mb-1">{card.label}</p>
-              <p className="text-3xl font-bold text-gray-900">{card.value}</p>
+              <p className="text-2xl md:text-3xl font-bold text-gray-900">{card.value}</p>
               <p className="text-xs text-gray-400 mt-1">{card.sub}</p>
             </Link>
           ))}

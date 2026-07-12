@@ -55,7 +55,7 @@ export default function CrmViewWrapper({ leads: initialLeads }: { leads: CrmLead
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex items-center bg-gray-100 rounded-lg p-1 gap-1">
           <button
             onClick={() => handleViewChange('kanban')}

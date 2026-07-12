@@ -262,7 +262,7 @@ export default function ClienteDetailPage({
   const posTourEmails = emails.filter(e => e.phase === 'pos_tour');
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-2xl">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
@@ -305,7 +305,7 @@ export default function ClienteDetailPage({
           <>
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">{client.name}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{client.name}</h1>
               <StatusBadge status={client.status} />
             </div>
 

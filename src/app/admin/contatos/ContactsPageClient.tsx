@@ -187,9 +187,13 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Left panel: contact list */}
-      <div className="w-72 flex-shrink-0 border-r border-gray-200 flex flex-col bg-white">
+    <div className="flex h-[calc(100dvh-3.5rem)] md:h-screen overflow-hidden">
+      {/* Left panel: contact list (no mobile some quando um painel está aberto) */}
+      <div
+        className={`w-full md:w-72 flex-shrink-0 border-r border-gray-200 flex-col bg-white ${
+          panel === 'empty' ? 'flex' : 'hidden md:flex'
+        }`}
+      >
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-lg font-bold text-gray-900">Contatos</h1>
@@ -298,7 +302,17 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 overflow-y-auto bg-gray-50">
+      <div className={`flex-1 overflow-y-auto bg-gray-50 ${panel === 'empty' ? 'hidden md:block' : 'block'}`}>
+        {panel !== 'empty' && (
+          <div className="md:hidden sticky top-0 z-10 bg-white border-b border-gray-200 px-3 py-2">
+            <button
+              onClick={() => setPanel('empty')}
+              className="inline-flex items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              ← Contatos
+            </button>
+          </div>
+        )}
         {panel === 'new' && (
           <ContactForm
             mode="new"

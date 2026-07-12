@@ -109,7 +109,7 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
   const draftCount = pages.filter((p) => p.status === 'draft').length;
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-5xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6 flex-wrap">

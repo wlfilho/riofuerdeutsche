@@ -55,11 +55,11 @@ export default async function CrmPage() {
   ];
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-[1600px]">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">CRM</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">CRM</h1>
             <p className="text-gray-500 mt-1">Pipeline de leads e conversões</p>
           </div>
         </div>
