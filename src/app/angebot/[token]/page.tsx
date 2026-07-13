@@ -154,7 +154,8 @@ export default async function AngebotPage({
 
   const valueStack = [
     'Privater deutschsprachiger Guide',
-    'Privatfahrzeug mit Fahrer',
+    'Klimatisiertes Privatfahrzeug mit Fahrer',
+    'Sicherheit & Komfort an erster Stelle',
     `Individuelle Planung – ${isSie ? 'Ihr' : 'euer'} Tempo`,
     'Zahlung erst am Ende der Tour',
   ];

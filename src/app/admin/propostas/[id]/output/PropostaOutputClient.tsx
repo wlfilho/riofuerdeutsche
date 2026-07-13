@@ -424,7 +424,7 @@ async function downloadPDF(proposal: Proposal, bank: DepositBankInfo): Promise<v
       ? '• Speisen und Getränke sind nicht im Preis inbegriffen.'
       : '• Speisen, Getränke und Eintrittsgelder sind nicht im Preis inbegriffen.',
     `• ${deposit > 0 ? 'Die Restzahlung' : 'Die Zahlung'} erfolgt in bar in Euro am Ende der Tour.`,
-    '• Privatfahrzeug mit Fahrer für alle Transfers inklusive.',
+    '• Klimatisiertes Privatfahrzeug mit Fahrer für alle Transfers inklusive.',
     `• Das Programm ist ein Vorschlag und kann ganz nach ${isSie ? 'Ihren' : 'euren'} Wünschen angepasst werden.`,
     ...(proposal.valid_until ? [`• Angebot gültig bis ${formatDate(proposal.valid_until)}.`] : []),
   ];
