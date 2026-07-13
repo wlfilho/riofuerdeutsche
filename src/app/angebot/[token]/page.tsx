@@ -369,7 +369,7 @@ export default async function AngebotPage({
             )}
 
             {/* Value stack: o que o preço compra, no momento da decisão */}
-            <ul className="mt-5 pt-4 border-t border-green-200/60 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 max-w-md mx-auto text-left">
+            <ul className="mt-5 pt-4 border-t border-green-200/60 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 text-left">
               {valueStack.map(benefit => (
                 <li key={benefit} className="flex items-start gap-2 text-[13px] text-green-900/80">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 mt-0.5 text-green-600 shrink-0">
