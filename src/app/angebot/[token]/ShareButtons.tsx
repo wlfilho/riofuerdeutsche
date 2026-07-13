@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-// Compartilhamento do Angebot pelo próprio cliente (com acompanhantes de
-// viagem): WhatsApp, Telegram, e-mail, copiar link e — quando o aparelho
-// suporta — o share nativo do sistema.
-export default function ShareButtons({ url, text }: { url: string; text: string }) {
+// Compartilhamento do Angebot pelo próprio cliente com os parceiros de
+// viagem: WhatsApp, Telegram, e-mail, copiar link e — quando o aparelho
+// suporta — o share nativo do sistema. Só o link, sem texto pré-pronto:
+// a pessoa escreve com as próprias palavras.
+export default function ShareButtons({ url }: { url: string }) {
   const [toastVisible, setToastVisible] = useState(false);
   const [canNativeShare, setCanNativeShare] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -28,7 +29,7 @@ export default function ShareButtons({ url, text }: { url: string; text: string 
 
   const handleNativeShare = async () => {
     try {
-      await navigator.share({ title: 'Angebot — Rio für Deutsche', text, url });
+      await navigator.share({ title: 'Angebot — Rio für Deutsche', url });
     } catch {
       // usuário cancelou o share sheet — nada a fazer
     }
@@ -40,12 +41,12 @@ export default function ShareButtons({ url, text }: { url: string; text: string 
   return (
     <div className="text-center">
       <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.15em] mb-3">
-        Angebot teilen
+        Mit Reisepartnern teilen
       </p>
       <div className="flex items-center justify-center gap-3">
         {/* WhatsApp */}
         <a
-          href={`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`}
+          href={`https://wa.me/?text=${encodeURIComponent(url)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Per WhatsApp teilen"
@@ -59,7 +60,7 @@ export default function ShareButtons({ url, text }: { url: string; text: string 
 
         {/* Telegram */}
         <a
-          href={`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`}
+          href={`https://t.me/share/url?url=${encodeURIComponent(url)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Per Telegram teilen"
@@ -73,7 +74,7 @@ export default function ShareButtons({ url, text }: { url: string; text: string 
 
         {/* E-Mail */}
         <a
-          href={`mailto:?subject=${encodeURIComponent('Angebot für Rio de Janeiro')}&body=${encodeURIComponent(`${text}\n\n${url}`)}`}
+          href={`mailto:?subject=${encodeURIComponent('Angebot für Rio de Janeiro')}&body=${encodeURIComponent(url)}`}
           title="Per E-Mail teilen"
           aria-label="Per E-Mail teilen"
           className={`${btnCls} bg-gray-500`}

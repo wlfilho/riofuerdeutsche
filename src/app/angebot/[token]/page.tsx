@@ -528,12 +528,9 @@ export default async function AngebotPage({
           </p>
         </div>
 
-        {/* ── Compartilhar (cliente → acompanhantes de viagem) ── */}
+        {/* ── Compartilhar (cliente → parceiros de viagem) ── */}
         <div className="pt-2">
-          <ShareButtons
-            url={`https://riofuerdeutsche.de/angebot/${proposal.public_token}`}
-            text="Schau mal – unser persönliches Angebot für Rio de Janeiro 🌴"
-          />
+          <ShareButtons url={`https://riofuerdeutsche.de/angebot/${proposal.public_token}`} />
         </div>
 
         <p className="text-center text-sm text-gray-400 pb-4">Até logo no Rio! 🌴</p>
