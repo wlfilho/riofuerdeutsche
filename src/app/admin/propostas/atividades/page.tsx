@@ -17,6 +17,8 @@ type CostDraft = {
   base_price: number | '';
   currency: 'EUR' | 'BRL';
   price_type: 'fixed' | 'per_pax' | 'per_hour';
+  // true = cobrado na proposta; false = cliente paga no local (valor exibido).
+  include_in_price: boolean;
 };
 
 type FormState = {
@@ -108,7 +110,7 @@ function CostRow({
   onRemove: () => void;
 }) {
   return (
-    <div className="grid grid-cols-[1fr_6rem_5rem_9rem_2rem] gap-2 items-center">
+    <div className="grid grid-cols-[1fr_6rem_5rem_9rem_auto_2rem] gap-2 items-center">
       <input
         type="text"
         value={cost.description}
@@ -142,6 +144,18 @@ function CostRow({
         <option value="per_pax">Por pessoa</option>
         <option value="per_hour">Por hora</option>
       </select>
+      <label
+        className="flex items-center gap-1 cursor-pointer select-none"
+        title="Marcado: entra no preço da proposta. Desmarcado: cliente paga no local (valor exibido na proposta)."
+      >
+        <input
+          type="checkbox"
+          checked={cost.include_in_price}
+          onChange={e => onChange({ include_in_price: e.target.checked })}
+          className="rounded"
+        />
+        <span className="text-xs text-gray-500 whitespace-nowrap">cobrar</span>
+      </label>
       <button
         onClick={onRemove}
         className="p-1.5 text-gray-300 hover:text-red-500 transition-colors rounded"
@@ -191,6 +205,7 @@ function ActivityModal({
       base_price: c.base_price,
       currency: c.currency as CostDraft['currency'],
       price_type: c.price_type as CostDraft['price_type'],
+      include_in_price: c.include_in_price ?? true,
     }))
   );
 
@@ -222,7 +237,7 @@ function ActivityModal({
   const addCost = () =>
     setCosts(prev => [
       ...prev,
-      { _id: Math.random().toString(36).slice(2), description: '', base_price: '', currency: 'EUR', price_type: 'fixed' },
+      { _id: Math.random().toString(36).slice(2), description: '', base_price: '', currency: 'EUR', price_type: 'fixed', include_in_price: true },
     ]);
 
   const updateCost = (id: string, updates: Partial<CostDraft>) =>
@@ -255,6 +270,7 @@ function ActivityModal({
           base_price: Number(c.base_price) || 0,
           currency: c.currency,
           price_type: c.price_type,
+          include_in_price: c.include_in_price,
         })),
       };
 
@@ -338,7 +354,7 @@ function ActivityModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Descrição curta</label>
-                <textarea value={form.description} onChange={set('description')} rows={2} className={`${INPUT_CLS} resize-none`} placeholder="Aparece no PDF da proposta." />
+                <textarea value={form.description} onChange={set('description')} rows={2} className={`${INPUT_CLS} resize-none`} placeholder="Aparece pro cliente embaixo do nome da atividade (link da proposta e PDF). Escreva em alemão." />
               </div>
 
               <div>

@@ -6,6 +6,7 @@ type CostPayload = {
   base_price: number;
   currency: string;
   price_type: string;
+  include_in_price?: boolean;
 };
 
 async function verifyAdmin(): Promise<boolean> {
@@ -101,6 +102,7 @@ export async function POST(request: NextRequest) {
           base_price: c.base_price,
           currency: c.currency,
           price_type: c.price_type,
+          include_in_price: c.include_in_price ?? true,
           sort_order: i,
         }))
       );

@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type {
   Proposal,
+  ProposalPriceDisplay,
   ProposalService,
-  ProposalTransportTier,
   ProposalTransportType,
   ProposalTreatment,
 } from '@/lib/proposals';
@@ -32,6 +32,7 @@ type EditableItem = {
   day: string;
   service_slug: string;
   service_name: string;
+  service_description: string | null;
   duration_hours: number | null;
   transfer_hours_to: number | null;
   transfer_hours_back: number | null;
@@ -40,6 +41,8 @@ type EditableItem = {
     base_price: number;
     currency: 'EUR' | 'BRL';
     price_type: 'fixed' | 'per_pax' | 'per_hour';
+    // true = cobrado na proposta; false = cliente paga no local (só exibido).
+    included: boolean;
   }>;
   // A atividade usa veículo próprio (transporte por faixa)? Entra no custo
   // de transporte do dia (diária do carro + motorista por hora).
@@ -88,42 +91,81 @@ function calcCostEur(
 }
 
 function calcItemAdditionalCosts(item: EditableItem, pax: number, exchangeRate: number): number {
+  // Custos com included=false ficam fora do total: o cliente paga no local
+  // (mas o valor segue exibido na proposta como "Vor Ort zu zahlen").
   return (item.costs ?? []).reduce(
-    (sum, cost) => sum + calcCostEur(cost, pax, item.duration_hours ?? 0, exchangeRate),
+    (sum, cost) => sum + (cost.included ? calcCostEur(cost, pax, item.duration_hours ?? 0, exchangeRate) : 0),
     0,
   );
 }
 
 // Vehicle + third-party driver, priced per itinerary day (NOT per activity)
-// and fully separate from the guide fee: one car daily rate whenever at least
-// one activity of the day needs the own vehicle, plus driver hours for the
-// transfer legs of those activities.
+// and fully separate from the guide fee. Two independent day toggles decide
+// what is charged: uses_rental_car → car daily rate; uses_driver → driver
+// hours over the transfer legs of the day's tier-transport activities.
+type DayToggles = { uses_driver: boolean; uses_rental_car: boolean };
+
+const DEFAULT_DAY_TOGGLES: DayToggles = { uses_driver: true, uses_rental_car: true };
+
+// Tarifas efetivas da proposta: a faixa por pax é só o default — a proposta
+// pode customizar os dois valores. null = nem faixa nem valor manual.
+type TransportRates = {
+  carRate: number | null;
+  driverRate: number | null;
+  currency: 'BRL' | 'EUR';
+  tierLabel: string | null;
+};
+
 type DayTransport =
-  | { status: 'none' }
-  | { status: 'no-tier'; hours: number }
-  | { status: 'ok'; hours: number; tier: ProposalTransportTier; costEur: number };
+  | { status: 'off' }
+  | { status: 'no-rates'; hours: number }
+  | {
+      status: 'ok';
+      hours: number;
+      carCostEur: number;
+      driverCostEur: number;
+      costEur: number;
+    };
 
 function calcDayTransport(
   dayItems: EditableItem[],
-  pax: number,
-  tiers: ProposalTransportTier[],
+  rates: TransportRates,
   exchangeRate: number,
+  toggles: DayToggles,
 ): DayTransport {
-  const vehicleItems = dayItems.filter(i => i.uses_vehicle);
-  if (vehicleItems.length === 0) return { status: 'none' };
+  if (dayItems.length === 0) return { status: 'off' };
+  if (!toggles.uses_driver && !toggles.uses_rental_car) return { status: 'off' };
 
-  const hours = vehicleItems.reduce(
-    (sum, i) => sum + (i.transfer_hours_to ?? 0) + (i.transfer_hours_back ?? 0),
-    0,
-  );
-  const tier = tiers.find(t => pax >= t.min_pax && (t.max_pax === null || pax <= t.max_pax));
-  if (!tier) return { status: 'no-tier', hours };
+  const hours = dayItems
+    .filter(i => i.uses_vehicle)
+    .reduce((sum, i) => sum + (i.transfer_hours_to ?? 0) + (i.transfer_hours_back ?? 0), 0);
+  if (rates.carRate === null && rates.driverRate === null) return { status: 'no-rates', hours };
 
-  const amount = tier.car_daily_rate + tier.driver_price_per_hour * hours;
-  const costEur = tier.currency === 'BRL'
-    ? (exchangeRate > 0 ? amount * exchangeRate : 0)
-    : amount;
-  return { status: 'ok', hours, tier, costEur };
+  const carAmount = toggles.uses_rental_car ? (rates.carRate ?? 0) : 0;
+  const driverAmount = toggles.uses_driver ? (rates.driverRate ?? 0) * hours : 0;
+  const toEur = rates.currency === 'BRL' ? (exchangeRate > 0 ? exchangeRate : 0) : 1;
+  return {
+    status: 'ok',
+    hours,
+    carCostEur: carAmount * toEur,
+    driverCostEur: driverAmount * toEur,
+    costEur: (carAmount + driverAmount) * toEur,
+  };
+}
+
+// Embutir no honorário = o custo existe pro Will, mas não é cobrado por fora.
+// Divide o custo do dia entre a parte cobrada (soma no total do cliente) e a
+// parte embutida (referência interna).
+type EmbedFlags = { car: boolean; driver: boolean };
+
+function splitTransportCost(
+  transport: DayTransport,
+  embed: EmbedFlags,
+): { chargeableEur: number; embeddedEur: number } {
+  if (transport.status !== 'ok') return { chargeableEur: 0, embeddedEur: 0 };
+  const chargeableEur =
+    (embed.car ? 0 : transport.carCostEur) + (embed.driver ? 0 : transport.driverCostEur);
+  return { chargeableEur, embeddedEur: transport.costEur - chargeableEur };
 }
 
 function serviceUsesVehicle(service: ProposalService): boolean {
@@ -556,11 +598,31 @@ function DayScheduleGrid({
                     const eur = calcCostEur(cost, pax, item.duration_hours ?? 0, exchangeRate);
                     return (
                       <div key={cIdx} className="flex items-center justify-between text-xs">
-                        <span className="text-gray-500">
-                          {cost.description}
-                          <span className="text-gray-400"> · {formatCostPrice(cost)}</span>
+                        <label
+                          className="flex items-center gap-1.5 cursor-pointer select-none text-gray-500"
+                          title="Marcado: entra no preço da proposta. Desmarcado: cliente paga no local (valor exibido na proposta)."
+                        >
+                          <input
+                            type="checkbox"
+                            checked={cost.included}
+                            onChange={e => onUpdateItem(item._id, {
+                              costs: item.costs.map((c, j) =>
+                                j === cIdx ? { ...c, included: e.target.checked } : c,
+                              ),
+                            })}
+                            className="rounded"
+                          />
+                          <span>
+                            {cost.description}
+                            <span className="text-gray-400"> · {formatCostPrice(cost)}</span>
+                            {!cost.included && (
+                              <span className="text-amber-600 font-medium"> · pax paga no local</span>
+                            )}
+                          </span>
+                        </label>
+                        <span className={`tabular-nums ml-4 shrink-0 ${cost.included ? 'text-gray-600' : 'text-gray-300 line-through'}`}>
+                          {formatEur(eur)}
                         </span>
-                        <span className="tabular-nums text-gray-600 ml-4 shrink-0">{formatEur(eur)}</span>
                       </div>
                     );
                   })}
@@ -677,10 +739,13 @@ function DayBlock({
   pax,
   exchangeRate,
   guideRate,
-  vehicleTiers,
+  transportRates,
+  embed,
   maxHoursPerDay,
   startTime,
   endTime,
+  toggles,
+  onChangeToggles,
   onChangeStartTime,
   onChangeEndTime,
   onAddItem,
@@ -696,10 +761,13 @@ function DayBlock({
   pax: number;
   exchangeRate: number;
   guideRate: number;
-  vehicleTiers: ProposalTransportTier[];
+  transportRates: TransportRates;
+  embed: EmbedFlags;
   maxHoursPerDay: number;
   startTime: string;
   endTime: string;
+  toggles: DayToggles;
+  onChangeToggles: (patch: Partial<DayToggles>) => void;
   onChangeStartTime: (t: string) => void;
   onChangeEndTime: (t: string) => void;
   onAddItem: (day: string, service: ProposalService, position?: InsertPosition) => void;
@@ -711,10 +779,11 @@ function DayBlock({
 }) {
   const [pickerFor, setPickerFor] = useState<InsertPosition | null>(null);
 
-  const transport = calcDayTransport(items, pax, vehicleTiers, exchangeRate);
+  const transport = calcDayTransport(items, transportRates, exchangeRate, toggles);
+  const { chargeableEur, embeddedEur } = splitTransportCost(transport, embed);
   const dayTotal =
     calcDayItemTotals(items, pax, exchangeRate, guideRate).reduce((s, v) => s + v, 0)
-    + (transport.status === 'ok' ? transport.costEur : 0);
+    + chargeableEur;
   const dayHours = calcDayHours(items);
   const overloaded = dayHours > maxHoursPerDay;
 
@@ -734,15 +803,43 @@ function DayBlock({
             )}
             {transport.status === 'ok' && (
               <p className="text-xs text-gray-500 mt-0.5">
-                🚗 Transporte do dia: diária do carro
-                {transport.hours > 0 && ` + ${transport.hours}h motorista`}
-                {' · '}{formatEur(transport.costEur)}
+                🚗 Transporte do dia:{' '}
+                {[
+                  toggles.uses_rental_car && 'diária do carro',
+                  toggles.uses_driver && `${transport.hours}h motorista`,
+                ].filter(Boolean).join(' + ')}
+                {' · '}{formatEur(chargeableEur)}
+                {embeddedEur > 0 && (
+                  <span className="text-gray-400"> (+{formatEur(embeddedEur)} embutido no honorário)</span>
+                )}
               </p>
             )}
-            {transport.status === 'no-tier' && (
+            {transport.status === 'no-rates' && (
               <p className="text-xs text-amber-600 font-medium mt-1">
-                ⚠️ Sem faixa de transporte para {pax} pessoas — custo de transporte não incluído.
+                ⚠️ Sem faixa de transporte para {pax} pessoas — defina os valores no bloco Transporte acima.
               </p>
+            )}
+            {items.length > 0 && (
+              <div className="flex items-center gap-4 mt-1.5">
+                <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-600">
+                  <input
+                    type="checkbox"
+                    checked={toggles.uses_driver}
+                    onChange={e => onChangeToggles({ uses_driver: e.target.checked })}
+                    className="rounded"
+                  />
+                  Usa motorista
+                </label>
+                <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-600">
+                  <input
+                    type="checkbox"
+                    checked={toggles.uses_rental_car}
+                    onChange={e => onChangeToggles({ uses_rental_car: e.target.checked })}
+                    className="rounded"
+                  />
+                  Carro alugado
+                </label>
+              </div>
             )}
             {overloaded && (
               <p className="text-xs text-amber-600 font-medium mt-1">
@@ -847,6 +944,22 @@ export default function NovaPropostaForm({
     return tierType ? [...tierType.tiers].sort((a, b) => a.min_pax - b.min_pax) : [];
   }, [transportTypes]);
 
+  // Toggles por dia vêm congelados na linha 'day_transport' de cada dia;
+  // propostas antigas sem os campos contam como ambos ligados.
+  const initialToggles: Record<string, DayToggles> = {};
+  for (const item of initialData?.items ?? []) {
+    if (item.kind === 'day_transport') {
+      initialToggles[item.day] = {
+        uses_driver: item.uses_driver ?? true,
+        uses_rental_car: item.uses_rental_car ?? true,
+      };
+    }
+  }
+
+  // Tarifas de transporte e flags "embutido no honorário" congeladas na
+  // proposta salva (qualquer linha day_transport carrega os mesmos valores).
+  const savedTransport = (initialData?.items ?? []).find(i => i.kind === 'day_transport');
+
   // Linhas sintéticas de transporte do dia são recalculadas no submit,
   // então ficam de fora da edição.
   const initialItems: EditableItem[] = (initialData?.items ?? [])
@@ -858,6 +971,8 @@ export default function NovaPropostaForm({
         day: item.day,
         service_slug: item.service_slug,
         service_name: item.service_name,
+        // Propostas antigas sem o snapshot pegam a descrição atual do serviço.
+        service_description: item.service_description ?? service?.description ?? null,
         duration_hours: item.duration_hours,
         transfer_hours_to: item.transfer_hours_to,
         transfer_hours_back: item.transfer_hours_back,
@@ -866,6 +981,7 @@ export default function NovaPropostaForm({
           base_price: c.base_price,
           currency: c.currency,
           price_type: c.price_type,
+          included: c.included ?? true,
         })),
         uses_vehicle: item.uses_vehicle ?? (service ? serviceUsesVehicle(service) : false),
         note: item.note,
@@ -878,9 +994,10 @@ export default function NovaPropostaForm({
   const [pax, setPax] = useState(initialData?.pax ?? initialLead?.pax ?? 2);
   const [treatment, setTreatment] = useState<ProposalTreatment>(initialData?.treatment ?? 'du-ihr');
   const [exchangeRate, setExchangeRate] = useState(initialData?.exchange_rate ?? defaultExchangeRate);
-  // Hourly guide rate comes from /admin/configuracoes; existing proposals keep
-  // the rate they were priced with.
-  const guideRate = initialData?.guide_rate ?? defaultGuideRate;
+  // Hourly guide rate: /admin/configuracoes provides the default, but each
+  // proposal can override it; existing proposals keep the rate they were
+  // priced with.
+  const [guideRate, setGuideRate] = useState(initialData?.guide_rate ?? defaultGuideRate);
   const [internalNotes, setInternalNotes] = useState(
     initialData?.internal_notes
       ?? ((initialLead?.children ?? 0) > 0
@@ -897,6 +1014,27 @@ export default function NovaPropostaForm({
   const [dayInput, setDayInput] = useState('');
   const [dayStartTimes, setDayStartTimes] = useState<Record<string, string>>({});
   const [dayEndTimes, setDayEndTimes] = useState<Record<string, string>>({});
+  // Dias sem entrada usam o default (ambos ligados) — cenário atual do Will.
+  const [dayToggles, setDayToggles] = useState<Record<string, DayToggles>>(initialToggles);
+  // Tarifas de transporte da proposta: null = segue a faixa por pax.
+  const [carRateOverride, setCarRateOverride] = useState<number | null>(
+    savedTransport?.car_daily_rate ?? null,
+  );
+  const [driverRateOverride, setDriverRateOverride] = useState<number | null>(
+    savedTransport?.driver_price_per_hour ?? null,
+  );
+  // Embutir no honorário (por recurso): o custo existe, mas não soma no
+  // total do cliente — está coberto pelo honorário do Will.
+  const [embedCar, setEmbedCar] = useState<boolean>(savedTransport?.car_cost_included ?? false);
+  const [embedDriver, setEmbedDriver] = useState<boolean>(savedTransport?.driver_cost_included ?? false);
+  // O que o cliente vê de preços: só o total final (padrão) ou por dia.
+  const [priceDisplay, setPriceDisplay] = useState<ProposalPriceDisplay>(
+    initialData?.price_display ?? 'total',
+  );
+  // Anzahlung (sinal em EUR); null = proposta sem bloco de sinal.
+  const [depositAmount, setDepositAmount] = useState<number | null>(
+    initialData?.deposit_amount ?? null,
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<1 | 2>(1);
@@ -920,14 +1058,44 @@ export default function NovaPropostaForm({
     [activeDays, items],
   );
 
+  const transportTier = useMemo(
+    () => vehicleTiers.find(t => pax >= t.min_pax && (t.max_pax === null || pax <= t.max_pax)) ?? null,
+    [vehicleTiers, pax],
+  );
+
+  // Faixa por pax como default, override da proposta por cima.
+  const transportRates: TransportRates = useMemo(() => ({
+    carRate: carRateOverride ?? transportTier?.car_daily_rate ?? null,
+    driverRate: driverRateOverride ?? transportTier?.driver_price_per_hour ?? null,
+    currency: transportTier?.currency ?? 'BRL',
+    tierLabel: transportTier ? `${transportTier.min_pax}–${transportTier.max_pax ?? '∞'} pax` : null,
+  }), [carRateOverride, driverRateOverride, transportTier]);
+
+  const getDayToggles = useCallback(
+    (day: string): DayToggles => dayToggles[day] ?? DEFAULT_DAY_TOGGLES,
+    [dayToggles],
+  );
+
+  const handleChangeToggles = useCallback((day: string, patch: Partial<DayToggles>) => {
+    setDayToggles(prev => ({
+      ...prev,
+      [day]: { ...(prev[day] ?? DEFAULT_DAY_TOGGLES), ...patch },
+    }));
+  }, []);
+
+  const embedFlags: EmbedFlags = useMemo(
+    () => ({ car: embedCar, driver: embedDriver }),
+    [embedCar, embedDriver],
+  );
+
   const grandTotal = useMemo(
     () => activeDays.reduce((total, day) => {
       const dayItems = items.filter(i => i.day === day);
       const itemsTotal = calcDayItemTotals(dayItems, pax, exchangeRate, guideRate).reduce((s, v) => s + v, 0);
-      const transport = calcDayTransport(dayItems, pax, vehicleTiers, exchangeRate);
-      return total + itemsTotal + (transport.status === 'ok' ? transport.costEur : 0);
+      const transport = calcDayTransport(dayItems, transportRates, exchangeRate, getDayToggles(day));
+      return total + itemsTotal + splitTransportCost(transport, embedFlags).chargeableEur;
     }, 0),
-    [activeDays, items, pax, exchangeRate, guideRate, vehicleTiers],
+    [activeDays, items, pax, exchangeRate, guideRate, transportRates, getDayToggles, embedFlags],
   );
 
   // ─── Day handlers ─────────────────────────────────────────────────────────────
@@ -941,6 +1109,10 @@ export default function NovaPropostaForm({
   const handleRemoveDay = useCallback((date: string) => {
     setActiveDays(prev => prev.filter(d => d !== date));
     setItems(prev => prev.filter(i => i.day !== date));
+    setDayToggles(prev => {
+      const { [date]: _removed, ...rest } = prev;
+      return rest;
+    });
   }, []);
 
   // ─── Item handlers ────────────────────────────────────────────────────────────
@@ -951,6 +1123,7 @@ export default function NovaPropostaForm({
       day,
       service_slug: service.slug,
       service_name: service.name,
+      service_description: service.description,
       duration_hours: service.duration_hours,
       transfer_hours_to: service.transfer_hours_to,
       transfer_hours_back: service.transfer_hours_back,
@@ -959,6 +1132,7 @@ export default function NovaPropostaForm({
         base_price: c.base_price,
         currency: c.currency,
         price_type: c.price_type,
+        included: c.include_in_price ?? true,
       })),
       uses_vehicle: serviceUsesVehicle(service),
       note: '',
@@ -1068,6 +1242,11 @@ export default function NovaPropostaForm({
       const cleanItems = activeDays.flatMap(day => {
         const dayItems = summaryItems.filter(i => i.day === day);
         const dayTotals = calcDayItemTotals(dayItems, pax, exchangeRate, guideRate);
+
+        const toggles = getDayToggles(day);
+        const transport = calcDayTransport(dayItems, transportRates, exchangeRate, toggles);
+        const { chargeableEur } = splitTransportCost(transport, embedFlags);
+
         const activityRows = dayItems.map((item, idx) => {
           const { _id: _skip, costs, ...rest } = item;
           return {
@@ -1080,42 +1259,57 @@ export default function NovaPropostaForm({
           };
         });
 
-        // Custo do dia (carro + motorista) congelado no jsonb como linha
-        // própria: entra no total_amount somado pelo servidor sem ratear
-        // a diária entre as atividades.
-        const transport = calcDayTransport(dayItems, pax, vehicleTiers, exchangeRate);
-        if (transport.status !== 'ok') return activityRows;
+        // Custo do dia (carro e/ou motorista, conforme os toggles) congelado no
+        // jsonb como linha própria: entra no total_amount somado pelo servidor
+        // sem ratear a diária entre as atividades. A linha é gravada mesmo com
+        // custo zero para toggles e tarifas sobreviverem à edição. As linhas de
+        // `costs` guardam o custo real (referência interna); partes embutidas
+        // no honorário ficam de fora do total_eur da linha.
+        const tierSuffix = transportRates.tierLabel ? ` (${transportRates.tierLabel})` : '';
+        const costs = transport.status === 'ok'
+          ? [
+              ...(toggles.uses_rental_car ? [{
+                description: `Diária do carro${tierSuffix}${embedCar ? ' — embutida no honorário' : ''}`,
+                base_price: transportRates.carRate ?? 0,
+                currency: transportRates.currency,
+                price_type: 'fixed' as const,
+                total_eur: transport.carCostEur,
+              }] : []),
+              ...(toggles.uses_driver ? [{
+                description: `Motorista (${transport.hours}h de deslocamento)${embedDriver ? ' — embutido no honorário' : ''}`,
+                base_price: transportRates.driverRate ?? 0,
+                currency: transportRates.currency,
+                price_type: 'per_hour' as const,
+                total_eur: transport.driverCostEur,
+              }] : []),
+            ]
+          : [];
 
-        const brlToEur = transport.tier.currency === 'BRL'
-          ? (exchangeRate > 0 ? exchangeRate : 0)
-          : 1;
+        const serviceName =
+          toggles.uses_driver && toggles.uses_rental_car ? 'Privattransport (Fahrzeug + Fahrer)'
+          : toggles.uses_driver ? 'Privater Fahrer'
+          : toggles.uses_rental_car ? 'Mietwagen'
+          : 'Privattransport (deaktiviert)';
+
         const transportRow = {
           kind: 'day_transport' as const,
           day,
           service_slug: '__day_transport__',
-          service_name: 'Privattransport (Fahrzeug + Fahrer)',
+          service_name: serviceName,
           duration_hours: null,
           transfer_hours_to: null,
           transfer_hours_back: null,
-          costs: [
-            {
-              description: `Diária do carro (${transport.tier.min_pax}–${transport.tier.max_pax ?? '∞'} pax)`,
-              base_price: transport.tier.car_daily_rate,
-              currency: transport.tier.currency,
-              price_type: 'fixed' as const,
-              total_eur: transport.tier.car_daily_rate * brlToEur,
-            },
-            {
-              description: `Motorista (${transport.hours}h de deslocamento)`,
-              base_price: transport.tier.driver_price_per_hour,
-              currency: transport.tier.currency,
-              price_type: 'per_hour' as const,
-              total_eur: transport.tier.driver_price_per_hour * transport.hours * brlToEur,
-            },
-          ],
+          costs,
           uses_vehicle: false,
-          total_eur: transport.costEur,
-          transport_hours: transport.hours,
+          uses_driver: toggles.uses_driver,
+          uses_rental_car: toggles.uses_rental_car,
+          car_daily_rate: transportRates.carRate,
+          driver_price_per_hour: transportRates.driverRate,
+          transport_currency: transportRates.currency,
+          car_cost_included: embedCar,
+          driver_cost_included: embedDriver,
+          total_eur: chargeableEur,
+          transport_hours: transport.status === 'off' ? 0 : transport.hours,
           note: '',
         };
         return [...activityRows, transportRow];
@@ -1143,6 +1337,8 @@ export default function NovaPropostaForm({
           items: cleanItems,
           exchange_rate: exchangeRate,
           guide_rate: guideRate,
+          price_display: priceDisplay,
+          deposit_amount: depositAmount,
         }),
       });
 
@@ -1261,6 +1457,55 @@ export default function NovaPropostaForm({
                 <option value="du-ihr">du/ihr (informal)</option>
               </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Honorário do guia (€/h)
+                <span className="ml-1 text-xs font-normal text-gray-400">padrão: {defaultGuideRate}</span>
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={guideRate}
+                onChange={e => {
+                  const v = parseFloat(e.target.value);
+                  setGuideRate(Number.isNaN(v) ? 0 : Math.max(0, v));
+                }}
+                className={INPUT_CLS}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Preços na proposta
+                <span className="ml-1 text-xs font-normal text-gray-400">o que o cliente vê</span>
+              </label>
+              <select
+                value={priceDisplay}
+                onChange={e => setPriceDisplay(e.target.value as ProposalPriceDisplay)}
+                className={INPUT_CLS}
+              >
+                <option value="total">Só o total final</option>
+                <option value="per_day">Total por dia + final</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Anzahlung (€)
+                <span className="ml-1 text-xs font-normal text-gray-400">vazio = sem sinal</span>
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="10"
+                value={depositAmount ?? ''}
+                onChange={e => {
+                  const v = parseFloat(e.target.value);
+                  setDepositAmount(Number.isNaN(v) || v <= 0 ? null : v);
+                }}
+                className={INPUT_CLS}
+                placeholder="200"
+              />
+            </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Observações internas{' '}
@@ -1302,6 +1547,92 @@ export default function NovaPropostaForm({
           </button>
         </div>
 
+        {/* ── Transporte da proposta ── */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h2 className="text-base font-bold text-gray-900">🚗 Transporte</h2>
+            <span className="text-xs text-gray-400">
+              {transportTier
+                ? `padrão da faixa ${transportRates.tierLabel} — editável só nesta proposta`
+                : `sem faixa para ${pax} pessoas — defina os valores manualmente`}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Diária do carro ({transportRates.currency === 'EUR' ? '€' : 'R$'})
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={transportRates.carRate ?? ''}
+                onChange={e => {
+                  const v = parseFloat(e.target.value);
+                  setCarRateOverride(Number.isNaN(v) ? null : Math.max(0, v));
+                }}
+                className={INPUT_CLS}
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Motorista ({transportRates.currency === 'EUR' ? '€' : 'R$'}/h)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={transportRates.driverRate ?? ''}
+                onChange={e => {
+                  const v = parseFloat(e.target.value);
+                  setDriverRateOverride(Number.isNaN(v) ? null : Math.max(0, v));
+                }}
+                className={INPUT_CLS}
+                placeholder="0"
+              />
+            </div>
+          </div>
+          {transportTier && (carRateOverride !== null || driverRateOverride !== null) && (
+            <button
+              onClick={() => { setCarRateOverride(null); setDriverRateOverride(null); }}
+              className="mt-2 text-xs font-semibold text-green-700 hover:text-green-900 transition-colors"
+            >
+              ↺ Restaurar padrão da faixa ({transportTier.currency === 'EUR' ? '€' : 'R$'}
+              {transportTier.car_daily_rate} diária + {transportTier.currency === 'EUR' ? '€' : 'R$'}
+              {transportTier.driver_price_per_hour}/h motorista)
+            </button>
+          )}
+          <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Embutir no honorário
+              <span className="ml-2 font-normal normal-case text-gray-400">
+                custo coberto pelo seu honorário — não soma no total do cliente
+              </span>
+            </p>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={embedCar}
+                  onChange={e => setEmbedCar(e.target.checked)}
+                  className="rounded"
+                />
+                Diária do carro
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={embedDriver}
+                  onChange={e => setEmbedDriver(e.target.checked)}
+                  className="rounded"
+                />
+                Motorista
+              </label>
+            </div>
+          </div>
+        </div>
+
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-base font-bold text-gray-900 mb-5">Itinerário</h2>
 
@@ -1322,10 +1653,13 @@ export default function NovaPropostaForm({
                 pax={pax}
                 exchangeRate={exchangeRate}
                 guideRate={guideRate}
-                vehicleTiers={vehicleTiers}
+                transportRates={transportRates}
+                embed={embedFlags}
                 maxHoursPerDay={maxHoursPerDay}
                 startTime={dayStartTimes[day] ?? '08:00'}
                 endTime={dayEndTimes[day] ?? '20:00'}
+                toggles={getDayToggles(day)}
+                onChangeToggles={patch => handleChangeToggles(day, patch)}
                 onChangeStartTime={t => handleChangeStartTime(day, t)}
                 onChangeEndTime={t => handleChangeEndTime(day, t)}
                 onAddItem={handleAddItem}
@@ -1380,6 +1714,9 @@ export default function NovaPropostaForm({
             <div className="space-y-2">
               {activeDays.flatMap(day => {
                 const dayItems = items.filter(i => i.day === day);
+                const toggles = getDayToggles(day);
+                const transport = calcDayTransport(dayItems, transportRates, exchangeRate, toggles);
+                const { chargeableEur, embeddedEur } = splitTransportCost(transport, embedFlags);
                 const dayTotals = calcDayItemTotals(dayItems, pax, exchangeRate, guideRate);
                 const rows = dayItems.map((item, idx) => (
                   <div key={item._id} className="flex items-center justify-between text-sm">
@@ -1394,8 +1731,11 @@ export default function NovaPropostaForm({
                     </span>
                   </div>
                 ));
-                const transport = calcDayTransport(dayItems, pax, vehicleTiers, exchangeRate);
-                if (transport.status === 'ok') {
+                if (transport.status === 'ok' && (chargeableEur > 0 || embeddedEur > 0)) {
+                  const parts = [
+                    toggles.uses_rental_car && 'diária',
+                    toggles.uses_driver && `${transport.hours}h motorista`,
+                  ].filter(Boolean).join(' + ');
                   rows.push(
                     <div key={`${day}-transport`} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2 min-w-0">
@@ -1403,11 +1743,14 @@ export default function NovaPropostaForm({
                           {formatGermanDay(day).split(',')[0]}
                         </span>
                         <span className="text-gray-500 truncate">
-                          🚗 Transporte (diária{transport.hours > 0 ? ` + ${transport.hours}h motorista` : ''})
+                          🚗 Transporte ({parts})
+                          {embeddedEur > 0 && (
+                            <span className="text-gray-400"> · {formatEur(embeddedEur)} embutido</span>
+                          )}
                         </span>
                       </div>
                       <span className="tabular-nums text-gray-700 font-medium ml-4 shrink-0">
-                        {formatEur(transport.costEur)}
+                        {formatEur(chargeableEur)}
                       </span>
                     </div>,
                   );

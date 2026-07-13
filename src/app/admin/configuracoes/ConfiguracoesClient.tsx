@@ -230,6 +230,57 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
                 Acima deste valor, aparece o aviso ⚠️ no itinerário da proposta.
               </p>
             </div>
+
+            {/* Dados bancários da Anzahlung */}
+            <div className="pt-5 border-t border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-900">Anzahlung — dados bancários</h3>
+              <p className="text-xs text-gray-400 mt-0.5 mb-4">
+                Exibidos no bloco &quot;Buchung &amp; Anzahlung&quot; da proposta (link e PDF) quando a
+                proposta tem valor de sinal. O valor é definido em cada proposta.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Kontoinhaber (titular)</label>
+                  <input
+                    type="text"
+                    placeholder="William Lantelme Filho"
+                    value={form.bank_account_holder}
+                    onChange={(e) => set('bank_account_holder', e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Banco</label>
+                  <input
+                    type="text"
+                    placeholder="Revolut"
+                    value={form.bank_name}
+                    onChange={(e) => set('bank_name', e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">IBAN</label>
+                  <input
+                    type="text"
+                    placeholder="LT62 3250 0338 6470 5980"
+                    value={form.bank_iban}
+                    onChange={(e) => set('bank_iban', e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">BIC/SWIFT</label>
+                  <input
+                    type="text"
+                    placeholder="REVOLT21"
+                    value={form.bank_bic}
+                    onChange={(e) => set('bank_bic', e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

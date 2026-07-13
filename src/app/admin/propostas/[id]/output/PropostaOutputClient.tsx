@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import type { Proposal, ProposalStatus } from '@/lib/proposals';
+import type { DepositBankInfo, Proposal, ProposalStatus } from '@/lib/proposals';
 
 // ─── Format helpers ────────────────────────────────────────────────────────────
 
@@ -43,6 +43,13 @@ function calcDayHours(items: { duration_hours: number | null; transfer_hours_to:
   return total;
 }
 
+// Linhas 'day_transport' com custo zero existem só para congelar os toggles do
+// dia (motorista/carro desligados, ou tarifas ainda em placeholder) — ficam
+// fora de tudo que é exibido ou enviado ao cliente.
+function visibleItems(items: Proposal['items']): Proposal['items'] {
+  return items.filter(i => !(i.kind === 'day_transport' && i.total_eur === 0));
+}
+
 const FULL_WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const ABBR_WEEKDAYS = ['So.', 'Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.'];
 
@@ -69,6 +76,58 @@ const STATUS_CONFIG: Record<ProposalStatus, { label: string; className: string }
   rejected: { label: 'Recusada', className: 'bg-red-100 text-red-700' },
 };
 
+// Link público enviado ao cliente — domínio canônico de produção.
+function publicProposalUrl(proposal: Proposal): string {
+  return `https://riofuerdeutsche.de/angebot/${proposal.public_token}`;
+}
+
+// Custos que o cliente paga no local (included=false): fora do total, mas
+// exibidos na proposta para ele se programar. Dedup para atividades repetidas
+// em mais de um dia.
+type OnsiteCost = {
+  activity: string;
+  description: string;
+  base_price: number;
+  currency: 'EUR' | 'BRL';
+  price_type: 'fixed' | 'per_pax' | 'per_hour';
+};
+
+function collectOnsiteCosts(items: Proposal['items']): OnsiteCost[] {
+  const seen = new Set<string>();
+  const out: OnsiteCost[] = [];
+  for (const item of items) {
+    if (item.kind === 'day_transport') continue;
+    for (const c of item.costs ?? []) {
+      if (c.included ?? true) continue;
+      const key = `${item.service_name}|${c.description}|${c.base_price}|${c.currency}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({
+        activity: item.service_name,
+        description: c.description,
+        base_price: c.base_price,
+        currency: c.currency,
+        price_type: c.price_type,
+      });
+    }
+  }
+  return out;
+}
+
+function formatOnsiteCost(c: OnsiteCost, exchangeRate: number | null): string {
+  const sym = c.currency === 'EUR' ? '€' : 'R$';
+  const val = c.base_price % 1 === 0
+    ? c.base_price.toFixed(0)
+    : c.base_price.toFixed(2).replace('.', ',');
+  const approx = c.currency === 'BRL' && exchangeRate
+    ? ` (ca. ${Math.round(c.base_price * exchangeRate)} €)`
+    : '';
+  const suffix = c.price_type === 'per_pax' ? ' pro Person'
+    : c.price_type === 'per_hour' ? ' pro Stunde'
+    : '';
+  return `${sym} ${val}${approx}${suffix}`;
+}
+
 // ─── WhatsApp text generator ───────────────────────────────────────────────────
 
 function generateWhatsAppText(proposal: Proposal): string {
@@ -92,24 +151,53 @@ function generateWhatsAppText(proposal: Proposal): string {
   lines.push('');
   lines.push('🗓 Programm:');
 
+  // O cliente nunca vê preço nem duração por atividade, nem linha de
+  // transporte: o programa lista as atividades, a duração aparece só como
+  // total aproximado do dia (arredondado pra cima) e o preço por dia
+  // (se configurado) e no total.
+  const showDayPrices = proposal.price_display === 'per_day';
   const sortedDays = [...new Set(proposal.items.map(i => i.day))].sort();
   for (const day of sortedDays) {
     const dayItems = proposal.items.filter(i => i.day === day);
+    const activities = dayItems.filter(i => i.kind !== 'day_transport');
+    const dayTotal = dayItems.reduce((sum, i) => sum + i.total_eur, 0);
+    const dayHours = Math.ceil(calcDayHours(activities));
     lines.push('');
-    lines.push(fullGermanDay(day));
-    for (const item of dayItems) {
-      const dur = item.duration_hours ? ` (${formatDuration(item.duration_hours)})` : '';
-      lines.push(`• ${item.service_name}${dur} — ${formatEur(item.total_eur)}`);
+    lines.push(showDayPrices ? `${fullGermanDay(day)} — ${formatEur(dayTotal)}` : fullGermanDay(day));
+    for (const item of activities) {
+      lines.push(`• ${item.service_name}`);
     }
+    if (dayHours > 0) lines.push(`⏱ Dauer: ca. ${dayHours} Std.`);
   }
+
+  const deposit = proposal.deposit_amount ?? 0;
+  const onsiteCosts = collectOnsiteCosts(proposal.items);
 
   lines.push('');
   lines.push(`💰 Gesamtpreis: ${formatEur(proposal.total_amount ?? 0)}`);
   lines.push('');
-  lines.push('ℹ️ Speisen, Getränke und Eintrittsgelder sind nicht im Preis inbegriffen.');
-  lines.push('💳 Zahlung erfolgt in bar in Euro am Ende der Tour.');
+  lines.push(
+    onsiteCosts.length > 0
+      ? 'ℹ️ Speisen und Getränke sind nicht im Preis inbegriffen.'
+      : 'ℹ️ Speisen, Getränke und Eintrittsgelder sind nicht im Preis inbegriffen.'
+  );
+  lines.push(`💳 ${deposit > 0 ? 'Die Restzahlung' : 'Die Zahlung'} erfolgt in bar in Euro am Ende der Tour.`);
+  if (onsiteCosts.length > 0) {
+    lines.push('');
+    lines.push('🎫 Vor Ort zu zahlen (nicht im Preis enthalten):');
+    for (const c of onsiteCosts) {
+      lines.push(`• ${c.activity}: ${c.description} – ${formatOnsiteCost(c, proposal.exchange_rate)}`);
+    }
+  }
+  if (deposit > 0) {
+    lines.push('');
+    lines.push(
+      `📌 Zur verbindlichen Reservierung bitte ich um eine Anzahlung von ${formatEur(deposit)} – alle Details ${isSie ? 'finden Sie' : 'findest du'} im Angebot.`
+    );
+  }
   lines.push('');
-  lines.push(`Das vollständige Angebot als PDF sende ich ${isSie ? 'Ihnen' : 'euch'} im Anhang.`);
+  lines.push(`Das vollständige Angebot ${isSie ? 'können Sie' : 'kannst du'} hier ansehen:`);
+  lines.push(publicProposalUrl(proposal));
   lines.push('');
   lines.push('Bis bald in Rio! 🌴');
   lines.push('Will');
@@ -120,7 +208,7 @@ function generateWhatsAppText(proposal: Proposal): string {
 
 // ─── PDF generator ─────────────────────────────────────────────────────────────
 
-async function downloadPDF(proposal: Proposal): Promise<void> {
+async function downloadPDF(proposal: Proposal, bank: DepositBankInfo): Promise<void> {
   const jsPDFModule = await import('jspdf');
   const JsPDF = jsPDFModule.default;
   const doc = new JsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
@@ -202,7 +290,10 @@ async function downloadPDF(proposal: Proposal): Promise<void> {
 
   // ── Table
   // Columns: date@mL, program@mL+28, duration@mL+110, price (right-aligned)@pageW-mR
+  // O cliente nunca vê preço por atividade nem linha de transporte: cada dia é
+  // um cabeçalho (com o subtotal do dia, se configurado) seguido das atividades.
   const COL = { date: mL, prog: mL + 28, dur: mL + 110, priceR: pageW - mR };
+  const showDayPrices = proposal.price_display === 'per_day';
 
   doc.setFillColor(GREEN_BG);
   doc.rect(mL, y, cW, 8, 'F');
@@ -212,17 +303,32 @@ async function downloadPDF(proposal: Proposal): Promise<void> {
   doc.text('Datum', COL.date + 2, y + 5.5);
   doc.text('Programm', COL.prog + 2, y + 5.5);
   doc.text('Dauer', COL.dur + 2, y + 5.5);
-  doc.text('Preis', COL.priceR - 2, y + 5.5, { align: 'right' });
+  if (showDayPrices) doc.text('Preis', COL.priceR - 2, y + 5.5, { align: 'right' });
   y += 8;
 
   const sortedDays = [...new Set(proposal.items.map(i => i.day))].sort();
 
   for (const day of sortedDays) {
     const dayItems = proposal.items.filter(i => i.day === day);
-    const abbr = abbrGermanDay(day);
+    const activities = dayItems.filter(i => i.kind !== 'day_transport');
+    const dayTotal = dayItems.reduce((sum, i) => sum + i.total_eur, 0);
+    // Duração só como total aproximado do dia, arredondado pra cima.
+    const dayHours = Math.ceil(calcDayHours(activities));
 
-    for (let idx = 0; idx < dayItems.length; idx++) {
-      const item = dayItems[idx];
+    if (y > 250) {
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(DARK);
+    doc.text(abbrGermanDay(day), COL.date + 2, y + 5);
+    if (dayHours > 0) doc.text(`ca. ${dayHours} Std.`, COL.dur + 2, y + 5);
+    if (showDayPrices) doc.text(formatEur(dayTotal), COL.priceR - 2, y + 5, { align: 'right' });
+
+    for (let idx = 0; idx < activities.length; idx++) {
+      const item = activities[idx];
 
       if (y > 260) {
         doc.addPage();
@@ -233,19 +339,33 @@ async function downloadPDF(proposal: Proposal): Promise<void> {
       doc.setFontSize(9);
       doc.setTextColor(DARK);
 
-      if (idx === 0) doc.text(abbr, COL.date + 2, y + 5);
-
       const nameLines = doc.splitTextToSize(item.service_name, 75);
       doc.text(nameLines[0] as string, COL.prog + 2, y + 5);
+      y += 6;
 
-      doc.text(item.duration_hours ? formatDuration(item.duration_hours) : '—', COL.dur + 2, y + 5);
-      doc.text(formatEur(item.total_eur), COL.priceR - 2, y + 5, { align: 'right' });
-
-      doc.setDrawColor(SEPARATOR);
-      doc.setLineWidth(0.2);
-      doc.line(mL, y + 7, pageW - mR, y + 7);
-      y += 7;
+      // Descrição curta da atividade, em cinza, embaixo do nome.
+      if (item.service_description) {
+        doc.setFontSize(8);
+        doc.setTextColor(GRAY);
+        const descLines = doc.splitTextToSize(item.service_description, 100) as string[];
+        for (const line of descLines) {
+          if (y > 265) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.text(line, COL.prog + 2, y + 4);
+          y += 4;
+        }
+        y += 1;
+      } else {
+        y += 1;
+      }
     }
+
+    doc.setDrawColor(SEPARATOR);
+    doc.setLineWidth(0.2);
+    doc.line(mL, y + 1, pageW - mR, y + 1);
+    y += 3;
   }
 
   // Total row
@@ -260,19 +380,102 @@ async function downloadPDF(proposal: Proposal): Promise<void> {
   y += 16;
 
   // ── Footer notes
+  const isSie = proposal.treatment === 'Sie';
+  const deposit = proposal.deposit_amount ?? 0;
+  const onsiteCosts = collectOnsiteCosts(proposal.items);
+
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(GRAY);
   const footerNotes = [
-    '• Speisen, Getränke und Eintrittsgelder sind nicht im Preis inbegriffen.',
-    '• Zahlung erfolgt in bar in Euro am Ende der Tour.',
+    onsiteCosts.length > 0
+      ? '• Speisen und Getränke sind nicht im Preis inbegriffen.'
+      : '• Speisen, Getränke und Eintrittsgelder sind nicht im Preis inbegriffen.',
+    `• ${deposit > 0 ? 'Die Restzahlung' : 'Die Zahlung'} erfolgt in bar in Euro am Ende der Tour.`,
     '• Privatfahrzeug mit Fahrer für alle Transfers inklusive.',
+    `• Das Programm ist ein Vorschlag und kann ganz nach ${isSie ? 'Ihren' : 'euren'} Wünschen angepasst werden.`,
   ];
   for (const note of footerNotes) {
     doc.text(note, mL, y);
     y += 5;
   }
   y += 8;
+
+  // ── Vor Ort zu zahlen (custos que o cliente paga direto, fora do total)
+  if (onsiteCosts.length > 0) {
+    if (y > 240) {
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(GREEN);
+    doc.text('Vor Ort zu zahlen (nicht im Preis enthalten)', mL, y);
+    y += 6;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(DARK);
+    for (const c of onsiteCosts) {
+      if (y > 265) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(
+        `• ${c.activity}: ${c.description} – ${formatOnsiteCost(c, proposal.exchange_rate)}`,
+        mL,
+        y,
+      );
+      y += 5;
+    }
+    y += 8;
+  }
+
+  // ── Buchung & Anzahlung
+  if (deposit > 0) {
+    if (y > 230) {
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(GREEN);
+    doc.text('Buchung & Anzahlung', mL, y);
+    y += 6;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(DARK);
+    const anzahlungText =
+      `Um ${isSie ? 'Ihren' : 'euren'} Wunschtermin verbindlich zu reservieren, bitte ich um eine ` +
+      `Anzahlung von ${formatEur(deposit)}. ${isSie ? 'Bitte beachten Sie' : 'Bitte beachtet'}, dass ` +
+      'dieser Betrag im Falle einer Stornierung nicht zurückerstattet werden kann. ' +
+      'Die Anzahlung kann bequem per Banküberweisung geleistet werden:';
+    const anzahlungLines = doc.splitTextToSize(anzahlungText, cW) as string[];
+    doc.text(anzahlungLines, mL, y);
+    y += anzahlungLines.length * 5 + 3;
+
+    const bankRows: Array<[string, string]> = (
+      [
+        ['Kontoinhaber', bank.account_holder],
+        ['IBAN', bank.iban],
+        ['BIC/SWIFT', bank.bic],
+        ['Bank', bank.bank_name],
+      ] as Array<[string, string]>
+    ).filter(([, v]) => v);
+
+    doc.setFontSize(10);
+    for (const [label, value] of bankRows) {
+      doc.setFont('helvetica', 'bold');
+      doc.text(label, mL, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(value, mL + 43, y);
+      y += 6;
+    }
+    y += 8;
+  }
 
   // ── Contact
   doc.setFont('helvetica', 'bold');
@@ -303,19 +506,28 @@ async function downloadPDF(proposal: Proposal): Promise<void> {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
-export default function PropostaOutputClient({ proposal: initial }: { proposal: Proposal }) {
+export default function PropostaOutputClient({
+  proposal: initial,
+  bank,
+}: {
+  proposal: Proposal;
+  bank: DepositBankInfo;
+}) {
   const [status, setStatus] = useState<ProposalStatus>(initial.status);
   const [statusSaving, setStatusSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
 
   const proposal = useMemo(() => ({ ...initial, status }), [initial, status]);
 
   const whatsappText = useMemo(() => generateWhatsAppText(initial), [initial]);
 
+  const shownItems = useMemo(() => visibleItems(initial.items), [initial.items]);
+
   const sortedDays = useMemo(
-    () => [...new Set(initial.items.map(i => i.day))].sort(),
-    [initial.items]
+    () => [...new Set(shownItems.map(i => i.day))].sort(),
+    [shownItems]
   );
 
   const grandTotal = useMemo(
@@ -325,10 +537,12 @@ export default function PropostaOutputClient({ proposal: initial }: { proposal: 
 
   const grandTotalHours = useMemo(
     () => sortedDays.reduce((sum, day) => {
-      const dayItems = initial.items.filter(i => i.day === day);
+      // Só atividades: a linha day_transport (horas null) distorceria o
+      // compartilhamento do transfer final no calcDayHours.
+      const dayItems = shownItems.filter(i => i.day === day && i.kind !== 'day_transport');
       return sum + calcDayHours(dayItems);
     }, 0),
-    [initial.items, sortedDays]
+    [shownItems, sortedDays]
   );
 
   const handleStatusChange = async (newStatus: ProposalStatus) => {
@@ -353,10 +567,16 @@ export default function PropostaOutputClient({ proposal: initial }: { proposal: 
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCopyLink = async () => {
+    await navigator.clipboard.writeText(publicProposalUrl(initial));
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
   const handleDownloadPDF = async () => {
     setPdfLoading(true);
     try {
-      await downloadPDF(proposal);
+      await downloadPDF(proposal, bank);
     } finally {
       setPdfLoading(false);
     }
@@ -411,8 +631,6 @@ export default function PropostaOutputClient({ proposal: initial }: { proposal: 
               [
                 ['Cliente', initial.client_name],
                 ['PAX', `${initial.pax} pessoa${initial.pax !== 1 ? 's' : ''}`],
-                ['Chegada', formatDate(initial.arrival_date)],
-                ['Partida', formatDate(initial.departure_date)],
                 ['Tratamento', initial.treatment === 'Sie' ? 'Sie (formal)' : 'du/ihr (informal)'],
               ] as Array<[string, string]>
             ).map(([label, value]) => (
@@ -421,6 +639,32 @@ export default function PropostaOutputClient({ proposal: initial }: { proposal: 
                 <dd className="text-sm font-medium text-gray-800">{value}</dd>
               </div>
             ))}
+
+            {/* Dias de tour (chegada/partida são derivadas deles) */}
+            <div className="flex items-start gap-4">
+              <dt className="text-sm text-gray-400 w-28 shrink-0">
+                Dias de tour
+                {sortedDays.length > 0 && (
+                  <span className="block text-xs text-gray-300">
+                    {sortedDays.length} {sortedDays.length === 1 ? 'dia' : 'dias'}
+                  </span>
+                )}
+              </dt>
+              <dd className="flex flex-wrap gap-1.5">
+                {sortedDays.length === 0 ? (
+                  <span className="text-sm font-medium text-gray-800">—</span>
+                ) : (
+                  sortedDays.map(day => (
+                    <span
+                      key={day}
+                      className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-50 text-green-800 tabular-nums"
+                    >
+                      {abbrGermanDay(day)}
+                    </span>
+                  ))
+                )}
+              </dd>
+            </div>
 
             {/* Status — inline editable */}
             <div className="flex items-center gap-4">
@@ -447,6 +691,28 @@ export default function PropostaOutputClient({ proposal: initial }: { proposal: 
                     <span className="text-xs text-gray-400">Salvando…</span>
                   )}
                 </div>
+              </dd>
+            </div>
+
+            {/* Link público do cliente */}
+            <div className="flex items-center gap-4">
+              <dt className="text-sm text-gray-400 w-28 shrink-0">Link cliente</dt>
+              <dd className="flex items-center gap-2 min-w-0">
+                {/* href relativo pra abrir também no dev/túnel; o copiado é o canônico */}
+                <a
+                  href={`/angebot/${initial.public_token}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-green-700 hover:underline truncate"
+                >
+                  {publicProposalUrl(initial).replace('https://', '')}
+                </a>
+                <button
+                  onClick={handleCopyLink}
+                  className="text-xs font-semibold px-2 py-1 rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors shrink-0"
+                >
+                  {linkCopied ? '✓ Copiado' : 'Copiar'}
+                </button>
               </dd>
             </div>
 
@@ -478,9 +744,9 @@ export default function PropostaOutputClient({ proposal: initial }: { proposal: 
                 </tr>
               </thead>
               {sortedDays.map(day => {
-                const dayItems = initial.items.filter(i => i.day === day);
+                const dayItems = shownItems.filter(i => i.day === day);
                 const dayTotal = dayItems.reduce((sum, i) => sum + i.total_eur, 0);
-                const dayHours = calcDayHours(dayItems);
+                const dayHours = calcDayHours(dayItems.filter(i => i.kind !== 'day_transport'));
                 return (
                   <tbody key={day}>
                     <tr className="bg-green-50 border-t border-green-100">

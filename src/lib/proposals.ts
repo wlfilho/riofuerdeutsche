@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
 
 export type ProposalServiceCategory = 'transfer' | 'tour' | 'extra' | 'atração';
 export type ProposalServiceCostCurrency = 'EUR' | 'BRL';
@@ -6,6 +7,9 @@ export type ProposalServiceCostType = 'fixed' | 'per_pax' | 'per_hour';
 export type ProposalServicePeriod = 'morning' | 'afternoon' | 'evening' | 'full_day';
 export type ProposalStatus = 'draft' | 'sent' | 'accepted' | 'rejected';
 export type ProposalTreatment = 'Sie' | 'du-ihr';
+// O que o cliente vê de preços no PDF/WhatsApp: só o total final, ou também o
+// subtotal por dia. Preço por atividade nunca é exibido ao cliente.
+export type ProposalPriceDisplay = 'total' | 'per_day';
 
 export interface ProposalServiceCost {
   id: string;
@@ -14,6 +18,9 @@ export interface ProposalServiceCost {
   base_price: number;
   currency: ProposalServiceCostCurrency;
   price_type: ProposalServiceCostType;
+  // Default da atividade: true = cobrado na proposta; false = cliente paga no
+  // local (o valor ainda é exibido na proposta). Ajustável por proposta.
+  include_in_price: boolean;
   sort_order: number;
 }
 
@@ -67,6 +74,9 @@ export interface ProposalItem {
   day: string;
   service_slug: string;
   service_name: string;
+  // Descrição curta da atividade (proposal_services.description), congelada na
+  // proposta — aparece embaixo do nome no link público e no PDF.
+  service_description?: string | null;
   duration_hours: number | null;
   transfer_hours_to: number | null;
   transfer_hours_back: number | null;
@@ -75,6 +85,9 @@ export interface ProposalItem {
     base_price: number;
     currency: ProposalServiceCostCurrency;
     price_type: ProposalServiceCostType;
+    // false = cliente paga no local (fora do total, exibido como "Vor Ort zu
+    // zahlen"). Ausência (propostas antigas) = true.
+    included?: boolean;
     total_eur: number;
   }>;
   total_eur: number;
@@ -82,6 +95,20 @@ export interface ProposalItem {
   uses_vehicle?: boolean;
   // Só em itens 'day_transport': horas de deslocamento cobradas do motorista.
   transport_hours?: number;
+  // Só em itens 'day_transport': toggles do dia congelados na proposta.
+  // Ausência (propostas antigas) equivale a ambos ligados.
+  uses_driver?: boolean;
+  uses_rental_car?: boolean;
+  // Só em 'day_transport': tarifas congeladas usadas no cálculo (default da
+  // faixa ou customizadas na proposta), na moeda transport_currency.
+  car_daily_rate?: number | null;
+  driver_price_per_hour?: number | null;
+  transport_currency?: 'BRL' | 'EUR';
+  // Custo embutido no honorário do guia: existe pro Will (aparece nas linhas
+  // de `costs` como referência interna), mas NÃO soma no total do cliente —
+  // o total_eur da linha carrega só a parte cobrada por fora.
+  car_cost_included?: boolean;
+  driver_cost_included?: boolean;
   note: string;
 }
 
@@ -98,6 +125,11 @@ export interface Proposal {
   total_amount: number | null;
   exchange_rate: number | null;
   guide_rate: number | null;
+  price_display: ProposalPriceDisplay;
+  // Anzahlung (sinal em EUR) pedido pra reservar; null/0 = proposta sem sinal.
+  deposit_amount: number | null;
+  // Token do link público /angebot/[token] enviado ao cliente.
+  public_token: string;
   status: ProposalStatus;
   internal_notes: string | null;
   pdf_url: string | null;
@@ -117,6 +149,37 @@ export interface ProposalFormData {
   items: ProposalItem[];
   exchange_rate: number;
   guide_rate: number;
+  price_display: ProposalPriceDisplay;
+  deposit_amount: number | null;
+}
+
+// Dados bancários do bloco "Buchung & Anzahlung" (site_settings, linha única).
+export interface DepositBankInfo {
+  account_holder: string;
+  iban: string;
+  bic: string;
+  bank_name: string;
+}
+
+// site_settings tem RLS restrito ao admin; a página pública /angebot precisa
+// dos dados bancários, então a leitura usa a service role — só no servidor.
+export async function getDepositBankInfo(): Promise<DepositBankInfo> {
+  const admin = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+  const { data } = await admin
+    .from('site_settings')
+    .select('bank_account_holder, bank_iban, bank_bic, bank_name')
+    .eq('key', 'email_assinatura')
+    .single();
+
+  return {
+    account_holder: data?.bank_account_holder ?? '',
+    iban: data?.bank_iban ?? '',
+    bic: data?.bank_bic ?? '',
+    bank_name: data?.bank_name ?? '',
+  };
 }
 
 export async function getTransportTypes(): Promise<ProposalTransportType[]> {
@@ -170,6 +233,27 @@ export async function getProposalById(id: string): Promise<Proposal | null> {
     if (error.code === 'PGRST116') return null;
     throw new Error(error.message);
   }
+  return data as Proposal;
+}
+
+// Página pública /angebot/[token]: proposals tem RLS restrito ao admin, então
+// a busca por token usa a service role — só roda no servidor.
+export async function getProposalByPublicToken(token: string): Promise<Proposal | null> {
+  // Evita erro de cast do Postgres em tokens que nem são UUID.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)) {
+    return null;
+  }
+  const admin = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+  const { data, error } = await admin
+    .from('proposals')
+    .select('*')
+    .eq('public_token', token)
+    .single();
+
+  if (error) return null;
   return data as Proposal;
 }
 
