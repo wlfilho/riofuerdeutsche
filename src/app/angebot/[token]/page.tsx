@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getDepositBankInfo, getProposalByPublicToken, type ProposalItem } from '@/lib/proposals';
+import CopyButton from './CopyButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -407,13 +408,14 @@ export default async function AngebotPage({
                   ['Bank', bank.bank_name, false],
                 ] as Array<[string, string, boolean]>
               ).filter(([, v]) => v).map(([label, value, mono]) => (
-                <div key={label} className="flex flex-wrap items-center gap-x-4 gap-y-0.5 px-4 py-2.5">
+                <div key={label} className="flex flex-wrap items-center gap-x-4 gap-y-0.5 px-4 py-2">
                   <dt className="w-28 shrink-0 text-xs font-semibold text-gray-400 uppercase tracking-wide">
                     {label}
                   </dt>
-                  <dd className={`text-gray-800 break-all ${mono ? 'font-mono text-[13px] font-medium' : 'font-medium'}`}>
+                  <dd className={`flex-1 min-w-0 text-gray-800 ${mono ? 'font-mono text-[13px] font-medium break-all' : 'font-medium break-words'}`}>
                     {value}
                   </dd>
+                  <CopyButton value={value} label={label} />
                 </div>
               ))}
             </dl>
