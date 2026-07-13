@@ -207,7 +207,10 @@ export default async function AngebotPage({
         </header>
 
         {/* ── Begrüßung + Über mich (avatar sobrepondo a borda do card) ── */}
-        <div className="relative bg-white rounded-2xl border border-gray-200 shadow-sm px-6 pt-14 pb-6 sm:px-7 sm:pb-7 !mt-16">
+        {/* O wrapper reserva o espaço que o avatar ocupa acima do card, pra
+            nunca colidir com os chips do header, independente de viewport. */}
+        <div className="pt-12">
+        <div className="relative bg-white rounded-2xl border border-gray-200 shadow-sm px-6 pt-14 pb-6 sm:px-7 sm:pb-7">
           <Image
             src="/images/rio-will.webp"
             alt="Will – Ihr deutschsprachiger Guide in Rio"
@@ -225,6 +228,7 @@ export default async function AngebotPage({
             <SectionTitle>Über mich</SectionTitle>
             <p className="mt-2 text-sm text-gray-600 leading-relaxed">{aboutText}</p>
           </div>
+        </div>
         </div>
 
         {/* ── Übersicht ── */}
