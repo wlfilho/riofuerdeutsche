@@ -128,6 +128,8 @@ export interface Proposal {
   price_display: ProposalPriceDisplay;
   // Anzahlung (sinal em EUR) pedido pra reservar; null/0 = proposta sem sinal.
   deposit_amount: number | null;
+  // "Angebot gültig bis" (ISO date); null = sem prazo de validade.
+  valid_until: string | null;
   // Token do link público /angebot/[token] enviado ao cliente.
   public_token: string;
   status: ProposalStatus;
@@ -151,6 +153,7 @@ export interface ProposalFormData {
   guide_rate: number;
   price_display: ProposalPriceDisplay;
   deposit_amount: number | null;
+  valid_until: string | null;
 }
 
 // Dados bancários do bloco "Buchung & Anzahlung" (site_settings, linha única).

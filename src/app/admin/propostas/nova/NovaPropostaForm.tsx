@@ -1035,6 +1035,12 @@ export default function NovaPropostaForm({
   const [depositAmount, setDepositAmount] = useState<number | null>(
     initialData?.deposit_amount ?? null,
   );
+  // "Angebot gültig bis": default +14 dias em proposta nova; vazio = sem prazo.
+  const [validUntil, setValidUntil] = useState<string>(
+    initialData
+      ? (initialData.valid_until ?? '')
+      : new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<1 | 2>(1);
@@ -1339,6 +1345,7 @@ export default function NovaPropostaForm({
           guide_rate: guideRate,
           price_display: priceDisplay,
           deposit_amount: depositAmount,
+          valid_until: validUntil || null,
         }),
       });
 
@@ -1504,6 +1511,18 @@ export default function NovaPropostaForm({
                 }}
                 className={INPUT_CLS}
                 placeholder="200"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Gültig bis
+                <span className="ml-1 text-xs font-normal text-gray-400">vazio = sem prazo</span>
+              </label>
+              <input
+                type="date"
+                value={validUntil}
+                onChange={e => setValidUntil(e.target.value)}
+                className={INPUT_CLS}
               />
             </div>
             <div className="sm:col-span-2">

@@ -173,8 +173,23 @@ function generateWhatsAppText(proposal: Proposal): string {
   const deposit = proposal.deposit_amount ?? 0;
   const onsiteCosts = collectOnsiteCosts(proposal.items);
 
+  // Reframing: mesmo valor na menor unidade honesta (pessoa × dia).
+  const total = proposal.total_amount ?? 0;
+  const priceUnits = proposal.pax * sortedDays.length;
+  const perPersonDay = priceUnits > 1 && total > 0 ? total / priceUnits : null;
+
   lines.push('');
-  lines.push(`💰 Gesamtpreis: ${formatEur(proposal.total_amount ?? 0)}`);
+  lines.push(`💰 Gesamtpreis: ${formatEur(total)}`);
+  if (perPersonDay) {
+    lines.push(
+      Number.isInteger(perPersonDay)
+        ? `✦ nur €${perPersonDay} pro Person und Tag`
+        : `✦ nur ca. €${Math.round(perPersonDay)} pro Person und Tag`
+    );
+  }
+  if (proposal.valid_until) {
+    lines.push(`⏳ Angebot gültig bis ${formatDate(proposal.valid_until)}`);
+  }
   lines.push('');
   lines.push(
     onsiteCosts.length > 0
@@ -377,7 +392,24 @@ async function downloadPDF(proposal: Proposal, bank: DepositBankInfo): Promise<v
   doc.setTextColor(GREEN);
   doc.text('Gesamt', COL.prog + 2, y + 6);
   doc.text(formatEur(proposal.total_amount ?? 0), COL.priceR - 2, y + 6, { align: 'right' });
-  y += 16;
+  y += 12;
+
+  // Reframing: mesmo valor na menor unidade honesta (pessoa × dia).
+  const pdfTotal = proposal.total_amount ?? 0;
+  const pdfUnits = proposal.pax * sortedDays.length;
+  const pdfPerUnit = pdfUnits > 1 && pdfTotal > 0 ? pdfTotal / pdfUnits : null;
+  if (pdfPerUnit) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(GRAY);
+    const label = Number.isInteger(pdfPerUnit)
+      ? `nur €${pdfPerUnit} pro Person und Tag`
+      : `nur ca. €${Math.round(pdfPerUnit)} pro Person und Tag`;
+    doc.text(label, COL.priceR - 2, y, { align: 'right' });
+    y += 8;
+  } else {
+    y += 4;
+  }
 
   // ── Footer notes
   const isSie = proposal.treatment === 'Sie';
@@ -394,6 +426,7 @@ async function downloadPDF(proposal: Proposal, bank: DepositBankInfo): Promise<v
     `• ${deposit > 0 ? 'Die Restzahlung' : 'Die Zahlung'} erfolgt in bar in Euro am Ende der Tour.`,
     '• Privatfahrzeug mit Fahrer für alle Transfers inklusive.',
     `• Das Programm ist ein Vorschlag und kann ganz nach ${isSie ? 'Ihren' : 'euren'} Wünschen angepasst werden.`,
+    ...(proposal.valid_until ? [`• Angebot gültig bis ${formatDate(proposal.valid_until)}.`] : []),
   ];
   for (const note of footerNotes) {
     doc.text(note, mL, y);
@@ -632,6 +665,7 @@ export default function PropostaOutputClient({
                 ['Cliente', initial.client_name],
                 ['PAX', `${initial.pax} pessoa${initial.pax !== 1 ? 's' : ''}`],
                 ['Tratamento', initial.treatment === 'Sie' ? 'Sie (formal)' : 'du/ihr (informal)'],
+                ...(initial.valid_until ? [['Gültig bis', formatDate(initial.valid_until)]] : []),
               ] as Array<[string, string]>
             ).map(([label, value]) => (
               <div key={label} className="flex items-center gap-4">
