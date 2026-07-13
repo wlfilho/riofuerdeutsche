@@ -206,23 +206,21 @@ export default async function AngebotPage({
           </div>
         </header>
 
-        {/* ── Begrüßung + Über mich ── */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-7">
-          <div className="flex items-start gap-4">
-            <Image
-              src="/images/rio-will.webp"
-              alt="Will – Ihr deutschsprachiger Guide in Rio"
-              width={96}
-              height={96}
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover object-[50%_62%] ring-4 ring-green-100 shrink-0"
-            />
-            <p className="text-[15px] text-gray-800 leading-relaxed">
-              Hallo {firstName},
-              <br />
-              vielen Dank für {isSie ? 'Ihr' : 'dein'} Interesse! Hier ist das persönliche Angebot,
-              das ich für {isSie ? 'Sie' : 'euch'} vorbereitet habe.
-            </p>
-          </div>
+        {/* ── Begrüßung + Über mich (avatar sobrepondo a borda do card) ── */}
+        <div className="relative bg-white rounded-2xl border border-gray-200 shadow-sm px-6 pt-14 pb-6 sm:px-7 sm:pb-7 !mt-16">
+          <Image
+            src="/images/rio-will.webp"
+            alt="Will – Ihr deutschsprachiger Guide in Rio"
+            width={112}
+            height={112}
+            className="absolute -top-11 left-1/2 -translate-x-1/2 w-[88px] h-[88px] rounded-full object-cover object-[50%_62%] ring-4 ring-white shadow-lg"
+          />
+          <p className="text-[15px] text-gray-800 leading-relaxed text-center max-w-md mx-auto">
+            Hallo {firstName},
+            <br />
+            vielen Dank für {isSie ? 'Ihr' : 'dein'} Interesse! Hier ist das persönliche Angebot,
+            das ich für {isSie ? 'Sie' : 'euch'} vorbereitet habe.
+          </p>
           <div className="mt-5 pt-5 border-t border-gray-100">
             <SectionTitle>Über mich</SectionTitle>
             <p className="mt-2 text-sm text-gray-600 leading-relaxed">{aboutText}</p>
