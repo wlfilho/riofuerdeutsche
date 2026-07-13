@@ -412,10 +412,12 @@ export default async function AngebotPage({
                   <dt className="w-28 shrink-0 text-xs font-semibold text-gray-400 uppercase tracking-wide">
                     {label}
                   </dt>
-                  <dd className={`flex-1 min-w-0 text-gray-800 ${mono ? 'font-mono text-[13px] font-medium break-all' : 'font-medium break-words'}`}>
-                    {value}
+                  <dd className="flex-1 min-w-0 flex items-center gap-1.5">
+                    <span className={`text-gray-800 ${mono ? 'font-mono text-[13px] font-medium break-all' : 'font-medium break-words'}`}>
+                      {value}
+                    </span>
+                    <CopyButton value={value} label={label} />
                   </dd>
-                  <CopyButton value={value} label={label} />
                 </div>
               ))}
             </dl>
