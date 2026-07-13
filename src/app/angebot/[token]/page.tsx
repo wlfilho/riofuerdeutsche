@@ -183,57 +183,46 @@ export default async function AngebotPage({
     <div className="min-h-screen bg-gray-100 py-6 px-4 sm:py-10">
       <div className="max-w-2xl mx-auto space-y-5">
 
-        {/* ── Hero: capa fotográfica do Rio ── */}
-        <div className="relative rounded-3xl overflow-hidden shadow-lg">
-          <Image
-            src="/images/dona-marta.webp"
-            alt="Blick auf den Corcovado, Rio de Janeiro"
-            fill
-            priority
-            sizes="(max-width: 700px) 100vw, 672px"
-            className="object-cover"
-          />
-          {/* Overlay: escuro embaixo (texto), foto respirando em cima */}
-          <div className="absolute inset-0 bg-gradient-to-t from-green-950/95 via-green-950/50 to-green-900/15" />
-          <div className="relative px-6 pt-28 pb-8 sm:px-10 sm:pt-40 sm:pb-10">
-            <p className="text-[11px] font-bold tracking-[0.3em] text-green-200 uppercase">
-              Rio für Deutsche
-            </p>
-            <p className="mt-4 text-sm text-green-100/85">Persönliches Angebot für</p>
-            <h1 className="mt-0.5 text-3xl sm:text-5xl font-extrabold text-white leading-tight">
-              {displayName}
-            </h1>
-            <p className="mt-2 text-sm text-green-100/80">
-              Ihr persönlicher deutschsprachiger Guide in Rio de Janeiro
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {heroChips.map(chip => (
-                <span
-                  key={chip}
-                  className="px-3 py-1.5 rounded-full bg-white/15 border border-white/10 text-sm font-medium text-white backdrop-blur-md whitespace-nowrap"
-                >
-                  {chip}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Begrüßung + Über mich (avatar sobrepondo a capa) ── */}
-        <div className="relative bg-white rounded-2xl border border-gray-200 shadow-sm px-6 pt-14 pb-6 sm:px-7 sm:pb-7 !mt-12">
-          <Image
-            src="/images/rio-will.webp"
-            alt="Will – Ihr deutschsprachiger Guide in Rio"
-            width={112}
-            height={112}
-            className="absolute -top-11 left-1/2 -translate-x-1/2 w-[88px] h-[88px] rounded-full object-cover object-[50%_62%] ring-4 ring-white shadow-lg"
-          />
-          <p className="text-[15px] text-gray-800 leading-relaxed text-center max-w-md mx-auto">
-            Hallo {firstName},
-            <br />
-            vielen Dank für {isSie ? 'Ihr' : 'dein'} Interesse! Hier ist das persönliche Angebot,
-            das ich für {isSie ? 'Sie' : 'euch'} vorbereitet habe.
+        {/* ── Header: tipográfico, compacto, estilo papel timbrado ── */}
+        <header className="text-center pt-2">
+          <p className="text-[11px] font-bold tracking-[0.3em] text-green-700 uppercase">
+            Rio für Deutsche
           </p>
+          <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
+            Angebot für {displayName}
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Ihr persönlicher deutschsprachiger Guide in Rio de Janeiro
+          </p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {heroChips.map(chip => (
+              <span
+                key={chip}
+                className="px-3 py-1.5 rounded-full bg-white border border-gray-200 shadow-sm text-[13px] font-medium text-gray-600 whitespace-nowrap"
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
+        </header>
+
+        {/* ── Begrüßung + Über mich ── */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-7">
+          <div className="flex items-start gap-4">
+            <Image
+              src="/images/rio-will.webp"
+              alt="Will – Ihr deutschsprachiger Guide in Rio"
+              width={96}
+              height={96}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover object-[50%_62%] ring-4 ring-green-100 shrink-0"
+            />
+            <p className="text-[15px] text-gray-800 leading-relaxed">
+              Hallo {firstName},
+              <br />
+              vielen Dank für {isSie ? 'Ihr' : 'dein'} Interesse! Hier ist das persönliche Angebot,
+              das ich für {isSie ? 'Sie' : 'euch'} vorbereitet habe.
+            </p>
+          </div>
           <div className="mt-5 pt-5 border-t border-gray-100">
             <SectionTitle>Über mich</SectionTitle>
             <p className="mt-2 text-sm text-gray-600 leading-relaxed">{aboutText}</p>
