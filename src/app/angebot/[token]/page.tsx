@@ -151,11 +151,6 @@ export default async function AngebotPage({
   // sentido quando há mais de uma unidade.
   const priceUnits = proposal.pax * sortedDays.length;
   const perPersonDay = priceUnits > 1 && grandTotal > 0 ? grandTotal / priceUnits : null;
-  const perPersonDayLabel = perPersonDay
-    ? Number.isInteger(perPersonDay)
-      ? `nur €${perPersonDay} pro Person und Tag`
-      : `nur ca. €${Math.round(perPersonDay)} pro Person und Tag`
-    : null;
 
   const valueStack = [
     'Privater deutschsprachiger Guide',
@@ -337,27 +332,37 @@ export default async function AngebotPage({
             </div>
           )}
 
-          <div className="bg-green-50 px-6 py-5 border-t border-green-100">
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-              <div>
-                <p className="text-sm font-bold text-green-800">💰 Gesamtpreis</p>
-                <p className="text-xs text-green-700/70">
+          <div className="bg-green-50 px-6 py-6 border-t border-green-100 text-center">
+            {/* Unidade menor em destaque; o total segue logo abaixo, sempre visível */}
+            {perPersonDay ? (
+              <>
+                <p className="text-3xl sm:text-4xl font-extrabold text-green-700 tabular-nums leading-none">
+                  {Number.isInteger(perPersonDay) ? `€${perPersonDay}` : `ca. €${Math.round(perPersonDay)}`}
+                </p>
+                <p className="mt-1.5 text-sm font-semibold text-green-600">pro Person und Tag</p>
+                <p className="mt-2.5 text-sm text-green-900/80">
+                  Gesamtpreis: <strong className="tabular-nums">{formatEur(grandTotal)}</strong>
+                  <span className="text-green-700/60">
+                    {' '}· {proposal.pax} {proposal.pax === 1 ? 'Person' : 'Personen'} ·{' '}
+                    {sortedDays.length} {sortedDays.length === 1 ? 'Tourtag' : 'Tourtage'}
+                  </span>
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-3xl sm:text-4xl font-extrabold text-green-700 tabular-nums leading-none">
+                  {formatEur(grandTotal)}
+                </p>
+                <p className="mt-1.5 text-sm font-semibold text-green-600">Gesamtpreis</p>
+                <p className="mt-2.5 text-sm text-green-700/60">
                   {proposal.pax} {proposal.pax === 1 ? 'Person' : 'Personen'} ·{' '}
                   {sortedDays.length} {sortedDays.length === 1 ? 'Tourtag' : 'Tourtage'}
                 </p>
-              </div>
-              <div className="text-left sm:text-right">
-                <p className="text-2xl font-extrabold text-green-700 tabular-nums leading-none">
-                  {formatEur(grandTotal)}
-                </p>
-                {perPersonDayLabel && (
-                  <p className="mt-1 text-xs font-semibold text-green-600">✦ {perPersonDayLabel}</p>
-                )}
-              </div>
-            </div>
+              </>
+            )}
 
             {/* Value stack: o que o preço compra, no momento da decisão */}
-            <ul className="mt-4 pt-4 border-t border-green-200/60 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+            <ul className="mt-5 pt-4 border-t border-green-200/60 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 max-w-md mx-auto text-left">
               {valueStack.map(benefit => (
                 <li key={benefit} className="flex items-start gap-2 text-[13px] text-green-900/80">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 mt-0.5 text-green-600 shrink-0">
@@ -369,11 +374,11 @@ export default async function AngebotPage({
             </ul>
 
             {/* CTA: micro-compromisso — a decisão vira a reserva, não o total */}
-            <div className="mt-5 text-center sm:text-left">
+            <div className="mt-6">
               {deposit > 0 && bank ? (
                 <a
                   href="#anzahlung"
-                  className="inline-block w-full sm:w-auto px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm text-center"
+                  className="inline-block w-full sm:w-auto px-8 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
                 >
                   🔒 Wunschtermine für {formatEur(deposit)} sichern
                 </a>
@@ -382,7 +387,7 @@ export default async function AngebotPage({
                   href="https://wa.me/5521990564944"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block w-full sm:w-auto px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm text-center"
+                  className="inline-block w-full sm:w-auto px-8 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
                 >
                   💬 Jetzt Termine sichern
                 </a>
