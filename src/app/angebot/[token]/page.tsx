@@ -3,12 +3,13 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getDepositBankInfo, getProposalByPublicToken, type ProposalItem } from '@/lib/proposals';
 import CopyButton from './CopyButton';
+import ShareButtons from './ShareButtons';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Ihr Reiseangebot — Rio für Deutsche',
-  description: 'Persönliches Reiseangebot für Rio de Janeiro.',
+  title: 'Ihr Angebot — Rio für Deutsche',
+  description: 'Persönliches Tour-Angebot für Rio de Janeiro.',
   robots: { index: false, follow: false },
 };
 
@@ -182,7 +183,7 @@ export default async function AngebotPage({
             Rio für Deutsche
           </p>
           <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold leading-tight">
-            Reiseangebot
+            Angebot
             <span className="block text-lg sm:text-xl font-semibold text-green-100 mt-1">
               für {proposal.client_name}
             </span>
@@ -525,6 +526,14 @@ export default async function AngebotPage({
               riofuerdeutsche.de
             </a>
           </p>
+        </div>
+
+        {/* ── Compartilhar (cliente → acompanhantes de viagem) ── */}
+        <div className="pt-2">
+          <ShareButtons
+            url={`https://riofuerdeutsche.de/angebot/${proposal.public_token}`}
+            text="Schau mal – unser persönliches Angebot für Rio de Janeiro 🌴"
+          />
         </div>
 
         <p className="text-center text-sm text-gray-400 pb-4">Até logo no Rio! 🌴</p>

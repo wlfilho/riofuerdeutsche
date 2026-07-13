@@ -253,7 +253,7 @@ async function downloadPDF(proposal: Proposal, bank: DepositBankInfo): Promise<v
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(13);
   doc.setTextColor(DARK);
-  doc.text('Reiseangebot', mL, y);
+  doc.text('Angebot', mL, y);
   y += 14;
 
   // ── Client data
@@ -534,7 +534,7 @@ async function downloadPDF(proposal: Proposal, bank: DepositBankInfo): Promise<v
   const dateStr = proposal.arrival_date
     ? proposal.arrival_date.split('-').reverse().join('')
     : 'undatum';
-  doc.save(`Reiseangebot_${firstName}_${dateStr}.pdf`);
+  doc.save(`Angebot_${firstName}_${dateStr}.pdf`);
 }
 
 // ─── Main Component ────────────────────────────────────────────────────────────
