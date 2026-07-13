@@ -162,6 +162,7 @@ export default async function AngebotPage({
   const valueStack = [
     'Privater deutschsprachiger Guide',
     'Klimatisiertes Privatfahrzeug mit Fahrer',
+    'Abholung direkt am Hotel',
     'Sicherheit & Komfort an erster Stelle',
     `Individuelle Planung – ${isSie ? 'Ihr' : 'euer'} Tempo`,
     'Zahlung erst am Ende der Tour',
