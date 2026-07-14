@@ -58,9 +58,10 @@ export default function ShareButtons({ url }: { url: string }) {
           </svg>
         </a>
 
-        {/* Telegram */}
+        {/* Telegram — telegram.me em vez de t.me: alguns provedores (BR
+            inclusive) ainda bloqueiam o DNS de t.me; o domínio completo resolve. */}
         <a
-          href={`https://t.me/share/url?url=${encodeURIComponent(url)}`}
+          href={`https://telegram.me/share/url?url=${encodeURIComponent(url)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Per Telegram teilen"
