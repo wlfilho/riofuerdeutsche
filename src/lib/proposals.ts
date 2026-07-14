@@ -292,6 +292,16 @@ export async function createProposal(formData: ProposalFormData): Promise<Propos
   return data as Proposal;
 }
 
+// O status da proposta comanda o funil do lead vinculado no CRM
+// (price_leads.proposal_id): uma mudança aqui move o card do kanban junto,
+// pra não ter que contar a mesma história em duas telas.
+const LEAD_STATUS_BY_PROPOSAL_STATUS: Record<ProposalStatus, string> = {
+  draft: 'contacted',
+  sent: 'proposal_sent',
+  accepted: 'closed',
+  rejected: 'lost',
+};
+
 export async function updateProposalStatus(id: string, status: ProposalStatus): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase
@@ -300,6 +310,17 @@ export async function updateProposalStatus(id: string, status: ProposalStatus): 
     .eq('id', id);
 
   if (error) throw new Error(error.message);
+
+  // Sincroniza o lead vinculado (best-effort: proposta sem lead é normal, e
+  // uma falha aqui não deve derrubar a troca de status da proposta).
+  const { error: leadError } = await supabase
+    .from('price_leads')
+    .update({ status: LEAD_STATUS_BY_PROPOSAL_STATUS[status] })
+    .eq('proposal_id', id);
+
+  if (leadError) {
+    console.error('[updateProposalStatus] failed to sync linked lead:', leadError.message);
+  }
 }
 
 export async function deleteProposal(id: string): Promise<void> {
