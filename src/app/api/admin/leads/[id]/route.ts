@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { syncTourDatesWithLeadStatus } from '@/lib/tourDates';
 import { NextRequest, NextResponse } from 'next/server';
 
 async function verifyAdmin() {
@@ -73,6 +74,12 @@ export async function PATCH(
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Best-effort: falha na sincronização do calendário não derruba a troca de status.
+  if (status !== undefined) {
+    const syncError = await syncTourDatesWithLeadStatus(supabase, id, status);
+    if (syncError) console.error('[leads PATCH] failed to sync tour_dates:', syncError);
+  }
 
   return NextResponse.json({ lead });
 }

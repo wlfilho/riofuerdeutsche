@@ -1,5 +1,7 @@
 // Shared types for tour_dates (calendário de tours)
 
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 export type TourDateStatus = 'proposta_enviada' | 'fechado';
 
 export const TOUR_DATE_STATUS_LABELS: Record<TourDateStatus, string> = {
@@ -45,3 +47,29 @@ export interface TourDateInput {
 }
 
 export const TOUR_DATE_SELECT = '*, lead:price_leads(id, name, email, phone, proposal:proposals(id, pdf_url))';
+
+// Mantém o calendário coerente com o kanban: lead com proposta enviada/fechado
+// atualiza os tours vinculados; lead perdido apaga as datas pra liberar o dia
+// pra outro cliente. new/contacted não mexem no calendário.
+export async function syncTourDatesWithLeadStatus(
+  supabase: SupabaseClient,
+  leadId: string,
+  leadStatus: string,
+): Promise<string | null> {
+  if (leadStatus === 'lost') {
+    const { error } = await supabase.from('tour_dates').delete().eq('lead_id', leadId);
+    return error?.message ?? null;
+  }
+
+  const tourStatus: TourDateStatus | null =
+    leadStatus === 'closed' ? 'fechado'
+    : leadStatus === 'proposal_sent' ? 'proposta_enviada'
+    : null;
+  if (!tourStatus) return null;
+
+  const { error } = await supabase
+    .from('tour_dates')
+    .update({ status: tourStatus })
+    .eq('lead_id', leadId);
+  return error?.message ?? null;
+}

@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { syncTourDatesWithLeadStatus } from '@/lib/tourDates';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 
 export type ProposalServiceCategory = 'transfer' | 'tour' | 'extra' | 'atração';
@@ -313,13 +314,23 @@ export async function updateProposalStatus(id: string, status: ProposalStatus): 
 
   // Sincroniza o lead vinculado (best-effort: proposta sem lead é normal, e
   // uma falha aqui não deve derrubar a troca de status da proposta).
-  const { error: leadError } = await supabase
+  const leadStatus = LEAD_STATUS_BY_PROPOSAL_STATUS[status];
+  const { data: syncedLeads, error: leadError } = await supabase
     .from('price_leads')
-    .update({ status: LEAD_STATUS_BY_PROPOSAL_STATUS[status] })
-    .eq('proposal_id', id);
+    .update({ status: leadStatus })
+    .eq('proposal_id', id)
+    .select('id');
 
   if (leadError) {
     console.error('[updateProposalStatus] failed to sync linked lead:', leadError.message);
+    return;
+  }
+
+  for (const lead of syncedLeads ?? []) {
+    const syncError = await syncTourDatesWithLeadStatus(supabase, lead.id, leadStatus);
+    if (syncError) {
+      console.error('[updateProposalStatus] failed to sync tour_dates:', syncError);
+    }
   }
 }
 
