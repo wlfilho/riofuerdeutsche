@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
-import type { TourDate } from '@/lib/tourDates';
+import type { TourDate, TourDateStatus } from '@/lib/tourDates';
 import TourDateModal, { type TourDateLeadOption } from '@/components/admin/TourDateModal';
 import {
   MONTH_NAMES_PT,
@@ -14,10 +14,8 @@ import {
   toISODate,
   todayISO,
 } from '@/lib/calendarDates';
-import MiniCalendar from './MiniCalendar';
+import MiniCalendar, { type CalendarView as View } from './MiniCalendar';
 import TourList from './TourList';
-
-type View = 'ano' | 'mes' | 'semana';
 
 const VIEW_OPTIONS: { id: View; label: string }[] = [
   { id: 'ano', label: 'Ano' },
@@ -36,14 +34,14 @@ export default function CalendarClient({
   const [view, setView] = useState<View>('mes');
   const [anchorISO, setAnchorISO] = useState<string>(todayISO());
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [onlyClosed, setOnlyClosed] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<TourDateStatus | null>(null);
   const [modal, setModal] = useState<{ editing?: TourDate; defaultDate?: string } | null>(null);
 
   const anchor = useMemo(() => parseISODate(anchorISO), [anchorISO]);
 
   const visibleTours = useMemo(
-    () => (onlyClosed ? tours.filter(t => t.status === 'fechado') : tours),
-    [tours, onlyClosed]
+    () => (statusFilter ? tours.filter(t => t.status === statusFilter) : tours),
+    [tours, statusFilter]
   );
 
   // Tours grouped by day for the mini calendar (server orders by date, time)
@@ -124,25 +122,55 @@ export default function CalendarClient({
       <aside className="w-full lg:w-72 shrink-0 lg:sticky lg:top-6 space-y-4">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <MiniCalendar
+            view={view}
             anchor={anchor}
             toursByDay={toursByDay}
             selectedDay={selectedDay}
             onDayClick={toggleDay}
             onNavigate={setAnchorISO}
+            onMonthClick={iso => {
+              setAnchorISO(iso);
+              switchView('mes');
+            }}
           />
-          <div className="flex items-center justify-center gap-4 text-[11px] text-gray-500 mt-3 pt-3 border-t border-gray-100">
-            <span className="inline-flex items-center gap-1.5">
+          {/* Legend doubles as a status filter: tap to filter, tap again to clear */}
+          <div className="flex items-center justify-center gap-1.5 mt-3 pt-3 border-t border-gray-100">
+            <button
+              onClick={() => setStatusFilter(null)}
+              className={`inline-flex items-center whitespace-nowrap px-2 py-1 text-[11px] font-medium rounded-full border transition-colors ${
+                statusFilter === null
+                  ? 'bg-gray-100 border-gray-300 text-gray-800'
+                  : 'border-transparent text-gray-500 hover:bg-gray-100'
+              }`}
+            >
+              Todos
+            </button>
+            <button
+              onClick={() => setStatusFilter(prev => (prev === 'fechado' ? null : 'fechado'))}
+              className={`inline-flex items-center whitespace-nowrap gap-1.5 px-2 py-1 text-[11px] font-medium rounded-full border transition-colors ${
+                statusFilter === 'fechado'
+                  ? 'bg-green-50 border-green-300 text-green-800'
+                  : 'border-transparent text-gray-500 hover:bg-gray-100'
+              }`}
+            >
               <span className="h-2 w-2 rounded-full bg-green-600" />
               Fechado
-            </span>
-            <span className="inline-flex items-center gap-1.5">
+            </button>
+            <button
+              onClick={() => setStatusFilter(prev => (prev === 'proposta_enviada' ? null : 'proposta_enviada'))}
+              className={`inline-flex items-center whitespace-nowrap gap-1.5 px-2 py-1 text-[11px] font-medium rounded-full border transition-colors ${
+                statusFilter === 'proposta_enviada'
+                  ? 'bg-amber-50 border-amber-300 text-amber-800'
+                  : 'border-transparent text-gray-500 hover:bg-gray-100'
+              }`}
+            >
               <span className="h-2 w-2 rounded-full bg-amber-400" />
-              Proposta Enviada
-            </span>
+              Proposta
+            </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-2">
+        <div className="bg-white rounded-xl border border-gray-200 p-3">
           <div className="grid grid-cols-3 bg-gray-100 rounded-lg p-1 gap-1">
             {VIEW_OPTIONS.map(opt => (
               <button
@@ -155,25 +183,6 @@ export default function CalendarClient({
                 {opt.label}
               </button>
             ))}
-          </div>
-
-          <div className="grid grid-cols-2 bg-gray-100 rounded-lg p-1 gap-1">
-            <button
-              onClick={() => setOnlyClosed(false)}
-              className={`px-2 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                !onlyClosed ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Todos
-            </button>
-            <button
-              onClick={() => setOnlyClosed(true)}
-              className={`px-2 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                onlyClosed ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Só fechados
-            </button>
           </div>
         </div>
 
