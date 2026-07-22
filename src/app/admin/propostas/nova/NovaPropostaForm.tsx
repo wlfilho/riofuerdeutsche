@@ -989,6 +989,7 @@ export default function NovaPropostaForm({
     });
 
   const [clientName, setClientName] = useState(initialData?.client_name ?? initialLead?.name ?? '');
+  const [internalLabel, setInternalLabel] = useState(initialData?.internal_label ?? '');
   const [clientEmail, setClientEmail] = useState(initialData?.client_email ?? initialLead?.email ?? '');
   const [clientPhone, setClientPhone] = useState(initialData?.client_phone ?? initialLead?.phone ?? '');
   const [pax, setPax] = useState(initialData?.pax ?? initialLead?.pax ?? 2);
@@ -1332,6 +1333,7 @@ export default function NovaPropostaForm({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_name: clientName.trim(),
+          internal_label: internalLabel.trim() || null,
           client_email: clientEmail.trim(),
           client_phone: clientPhone.trim(),
           pax,
@@ -1440,6 +1442,13 @@ export default function NovaPropostaForm({
                 Nome <span className="text-red-500">*</span>
               </label>
               <input type="text" value={clientName} onChange={e => setClientName(e.target.value)} className={INPUT_CLS} placeholder="Martin Müller" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Rótulo interno
+                <span className="ml-1 text-xs font-normal text-gray-400">só você vê — ex.: Plano chuva</span>
+              </label>
+              <input type="text" value={internalLabel} onChange={e => setInternalLabel(e.target.value)} className={INPUT_CLS} placeholder="Plano chuva" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
@@ -1553,6 +1562,11 @@ export default function NovaPropostaForm({
         {/* Client data recap */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-600">
           <span className="font-semibold text-gray-800">{clientName}</span>
+          {internalLabel.trim() && (
+            <span className="px-1.5 py-0.5 text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded">
+              {internalLabel.trim()}
+            </span>
+          )}
           <span>{pax} {pax === 1 ? 'pessoa' : 'pessoas'}</span>
           {activeDays.length > 0 && (
             <span>{activeDays.length} {activeDays.length === 1 ? 'dia' : 'dias'} de tour</span>

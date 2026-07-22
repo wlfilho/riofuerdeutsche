@@ -632,6 +632,11 @@ export default function PropostaOutputClient({
             <h1 className="text-xl font-bold text-gray-900 truncate">
               Proposta — {initial.client_name}
             </h1>
+            {initial.internal_label && (
+              <span className="px-1.5 py-0.5 text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded shrink-0">
+                {initial.internal_label}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Link

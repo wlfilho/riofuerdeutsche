@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { Proposal, ProposalStatus } from '@/lib/proposals';
 
 
@@ -16,13 +17,26 @@ function formatEur(amount: number | null): string {
   return `€${amount.toFixed(2).replace('.', ',')}`;
 }
 
+// Dias de tour reais da proposta (únicos, ordenados), extraídos dos itens —
+// chegada/partida são só derivações (primeiro/último dia) e não interessam.
+function getTourDays(p: Proposal): string[] {
+  return [...new Set(p.items.map(i => i.day))].sort();
+}
+
+function formatShortDay(iso: string): string {
+  const [, m, d] = iso.split('-');
+  return `${d}.${m}`;
+}
+
 function buildWhatsAppText(p: Proposal): string {
   const greeting = p.treatment === 'Sie' ? `Guten Tag, ${p.client_name}!` : `Hallo, ${p.client_name}!`;
   const lines: string[] = [greeting, ''];
 
-  if (p.arrival_date || p.departure_date) {
-    if (p.arrival_date) lines.push(`📅 Ankunft: ${formatDate(p.arrival_date)}`);
-    if (p.departure_date) lines.push(`📅 Abreise: ${formatDate(p.departure_date)}`);
+  // Ankunft/Abreise seriam informação errada pro cliente: são só o primeiro e
+  // o último dia de tour. O que importa são os Tourtage.
+  const tourDays = getTourDays(p);
+  if (tourDays.length > 0) {
+    lines.push(`📅 Tourtage: ${tourDays.map(formatDate).join(', ')}`);
   }
   lines.push(`👥 Personen: ${p.pax}`);
   lines.push('');
@@ -117,9 +131,11 @@ function DeleteModal({
 }
 
 export default function PropostasListClient({ initialProposals }: { initialProposals: Proposal[] }) {
+  const router = useRouter();
   const [proposals, setProposals] = useState<Proposal[]>(initialProposals);
   const [deleteTarget, setDeleteTarget] = useState<Proposal | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   const clearToast = useCallback(() => setToast(null), []);
@@ -141,6 +157,27 @@ export default function PropostasListClient({ initialProposals }: { initialPropo
       alert('Netzwerkfehler.');
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  // Duplica a proposta como rascunho e já abre a cópia pra edição — o caso de
+  // uso é o cliente pedir um itinerário alternativo (ex.: plano pra chuva).
+  const handleDuplicate = async (p: Proposal) => {
+    setDuplicatingId(p.id);
+    try {
+      const res = await fetch(`/api/admin/proposals/${p.id}/duplicate`, { method: 'POST' });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error ?? 'Fehler beim Duplizieren.');
+        return;
+      }
+      const copy: Proposal = await res.json();
+      setToast('Proposta dupliziert ✓');
+      router.push(`/admin/propostas/${copy.id}/editar`);
+    } catch {
+      alert('Netzwerkfehler.');
+    } finally {
+      setDuplicatingId(null);
     }
   };
 
@@ -178,8 +215,7 @@ export default function PropostasListClient({ initialProposals }: { initialPropo
               <tr className="bg-gray-50 border-b border-gray-200">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Cliente</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">PAX</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Chegada</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Partida</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Dias de tour</th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Total</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Ações</th>
@@ -188,10 +224,35 @@ export default function PropostasListClient({ initialProposals }: { initialPropo
             <tbody className="divide-y divide-gray-100">
               {proposals.map(p => (
                 <tr key={p.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{p.client_name}</td>
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-gray-900">{p.client_name}</div>
+                    {p.internal_label && (
+                      <span className="inline-block mt-0.5 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded">
+                        {p.internal_label}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-gray-700 tabular-nums">{p.pax}</td>
-                  <td className="px-4 py-3 text-gray-600 tabular-nums">{formatDate(p.arrival_date)}</td>
-                  <td className="px-4 py-3 text-gray-600 tabular-nums">{formatDate(p.departure_date)}</td>
+                  <td className="px-4 py-3 tabular-nums">
+                    {(() => {
+                      const days = getTourDays(p);
+                      if (days.length === 0) return <span className="text-gray-400">—</span>;
+                      const shown = days.slice(0, 4);
+                      return (
+                        <>
+                          <div className="text-gray-700">
+                            {shown.map(formatShortDay).join(' · ')}
+                            {days.length > shown.length && (
+                              <span className="text-gray-400"> +{days.length - shown.length}</span>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {days.length} {days.length === 1 ? 'dia' : 'dias'} · {days[0].slice(0, 4)}
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </td>
                   <td className="px-4 py-3 text-right text-gray-700 tabular-nums font-medium">
                     {formatEur(p.total_amount)}
                   </td>
@@ -222,6 +283,25 @@ export default function PropostasListClient({ initialProposals }: { initialPropo
                           <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                         </svg>
                       </Link>
+
+                      {/* Duplicar proposta */}
+                      <button
+                        onClick={() => handleDuplicate(p)}
+                        disabled={duplicatingId !== null}
+                        title="Proposta duplizieren"
+                        className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {duplicatingId === p.id ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 12a9 9 0 11-6.219-8.56" strokeLinecap="round" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" />
+                            <path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z" />
+                          </svg>
+                        )}
+                      </button>
 
                       {/* Copiar WhatsApp */}
                       <button

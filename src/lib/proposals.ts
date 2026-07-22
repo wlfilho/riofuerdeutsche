@@ -116,6 +116,9 @@ export interface ProposalItem {
 export interface Proposal {
   id: string;
   client_name: string;
+  // Rótulo interno (ex.: "Plano chuva") pra diferenciar propostas do mesmo
+  // cliente no admin; nunca aparece pro cliente.
+  internal_label: string | null;
   client_email: string | null;
   client_phone: string | null;
   pax: number;
@@ -142,6 +145,7 @@ export interface Proposal {
 
 export interface ProposalFormData {
   client_name: string;
+  internal_label: string | null;
   client_email: string;
   client_phone: string;
   pax: number;
@@ -284,6 +288,46 @@ export async function createProposal(formData: ProposalFormData): Promise<Propos
     .insert({
       ...formData,
       total_amount,
+      status: 'draft' satisfies ProposalStatus,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data as Proposal;
+}
+
+// Cria uma nova proposta (rascunho) a partir de uma existente — caso típico:
+// o cliente pede um itinerário alternativo (ex.: plano B pra dia de chuva).
+// A cópia não herda id, public_token (o DB gera um novo), pdf_url nem status.
+// A marca de cópia vai no rótulo interno; client_name fica intacto porque é o
+// título da proposta que o cliente vê.
+export async function duplicateProposal(id: string): Promise<Proposal> {
+  const original = await getProposalById(id);
+  if (!original) throw new Error('Proposta não encontrada.');
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('proposals')
+    .insert({
+      client_name: original.client_name,
+      internal_label: original.internal_label
+        ? `${original.internal_label} (Kopie)`
+        : 'Kopie',
+      client_email: original.client_email,
+      client_phone: original.client_phone,
+      pax: original.pax,
+      arrival_date: original.arrival_date,
+      departure_date: original.departure_date,
+      treatment: original.treatment,
+      items: original.items,
+      total_amount: original.total_amount,
+      exchange_rate: original.exchange_rate,
+      guide_rate: original.guide_rate,
+      price_display: original.price_display,
+      deposit_amount: original.deposit_amount,
+      valid_until: original.valid_until,
+      internal_notes: original.internal_notes,
       status: 'draft' satisfies ProposalStatus,
     })
     .select()
