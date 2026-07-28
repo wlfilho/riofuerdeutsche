@@ -2,27 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
-
-```bash
-# Development (with Turbopack)
-npm run dev
-
-# Production build
-npm run build
-
-# Start production server
-npm start
-
-# Lint
-npm run lint
-```
-
 ## Architecture Overview
 
 **Rio für Deutsche** is a German-language membership platform for a Rio de Janeiro tour guide. It uses a freemium model: one free guide chapter, rest locked behind premium.
-
-**Stack:** Next.js 16 (App Router) · TypeScript 5 · Tailwind CSS 4 · Supabase (auth + DB) · TipTap (WYSIWYG editor) · Framer Motion
 
 ### Route Structure & Access Control
 
@@ -70,11 +52,3 @@ Guide chapters and pages are stored as **TipTap JSON** in the database (`guide_c
 - Admin moderation at `/admin/bewertungen`
 - NPS feedback token generated per user, collected at `/nps`
 - Supabase Edge Function `supabase/functions/notify-new-review` triggers on insert (Deno runtime)
-
-### Image Domains
-
-Remote images allowed from Unsplash and Pexels only (configured in `next.config.ts`).
-
-### Path Alias
-
-`@/*` maps to `./src/*`.
