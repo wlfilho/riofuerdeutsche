@@ -326,7 +326,7 @@ function CrmTab({ leads, lead_contacts }: { leads: Lead[]; lead_contacts: LeadCo
 
           {lead.proposal_id && (
             <a
-              href={`/admin/propostas/${lead.proposal_id}`}
+              href={`/admin/propostas/${lead.proposal_id}/output`}
               className="inline-flex items-center gap-1.5 text-sm text-green-700 hover:underline"
             >
               📋 Ver proposta vinculada

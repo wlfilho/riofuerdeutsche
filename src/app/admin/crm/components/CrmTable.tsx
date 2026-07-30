@@ -209,7 +209,7 @@ export default function CrmTable({
                         {/* Proposta */}
                         {lead.proposal_id ? (
                           <Link
-                            href={`/admin/propostas/${lead.proposal_id}`}
+                            href={`/admin/propostas/${lead.proposal_id}/output`}
                             title="Ver proposta"
                             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           >

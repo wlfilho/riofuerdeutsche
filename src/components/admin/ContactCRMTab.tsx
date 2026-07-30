@@ -400,7 +400,7 @@ function ProposalLink({ proposalId }: { proposalId: string }) {
           {badge.label}
         </span>
       )}
-      <a href={`/admin/propostas/${proposalId}`} className="text-xs text-green-600 hover:underline font-medium">
+      <a href={`/admin/propostas/${proposalId}/output`} className="text-xs text-green-600 hover:underline font-medium">
         Ver proposta
       </a>
     </div>

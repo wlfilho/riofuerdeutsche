@@ -277,7 +277,7 @@ export default function LeadDrawer({
               )}
               {lead.proposal_id && (
                 <Link
-                  href={`/admin/propostas/${lead.proposal_id}`}
+                  href={`/admin/propostas/${lead.proposal_id}/output`}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
                 >
                   <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
