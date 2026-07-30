@@ -355,7 +355,7 @@ function ServicePickerModal({
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-          <h3 className="text-base font-bold text-gray-900">Leistung hinzufügen</h3>
+          <h3 className="text-base font-bold text-gray-900">Adicionar serviço</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">
             ✕
           </button>
@@ -391,7 +391,7 @@ function ServicePickerModal({
             );
           })}
           {services.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-6">Keine Leistungen verfügbar.</p>
+            <p className="text-sm text-gray-400 text-center py-6">Nenhum serviço disponível.</p>
           )}
         </div>
       </div>
@@ -499,7 +499,7 @@ function DayScheduleGrid({
                 {seg.insert && (
                   <button
                     onClick={() => onRequestAdd(seg.insert!)}
-                    title="Leistung hier einfügen"
+                    title="Inserir serviço aqui"
                     className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-5 h-5 flex items-center justify-center rounded-full bg-white border border-gray-300 text-gray-400 text-xs leading-none hover:border-green-400 hover:text-green-600 shadow-sm transition-colors"
                   >
                     +
@@ -633,7 +633,7 @@ function DayScheduleGrid({
                   value={item.note}
                   onChange={e => onUpdateItem(item._id, { note: e.target.value })}
                   className={INPUT_CLS}
-                  placeholder="Anmerkung (z.B. GIG → Ipanema)"
+                  placeholder="Anotação (ex.: GIG → Ipanema)"
                 />
 
                 <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-gray-200">
@@ -704,7 +704,7 @@ function DayScheduleGrid({
 
         {segments.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-xs text-gray-300">Dia livre — adicione uma Leistung acima.</p>
+            <p className="text-xs text-gray-300">Dia livre — adicione um serviço acima.</p>
           </div>
         )}
       </div>
@@ -797,7 +797,7 @@ function DayBlock({
             <p className="text-sm font-semibold text-gray-800">{formatGermanDay(day)}</p>
             {items.length > 0 && (
               <p className="text-xs text-gray-400 mt-0.5">
-                {items.length} Leistung{items.length !== 1 ? 'en' : ''} · {formatEur(dayTotal)}
+                {items.length} serviço{items.length !== 1 ? 's' : ''} · {formatEur(dayTotal)}
                 {dayHours > 0 && ` · ${dayHours}h`}
               </p>
             )}
@@ -867,7 +867,7 @@ function DayBlock({
             </div>
             <button
               onClick={onRemoveDay}
-              title="Tag entfernen"
+              title="Remover dia"
               className="p-1.5 text-gray-300 hover:text-red-500 transition-colors rounded"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -880,7 +880,7 @@ function DayBlock({
           onClick={() => setPickerFor('end')}
           className="mt-2 w-full px-3 py-1.5 text-xs font-semibold bg-white border border-dashed border-gray-300 text-gray-500 rounded-lg hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-colors"
         >
-          + Leistung hinzufügen
+          + Adicionar serviço
         </button>
       </div>
 
@@ -1263,8 +1263,8 @@ export default function NovaPropostaForm({
 
   const handleGoToItinerary = () => {
     setError(null);
-    if (!clientName.trim()) { setError('Name ist Pflichtfeld.'); return; }
-    if (pax < 1) { setError('Mindestens 1 Person.'); return; }
+    if (!clientName.trim()) { setError('Nome é obrigatório.'); return; }
+    if (pax < 1) { setError('Mínimo de 1 pessoa.'); return; }
     setStep(2);
     window.scrollTo({ top: 0 });
   };
@@ -1279,9 +1279,9 @@ export default function NovaPropostaForm({
 
   const handleSubmit = async () => {
     setError(null);
-    if (!clientName.trim()) { setError('Name ist Pflichtfeld.'); return; }
-    if (pax < 1) { setError('Mindestens 1 Person.'); return; }
-    if (summaryItems.length === 0) { setError('Mindestens eine Leistung im Itinerar hinzufügen.'); return; }
+    if (!clientName.trim()) { setError('Nome é obrigatório.'); return; }
+    if (pax < 1) { setError('Mínimo de 1 pessoa.'); return; }
+    if (summaryItems.length === 0) { setError('Adicione ao menos um serviço ao itinerário.'); return; }
 
     setSubmitting(true);
     try {
@@ -1391,12 +1391,12 @@ export default function NovaPropostaForm({
       });
 
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? 'Fehler beim Speichern.'); return; }
+      if (!res.ok) { setError(data.error ?? 'Erro ao salvar.'); return; }
 
       setDirty(false); // salvo: libera a guarda de saída antes de navegar
       router.push(`/admin/propostas/${data.id}/output`);
     } catch {
-      setError('Netzwerkfehler. Bitte versuche es erneut.');
+      setError('Erro de rede. Tente novamente.');
     } finally {
       setSubmitting(false);
     }
@@ -1424,7 +1424,7 @@ export default function NovaPropostaForm({
               </>
             )}
             <h1 className="text-2xl font-bold text-gray-900">
-              {isEditing ? 'Proposta bearbeiten' : 'Nova Proposta'}
+              {isEditing ? 'Editar Proposta' : 'Nova Proposta'}
             </h1>
           </div>
           {singlePage ? (
@@ -1433,7 +1433,7 @@ export default function NovaPropostaForm({
               disabled={submitting || !dirty}
               className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Wird gespeichert…' : dirty ? 'Änderungen speichern' : 'Gespeichert'}
+              {submitting ? 'Salvando…' : dirty ? 'Salvar alterações' : 'Salvo'}
             </button>
           ) : step === 1 ? (
             <button
@@ -1448,7 +1448,7 @@ export default function NovaPropostaForm({
               disabled={submitting}
               className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Wird gespeichert…' : 'Gerar Proposta'}
+              {submitting ? 'Salvando…' : 'Gerar Proposta'}
             </button>
           )}
         </div>
@@ -1779,7 +1779,7 @@ export default function NovaPropostaForm({
                     onClick={() => { setShowDayPicker(false); setDayInput(''); }}
                     className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    Abbrechen
+                    Cancelar
                   </button>
                 </div>
               ) : (
@@ -1787,7 +1787,7 @@ export default function NovaPropostaForm({
                   onClick={() => setShowDayPicker(true)}
                   className="px-4 py-2 text-sm font-semibold border border-dashed border-gray-300 text-gray-500 rounded-lg hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-colors w-full"
                 >
-                  + Tag hinzufügen
+                  + Adicionar dia
                 </button>
               )}
             </div>
@@ -1846,7 +1846,7 @@ export default function NovaPropostaForm({
               })}
             </div>
             <div className="mt-4 pt-4 border-t-2 border-gray-200 flex items-center justify-between">
-              <span className="font-semibold text-gray-600">Gesamtbetrag</span>
+              <span className="font-semibold text-gray-600">Valor total</span>
               <span className="text-2xl font-bold text-green-600 tabular-nums">
                 {formatEur(grandTotal)}
               </span>
@@ -1868,7 +1868,7 @@ export default function NovaPropostaForm({
             disabled={submitting}
             className="px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Wird gespeichert…' : 'Gerar Proposta →'}
+            {submitting ? 'Salvando…' : 'Gerar Proposta →'}
           </button>
         </div>
         )}
@@ -1892,7 +1892,7 @@ export default function NovaPropostaForm({
               disabled={submitting || !dirty}
               className="px-6 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Wird gespeichert…' : 'Änderungen speichern'}
+              {submitting ? 'Salvando…' : 'Salvar alterações'}
             </button>
           </div>
         </div>
