@@ -1045,6 +1045,14 @@ export default function NovaPropostaForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<1 | 2>(1);
+  // Na edição a proposta vira página única (sem wizard): dados e itinerário
+  // juntos, com salvamento explícito — muda-se uma coisa e salva, sem ter que
+  // atravessar passos (evita "Continuar" ser confundido com salvar).
+  const singlePage = isEditing;
+
+  // Só na edição: rastreia se algo mudou desde que a proposta foi carregada,
+  // pra habilitar o botão de salvar e avisar sobre saída com mudanças pendentes.
+  const [dirty, setDirty] = useState(false);
 
   // Live daily rate for new proposals only; when editing, the rate stored on
   // the proposal is a price snapshot and must not silently change.
@@ -1059,6 +1067,37 @@ export default function NovaPropostaForm({
       })
       .catch(() => {});
   }, [isEditing]);
+
+  // Guarda de saída: avisa o browser se houver mudanças não salvas na edição.
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [dirty]);
+
+  // Snapshot serializado de tudo que é editável. Comparando com o valor do
+  // primeiro render, marca "dirty" assim que qualquer campo muda — mais
+  // confiável que espalhar setDirty por dezenas de onChange/handlers.
+  const formSnapshot = useMemo(
+    () => JSON.stringify({
+      clientName, internalLabel, clientEmail, clientPhone, pax, treatment,
+      exchangeRate, guideRate, internalNotes, items, activeDays, dayStartTimes,
+      dayEndTimes, dayToggles, carRateOverride, driverRateOverride, embedCar,
+      embedDriver, priceDisplay, depositAmount, validUntil,
+    }),
+    [clientName, internalLabel, clientEmail, clientPhone, pax, treatment,
+     exchangeRate, guideRate, internalNotes, items, activeDays, dayStartTimes,
+     dayEndTimes, dayToggles, carRateOverride, driverRateOverride, embedCar,
+     embedDriver, priceDisplay, depositAmount, validUntil],
+  );
+  const pristineSnapshot = useMemo(() => formSnapshot, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (isEditing) setDirty(formSnapshot !== pristineSnapshot);
+  }, [formSnapshot, pristineSnapshot, isEditing]);
 
   const summaryItems = useMemo(
     () => activeDays.flatMap(day => items.filter(i => i.day === day)),
@@ -1354,6 +1393,7 @@ export default function NovaPropostaForm({
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? 'Fehler beim Speichern.'); return; }
 
+      setDirty(false); // salvo: libera a guarda de saída antes de navegar
       router.push(`/admin/propostas/${data.id}/output`);
     } catch {
       setError('Netzwerkfehler. Bitte versuche es erneut.');
@@ -1387,7 +1427,15 @@ export default function NovaPropostaForm({
               {isEditing ? 'Proposta bearbeiten' : 'Nova Proposta'}
             </h1>
           </div>
-          {step === 1 ? (
+          {singlePage ? (
+            <button
+              onClick={handleSubmit}
+              disabled={submitting || !dirty}
+              className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? 'Wird gespeichert…' : dirty ? 'Änderungen speichern' : 'Gespeichert'}
+            </button>
+          ) : step === 1 ? (
             <button
               onClick={handleGoToItinerary}
               className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
@@ -1400,12 +1448,13 @@ export default function NovaPropostaForm({
               disabled={submitting}
               className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Wird gespeichert…' : isEditing ? 'Änderungen speichern' : 'Gerar Proposta'}
+              {submitting ? 'Wird gespeichert…' : 'Gerar Proposta'}
             </button>
           )}
         </div>
 
-        {/* Step indicator */}
+        {/* Step indicator — só no wizard de criação */}
+        {!singlePage && (
         <div className="flex items-center gap-3 text-sm">
           <button
             onClick={step === 2 ? handleBackToData : undefined}
@@ -1424,6 +1473,7 @@ export default function NovaPropostaForm({
             Itinerário
           </div>
         </div>
+        )}
 
         {error && (
           <div className="p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200">
@@ -1431,8 +1481,8 @@ export default function NovaPropostaForm({
           </div>
         )}
 
-        {/* ── Step 1: Client data ── */}
-        {step === 1 && (
+        {/* ── Step 1: Client data ── (na edição, sempre visível junto do resto) */}
+        {(singlePage || step === 1) && (
         <>
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-base font-bold text-gray-900 mb-5">Dados do Cliente</h2>
@@ -1544,7 +1594,8 @@ export default function NovaPropostaForm({
           </div>
         </div>
 
-        {/* Step 1 footer */}
+        {/* Step 1 footer — só no wizard de criação */}
+        {!singlePage && (
         <div className="flex justify-end pb-10">
           <button
             onClick={handleGoToItinerary}
@@ -1553,13 +1604,15 @@ export default function NovaPropostaForm({
             Continuar para o itinerário →
           </button>
         </div>
+        )}
         </>
         )}
 
-        {/* ── Step 2: Itinerary ── */}
-        {step === 2 && (
+        {/* ── Step 2: Itinerary ── (na edição, sempre visível junto do resto) */}
+        {(singlePage || step === 2) && (
         <>
-        {/* Client data recap */}
+        {/* Client data recap — só no wizard; na página única os dados já estão acima */}
+        {!singlePage && (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-600">
           <span className="font-semibold text-gray-800">{clientName}</span>
           {internalLabel.trim() && (
@@ -1579,6 +1632,7 @@ export default function NovaPropostaForm({
             Editar dados
           </button>
         </div>
+        )}
 
         {/* ── Transporte da proposta ── */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -1800,7 +1854,8 @@ export default function NovaPropostaForm({
           </div>
         )}
 
-        {/* Step 2 footer */}
+        {/* Step 2 footer — só no wizard; na edição o salvar fica na barra fixa */}
+        {!singlePage && (
         <div className="flex items-center justify-between pb-10">
           <button
             onClick={handleBackToData}
@@ -1813,13 +1868,35 @@ export default function NovaPropostaForm({
             disabled={submitting}
             className="px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Wird gespeichert…' : isEditing ? 'Änderungen speichern →' : 'Gerar Proposta →'}
+            {submitting ? 'Wird gespeichert…' : 'Gerar Proposta →'}
           </button>
         </div>
+        )}
         </>
         )}
 
+        {/* Espaço pra barra fixa não cobrir o final do conteúdo na edição */}
+        {singlePage && <div className="h-20" />}
+
       </div>
+
+      {/* Barra fixa de salvar (só na edição): sempre acessível, sem passos */}
+      {singlePage && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-gray-200">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-10 py-3 flex items-center justify-between gap-4">
+            <span className={`text-sm ${dirty ? 'text-amber-600 font-medium' : 'text-gray-400'}`}>
+              {dirty ? '● Alterações não salvas' : 'Tudo salvo'}
+            </span>
+            <button
+              onClick={handleSubmit}
+              disabled={submitting || !dirty}
+              className="px-6 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? 'Wird gespeichert…' : 'Änderungen speichern'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
