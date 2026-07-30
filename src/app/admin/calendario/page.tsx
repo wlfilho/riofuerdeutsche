@@ -1,9 +1,14 @@
 import { createClient } from '@/utils/supabase/server';
 import CalendarClient from './components/CalendarClient';
-import { TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
+import { type TourDate } from '@/lib/tourDates';
 import type { TourDateLeadOption } from '@/components/admin/TourDateModal';
 
 export const metadata = { title: 'Calendário — Admin' };
+
+// !inner: filtro por lead.status exclui a linha inteira (tours de lead PERDIDO
+// somem do calendário), em vez de só anular o objeto lead.
+const CALENDAR_TOUR_SELECT =
+  '*, lead:price_leads!inner(id, name, email, phone, status, proposal:proposals(id, pdf_url))';
 
 export default async function CalendarioPage() {
   const supabase = await createClient();
@@ -11,7 +16,9 @@ export default async function CalendarioPage() {
   const [toursResult, leadsResult] = await Promise.all([
     supabase
       .from('tour_dates')
-      .select(TOUR_DATE_SELECT)
+      // Só mostra tours de leads ativos; lead perdido (kanban PERDIDO) some do calendário
+      .select(CALENDAR_TOUR_SELECT)
+      .in('lead.status', ['proposal_sent', 'closed'])
       .order('date', { ascending: true })
       .order('start_time', { ascending: true, nullsFirst: true }),
     supabase
