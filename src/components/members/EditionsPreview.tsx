@@ -1,3 +1,11 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+
+/**
+ * Conteúdo editorial (títulos/itens de cada edição) fica fora do catálogo de
+ * propósito: é texto de marketing, não chrome reutilizável.
+ */
 const editions = [
   {
     id: 1,
@@ -58,6 +66,8 @@ const editions = [
 ]
 
 export default function EditionsPreview() {
+  const t = useTranslations('public.cta.editions')
+
   return (
     <section className="w-full bg-[#f8f5f0] border-t border-[#e8e4dc] py-16 px-6">
       <div className="max-w-6xl mx-auto">
@@ -65,10 +75,10 @@ export default function EditionsPreview() {
         {/* Header */}
         <div className="text-center mb-12">
           <p className="text-xs font-bold uppercase tracking-[1.5px] text-gray-400 mb-3">
-            Was noch kommt
+            {t('wasNochKommt')}
           </p>
           <h2 className="font-heading font-black text-3xl lg:text-4xl text-gray-900 mb-4">
-            Vier Editionen. Ein Preis. Für immer.
+            {t('titel')}
           </h2>
           <p className="text-gray-500 text-base max-w-xl mx-auto leading-relaxed">
             Wer jetzt einsteigt, bekommt alle zukünftigen Editionen kostenlos —
@@ -88,11 +98,11 @@ export default function EditionsPreview() {
                   {edition.number}
                 </span>
                 <span className="inline-flex items-center gap-1.5 bg-[#e8f5e9] text-[#2e7d32] text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full w-fit">
-                  ✓ Verfügbar
+                  {t('verfuegbar')}
                 </span>
                 <div>
                   <p className="font-mono text-[10px] uppercase tracking-widest mb-0.5 text-gray-400">
-                    Edition {edition.id}
+                    {t('edition', { number: String(edition.id) })}
                   </p>
                   <h3 className="font-heading font-black text-xl text-gray-900 leading-tight">
                     {edition.title}
@@ -117,11 +127,11 @@ export default function EditionsPreview() {
                   {edition.number}
                 </span>
                 <span className="inline-flex items-center gap-1.5 bg-[#fff8e1] text-[#b8860b] text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full w-fit">
-                  Demnächst
+                  {t('demnaechst')}
                 </span>
                 <div>
                   <p className="font-mono text-[10px] uppercase tracking-widest mb-0.5 text-gray-400">
-                    Edition {edition.id}
+                    {t('edition', { number: String(edition.id) })}
                   </p>
                   <h3 className="font-heading font-black text-xl text-gray-900 leading-tight">
                     {edition.title}

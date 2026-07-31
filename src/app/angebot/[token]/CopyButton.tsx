@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 // Botão de copiar dos dados bancários da Anzahlung: ícone discreto ao lado do
 // valor + toast animado confirmando a cópia. Copia o valor com espaços
 // normalizados (IBAN colável direto no app do banco).
 export default function CopyButton({ value, label }: { value: string; label: string }) {
+  const t = useTranslations('public.angebot.copy');
   const [copied, setCopied] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const timers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
@@ -34,8 +36,8 @@ export default function CopyButton({ value, label }: { value: string; label: str
     <>
       <button
         onClick={handleCopy}
-        title={`${label} kopieren`}
-        aria-label={`${label} kopieren`}
+        title={t('action', { label })}
+        aria-label={t('action', { label })}
         className={`inline-flex items-center justify-center w-6 h-6 rounded-md transition-colors shrink-0 ${
           copied ? 'text-green-600' : 'text-gray-300 hover:text-green-600 hover:bg-green-100/60'
         }`}
@@ -62,7 +64,7 @@ export default function CopyButton({ value, label }: { value: string; label: str
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-green-400">
           <path d="M20 6 9 17l-5-5" />
         </svg>
-        {label} kopiert
+        {t('copied', { label })}
       </span>
     </>
   );

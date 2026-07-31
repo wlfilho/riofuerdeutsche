@@ -1,4 +1,10 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 export default function CTABeratung() {
+  const t = useTranslations("public.cta.beratung");
+
   return (
     <section
       className="w-full text-center"
@@ -23,7 +29,7 @@ export default function CTABeratung() {
             marginBottom: "20px",
           }}
         >
-          Persönliche Beratung
+          {t("badge")}
         </span>
 
         {/* Título */}
@@ -37,7 +43,7 @@ export default function CTABeratung() {
             lineHeight: 1.2,
           }}
         >
-          Persönliche Unterkunft-Beratung
+          {t("titel")}
         </h2>
 
         {/* Subtítulo */}
@@ -60,7 +66,7 @@ export default function CTABeratung() {
           className="flex justify-center flex-wrap"
           style={{ gap: "10px", marginBottom: "32px" }}
         >
-          {["60 Minuten", "Videocall", "Personalisiert", "Auf Deutsch"].map((label) => (
+          {[t("pill60Minuten"), t("pillVideocall"), t("pillPersonalisiert"), t("pillAufDeutsch")].map((label) => (
             <span
               key={label}
               style={{
@@ -95,7 +101,7 @@ export default function CTABeratung() {
               whiteSpace: "nowrap",
             }}
           >
-            📞 Beratung buchen
+            {t("beratungBuchen")}
           </a>
           <a
             href="https://riofuerdeutsche.de/unterkunft/beratung#details"
@@ -113,7 +119,7 @@ export default function CTABeratung() {
               whiteSpace: "nowrap",
             }}
           >
-            Mehr erfahren
+            {t("mehrErfahren")}
           </a>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Circle } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useReading } from './ReadingContext'
 
 export interface ToCItem {
@@ -40,6 +41,7 @@ export default function GuideToC({
   currentSlug,
   readPageIds: propReadPageIds,
 }: GuideToCProps) {
+  const t = useTranslations('public.dashboard.toc')
   const { readPageIds: contextReadPageIds } = useReading()
   const readPageIds = contextReadPageIds || propReadPageIds || []
 
@@ -67,7 +69,7 @@ export default function GuideToC({
           className="font-mono text-[10px] uppercase tracking-widest mb-1"
           style={{ color: 'var(--rfd-text-muted)' }}
         >
-          Kapitel
+          {t('kapitel')}
         </p>
         <p
           className="font-heading font-bold text-sm leading-snug mb-3"
@@ -81,7 +83,7 @@ export default function GuideToC({
             className="font-mono text-[10px]"
             style={{ color: 'var(--rfd-text-muted)' }}
           >
-            {readInChapter} von {totalPages} gelesen
+            {t('gelesenVon', { read: String(readInChapter), total: String(totalPages) })}
           </span>
           <span
             className="font-mono text-[10px] font-bold"
@@ -114,7 +116,7 @@ export default function GuideToC({
           className="font-mono text-[10px] uppercase tracking-widest mb-3"
           style={{ color: 'var(--rfd-text-muted)' }}
         >
-          Seiten in diesem Kapitel
+          {t('seitenInDiesemKapitel')}
         </p>
 
         <nav className="flex flex-col gap-1">
@@ -166,7 +168,7 @@ export default function GuideToC({
             className="font-mono text-[10px] uppercase tracking-widest mb-3"
             style={{ color: 'var(--rfd-text-muted)' }}
           >
-            Auf dieser Seite
+            {t('aufDieserSeite')}
           </p>
 
           <nav className="flex flex-col gap-0.5">

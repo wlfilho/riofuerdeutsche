@@ -1,17 +1,21 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { getDepositBankInfo, getProposalByPublicToken, type ProposalItem } from '@/lib/proposals';
 import CopyButton from './CopyButton';
 import ShareButtons from './ShareButtons';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Ihr Angebot — Rio für Deutsche',
-  description: 'Persönliches Tour-Angebot für Rio de Janeiro.',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('public.angebot');
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+    robots: { index: false, follow: false },
+  };
+}
 
 // ─── Format helpers (alinhados com o PDF/WhatsApp do admin) ──────────────────
 
@@ -130,6 +134,7 @@ export default async function AngebotPage({
 }: {
   params: Promise<{ token: string }>;
 }) {
+  const t = await getTranslations('public.angebot');
   const { token } = await params;
   const proposal = await getProposalByPublicToken(token);
   if (!proposal) notFound();
@@ -184,8 +189,8 @@ export default async function AngebotPage({
     proposal.arrival_date && proposal.departure_date
       ? `📅 ${formatShortDate(proposal.arrival_date)} – ${formatDate(proposal.departure_date)}`
       : null,
-    `👥 ${proposal.pax} ${proposal.pax === 1 ? 'Person' : 'Personen'}`,
-    `🗓 ${sortedDays.length} ${sortedDays.length === 1 ? 'Tourtag' : 'Tourtage'}`,
+    `👥 ${proposal.pax} ${proposal.pax === 1 ? t('person') : t('persons')}`,
+    `🗓 ${sortedDays.length} ${sortedDays.length === 1 ? t('tourDay') : t('tourDays')}`,
   ].filter(Boolean) as string[];
 
   return (
@@ -195,13 +200,13 @@ export default async function AngebotPage({
         {/* ── Header: tipográfico, compacto, estilo papel timbrado ── */}
         <header className="text-center pt-2">
           <p className="text-[11px] font-bold tracking-[0.3em] text-green-700 uppercase">
-            Rio für Deutsche
+            {t('brand')}
           </p>
           <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
-            Angebot für {displayName}
+            {t('headerTitle', { name: displayName })}
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            Ihr persönlicher deutschsprachiger Guide in Rio de Janeiro
+            {t('headerSubtitle')}
           </p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {heroChips.map(chip => (
@@ -222,19 +227,18 @@ export default async function AngebotPage({
         <div className="relative bg-white rounded-2xl border border-gray-200 shadow-sm px-6 pt-14 pb-6 sm:px-7 sm:pb-7">
           <Image
             src="/images/rio-will.webp"
-            alt="Will – Ihr deutschsprachiger Guide in Rio"
+            alt={t('avatarAlt')}
             width={112}
             height={112}
             className="absolute -top-11 left-1/2 -translate-x-1/2 w-[88px] h-[88px] rounded-full object-cover object-[50%_62%] ring-4 ring-white shadow-lg"
           />
           <p className="text-[15px] text-gray-800 leading-relaxed text-center max-w-md mx-auto">
-            Hallo {firstName},
+            {t('greeting', { name: firstName })}
             <br />
-            vielen Dank für {isSie ? 'Ihr' : 'dein'} Interesse! Hier ist das persönliche Angebot,
-            das ich für {isSie ? 'Sie' : 'euch'} vorbereitet habe.
+            {isSie ? t('greetingBody.sie') : t('greetingBody.du')}
           </p>
           <div className="mt-5 pt-5 border-t border-gray-100">
-            <SectionTitle>Über mich</SectionTitle>
+            <SectionTitle>{t('aboutTitle')}</SectionTitle>
             <p className="mt-2 text-sm text-gray-600 leading-relaxed">{aboutText}</p>
           </div>
         </div>
@@ -244,13 +248,13 @@ export default async function AngebotPage({
         {sortedDays.length > 1 && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-6 pt-6 pb-4">
-              <SectionTitle>Übersicht {isSie ? 'Ihrer' : 'eurer'} Tage</SectionTitle>
+              <SectionTitle>{isSie ? t('overviewTitle.sie') : t('overviewTitle.du')}</SectionTitle>
             </div>
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-green-700 text-white text-left">
-                  <th className="px-6 py-2.5 text-xs font-semibold uppercase tracking-wide w-28">Datum</th>
-                  <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">Programm</th>
+                  <th className="px-6 py-2.5 text-xs font-semibold uppercase tracking-wide w-28">{t('tableDate')}</th>
+                  <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">{t('tableProgram')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -272,7 +276,7 @@ export default async function AngebotPage({
         {/* ── Programm (detalhe por dia) ── */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 pt-6 pb-2">
-            <SectionTitle>Detailprogramm</SectionTitle>
+            <SectionTitle>{t('detailProgramTitle')}</SectionTitle>
           </div>
           <div className="divide-y divide-gray-100">
             {dayData.map(({ day, activities, total, hours }, dayIdx) => (
@@ -291,7 +295,7 @@ export default async function AngebotPage({
                   <div className="ml-auto flex items-center gap-1.5">
                     {hours > 0 && (
                       <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold whitespace-nowrap">
-                        ⏱ ca. {hours} Std.
+                        {t('hoursChip', { hours: String(hours) })}
                       </span>
                     )}
                     {showDayPrices && (
@@ -329,7 +333,7 @@ export default async function AngebotPage({
         {/* ── Preis ── */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 pt-6 pb-4">
-            <SectionTitle>Preisübersicht</SectionTitle>
+            <SectionTitle>{t('priceOverviewTitle')}</SectionTitle>
           </div>
 
           {showDayPrices && (
@@ -338,7 +342,7 @@ export default async function AngebotPage({
                 {dayData.map(({ day, total }, i) => (
                   <div key={day} className="flex items-center justify-between py-2.5 text-sm">
                     <dt className="text-gray-600">
-                      <span className="font-semibold text-gray-800">Tag {i + 1}</span>
+                      <span className="font-semibold text-gray-800">{t('dayLabel', { n: String(i + 1) })}</span>
                       <span className="text-gray-400"> · {abbrGermanDay(day)}</span>
                     </dt>
                     <dd className="font-medium text-gray-800 tabular-nums">{formatEur(total)}</dd>
@@ -355,12 +359,12 @@ export default async function AngebotPage({
                 <p className="text-3xl sm:text-4xl font-extrabold text-green-700 tabular-nums leading-none">
                   {Number.isInteger(perPersonDay) ? `€${perPersonDay}` : `ca. €${Math.round(perPersonDay)}`}
                 </p>
-                <p className="mt-1.5 text-sm font-semibold text-green-600">pro Person und Tag</p>
+                <p className="mt-1.5 text-sm font-semibold text-green-600">{t('perPersonDay')}</p>
                 <p className="mt-2.5 text-sm text-green-900/80">
-                  Gesamtpreis: <strong className="tabular-nums">{formatEur(grandTotal)}</strong>
+                  {t('totalPriceLabel')}: <strong className="tabular-nums">{formatEur(grandTotal)}</strong>
                   <span className="text-green-700/60">
-                    {' '}· {proposal.pax} {proposal.pax === 1 ? 'Person' : 'Personen'} ·{' '}
-                    {sortedDays.length} {sortedDays.length === 1 ? 'Tourtag' : 'Tourtage'}
+                    {' '}· {proposal.pax} {proposal.pax === 1 ? t('person') : t('persons')} ·{' '}
+                    {sortedDays.length} {sortedDays.length === 1 ? t('tourDay') : t('tourDays')}
                   </span>
                 </p>
               </>
@@ -369,10 +373,10 @@ export default async function AngebotPage({
                 <p className="text-3xl sm:text-4xl font-extrabold text-green-700 tabular-nums leading-none">
                   {formatEur(grandTotal)}
                 </p>
-                <p className="mt-1.5 text-sm font-semibold text-green-600">Gesamtpreis</p>
+                <p className="mt-1.5 text-sm font-semibold text-green-600">{t('totalPriceLabel')}</p>
                 <p className="mt-2.5 text-sm text-green-700/60">
-                  {proposal.pax} {proposal.pax === 1 ? 'Person' : 'Personen'} ·{' '}
-                  {sortedDays.length} {sortedDays.length === 1 ? 'Tourtag' : 'Tourtage'}
+                  {proposal.pax} {proposal.pax === 1 ? t('person') : t('persons')} ·{' '}
+                  {sortedDays.length} {sortedDays.length === 1 ? t('tourDay') : t('tourDays')}
                 </p>
               </>
             )}
@@ -400,7 +404,7 @@ export default async function AngebotPage({
                   href="#anzahlung"
                   className="inline-block w-full sm:w-auto px-8 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
                 >
-                  🔒 Wunschtermine für {formatEur(deposit)} sichern
+                  {t('depositCta', { amount: formatEur(deposit) })}
                 </a>
               ) : (
                 <a
@@ -410,12 +414,12 @@ export default async function AngebotPage({
                   className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-8 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
                 >
                   <WhatsAppIcon className="w-5 h-5" />
-                  Jetzt Termine sichern
+                  {t('whatsappCta')}
                 </a>
               )}
               {proposal.valid_until && (
                 <p className="mt-2 text-xs text-green-700/60">
-                  ⏳ Angebot gültig bis {formatDate(proposal.valid_until)}
+                  {t('validUntil', { date: formatDate(proposal.valid_until) })}
                 </p>
               )}
             </div>
@@ -424,9 +428,9 @@ export default async function AngebotPage({
           {onsiteCosts.length > 0 && (
             <div className="mx-6 my-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
               <p className="text-xs font-bold text-amber-800 uppercase tracking-wide">
-                🎫 Vor Ort zu zahlen
+                {t('onsiteTitle')}
                 <span className="ml-1.5 font-normal normal-case text-amber-700/70">
-                  (nicht im Preis enthalten)
+                  {t('onsiteNote')}
                 </span>
               </p>
               <ul className="mt-2.5 space-y-1.5">
@@ -450,21 +454,19 @@ export default async function AngebotPage({
             <li className="flex gap-2">
               <span className="shrink-0">🍽</span>
               <span>
-                Speisen{onsiteCosts.length > 0 ? ' und Getränke' : ', Getränke und Eintrittsgelder'} sind
-                nicht im Preis inbegriffen.
+                {onsiteCosts.length > 0 ? t('noteMealsWithOnsite') : t('noteMealsWithoutOnsite')}
               </span>
             </li>
             <li className="flex gap-2">
               <span className="shrink-0">💶</span>
               <span>
-                {deposit > 0 ? 'Die Restzahlung' : 'Die Zahlung'} erfolgt in bar in Euro am Ende der Tour.
+                {deposit > 0 ? t('notePaymentRest') : t('notePaymentFull')}
               </span>
             </li>
             <li className="flex gap-2">
               <span className="shrink-0">✏️</span>
               <span>
-                Das Programm ist ein Vorschlag und kann ganz nach {isSie ? 'Ihren' : 'euren'} Wünschen
-                angepasst werden.
+                {isSie ? t('noteAdjustable.sie') : t('noteAdjustable.du')}
               </span>
             </li>
           </ul>
@@ -474,22 +476,24 @@ export default async function AngebotPage({
         {deposit > 0 && bank && (
           <div id="anzahlung" className="bg-white rounded-2xl border border-gray-200 border-l-4 border-l-green-600 shadow-sm p-6 sm:p-7 scroll-mt-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <SectionTitle>Buchung &amp; Anzahlung</SectionTitle>
+              <SectionTitle>{t('bookingTitle')}</SectionTitle>
               <span className="px-3 py-1 rounded-full bg-green-600 text-white text-sm font-bold tabular-nums">
                 {formatEur(deposit)}
               </span>
             </div>
             <p className="mt-3 text-sm text-gray-700 leading-relaxed">
-              Um {isSie ? 'Ihren' : 'euren'} Wunschtermin verbindlich zu reservieren, bitte ich um eine
-              Anzahlung von <strong>{formatEur(deposit)}</strong> per Banküberweisung:
+              {t.rich(isSie ? 'depositRequest.sie' : 'depositRequest.du', {
+                amount: formatEur(deposit),
+                strong: chunks => <strong>{chunks}</strong>,
+              })}
             </p>
             <dl className="mt-4 rounded-xl bg-gray-50 border border-gray-100 divide-y divide-gray-200/70 text-sm">
               {(
                 [
-                  ['Kontoinhaber', bank.account_holder, false],
-                  ['IBAN', bank.iban, true],
-                  ['BIC/SWIFT', bank.bic, true],
-                  ['Bank', bank.bank_name, false],
+                  [t('bankAccountHolder'), bank.account_holder, false],
+                  [t('bankIban'), bank.iban, true],
+                  [t('bankBic'), bank.bic, true],
+                  [t('bankName'), bank.bank_name, false],
                 ] as Array<[string, string, boolean]>
               ).filter(([, v]) => v).map(([label, value, mono]) => (
                 <div key={label} className="flex flex-wrap items-center gap-x-4 gap-y-0.5 px-4 py-2">
@@ -508,8 +512,7 @@ export default async function AngebotPage({
             <p className="mt-3 flex gap-2 text-xs text-gray-400">
               <span className="shrink-0">⚠️</span>
               <span>
-                {isSie ? 'Bitte beachten Sie' : 'Bitte beachtet'}, dass dieser Betrag im Falle einer
-                Stornierung nicht zurückerstattet werden kann.
+                {isSie ? t('depositWarning.sie') : t('depositWarning.du')}
               </span>
             </p>
           </div>
@@ -517,11 +520,9 @@ export default async function AngebotPage({
 
         {/* ── Kontakt ── */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-7 text-center">
-          <SectionTitle>Kontakt &amp; nächste Schritte</SectionTitle>
+          <SectionTitle>{t('contactTitle')}</SectionTitle>
           <p className="mt-3 text-sm text-gray-700 leading-relaxed max-w-md mx-auto">
-            Ich freue mich sehr auf diese Tage mit {isSie ? 'Ihnen' : 'euch'} in Rio! Falls{' '}
-            {isSie ? 'Sie Fragen haben' : 'ihr Fragen habt'} oder Anpassungen{' '}
-            {isSie ? 'wünschen, schreiben Sie' : 'wünscht, schreibt'} mir jederzeit – ich helfe gerne.
+            {isSie ? t('contactText.sie') : t('contactText.du')}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <a
@@ -531,17 +532,17 @@ export default async function AngebotPage({
               className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
             >
               <WhatsAppIcon className="w-5 h-5" />
-              Auf WhatsApp antworten
+              {t('replyWhatsApp')}
             </a>
             <a
               href="mailto:riofuerdeutsche@gmail.com"
               className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
             >
-              ✉️ E-Mail schreiben
+              {t('replyEmail')}
             </a>
           </div>
           <p className="mt-5 text-xs text-gray-400">
-            William Lantelme Filho ·{' '}
+            {t('signature')} ·{' '}
             <a href="https://riofuerdeutsche.de" className="text-green-700 hover:underline">
               riofuerdeutsche.de
             </a>
@@ -553,7 +554,7 @@ export default async function AngebotPage({
           <ShareButtons url={`https://riofuerdeutsche.de/angebot/${proposal.public_token}`} />
         </div>
 
-        <p className="text-center text-sm text-gray-400 pb-4">Até logo no Rio! 🌴</p>
+        <p className="text-center text-sm text-gray-400 pb-4">{t('farewell')}</p>
       </div>
     </div>
   );

@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 // Compartilhamento do Angebot pelo próprio cliente com os parceiros de
 // viagem: WhatsApp, Telegram, e-mail, copiar link e — quando o aparelho
 // suporta — o share nativo do sistema. Só o link, sem texto pré-pronto:
 // a pessoa escreve com as próprias palavras.
 export default function ShareButtons({ url }: { url: string }) {
+  const t = useTranslations('public.angebot.share');
   const [toastVisible, setToastVisible] = useState(false);
   const [canNativeShare, setCanNativeShare] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -29,7 +31,7 @@ export default function ShareButtons({ url }: { url: string }) {
 
   const handleNativeShare = async () => {
     try {
-      await navigator.share({ title: 'Angebot — Rio für Deutsche', url });
+      await navigator.share({ title: t('nativeShareTitle'), url });
     } catch {
       // usuário cancelou o share sheet — nada a fazer
     }
@@ -41,7 +43,7 @@ export default function ShareButtons({ url }: { url: string }) {
   return (
     <div className="text-center">
       <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.15em] mb-3">
-        Mit Reisepartnern teilen
+        {t('title')}
       </p>
       <div className="flex items-center justify-center gap-3">
         {/* WhatsApp */}
@@ -49,8 +51,8 @@ export default function ShareButtons({ url }: { url: string }) {
           href={`https://wa.me/?text=${encodeURIComponent(url)}`}
           target="_blank"
           rel="noopener noreferrer"
-          title="Per WhatsApp teilen"
-          aria-label="Per WhatsApp teilen"
+          title={t('whatsapp')}
+          aria-label={t('whatsapp')}
           className={`${btnCls} bg-[#25D366]`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -64,8 +66,8 @@ export default function ShareButtons({ url }: { url: string }) {
           href={`https://telegram.me/share/url?url=${encodeURIComponent(url)}`}
           target="_blank"
           rel="noopener noreferrer"
-          title="Per Telegram teilen"
-          aria-label="Per Telegram teilen"
+          title={t('telegram')}
+          aria-label={t('telegram')}
           className={`${btnCls} bg-[#229ED9]`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -75,9 +77,9 @@ export default function ShareButtons({ url }: { url: string }) {
 
         {/* E-Mail */}
         <a
-          href={`mailto:?subject=${encodeURIComponent('Angebot für Rio de Janeiro')}&body=${encodeURIComponent(url)}`}
-          title="Per E-Mail teilen"
-          aria-label="Per E-Mail teilen"
+          href={`mailto:?subject=${encodeURIComponent(t('emailSubject'))}&body=${encodeURIComponent(url)}`}
+          title={t('email')}
+          aria-label={t('email')}
           className={`${btnCls} bg-gray-500`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -89,8 +91,8 @@ export default function ShareButtons({ url }: { url: string }) {
         {/* Link kopieren */}
         <button
           onClick={handleCopy}
-          title="Link kopieren"
-          aria-label="Link kopieren"
+          title={t('copyLink')}
+          aria-label={t('copyLink')}
           className={`${btnCls} bg-gray-700`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -103,8 +105,8 @@ export default function ShareButtons({ url }: { url: string }) {
         {canNativeShare && (
           <button
             onClick={handleNativeShare}
-            title="Teilen"
-            aria-label="Teilen"
+            title={t('native')}
+            aria-label={t('native')}
             className={`${btnCls} bg-green-600`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -127,7 +129,7 @@ export default function ShareButtons({ url }: { url: string }) {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-green-400">
           <path d="M20 6 9 17l-5-5" />
         </svg>
-        Link kopiert
+        {t('copied')}
       </span>
     </div>
   );

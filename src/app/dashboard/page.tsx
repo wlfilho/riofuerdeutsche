@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import MembersHero from '@/components/members/MembersHero';
 import ChapterGrid from '@/components/members/ChapterGrid';
 import GuideIntro from '@/components/members/GuideIntro';
@@ -17,6 +18,7 @@ export default function GuidePage({
 }: {
   searchParams: Promise<{ upgrade?: string }>;
 }) {
+  const t = useTranslations('public.dashboard');
   const params = use(searchParams);
   const showUpgrade = params.upgrade === 'true';
   const router = useRouter();
@@ -101,7 +103,7 @@ export default function GuidePage({
   return (
     <>
       {/* Hero — largura total, de borda a borda */}
-      <MembersHero userName={firstName || 'Gast'} userPlan={userPlan} />
+      <MembersHero userName={firstName || t('gast')} userPlan={userPlan} />
 
       {/* Conteúdo — centralizado com max-width */}
       <main className="max-w-5xl mx-auto px-6 py-8 w-full flex flex-col gap-0">

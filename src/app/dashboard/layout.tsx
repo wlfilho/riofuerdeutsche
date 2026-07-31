@@ -1,4 +1,5 @@
 import { getMembershipAccess } from '@/lib/membership';
+import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import MembersHeader from '@/components/members/MembersHeader';
 import { createClient } from '@/utils/supabase/server';
@@ -8,6 +9,7 @@ export default async function GuideLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const t = await getTranslations('public.dashboard');
   const access = await getMembershipAccess();
 
   if (!access.isAuthenticated) {
@@ -17,7 +19,7 @@ export default async function GuideLayout({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const userName = access.firstName || (user?.email ? user.email.split('@')[0] : 'User');
+  const userName = access.firstName || (user?.email ? user.email.split('@')[0] : t('user'));
   const userEmail = user?.email || '';
   const userRole = (access.role || 'user') as 'user' | 'premium' | 'admin';
 

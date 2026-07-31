@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import ChapterCard, { Chapter } from "./ChapterCard";
 
 interface ChapterGridProps {
@@ -6,10 +9,12 @@ interface ChapterGridProps {
 }
 
 export default function ChapterGrid({ chapters, userPlan }: ChapterGridProps) {
+  const t = useTranslations("public.dashboard.kapitel");
+
   return (
     <div className="w-full mb-[32px]">
       <div className="text-[#bbb] text-[9px] font-[700] uppercase tracking-[1.5px] mb-[14px]">
-        KAPITEL DES GUIDES
+        {t("kapitelDesGuides")}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[12px]">
         {chapters.map((ch) => (
@@ -20,13 +25,13 @@ export default function ChapterGrid({ chapters, userPlan }: ChapterGridProps) {
           <div className="flex justify-between items-start w-full mb-[12px]">
             <span className="text-[28px] opacity-30">📖</span>
           </div>
-          <h3 className="font-display font-bold text-[#1a1a1a] mb-[4px]">Edition 2, 3, 4...</h3>
+          <h3 className="font-display font-bold text-[#1a1a1a] mb-[4px]">{t("naechsteEditionenTitel")}</h3>
           <p className="text-[12px] text-[#555] mb-[16px] leading-[1.6] line-clamp-2">
-            Viertel, Gastronomie, Karneval, Kultur — bald verfügbar.
+            {t("naechsteEditionenText")}
           </p>
           <div className="mt-auto">
             <span className="inline-block px-[8px] py-[3px] bg-[#fff8e1] text-[#b8860b] text-[10px] font-[700] rounded-[6px]">
-              Demnächst
+              {t("demnaechst")}
             </span>
           </div>
         </div>

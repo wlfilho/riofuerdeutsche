@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { createClient } from '@/utils/supabase/client';
 import { Star, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -64,6 +65,7 @@ interface FormErrors {
 }
 
 export default function ReviewForm() {
+    const t = useTranslations('public.bewertungen.form');
     const [formData, setFormData] = useState<FormData>({
         attractions: [],
         nickname: '',
@@ -93,14 +95,14 @@ export default function ReviewForm() {
         
         // Máximo 5 fotos
         if (photoFiles.length + files.length > 5) {
-            setErrors(prev => ({ ...prev, photos: "Maximal 5 Fotos erlaubt." }));
+            setErrors(prev => ({ ...prev, photos: t('errorTooManyPhotos') }));
             return;
         }
         
         // Máximo 5MB por ficheiro
         const oversized = files.filter(f => f.size > 5 * 1024 * 1024);
         if (oversized.length > 0) {
-            setErrors(prev => ({ ...prev, photos: "Jedes Bild darf maximal 5 MB groß sein." }));
+            setErrors(prev => ({ ...prev, photos: t('errorPhotoTooLarge') }));
             return;
         }
         
@@ -120,16 +122,16 @@ export default function ReviewForm() {
     const validate = (): boolean => {
         const newErrors: FormErrors = {};
 
-        if (!formData.nickname.trim()) newErrors.nickname = 'Bitte gib deinen Namen an.';
+        if (!formData.nickname.trim()) newErrors.nickname = t('errorNickname');
         if (!formData.email.trim()) {
-            newErrors.email = 'Bitte gib deine E-Mail-Adresse an.';
+            newErrors.email = t('errorEmail');
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Bitte gib eine gültige E-Mail-Adresse an.';
+            newErrors.email = t('errorEmailInvalid');
         }
-        if (formData.rating === 0) newErrors.rating = 'Bitte gib eine Bewertung ab.';
-        if (!formData.title.trim()) newErrors.title = 'Bitte gib einen Titel an.';
+        if (formData.rating === 0) newErrors.rating = t('errorRating');
+        if (!formData.title.trim()) newErrors.title = t('errorTitle');
         if (formData.body.trim().length < 50) {
-            newErrors.body = `Deine Erfahrung muss mindestens 50 Zeichen lang sein (aktuell: ${formData.body.trim().length}).`;
+            newErrors.body = t('errorBodyTooShort', { count: String(formData.body.trim().length) });
         }
 
         setErrors(newErrors);
@@ -209,7 +211,7 @@ export default function ReviewForm() {
 
         } catch (error) {
             console.error('Submit error:', error);
-            setErrors({ submit: 'Ups! Etwas ist schief gelaufen. Bitte versuche es später noch einmal.' });
+            setErrors({ submit: t('errorSubmit') });
         } finally {
             setIsSubmitting(false);
         }
@@ -225,18 +227,17 @@ export default function ReviewForm() {
                         </div>
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                        Vielen Dank für deine Bewertung!
+                        {t('successTitle')}
                     </h2>
                     <p className="text-gray-600 mb-8 leading-relaxed">
-                        Wir prüfen deine Bewertung und schalten sie in Kürze frei.
-                        Als Dankeschön erhältst du bald eine E-Mail von uns.
+                        {t('successText')}
                     </p>
                     <Link
                         href="/"
                         className="inline-flex items-center gap-2 text-gray-900 font-semibold hover:text-gray-600 transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Zurück zur Startseite
+                        {t('backHome')}
                     </Link>
                 </div>
             </div>
@@ -248,10 +249,10 @@ export default function ReviewForm() {
             <div className="max-w-2xl mx-auto">
                 <div className="text-center mb-10">
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                        Deine Erfahrung teilen
+                        {t('title')}
                     </h1>
                     <p className="text-lg text-gray-600 max-w-lg mx-auto">
-                        Hat dir das Erlebnis gefallen? Schreib uns — dein Feedback hilft anderen deutschen Reisenden.
+                        {t('subtitle')}
                     </p>
                 </div>
 
@@ -274,12 +275,12 @@ export default function ReviewForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-1.5">
                                 <label htmlFor="nickname" className="block text-sm font-semibold text-gray-700">
-                                    Dein Name / Nickname
+                                    {t('nicknameLabel')}
                                 </label>
                                 <input
                                     type="text"
                                     id="nickname"
-                                    placeholder="z.B. Max Mustermann"
+                                    placeholder={t('nicknamePlaceholder')}
                                     value={formData.nickname}
                                     onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
                                     className={`w-full px-4 py-2.5 bg-white border ${errors.nickname ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all`}
@@ -290,12 +291,12 @@ export default function ReviewForm() {
                             </div>
                             <div className="space-y-1.5">
                                 <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
-                                    Deine E-Mail <span className="text-xs font-normal text-gray-500">(wird nicht veröffentlicht)</span>
+                                    {t('emailLabel')} <span className="text-xs font-normal text-gray-500">{t('emailNote')}</span>
                                 </label>
                                 <input
                                     type="email"
                                     id="email"
-                                    placeholder="email@beispiel.de"
+                                    placeholder={t('emailPlaceholder')}
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className={`w-full px-4 py-2.5 bg-white border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all`}
@@ -309,7 +310,7 @@ export default function ReviewForm() {
                         {/* Star Rating */}
                         <div className="space-y-1.5">
                             <label className="block text-sm font-semibold text-gray-700">
-                                Wie bewertest du deine Erfahrung?
+                                {t('ratingLabel')}
                             </label>
                             <div className="flex gap-1.5">
                                 {[1, 2, 3, 4, 5].map((star) => (
@@ -339,12 +340,12 @@ export default function ReviewForm() {
                         {/* Title */}
                         <div className="space-y-1.5">
                             <label htmlFor="title" className="block text-sm font-semibold text-gray-700">
-                                Titel deiner Bewertung
+                                {t('titleLabel')}
                             </label>
                             <input
                                 type="text"
                                 id="title"
-                                placeholder="Fasse deine Erfahrung kurz zusammen"
+                                placeholder={t('titlePlaceholder')}
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                 className={`w-full px-4 py-2.5 bg-white border ${errors.title ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400 outline-none transition-all`}
@@ -357,12 +358,12 @@ export default function ReviewForm() {
                         {/* Body */}
                         <div className="space-y-1.5">
                             <label htmlFor="body" className="block text-sm font-semibold text-gray-700">
-                                Deine Erfahrung
+                                {t('bodyLabel')}
                             </label>
                             <textarea
                                 id="body"
                                 rows={6}
-                                placeholder="Erzähl uns von deinem Tag. Was hat dir besonders gut gefallen?"
+                                placeholder={t('bodyPlaceholder')}
                                 value={formData.body}
                                 onChange={(e) => setFormData({ ...formData, body: e.target.value })}
                                 className={`w-full px-4 py-2.5 bg-white border ${errors.body ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400 outline-none transition-all resize-y min-h-[120px]`}
@@ -371,10 +372,10 @@ export default function ReviewForm() {
                                 {errors.body ? (
                                     <p className="text-xs text-red-500 mt-1">{errors.body}</p>
                                 ) : (
-                                    <p className="text-xs text-gray-500 mt-1">Min. 50 Zeichen</p>
+                                    <p className="text-xs text-gray-500 mt-1">{t('bodyMinHint')}</p>
                                 )}
                                 <p className={`text-xs mt-1 tabular-nums ${formData.body.length >= 50 ? 'text-green-600' : 'text-gray-400'}`}>
-                                    {formData.body.length} Zeichen
+                                    {t('bodyCharCount', { count: String(formData.body.length) })}
                                 </p>
                             </div>
                         </div>
@@ -382,11 +383,10 @@ export default function ReviewForm() {
                         {/* Upload de fotos */}
                         <div className="space-y-4">
                             <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                Fotos teilen <span className="text-gray-400 font-normal">(optional)</span>
+                                {t('photosLabel')} <span className="text-gray-400 font-normal">{t('photosOptional')}</span>
                             </label>
                             <p className="text-xs text-gray-500 mb-3">
-                                Hast du Fotos von der Tour? Du kannst bis zu 5 Bilder hochladen. 
-                                (JPG, PNG · max. 5 MB pro Bild)
+                                {t('photosHint')}
                             </p>
 
                             <input
@@ -409,7 +409,7 @@ export default function ReviewForm() {
                                         <div key={index} className="relative">
                                             <img
                                                 src={URL.createObjectURL(file)}
-                                                alt={`Foto ${index + 1}`}
+                                                alt={t('photoAlt', { n: String(index + 1) })}
                                                 className="w-20 h-20 object-cover rounded-lg border border-gray-200"
                                             />
                                             <button
@@ -437,9 +437,9 @@ export default function ReviewForm() {
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-1">
-                                    Was hast du mit Will besucht?
+                                    {t('attractionsLabel')}
                                 </label>
-                                <p className="text-xs text-gray-500 mb-4 italic">(Optional — hilft anderen Reisenden zu wissen, was du gesehen hast)</p>
+                                <p className="text-xs text-gray-500 mb-4 italic">{t('attractionsHint')}</p>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -479,7 +479,7 @@ export default function ReviewForm() {
 
                         {/* Consentimento de fotos */}
                         <div className="border border-gray-200 rounded-lg p-5 bg-gray-50 space-y-4">
-                            <p className="text-sm font-bold text-gray-700">Foto-Einwilligung</p>
+                            <p className="text-sm font-bold text-gray-700">{t('consentTitle')}</p>
 
                             <div className="space-y-3">
                                 {/* Consentimento para fotos do próprio upload */}
@@ -494,8 +494,7 @@ export default function ReviewForm() {
                                             className="mt-1 rounded border-gray-300 text-yellow-400 focus:ring-yellow-400"
                                         />
                                         <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
-                                            Ich bin einverstanden, dass die hochgeladenen Fotos auf der Website 
-                                            und in den sozialen Medien von Rio für Deutsche veröffentlicht werden dürfen.
+                                            {t('consentOwnPhotos')}
                                         </span>
                                     </label>
                                 )}
@@ -511,9 +510,7 @@ export default function ReviewForm() {
                                         className="mt-1 rounded border-gray-300 text-yellow-400 focus:ring-yellow-400"
                                     />
                                     <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
-                                        Ich bin einverstanden, dass Fotos, die Will während der Tour von mir 
-                                        gemacht hat, auf der Website und in den sozialen Medien von 
-                                        Rio für Deutsche veröffentlicht werden dürfen.
+                                        {t('consentWillPhotos')}
                                     </span>
                                 </label>
                             </div>
@@ -534,11 +531,11 @@ export default function ReviewForm() {
                             {isSubmitting ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    Wird gesendet...
+                                    {t('submitting')}
                                 </>
                             ) : (
                                 <>
-                                    Bewertung absenden
+                                    {t('submit')}
                                 </>
                             )}
                         </button>
@@ -547,7 +544,7 @@ export default function ReviewForm() {
             </div>
             
             <div className="max-w-2xl mx-auto mt-12 text-center text-gray-400 text-sm">
-                &copy; {new Date().getFullYear()} Rio für Deutsche — Deine Experten in Rio de Janeiro
+                {t('footer', { year: String(new Date().getFullYear()) })}
             </div>
         </div>
     );

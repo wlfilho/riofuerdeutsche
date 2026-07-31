@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, List, CheckCircle2, Circle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { ToCItem, SiblingPage } from './GuideToC'
 import { useReading } from './ReadingContext'
 
@@ -29,12 +30,13 @@ export default function GuideToCMobile({
   currentSlug,
   readPageIds: propReadPageIds,
 }: GuideToCMobileProps) {
+  const t = useTranslations('public.dashboard.toc')
   const { readPageIds: contextReadPageIds } = useReading()
   const readPageIds = contextReadPageIds || propReadPageIds || []
   const [open, setOpen] = useState(false)
 
   const activeItem = items.find((item) => item.id === activeId)
-  const activeLabel = activeItem?.text ?? 'Inhaltsverzeichnis'
+  const activeLabel = activeItem?.text ?? t('inhaltsverzeichnis')
 
   const handleClick = (e: React.MouseEvent, id: string) => {
     e.preventDefault()
@@ -90,7 +92,7 @@ export default function GuideToCMobile({
               {/* Chapter Pages */}
               <div className="mb-6">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400 mb-2">
-                  Kapitel-Seiten
+                  {t('kapitelSeiten')}
                 </p>
                 <div className="flex flex-col gap-1">
                   {pages.map((page) => {
@@ -123,7 +125,7 @@ export default function GuideToCMobile({
               {items.length > 0 && (
                 <div>
                   <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400 mb-2">
-                    Auf dieser Seite
+                    {t('aufDieserSeite')}
                   </p>
                   <div className="flex flex-col gap-0.5">
                     {items.map((item) => {

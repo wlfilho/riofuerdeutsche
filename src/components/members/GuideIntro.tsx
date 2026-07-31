@@ -1,8 +1,14 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+
 interface GuideIntroProps {
   userPlan: 'free' | 'premium'
 }
 
 export default function GuideIntro({ userPlan }: GuideIntroProps) {
+  const t = useTranslations('public.dashboard.intro')
+
   return (
     <div className="w-full bg-white border border-[#e8e4dc] rounded-[10px] px-[18px] py-[14px] mb-[24px] flex items-start gap-3">
       {userPlan === 'free' ? (
@@ -10,15 +16,14 @@ export default function GuideIntro({ userPlan }: GuideIntroProps) {
           <span className="text-base flex-shrink-0 mt-0.5">📖</span>
           <p className="text-sm text-gray-600 leading-relaxed">
             <span className="font-semibold text-gray-800">
-              Das Sicherheitskapitel ist kostenlos für dich freigeschaltet.
+              {t('freiTitel')}
             </span>
-            {' '}Alle weiteren Kapitel sind im vollständigen Rio-Guide enthalten —
-            schalte ihn einmalig frei und erhalte alle 4 Editionen für immer.{' '}
+            {' '}{t('freiText')}{' '}
             <a
               href="/dashboard/upgrade"
               className="text-[#22a262] font-semibold underline underline-offset-2 hover:text-[#1a8050] transition-colors whitespace-nowrap"
             >
-              Jetzt freischalten →
+              {t('freiLink')}
             </a>
           </p>
         </>
@@ -31,10 +36,9 @@ export default function GuideIntro({ userPlan }: GuideIntroProps) {
           </span>
           <p className="text-sm text-gray-600 leading-relaxed">
             <span className="font-semibold text-gray-800">
-              Du hast vollen Zugang zum Rio-Guide.
+              {t('premiumTitel')}
             </span>
-            {' '}Alle Kapitel sind freigeschaltet. Neue Editionen erscheinen
-            automatisch in deinem Bereich — ohne zusätzliche Kosten.
+            {' '}{t('premiumText')}
           </p>
         </>
       )}

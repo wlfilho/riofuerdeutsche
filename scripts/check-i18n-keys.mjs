@@ -28,8 +28,26 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const CATALOG = 'src/i18n/messages/pt-BR.json';
-const SCAN_DIRS = ['src/app/admin', 'src/components/admin'];
+/**
+ * Cada área tem seu catálogo. O admin roda em pt-BR, o lado público em de.
+ * Um `t()` no admin nunca resolve contra de.json e vice-versa, então os scans
+ * são independentes.
+ */
+const AREAS = [
+  {
+    name: 'admin',
+    catalog: 'src/i18n/messages/pt-BR.json',
+    dirs: ['src/app/admin', 'src/components/admin'],
+  },
+  {
+    name: 'público',
+    catalog: 'src/i18n/messages/de.json',
+    dirs: ['src/app', 'src/components'],
+    // o público mora nos mesmos diretórios-raiz do admin; excluímos o admin
+    // para não checar as chaves dele contra o catálogo alemão.
+    exclude: ['src/app/admin', 'src/components/admin'],
+  },
+];
 
 /** Captura `const X = useTranslations('ns')` e a variante `await getTranslations('ns')`. */
 const BINDING_RE =
@@ -50,10 +68,10 @@ function listTsxFiles(dir) {
   return out;
 }
 
-function main() {
-  const catalogPath = path.join(repoRoot, CATALOG);
+function checkArea({ name, catalog: catalogRel, dirs, exclude = [] }) {
+  const catalogPath = path.join(repoRoot, catalogRel);
   if (!fs.existsSync(catalogPath)) {
-    console.error(`✗ Catálogo não encontrado: ${CATALOG}`);
+    console.error(`✗ Catálogo não encontrado: ${catalogRel}`);
     process.exit(1);
   }
 
@@ -64,7 +82,9 @@ function main() {
       .reduce((node, k) => (node && typeof node === 'object' ? node[k] : undefined), catalog) !==
     undefined;
 
-  const files = SCAN_DIRS.flatMap(listTsxFiles);
+  const files = dirs
+    .flatMap(listTsxFiles)
+    .filter((f) => !exclude.some((ex) => f === ex || f.startsWith(`${ex}/`)));
   const missing = [];
   const dynamic = [];
   let checked = 0;
@@ -104,18 +124,29 @@ function main() {
   }
 
   console.log(
-    `i18n: ${checked} referências estáticas verificadas em ${files.length} arquivos ` +
-      `(${dynamic.length} dinâmicas ignoradas)`,
+    `[${name}] ${checked} referências estáticas em ${files.length} arquivos ` +
+      `(${dynamic.length} dinâmicas ignoradas) → ${catalogRel}`,
   );
 
   if (dynamic.length) {
-    console.log('\nChaves dinâmicas (verifique manualmente que os valores existem):');
-    for (const d of dynamic) console.log(`  ${d}`);
+    console.log(`  chaves dinâmicas (verifique manualmente que os valores existem):`);
+    for (const d of dynamic) console.log(`    ${d}`);
   }
 
   if (missing.length) {
-    console.error(`\n✗ ${missing.length} chave(s) sem entrada em ${CATALOG}:`);
-    for (const m of missing) console.error(`  ${m}`);
+    console.error(`\n✗ [${name}] ${missing.length} chave(s) sem entrada em ${catalogRel}:`);
+    for (const m of missing) console.error(`    ${m}`);
+  }
+
+  return missing.length;
+}
+
+function main() {
+  let totalMissing = 0;
+  for (const area of AREAS) totalMissing += checkArea(area);
+
+  if (totalMissing > 0) {
+    console.error(`\n✗ ${totalMissing} chave(s) faltando no total.`);
     process.exit(1);
   }
 
