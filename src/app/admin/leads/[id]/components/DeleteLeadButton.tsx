@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { deleteLead } from '../actions';
 
 export default function DeleteLeadButton({ leadId, leadName }: { leadId: string; leadName: string }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
 
   const handleDelete = async () => {
     setLoading(true);
@@ -26,7 +29,7 @@ export default function DeleteLeadButton({ leadId, leadName }: { leadId: string;
           onClick={() => setShowConfirm(true)}
           className="text-xs text-red-400 hover:text-red-600 transition-colors underline underline-offset-2"
         >
-          Deletar lead
+          {t('deletarLeadBotao')}
         </button>
       </div>
 
@@ -34,12 +37,15 @@ export default function DeleteLeadButton({ leadId, leadName }: { leadId: string;
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => !loading && setShowConfirm(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Deletar lead?</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">{t('deletarLead')}</h2>
             <p className="text-sm text-gray-600 mb-2">
-              O lead de <strong>{leadName}</strong> será excluído permanentemente.
+              {t.rich('leadSeraExcluido', {
+                nome: leadName,
+                strong: chunks => <strong>{chunks}</strong>,
+              })}
             </p>
             <p className="text-sm text-gray-500 mb-6">
-              Todos os contatos registrados serão removidos.
+              {t('contatosSeraoRemovidos')}
             </p>
 
             {error && (
@@ -54,14 +60,14 @@ export default function DeleteLeadButton({ leadId, leadName }: { leadId: string;
                 disabled={loading}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
               >
-                Cancelar
+                {tCommon('cancelar')}
               </button>
               <button
                 onClick={handleDelete}
                 disabled={loading}
                 className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
               >
-                {loading ? 'Deletando...' : 'Deletar permanentemente'}
+                {loading ? tCommon('deletando') : t('deletarPermanentemente')}
               </button>
             </div>
           </div>

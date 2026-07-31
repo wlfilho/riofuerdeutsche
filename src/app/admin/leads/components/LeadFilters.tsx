@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useTransition, useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 type Props = {
   currentStatus?: string;
@@ -10,24 +11,9 @@ type Props = {
   hideStatus?: boolean;
 };
 
-const STATUS_OPTIONS = [
-  { value: '', label: 'Todos' },
-  { value: 'new', label: 'Novo' },
-  { value: 'contacted', label: 'Em Contato' },
-  { value: 'proposal_sent', label: 'Proposta Enviada' },
-  { value: 'closed', label: 'Fechado' },
-  { value: 'lost', label: 'Perdido' },
-];
+const STATUS_VALUES = ['new', 'contacted', 'proposal_sent', 'closed', 'lost'] as const;
 
-const SOURCE_OPTIONS = [
-  { value: '', label: 'Todas' },
-  { value: 'calculator', label: 'Calculadora' },
-  { value: 'email', label: 'E-Mail' },
-  { value: 'whatsapp', label: 'WhatsApp' },
-  { value: 'instagram', label: 'Instagram' },
-  { value: 'referral', label: 'Indicação' },
-  { value: 'other', label: 'Outro' },
-];
+const SOURCE_VALUES = ['calculator', 'email', 'whatsapp', 'instagram', 'referral', 'other'] as const;
 
 const SELECT_CLS =
   'px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent';
@@ -38,6 +24,10 @@ export default function LeadFilters({ currentStatus = '', currentSource = '', cu
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
   const [q, setQ] = useState(currentQ);
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
+  const tStatus = useTranslations('admin.status.lead');
+  const tSource = useTranslations('admin.status.source');
 
   const push = useCallback(
     (updates: Record<string, string>) => {
@@ -84,7 +74,7 @@ export default function LeadFilters({ currentStatus = '', currentSource = '', cu
           type="text"
           value={q}
           onChange={e => setQ(e.target.value)}
-          placeholder="Buscar por nome ou e-mail..."
+          placeholder={t('buscarPlaceholder')}
           className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
         />
       </div>
@@ -96,9 +86,10 @@ export default function LeadFilters({ currentStatus = '', currentSource = '', cu
           onChange={e => push({ status: e.target.value })}
           className={SELECT_CLS}
         >
-          {STATUS_OPTIONS.map(o => (
-            <option key={o.value} value={o.value}>
-              {o.label}
+          <option value="">{tCommon('todos')}</option>
+          {STATUS_VALUES.map(value => (
+            <option key={value} value={value}>
+              {tStatus(value)}
             </option>
           ))}
         </select>
@@ -110,9 +101,10 @@ export default function LeadFilters({ currentStatus = '', currentSource = '', cu
         onChange={e => push({ source: e.target.value })}
         className={SELECT_CLS}
       >
-        {SOURCE_OPTIONS.map(o => (
-          <option key={o.value} value={o.value}>
-            {o.label}
+        <option value="">{tCommon('todas')}</option>
+        {SOURCE_VALUES.map(value => (
+          <option key={value} value={value}>
+            {tSource(value)}
           </option>
         ))}
       </select>
@@ -126,7 +118,7 @@ export default function LeadFilters({ currentStatus = '', currentSource = '', cu
           }}
           className="px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
         >
-          Limpar filtros
+          {tCommon('limparFiltros')}
         </button>
       )}
     </div>

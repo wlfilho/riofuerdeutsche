@@ -1,16 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-const SOURCES = [
-  { value: '', label: 'Selecionar origem…' },
-  { value: 'email', label: 'E-mail' },
-  { value: 'whatsapp', label: 'WhatsApp' },
-  { value: 'instagram', label: 'Instagram' },
-  { value: 'calculator', label: 'Calculadora' },
-  { value: 'referral', label: 'Indicação' },
-  { value: 'other', label: 'Outro' },
-];
+const SOURCE_VALUES = ['email', 'whatsapp', 'instagram', 'calculator', 'referral', 'other'] as const;
 
 interface ContactFormData {
   name: string;
@@ -35,6 +28,10 @@ export default function ContactForm({ mode, initial = {}, onCancel, onSave }: Co
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations('admin.contatos');
+  const tCommon = useTranslations('admin.common');
+  const tSource = useTranslations('admin.status.source');
+  const tCrm = useTranslations('admin.crm');
 
   const set = (field: keyof ContactFormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm(f => ({ ...f, [field]: e.target.value }));
@@ -42,14 +39,14 @@ export default function ContactForm({ mode, initial = {}, onCancel, onSave }: Co
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) { setError('Nome é obrigatório'); return; }
-    if (!form.email.trim()) { setError('E-mail é obrigatório'); return; }
+    if (!form.name.trim()) { setError(tCrm('nomeObrigatorio')); return; }
+    if (!form.email.trim()) { setError(tCrm('emailObrigatorio')); return; }
     setSaving(true);
     setError(null);
     try {
       await onSave(form);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar. Tente novamente.');
+      setError(err instanceof Error ? err.message : tCommon('erroSalvar'));
     } finally {
       setSaving(false);
     }
@@ -74,7 +71,7 @@ export default function ContactForm({ mode, initial = {}, onCancel, onSave }: Co
             )}
           </div>
           <h2 className="text-base font-semibold text-gray-900">
-            {isEdit ? 'Editar contato' : 'Novo contato'}
+            {isEdit ? t('editarContato') : t('novoContato')}
           </h2>
         </div>
         <button
@@ -99,19 +96,19 @@ export default function ContactForm({ mode, initial = {}, onCancel, onSave }: Co
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-500 uppercase mb-1.5">
-                Nome <span className="text-red-500">*</span>
+                {tCommon('nome')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={form.name}
                 onChange={set('name')}
-                placeholder="Nome completo"
+                placeholder={t('nomeCompletoPlaceholder')}
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 uppercase mb-1.5">Telefone</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase mb-1.5">{tCommon('telefone')}</label>
               <input
                 type="tel"
                 value={form.phone}
@@ -125,42 +122,41 @@ export default function ContactForm({ mode, initial = {}, onCancel, onSave }: Co
           {/* Email */}
           <div>
             <label className="block text-xs font-medium text-gray-500 uppercase mb-1.5">
-              E-mail <span className="text-red-500">*</span>
+              {tCommon('email')} <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
               value={form.email}
               onChange={set('email')}
-              placeholder="contato@exemplo.com"
+              placeholder={t('emailPlaceholder')}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
               required
             />
             {isEdit && (
               <p className="mt-1.5 text-xs text-amber-600">
-                Alterar o e-mail pode desvincular a conta Guide se o usuário tiver login no site.
+                {t('avisoAlterarEmail')}
               </p>
             )}
           </div>
 
           {/* Source */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase mb-1.5">Origem</label>
+            <label className="block text-xs font-medium text-gray-500 uppercase mb-1.5">{tCommon('origem')}</label>
             <select
               value={form.source}
               onChange={set('source')}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              {SOURCES.map(s => (
-                <option key={s.value} value={s.value}>{s.label}</option>
+              <option value="">{t('selecionarOrigem')}</option>
+              {SOURCE_VALUES.map(value => (
+                <option key={value} value={value}>{tSource(value)}</option>
               ))}
             </select>
           </div>
 
           {/* Info note */}
           <p className="text-xs text-gray-400 italic">
-            {isEdit
-              ? 'Dados de CRM e e-mails são editados dentro das abas do perfil.'
-              : 'Se o e-mail já existir, o contato será vinculado ao registro existente.'}
+            {isEdit ? t('notaEdicao') : t('notaCriacao')}
           </p>
         </div>
 
@@ -171,14 +167,14 @@ export default function ContactForm({ mode, initial = {}, onCancel, onSave }: Co
             onClick={onCancel}
             className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
           >
-            Cancelar
+            {tCommon('cancelar')}
           </button>
           <button
             type="submit"
             disabled={saving}
             className="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
           >
-            {saving ? 'Salvando…' : isEdit ? 'Salvar alterações' : 'Criar contato'}
+            {saving ? tCommon('salvando') : isEdit ? tCommon('salvarAlteracoes') : t('criarContato')}
           </button>
         </div>
       </form>

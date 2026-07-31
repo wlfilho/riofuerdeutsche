@@ -2,6 +2,12 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
+    // Propaga o pathname para os Server Components: o next-intl (src/i18n/request.ts)
+    // usa este header para resolver o locale (/admin → pt-BR, resto → de).
+    // Precisa ser setado ANTES do createServerClient porque os NextResponse.next({request})
+    // do fluxo de cookies reconstroem a resposta a partir do request.
+    request.headers.set("x-pathname", request.nextUrl.pathname);
+
     let supabaseResponse = NextResponse.next({
         request,
     });

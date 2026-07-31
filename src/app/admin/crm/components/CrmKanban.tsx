@@ -14,45 +14,34 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { useTranslations } from 'next-intl';
 import TourDateKanbanFlow, { type KanbanStatusChange } from '@/components/admin/TourDateKanbanFlow';
+import { fmtDate, fmtEur } from '@/lib/adminFormat';
 import type { CrmLead, LeadStatus } from '../page';
 
 type ColumnConfig = {
   id: LeadStatus;
-  label: string;
   headerClass: string;
   countClass: string;
 };
 
 const COLUMNS: ColumnConfig[] = [
-  { id: 'new', label: 'Novo', headerClass: 'bg-gray-100 border-gray-200 text-gray-700', countClass: 'bg-gray-200 text-gray-700' },
-  { id: 'contacted', label: 'Em Contato', headerClass: 'bg-blue-50 border-blue-100 text-blue-700', countClass: 'bg-blue-100 text-blue-700' },
-  { id: 'proposal_sent', label: 'Proposta Enviada', headerClass: 'bg-amber-50 border-amber-100 text-amber-700', countClass: 'bg-amber-100 text-amber-700' },
-  { id: 'closed', label: 'Fechado', headerClass: 'bg-green-50 border-green-100 text-green-700', countClass: 'bg-green-100 text-green-700' },
-  { id: 'lost', label: 'Perdido', headerClass: 'bg-red-50 border-red-100 text-red-700', countClass: 'bg-red-100 text-red-700' },
+  { id: 'new', headerClass: 'bg-gray-100 border-gray-200 text-gray-700', countClass: 'bg-gray-200 text-gray-700' },
+  { id: 'contacted', headerClass: 'bg-blue-50 border-blue-100 text-blue-700', countClass: 'bg-blue-100 text-blue-700' },
+  { id: 'proposal_sent', headerClass: 'bg-amber-50 border-amber-100 text-amber-700', countClass: 'bg-amber-100 text-amber-700' },
+  { id: 'closed', headerClass: 'bg-green-50 border-green-100 text-green-700', countClass: 'bg-green-100 text-green-700' },
+  { id: 'lost', headerClass: 'bg-red-50 border-red-100 text-red-700', countClass: 'bg-red-100 text-red-700' },
 ];
-
-function formatDate(iso: string) {
-  const [y, m, d] = iso.split('T')[0].split('-');
-  return `${d}.${m}.${y}`;
-}
 
 function formatEstimate(min: number | null, max: number | null) {
   if (min === null && max === null) return null;
-  if (min !== null && max !== null) return `${min}–${max} €`;
-  return `${min ?? max} €`;
+  if (min !== null && max !== null) return `${fmtEur(min)}–${fmtEur(max)}`;
+  return fmtEur(min ?? max);
 }
 
-const SOURCE_LABELS: Record<string, string> = {
-  calculator: 'Calculadora',
-  email: 'E-Mail',
-  whatsapp: 'WhatsApp',
-  instagram: 'Instagram',
-  referral: 'Indicação',
-  other: 'Outro',
-};
-
 function CardContent({ lead, isDragging = false }: { lead: CrmLead; isDragging?: boolean }) {
+  const tSource = useTranslations('admin.status.source');
+  const tCommon = useTranslations('admin.common');
   const estimate = formatEstimate(lead.estimated_min, lead.estimated_max);
   return (
     <div
@@ -63,7 +52,7 @@ function CardContent({ lead, isDragging = false }: { lead: CrmLead; isDragging?:
       <div className="flex items-start justify-between gap-2 mb-1.5">
         <span className="font-semibold text-sm text-gray-900 leading-snug">{lead.name}</span>
         <span className="inline-block shrink-0 px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600">
-          {SOURCE_LABELS[lead.source] ?? lead.source}
+          {tSource.has(lead.source) ? tSource(lead.source) : lead.source}
         </span>
       </div>
 
@@ -74,13 +63,13 @@ function CardContent({ lead, isDragging = false }: { lead: CrmLead; isDragging?:
           <svg className="h-3 w-3 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM6 8a2 2 0 11-4 0 2 2 0 014 0zM1.49 15.326a.78.78 0 01-.358-.442 3 3 0 014.308-3.516 6.484 6.484 0 00-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 01-2.07-.655zM16.44 15.98a4.97 4.97 0 002.07-.654.78.78 0 00.357-.442 3 3 0 00-4.308-3.517 6.484 6.484 0 011.907 3.96 2.32 2.32 0 01-.026.654zM18 8a2 2 0 11-4 0 2 2 0 014 0zM5.304 16.19a.844.844 0 01-.277-.71 5 5 0 019.947 0 .843.843 0 01-.277.71A6.975 6.975 0 0110 18a6.974 6.974 0 01-4.696-1.81z" />
           </svg>
-          {lead.pax} PAX
+          {lead.pax} {tCommon('pax')}
         </span>
         <span className="inline-flex items-center gap-1">
           <svg className="h-3 w-3 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
           </svg>
-          {formatDate(lead.created_at)}
+          {fmtDate(lead.created_at)}
         </span>
       </div>
 
@@ -123,11 +112,13 @@ function KanbanColumn({
   onLeadClick: (lead: CrmLead) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
+  const t = useTranslations('admin.crm');
+  const tStatus = useTranslations('admin.status.lead');
 
   return (
     <div className="flex flex-col w-64 shrink-0">
       <div className={`flex items-center justify-between px-3 py-2 rounded-t-xl border ${column.headerClass} mb-2`}>
-        <span className="text-xs font-semibold">{column.label}</span>
+        <span className="text-xs font-semibold">{tStatus(column.id)}</span>
         <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${column.countClass}`}>
           {leads.length}
         </span>
@@ -141,7 +132,7 @@ function KanbanColumn({
       >
         {leads.length === 0 ? (
           <div className="flex items-center justify-center h-20 border-2 border-dashed border-gray-200 rounded-lg">
-            <p className="text-xs text-gray-400">Nenhum lead</p>
+            <p className="text-xs text-gray-400">{t('nenhumLead')}</p>
           </div>
         ) : (
           leads.map(lead => (
@@ -179,6 +170,8 @@ export default function CrmKanban({
   const [toast, setToast] = useState<string | null>(null);
   const [tourFlow, setTourFlow] = useState<KanbanStatusChange | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
 
   useEffect(() => {
     setLeads(initialLeads);
@@ -218,7 +211,7 @@ export default function CrmKanban({
         const data = await res.json();
         setLeads(prev);
         onStatusChange(lead);
-        setToast(`Erro: ${data.error ?? 'Falha ao atualizar status'}`);
+        setToast(tCommon('erroPrefixo', { mensagem: data.error ?? t('falhaAtualizarStatus') }));
       } else {
         setTourFlow({
           leadId: lead.id,
@@ -231,7 +224,7 @@ export default function CrmKanban({
     } catch {
       setLeads(prev);
       onStatusChange(lead);
-      setToast('Erro de rede. Tente novamente.');
+      setToast(tCommon('erroRede'));
     }
   };
 

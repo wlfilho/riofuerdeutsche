@@ -4,6 +4,12 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type TourDateStatus = 'proposta_enviada' | 'fechado';
 
+/**
+ * @deprecated Rótulos de UI vivem no catálogo i18n (`admin.status.tourDate` e
+ * `admin.status.tourDateShort`). Este módulo não é React e não pode usar hooks,
+ * então a tradução é feita pelos componentes. Mantido só para não quebrar
+ * importações externas.
+ */
 export const TOUR_DATE_STATUS_LABELS: Record<TourDateStatus, string> = {
   fechado: 'FECHADO',
   proposta_enviada: 'PROPOSTA ENVIADA',

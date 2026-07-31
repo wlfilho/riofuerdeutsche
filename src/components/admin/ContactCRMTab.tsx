@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Check, X, FileText, CircleCheck,
   Pencil, ExternalLink, MessageCircle, Plus,
   Mail, Phone, MessageSquare, HelpCircle, ChevronDown,
 } from 'lucide-react';
+import { fmtDate, fmtEur } from '@/lib/adminFormat';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -46,43 +48,23 @@ interface CrmTabProps {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const SOURCE_LABEL: Record<string, string> = {
-  email: 'E-mail',
-  whatsapp: 'WhatsApp',
-  instagram: 'Instagram',
-  calculator: 'Calculadora',
-  referral: 'Indicação',
-  other: 'Outro',
-};
-
-const FUNNEL_STEPS: { key: LeadStatus; label: string; icon: React.ReactNode }[] = [
-  { key: 'new',           label: 'Novo',       icon: null },
-  { key: 'contacted',     label: 'Em contato', icon: null },
-  { key: 'proposal_sent', label: 'Proposta',   icon: <FileText className="w-4 h-4" /> },
-  { key: 'closed',        label: 'Fechado',    icon: <CircleCheck className="w-4 h-4" /> },
+const FUNNEL_STEPS: { key: LeadStatus; labelKey: string; icon: React.ReactNode }[] = [
+  { key: 'new',           labelKey: 'novo',      icon: null },
+  { key: 'contacted',     labelKey: 'emContato', icon: null },
+  { key: 'proposal_sent', labelKey: 'proposta',  icon: <FileText className="w-4 h-4" /> },
+  { key: 'closed',        labelKey: 'fechado',   icon: <CircleCheck className="w-4 h-4" /> },
 ];
 
-const PROPOSAL_BADGE: Record<string, { label: string; cls: string }> = {
-  draft:    { label: 'Rascunho', cls: 'bg-gray-100 text-gray-600' },
-  sent:     { label: 'Enviada',  cls: 'bg-amber-100 text-amber-700' },
-  accepted: { label: 'Aceita',   cls: 'bg-green-100 text-green-700' },
-  rejected: { label: 'Recusada', cls: 'bg-red-100 text-red-700' },
+const PROPOSAL_BADGE_CLASS: Record<string, string> = {
+  draft:    'bg-gray-100 text-gray-600',
+  sent:     'bg-amber-100 text-amber-700',
+  accepted: 'bg-green-100 text-green-700',
+  rejected: 'bg-red-100 text-red-700',
 };
 
-const CONTACT_TYPE_LABELS: { value: LeadContact['type']; label: string }[] = [
-  { value: 'email',    label: 'E-mail' },
-  { value: 'whatsapp', label: 'WhatsApp' },
-  { value: 'phone',    label: 'Telefone' },
-  { value: 'other',    label: 'Outro' },
-];
+const CONTACT_TYPE_VALUES: LeadContact['type'][] = ['email', 'whatsapp', 'phone', 'other'];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function fmt(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('de-DE', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-  });
-}
 
 function parseNotes(notes: string): string[] {
   return notes.split(' | ').map(s => s.trim()).filter(Boolean);
@@ -108,12 +90,15 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 // ── FunnelProgress ────────────────────────────────────────────────────────────
 
 function FunnelProgress({ status }: { status: LeadStatus }) {
+  const t = useTranslations('admin.crm');
+  const tStatus = useTranslations('admin.status.lead');
+
   if (status === 'lost') {
     return (
       <div className="flex items-center gap-2 mb-6">
         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
           <X className="w-3.5 h-3.5" />
-          Perdido
+          {tStatus('lost')}
         </span>
       </div>
     );
@@ -175,7 +160,7 @@ function FunnelProgress({ status }: { status: LeadStatus }) {
                 isCurrent ? 'text-green-600 font-medium' : 'text-gray-400'
               }`}
             >
-              {step.label}
+              {t(step.labelKey)}
             </span>
           </div>
         );
@@ -202,6 +187,8 @@ function NotesSection({ lead, onUpdated }: { lead: Lead; onUpdated: (notes: stri
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(lead.notes ?? '');
   const [saving, setSaving] = useState(false);
+  const t = useTranslations('admin.contatos');
+  const tCommon = useTranslations('admin.common');
 
   const handleSave = async () => {
     setSaving(true);
@@ -225,7 +212,7 @@ function NotesSection({ lead, onUpdated }: { lead: Lead; onUpdated: (notes: stri
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-3">
-        <SectionLabel>Notas</SectionLabel>
+        <SectionLabel>{tCommon('notas')}</SectionLabel>
         {!editing && (
           <button
             onClick={() => { setDraft(lead.notes ?? ''); setEditing(true); }}
@@ -242,7 +229,7 @@ function NotesSection({ lead, onUpdated }: { lead: Lead; onUpdated: (notes: stri
             value={draft}
             onChange={e => setDraft(e.target.value)}
             rows={4}
-            placeholder="Separar itens com  |  (barra vertical)"
+            placeholder={t('separarItens')}
             className="w-full text-sm text-gray-800 bg-white border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
           />
           <div className="flex items-center gap-2 justify-end">
@@ -250,14 +237,14 @@ function NotesSection({ lead, onUpdated }: { lead: Lead; onUpdated: (notes: stri
               onClick={() => setEditing(false)}
               className="px-3 py-1.5 text-xs text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
             >
-              Cancelar
+              {tCommon('cancelar')}
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
               className="px-3 py-1.5 text-xs text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
             >
-              {saving ? 'Salvando…' : 'Salvar'}
+              {saving ? tCommon('salvando') : tCommon('salvar')}
             </button>
           </div>
         </div>
@@ -272,12 +259,12 @@ function NotesSection({ lead, onUpdated }: { lead: Lead; onUpdated: (notes: stri
         </div>
       ) : (
         <p className="text-sm text-gray-400 italic">
-          Sem notas.{' '}
+          {t('semNotas')}{' '}
           <button
             onClick={() => { setDraft(''); setEditing(true); }}
             className="text-green-600 hover:underline not-italic"
           >
-            Adicionar
+            {tCommon('adicionar')}
           </button>
         </p>
       )}
@@ -291,6 +278,9 @@ function ClaudeSection({ lead, onUpdated }: { lead: Lead; onUpdated: (url: strin
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(lead.claude_chat_url ?? '');
   const [saving, setSaving] = useState(false);
+  const t = useTranslations('admin.contatos');
+  const tCrm = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
 
   const handleSave = async () => {
     setSaving(true);
@@ -312,7 +302,7 @@ function ClaudeSection({ lead, onUpdated }: { lead: Lead; onUpdated: (url: strin
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-3">
-        <SectionLabel>Conversa no Claude</SectionLabel>
+        <SectionLabel>{tCrm('conversaClaude')}</SectionLabel>
         {!editing && (
           <button
             onClick={() => { setDraft(lead.claude_chat_url ?? ''); setEditing(true); }}
@@ -337,14 +327,14 @@ function ClaudeSection({ lead, onUpdated }: { lead: Lead; onUpdated: (url: strin
               onClick={() => setEditing(false)}
               className="px-3 py-1.5 text-xs text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
             >
-              Cancelar
+              {tCommon('cancelar')}
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
               className="px-3 py-1.5 text-xs text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
             >
-              {saving ? 'Salvando…' : 'Salvar'}
+              {saving ? tCommon('salvando') : tCommon('salvar')}
             </button>
           </div>
         </div>
@@ -357,19 +347,19 @@ function ClaudeSection({ lead, onUpdated }: { lead: Lead; onUpdated: (url: strin
             <MessageCircle className="w-4 h-4 text-blue-700" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-800">Abrir conversa</p>
+            <p className="text-sm font-medium text-gray-800">{t('abrirConversa')}</p>
             <p className="text-xs text-gray-400 truncate">{lead.claude_chat_url}</p>
           </div>
           <ExternalLink className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" />
         </button>
       ) : (
         <p className="text-sm text-gray-400 italic">
-          Sem link.{' '}
+          {t('semLink')}{' '}
           <button
             onClick={() => { setDraft(''); setEditing(true); }}
             className="text-green-600 hover:underline not-italic"
           >
-            Adicionar
+            {tCommon('adicionar')}
           </button>
         </p>
       )}
@@ -381,6 +371,9 @@ function ClaudeSection({ lead, onUpdated }: { lead: Lead; onUpdated: (url: strin
 
 function ProposalLink({ proposalId }: { proposalId: string }) {
   const [status, setStatus] = useState<string | null>(null);
+  const t = useTranslations('admin.contatos');
+  const tCrm = useTranslations('admin.crm');
+  const tProposal = useTranslations('admin.status.proposal');
 
   useEffect(() => {
     fetch(`/api/admin/proposals/${proposalId}`)
@@ -389,19 +382,19 @@ function ProposalLink({ proposalId }: { proposalId: string }) {
       .catch(() => {});
   }, [proposalId]);
 
-  const badge = status ? (PROPOSAL_BADGE[status] ?? null) : null;
+  const badgeClass = status ? (PROPOSAL_BADGE_CLASS[status] ?? null) : null;
 
   return (
     <div className="flex items-center gap-2.5 mb-5 px-4 py-3 bg-gray-100 rounded-xl">
       <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
-      <span className="text-sm text-gray-700 flex-1">Proposta vinculada</span>
-      {badge && (
-        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${badge.cls}`}>
-          {badge.label}
+      <span className="text-sm text-gray-700 flex-1">{t('propostaVinculadaLabel')}</span>
+      {badgeClass && status && (
+        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${badgeClass}`}>
+          {tProposal(status)}
         </span>
       )}
       <a href={`/admin/propostas/${proposalId}/output`} className="text-xs text-green-600 hover:underline font-medium">
-        Ver proposta
+        {tCrm('verProposta')}
       </a>
     </div>
   );
@@ -426,6 +419,10 @@ function ContactHistory({
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
+  const tType = useTranslations('admin.status.contactType');
+  const tDirection = useTranslations('admin.status.direction');
 
   const handleSave = async () => {
     setSaving(true);
@@ -452,13 +449,13 @@ function ContactHistory({
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <SectionLabel>Histórico de contatos</SectionLabel>
+        <SectionLabel>{t('historicoContatos')}</SectionLabel>
         <button
           onClick={() => setShowForm(f => !f)}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
-          Registrar
+          {tCommon('registrar')}
         </button>
       </div>
 
@@ -466,26 +463,26 @@ function ContactHistory({
         <div className="bg-gray-100 rounded-xl p-3.5 space-y-2.5 mb-4">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-[10px] text-gray-400 uppercase font-medium mb-1.5">Tipo</label>
+              <label className="block text-[10px] text-gray-400 uppercase font-medium mb-1.5">{t('tipo')}</label>
               <select
                 value={type}
                 onChange={e => setType(e.target.value as LeadContact['type'])}
                 className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
               >
-                {CONTACT_TYPE_LABELS.map(t => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
+                {CONTACT_TYPE_VALUES.map(value => (
+                  <option key={value} value={value}>{tType(value)}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-[10px] text-gray-400 uppercase font-medium mb-1.5">Direção</label>
+              <label className="block text-[10px] text-gray-400 uppercase font-medium mb-1.5">{t('direcao')}</label>
               <select
                 value={direction}
                 onChange={e => setDirection(e.target.value as 'sent' | 'received')}
                 className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
               >
-                <option value="sent">Enviado</option>
-                <option value="received">Recebido</option>
+                <option value="sent">{tDirection('sent')}</option>
+                <option value="received">{tDirection('received')}</option>
               </select>
             </div>
           </div>
@@ -493,7 +490,7 @@ function ContactHistory({
             value={note}
             onChange={e => setNote(e.target.value)}
             rows={3}
-            placeholder="Descreva o contato…"
+            placeholder={t('descrevaContato')}
             className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
           />
           <div className="flex items-center justify-end gap-2">
@@ -501,21 +498,21 @@ function ContactHistory({
               onClick={() => setShowForm(false)}
               className="px-3 py-1.5 text-xs text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
             >
-              Cancelar
+              {tCommon('cancelar')}
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
               className="px-3 py-1.5 text-xs text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
             >
-              {saving ? 'Salvando…' : 'Salvar'}
+              {saving ? tCommon('salvando') : tCommon('salvar')}
             </button>
           </div>
         </div>
       )}
 
       {contacts.length === 0 ? (
-        <p className="text-sm text-gray-400 italic">Nenhum contato registrado ainda.</p>
+        <p className="text-sm text-gray-400 italic">{t('nenhumContatoRegistrado')}</p>
       ) : (
         <div className="bg-gray-100 rounded-xl overflow-hidden">
           <ul>
@@ -542,11 +539,11 @@ function ContactHistory({
                           isSent ? 'text-blue-600' : 'text-green-600'
                         }`}
                       >
-                        {isSent ? 'Enviado' : 'Recebido'}
+                        {tDirection(c.direction)}
                       </span>
-                      <span className="text-xs text-gray-400">{fmt(c.created_at)}</span>
+                      <span className="text-xs text-gray-400">{fmtDate(c.created_at)}</span>
                       {c.is_automatic && (
-                        <span className="text-xs text-gray-400 italic">{c.automatic_label ?? 'automático'}</span>
+                        <span className="text-xs text-gray-400 italic">{c.automatic_label ?? t('automatico')}</span>
                       )}
                     </div>
                     {c.note && (
@@ -582,11 +579,15 @@ export default function ContactCRMTab({ leads: initialLeads, lead_contacts: init
   const [leads, setLeads] = useState(initialLeads);
   const [allContacts, setAllContacts] = useState(initialContacts);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(initialLeads[0]?.id ?? null);
+  const t = useTranslations('admin.contatos');
+  const tCommon = useTranslations('admin.common');
+  const tCrm = useTranslations('admin.crm');
+  const tSource = useTranslations('admin.status.source');
 
   if (leads.length === 0) {
     return (
       <div className="p-6">
-        <p className="text-sm text-gray-400 italic">Nenhum lead encontrado para este contato.</p>
+        <p className="text-sm text-gray-400 italic">{t('nenhumLeadContato')}</p>
       </div>
     );
   }
@@ -609,7 +610,7 @@ export default function ContactCRMTab({ leads: initialLeads, lead_contacts: init
                   : 'border-gray-200 text-gray-500 hover:border-gray-300'
               }`}
             >
-              {fmt(l.created_at)}
+              {fmtDate(l.created_at)}
             </button>
           ))}
         </div>
@@ -617,20 +618,24 @@ export default function ContactCRMTab({ leads: initialLeads, lead_contacts: init
 
       {/* Funnel */}
       <div className="mb-2">
-        <SectionLabel>Funil de vendas</SectionLabel>
+        <SectionLabel>{t('funilVendas')}</SectionLabel>
         <FunnelProgress status={lead.status} />
       </div>
 
       {/* Metric cards */}
       <div className={`grid gap-3 mb-6 ${(lead.estimated_min || lead.estimated_max) ? 'grid-cols-2' : 'grid-cols-3'}`}>
-        <MetricCard label="PAX" value={String(lead.pax)} subtitle="pessoas" />
-        <MetricCard label="Origem" value={SOURCE_LABEL[lead.source] ?? lead.source} subtitle="primeiro contato" />
+        <MetricCard label={tCommon('pax')} value={String(lead.pax)} subtitle={tCommon('pessoas')} />
+        <MetricCard label={tCommon('origem')} value={tSource.has(lead.source) ? tSource(lead.source) : lead.source} subtitle={t('primeiroContato')} />
         {(lead.estimated_min || lead.estimated_max)
           ? <>
-              <MetricCard label="Estimativa" value={`€${lead.estimated_min ?? '?'} – €${lead.estimated_max ?? '?'}`} subtitle="valor previsto" />
-              <MetricCard label="Lead em" value={fmt(lead.created_at)} subtitle="data de entrada" />
+              <MetricCard
+                label={tCrm('colEstimativa')}
+                value={`${lead.estimated_min !== null ? fmtEur(lead.estimated_min) : '?'} – ${lead.estimated_max !== null ? fmtEur(lead.estimated_max) : '?'}`}
+                subtitle={t('valorPrevisto')}
+              />
+              <MetricCard label={t('leadEm')} value={fmtDate(lead.created_at)} subtitle={t('dataEntrada')} />
             </>
-          : <MetricCard label="Lead em" value={fmt(lead.created_at)} subtitle="data de entrada" />
+          : <MetricCard label={t('leadEm')} value={fmtDate(lead.created_at)} subtitle={t('dataEntrada')} />
         }
       </div>
 

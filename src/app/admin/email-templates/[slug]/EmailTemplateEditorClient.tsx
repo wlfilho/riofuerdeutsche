@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { EmailTemplate, SHORTCODES, applyExampleShortcodes } from '@/types/email-templates'
 import { saveEmailTemplate } from '@/app/actions/email-templates'
 import Link from 'next/link'
@@ -13,6 +14,9 @@ interface Client {
   email: string
 }
 
+/** Destinatário do envio de teste (definido no endpoint /api/email-templates/test). */
+const TEST_RECIPIENT = 'lantelmew@gmail.com'
+
 function SendToClientModal({
   onClose,
   onSend,
@@ -22,6 +26,8 @@ function SendToClientModal({
   onSend: (clientId: string) => void
   sending: boolean
 }) {
+  const t = useTranslations('admin.emailTemplates')
+  const tCommon = useTranslations('admin.common')
   const [clients, setClients] = useState<Client[]>([])
   const [loadingClients, setLoadingClients] = useState(true)
   const [selected, setSelected] = useState<string>('')
@@ -40,19 +46,19 @@ function SendToClientModal({
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md">
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
-          <h2 className="text-base font-bold text-gray-900">An Kunden senden</h2>
+          <h2 className="text-base font-bold text-gray-900">{t('enviarParaCliente')}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
         <div className="px-6 py-5 space-y-4">
           <p className="text-sm text-gray-500">
-            Wähle einen Kunden aus. Die Shortcodes werden automatisch mit seinen Daten befüllt.
+            {t('escolhaCliente')}
           </p>
           {loadingClients ? (
             <div className="flex items-center gap-2 text-sm text-gray-400">
-              <Loader2 className="w-4 h-4 animate-spin" /> Wird geladen…
+              <Loader2 className="w-4 h-4 animate-spin" /> {tCommon('carregando')}
             </div>
           ) : clients.length === 0 ? (
-            <p className="text-sm text-gray-400">Keine Kunden gefunden.</p>
+            <p className="text-sm text-gray-400">{t('nenhumCliente')}</p>
           ) : (
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {clients.map(c => (
@@ -87,7 +93,7 @@ function SendToClientModal({
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
           >
-            Abbrechen
+            {tCommon('cancelar')}
           </button>
           <button
             onClick={() => selected && onSend(selected)}
@@ -95,9 +101,9 @@ function SendToClientModal({
             className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sending ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Wird gesendet…</>
+              <><Loader2 className="w-4 h-4 animate-spin" /> {tCommon('enviando')}</>
             ) : (
-              <><Send className="w-4 h-4" /> Senden</>
+              <><Send className="w-4 h-4" /> {tCommon('enviar')}</>
             )}
           </button>
         </div>
@@ -108,6 +114,8 @@ function SendToClientModal({
 
 export default function EmailTemplateEditorClient({ template }: { template: EmailTemplate }) {
   const router = useRouter()
+  const t = useTranslations('admin.emailTemplates')
+  const tCommon = useTranslations('admin.common')
   const [subject, setSubject] = useState(template.subject)
   const [htmlBody, setHtmlBody] = useState(template.html_body)
   const [saving, setSaving] = useState(false)
@@ -133,7 +141,7 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
       setTimeout(() => setSaved(false), 3000)
       router.refresh()
     } else {
-      setError(result.error ?? 'Fehler beim Speichern.')
+      setError(result.error ?? tCommon('erroSalvar'))
     }
   }
 
@@ -154,13 +162,13 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
       const data = await res.json()
       if (data.success) {
         setShowSendModal(false)
-        setClientSentToast('E-Mail erfolgreich gesendet ✓')
+        setClientSentToast(t('emailEnviado'))
         setTimeout(() => setClientSentToast(null), 3500)
       } else {
-        alert('Fehler: ' + data.error)
+        alert(tCommon('erroPrefixo', { mensagem: data.error }))
       }
     } catch (err: any) {
-      alert('Fehler: ' + err.message)
+      alert(tCommon('erroPrefixo', { mensagem: err.message }))
     } finally {
       setSendingToClient(false)
     }
@@ -177,13 +185,13 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
       })
       const data = await res.json()
       if (data.success) {
-        setTestToast('Test-E-Mail gesendet an lantelmew@gmail.com ✓')
+        setTestToast(t('testeEnviadoPara', { email: TEST_RECIPIENT }))
         setTimeout(() => setTestToast(null), 3000)
       } else {
-        alert('Fehler: ' + data.error)
+        alert(tCommon('erroPrefixo', { mensagem: data.error }))
       }
     } catch (err: any) {
-      alert('Fehler: ' + err.message)
+      alert(tCommon('erroPrefixo', { mensagem: err.message }))
     } finally {
       setSendingTest(false)
     }
@@ -194,7 +202,7 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href="/admin/email-templates" className="text-gray-400 hover:text-gray-600 transition-colors text-sm">
-          ← Alle Templates
+          {t('todosTemplates')}
         </Link>
         <span className="text-gray-300">/</span>
         <h1 className="text-xl font-bold text-gray-900">{template.name}</h1>
@@ -211,7 +219,7 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
         <div className="xl:col-span-3 space-y-4">
           {/* Subject */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Betreff</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('assunto')}</label>
             <input
               type="text"
               value={subject}
@@ -222,7 +230,7 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
 
           {/* HTML Body */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">HTML-Inhalt</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('conteudoHtml')}</label>
             <textarea
               value={htmlBody}
               onChange={(e) => setHtmlBody(e.target.value)}
@@ -239,13 +247,13 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
               disabled={saving}
               className="bg-green-700 hover:bg-green-800 disabled:opacity-50 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors"
             >
-              {saving ? 'Wird gespeichert…' : saved ? '✓ Gespeichert' : 'Speichern'}
+              {saving ? tCommon('salvando') : saved ? t('salvo') : tCommon('salvar')}
             </button>
             <button
               onClick={() => setShowPreview(true)}
               className="border border-gray-200 hover:border-gray-300 text-gray-700 text-sm font-medium px-5 py-2 rounded-lg transition-colors"
             >
-              Vorschau
+              {t('previa')}
             </button>
             <div className="relative flex flex-col items-center">
               <button
@@ -256,12 +264,12 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
                 {sendingTest ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Wird gesendet…
+                    {tCommon('enviando')}
                   </>
                 ) : (
                   <>
                     <Send className="w-3.5 h-3.5" />
-                    Test senden
+                    {t('enviarTeste')}
                   </>
                 )}
               </button>
@@ -277,7 +285,7 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
                 className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-green-600 bg-green-600 text-white hover:bg-green-700 transition-colors"
               >
                 <Users className="w-3.5 h-3.5" />
-                An Kunden senden
+                {t('enviarParaCliente')}
               </button>
               {clientSentToast && (
                 <span className="absolute top-full mt-1.5 whitespace-nowrap text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded shadow-sm z-10">
@@ -292,8 +300,8 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
         {/* Shortcodes Panel — 1 col */}
         <div className="xl:col-span-1">
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 sticky top-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Shortcodes</h3>
-            <p className="text-xs text-gray-500 mb-4">Klicke um den Code zu kopieren und füge ihn in den HTML-Editor ein.</p>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('shortcodes')}</h3>
+            <p className="text-xs text-gray-500 mb-4">{t('cliqueCopiar')}</p>
             <div className="space-y-2">
               {SHORTCODES.map(({ key, label }) => (
                 <button
@@ -302,7 +310,7 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
                   className="w-full text-left px-3 py-2 rounded-lg border border-gray-200 bg-white hover:border-green-400 hover:bg-green-50 transition-colors group"
                 >
                   <span className="block text-xs font-mono text-green-700 font-semibold">
-                    {copiedKey === key ? '✓ Kopiert!' : `{{${key}}}`}
+                    {copiedKey === key ? t('copiado') : `{{${key}}}`}
                   </span>
                   <span className="block text-xs text-gray-500 mt-0.5">{label}</span>
                 </button>
@@ -333,7 +341,7 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-100 sticky top-0 bg-white">
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wide">Vorschau mit Beispieldaten</p>
+                <p className="text-xs text-gray-400 uppercase tracking-wide">{t('previaExemplo')}</p>
                 <p className="text-sm font-medium text-gray-700">{applyExampleShortcodes(subject)}</p>
               </div>
               <button
@@ -346,7 +354,7 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
             <iframe
               srcDoc={applyExampleShortcodes(htmlBody)}
               className="w-full h-[600px] border-0"
-              title="E-Mail Vorschau"
+              title={t('previaEmail')}
             />
           </div>
         </div>

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { fmtDate } from '@/lib/adminFormat';
 
 interface Page {
   id: string;
@@ -23,6 +25,8 @@ interface Props {
 }
 
 export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, chapterSlug }: Props) {
+  const t = useTranslations('admin.guide');
+  const tCommon = useTranslations('admin.common');
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -34,7 +38,7 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
       const data = await res.json();
       if (data.pages) setPages(data.pages);
     } catch {
-      setMessage({ type: 'error', text: 'Fehler beim Laden.' });
+      setMessage({ type: 'error', text: t('erroCarregar') });
     } finally {
       setLoading(false);
     }
@@ -45,17 +49,17 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
   }, [chapterId]);
 
   const deletePage = async (page: Page) => {
-    if (!confirm(`Seite "${page.title}" wirklich löschen?`)) return;
+    if (!confirm(t('confirmarExcluirPagina', { titulo: page.title }))) return;
     try {
       const res = await fetch(`/api/admin/guide/pages/${page.id}`, { method: 'DELETE' });
       if (res.ok) {
-        setMessage({ type: 'success', text: `"${page.title}" gelöscht.` });
+        setMessage({ type: 'success', text: t('paginaExcluida', { titulo: page.title }) });
         fetchPages();
       } else {
-        setMessage({ type: 'error', text: 'Fehler beim Löschen.' });
+        setMessage({ type: 'error', text: t('erroExcluir') });
       }
     } catch {
-      setMessage({ type: 'error', text: 'Netzwerkfehler.' });
+      setMessage({ type: 'error', text: tCommon('erroRede') });
     }
   };
 
@@ -68,11 +72,17 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
         body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
-        setMessage({ type: 'success', text: `"${page.title}" ist jetzt ${newStatus === 'published' ? 'veröffentlicht' : 'ein Entwurf'}.` });
+        setMessage({
+          type: 'success',
+          text:
+            newStatus === 'published'
+              ? t('paginaPublicada', { titulo: page.title })
+              : t('paginaRascunho', { titulo: page.title }),
+        });
         fetchPages();
       }
     } catch {
-      setMessage({ type: 'error', text: 'Fehler.' });
+      setMessage({ type: 'error', text: t('erroAtualizar') });
     }
   };
 
@@ -100,11 +110,6 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
     }
   };
 
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString('de-DE', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-    });
-
   const publishedCount = pages.filter((p) => p.status === 'published').length;
   const draftCount = pages.filter((p) => p.status === 'draft').length;
 
@@ -113,13 +118,13 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
       <div className="max-w-5xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6 flex-wrap">
-          <Link href="/admin" className="hover:text-gray-600">Dashboard</Link>
+          <Link href="/admin" className="hover:text-gray-600">{t('dashboard')}</Link>
           <span>›</span>
           <Link href="/admin/guide" className="hover:text-gray-600">Guide</Link>
           <span>›</span>
           <span className="text-gray-700 font-medium">{chapterIcon} {chapterTitle}</span>
           <span>›</span>
-          <span className="text-gray-500">Seiten</span>
+          <span className="text-gray-500">{t('paginas')}</span>
         </div>
 
         {/* Header */}
@@ -129,14 +134,18 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
               {chapterIcon} {chapterTitle}
             </h1>
             <p className="text-gray-500 mt-1 text-sm">
-              {publishedCount} veröffentlicht · {draftCount} Entwürfe · {pages.length} gesamt
+              {t('resumo', {
+                publicados: publishedCount,
+                rascunhos: draftCount,
+                total: pages.length,
+              })}
             </p>
           </div>
           <Link
             href={`/admin/guide/${chapterId}/pages/new`}
             className="px-4 py-2 bg-green-600 text-white font-semibold rounded-full text-sm hover:bg-green-700 transition-colors whitespace-nowrap"
           >
-            + Neue Seite
+            {t('novaPaginaBotao')}
           </Link>
         </div>
 
@@ -154,15 +163,15 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
         {/* Pages List */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-gray-400">Laden...</div>
+            <div className="p-8 text-center text-gray-400">{tCommon('carregando')}</div>
           ) : pages.length === 0 ? (
             <div className="p-10 text-center">
-              <p className="text-gray-400 mb-4">Noch keine Seiten in diesem Kapitel.</p>
+              <p className="text-gray-400 mb-4">{t('nenhumaPagina')}</p>
               <Link
                 href={`/admin/guide/${chapterId}/pages/new`}
                 className="inline-block px-4 py-2 bg-green-600 text-white font-semibold rounded-full text-sm hover:bg-green-700 transition-colors"
               >
-                Erste Seite erstellen
+                {t('criarPrimeiraPagina')}
               </Link>
             </div>
           ) : (
@@ -170,10 +179,10 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
               {/* Table header */}
               <div className="grid grid-cols-[32px_1fr_120px_90px_100px] gap-3 px-4 py-2 bg-gray-50 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                 <div />
-                <div>Seite</div>
-                <div>Zugang</div>
-                <div>Status</div>
-                <div className="text-right">Aktionen</div>
+                <div>{t('colPagina')}</div>
+                <div>{t('colAcesso')}</div>
+                <div>{tCommon('status')}</div>
+                <div className="text-right">{tCommon('acoes')}</div>
               </div>
 
               {pages.map((page, index) => (
@@ -203,7 +212,7 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
                   <div className="min-w-0">
                     <p className="font-semibold text-gray-900 text-sm truncate">{page.title}</p>
                     <p className="text-[11px] text-gray-400 truncate">
-                      /{page.slug} · {formatDate(page.updated_at)}
+                      /{page.slug} · {fmtDate(page.updated_at)}
                     </p>
                   </div>
 
@@ -214,7 +223,7 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
                         ? 'bg-green-100 text-green-700'
                         : 'bg-yellow-100 text-yellow-700'
                     }`}>
-                      {page.is_free ? 'Kostenlos' : 'Premium'}
+                      {page.is_free ? t('gratuito') : t('premium')}
                     </span>
                   </div>
 
@@ -228,7 +237,7 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
                           : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                       }`}
                     >
-                      {page.status === 'published' ? '● Live' : '○ Entwurf'}
+                      {page.status === 'published' ? t('live') : t('rascunhoBadge')}
                     </button>
                   </div>
 
@@ -256,7 +265,7 @@ export default function GuidePagesList({ chapterId, chapterTitle, chapterIcon, c
         {/* Back link */}
         <div className="mt-6">
           <Link href="/admin/guide" className="text-sm text-gray-400 hover:text-gray-600">
-            ← Zurück zu den Kapiteln
+            {t('voltarCapitulos')}
           </Link>
         </div>
       </div>

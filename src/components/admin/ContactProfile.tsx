@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import ContactCRMTab from '@/components/admin/ContactCRMTab';
+import { fmtDate, fmtDateTime, fmtEur } from '@/lib/adminFormat';
 
 type Tab = 'guide' | 'crm' | 'emails' | 'dokumente';
 
@@ -93,18 +95,15 @@ interface ContactProfileProps {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function fmt(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
+const ROLE_CLASS: Record<Profile['role'], string> = {
+  admin:   'bg-purple-100 text-purple-700',
+  premium: 'bg-amber-100 text-amber-700',
+  user:    'bg-gray-100 text-gray-600',
+};
 
 function RoleBadge({ role }: { role: Profile['role'] }) {
-  const map: Record<Profile['role'], { label: string; cls: string }> = {
-    admin:   { label: 'Admin',   cls: 'bg-purple-100 text-purple-700' },
-    premium: { label: 'Premium', cls: 'bg-amber-100 text-amber-700' },
-    user:    { label: 'Free',    cls: 'bg-gray-100 text-gray-600' },
-  };
-  const { label, cls } = map[role];
-  return <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${cls}`}>{label}</span>;
+  const t = useTranslations('admin.status.role');
+  return <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${ROLE_CLASS[role]}`}>{t(role)}</span>;
 }
 
 // ── Guide Tab ─────────────────────────────────────────────────────────────────
@@ -112,6 +111,7 @@ function RoleBadge({ role }: { role: Profile['role'] }) {
 function GuideTab({ profile, pages_read, contactEmail }: { profile: Profile | null; pages_read: number; contactEmail: string }) {
   const [upgrading, setUpgrading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const t = useTranslations('admin.contatos');
 
   const handleUpgrade = async () => {
     if (!profile) return;
@@ -127,11 +127,11 @@ function GuideTab({ profile, pages_read, contactEmail }: { profile: Profile | nu
       });
 
       if (res.ok) {
-        setToast('Upgrade para Premium realizado ✓');
+        setToast(t('upgradeRealizado'));
         setTimeout(() => window.location.reload(), 1200);
       } else {
         const data = await res.json();
-        setToast(data.error ?? 'Erro ao fazer upgrade');
+        setToast(data.error ?? t('erroUpgrade'));
       }
     } finally {
       setUpgrading(false);
@@ -142,7 +142,10 @@ function GuideTab({ profile, pages_read, contactEmail }: { profile: Profile | nu
     return (
       <div className="p-6">
         <p className="text-sm text-gray-400 italic">
-          Nenhuma conta Guide encontrada para <span className="font-medium text-gray-600">{contactEmail}</span>.
+          {t.rich('nenhumaContaGuide', {
+            nome: contactEmail,
+            destaque: chunks => <span className="font-medium text-gray-600">{chunks}</span>,
+          })}
         </p>
       </div>
     );
@@ -161,27 +164,27 @@ function GuideTab({ profile, pages_read, contactEmail }: { profile: Profile | nu
 
       <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
         <div>
-          <dt className="text-xs text-gray-400 uppercase font-medium">Registriert</dt>
-          <dd className="text-gray-800 mt-0.5">{fmt(profile.created_at)}</dd>
+          <dt className="text-xs text-gray-400 uppercase font-medium">{t('registrado')}</dt>
+          <dd className="text-gray-800 mt-0.5">{fmtDate(profile.created_at)}</dd>
         </div>
         <div>
-          <dt className="text-xs text-gray-400 uppercase font-medium">Seiten gelesen</dt>
+          <dt className="text-xs text-gray-400 uppercase font-medium">{t('paginasLidas')}</dt>
           <dd className="text-gray-800 mt-0.5">{pages_read}</dd>
         </div>
 
         {profile.role === 'premium' && (
           <>
             <div>
-              <dt className="text-xs text-gray-400 uppercase font-medium">Premium seit</dt>
-              <dd className="text-gray-800 mt-0.5">{profile.premium_since ? fmt(profile.premium_since) : '—'}</dd>
+              <dt className="text-xs text-gray-400 uppercase font-medium">{t('premiumDesde')}</dt>
+              <dd className="text-gray-800 mt-0.5">{fmtDate(profile.premium_since)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-gray-400 uppercase font-medium">Premium bis</dt>
-              <dd className="text-gray-800 mt-0.5">{profile.premium_until ? fmt(profile.premium_until) : '—'}</dd>
+              <dt className="text-xs text-gray-400 uppercase font-medium">{t('premiumAte')}</dt>
+              <dd className="text-gray-800 mt-0.5">{fmtDate(profile.premium_until)}</dd>
             </div>
             {profile.guide_edition && (
               <div>
-                <dt className="text-xs text-gray-400 uppercase font-medium">Guide Edition</dt>
+                <dt className="text-xs text-gray-400 uppercase font-medium">{t('guideEdition')}</dt>
                 <dd className="text-gray-800 mt-0.5">{profile.guide_edition}</dd>
               </div>
             )}
@@ -195,7 +198,7 @@ function GuideTab({ profile, pages_read, contactEmail }: { profile: Profile | nu
           disabled={upgrading}
           className="mt-2 px-4 py-2 text-sm font-semibold text-white bg-amber-500 rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50"
         >
-          {upgrading ? 'Upgrading…' : 'Upgrade para Premium'}
+          {upgrading ? t('fazendoUpgrade') : t('upgradePremium')}
         </button>
       )}
     </div>
@@ -204,14 +207,16 @@ function GuideTab({ profile, pages_read, contactEmail }: { profile: Profile | nu
 
 // ── CRM Tab ───────────────────────────────────────────────────────────────────
 
-const FUNNEL_STEPS: { key: LeadStatus; label: string }[] = [
-  { key: 'new',           label: 'Novo' },
-  { key: 'contacted',     label: 'Em Contato' },
-  { key: 'proposal_sent', label: 'Proposta' },
-  { key: 'closed',        label: 'Fechado' },
+const FUNNEL_STEPS: { key: LeadStatus; labelKey: string }[] = [
+  { key: 'new',           labelKey: 'novo' },
+  { key: 'contacted',     labelKey: 'emContato' },
+  { key: 'proposal_sent', labelKey: 'proposta' },
+  { key: 'closed',        labelKey: 'fechado' },
 ];
 
 function LeadFunnel({ status }: { status: LeadStatus }) {
+  const t = useTranslations('admin.crm');
+  const tStatus = useTranslations('admin.status.lead');
   const isLost = status === 'lost';
   const currentIdx = isLost ? -1 : FUNNEL_STEPS.findIndex(s => s.key === status);
 
@@ -234,7 +239,7 @@ function LeadFunnel({ status }: { status: LeadStatus }) {
               {i < currentIdx && !isLost ? '✓' : i + 1}
             </div>
             <span className={`text-xs mt-1 whitespace-nowrap ${i === currentIdx && !isLost ? 'text-green-700 font-semibold' : 'text-gray-400'}`}>
-              {step.label}
+              {t(step.labelKey)}
             </span>
           </div>
           {i < FUNNEL_STEPS.length - 1 && (
@@ -243,7 +248,7 @@ function LeadFunnel({ status }: { status: LeadStatus }) {
         </div>
       ))}
       {isLost && (
-        <span className="ml-2 self-center px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full font-medium">Perdido</span>
+        <span className="ml-2 self-center px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full font-medium">{tStatus('lost')}</span>
       )}
     </div>
   );
@@ -258,13 +263,17 @@ const CONTACT_TYPE_ICON: Record<LeadContact['type'], string> = {
 
 function CrmTab({ leads, lead_contacts }: { leads: Lead[]; lead_contacts: LeadContact[] }) {
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(leads[0]?.id ?? null);
+  const t = useTranslations('admin.contatos');
+  const tCommon = useTranslations('admin.common');
+  const tCrm = useTranslations('admin.crm');
+  const tDirection = useTranslations('admin.status.direction');
   const lead = leads.find(l => l.id === selectedLeadId) ?? leads[0] ?? null;
   const timeline = lead_contacts.filter(c => c.lead_id === lead?.id);
 
   if (leads.length === 0) {
     return (
       <div className="p-6">
-        <p className="text-sm text-gray-400 italic">Nenhum lead encontrado para este contato.</p>
+        <p className="text-sm text-gray-400 italic">{t('nenhumLeadContato')}</p>
       </div>
     );
   }
@@ -284,7 +293,7 @@ function CrmTab({ leads, lead_contacts }: { leads: Lead[]; lead_contacts: LeadCo
                   : 'border-gray-200 text-gray-500 hover:border-gray-300'
               }`}
             >
-              {fmt(l.created_at)}
+              {fmtDate(l.created_at)}
             </button>
           ))}
         </div>
@@ -294,31 +303,31 @@ function CrmTab({ leads, lead_contacts }: { leads: Lead[]; lead_contacts: LeadCo
         <>
           {/* Funnel */}
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-3">Funil</p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-3">{tCrm('funil')}</p>
             <LeadFunnel status={lead.status} />
           </div>
 
           {/* Lead details */}
           <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
             <div>
-              <dt className="text-xs text-gray-400 uppercase font-medium">PAX</dt>
+              <dt className="text-xs text-gray-400 uppercase font-medium">{tCommon('pax')}</dt>
               <dd className="text-gray-800 mt-0.5">{lead.pax}</dd>
             </div>
             <div>
-              <dt className="text-xs text-gray-400 uppercase font-medium">Origem</dt>
+              <dt className="text-xs text-gray-400 uppercase font-medium">{tCommon('origem')}</dt>
               <dd className="text-gray-800 mt-0.5 capitalize">{lead.source}</dd>
             </div>
             {(lead.estimated_min || lead.estimated_max) && (
               <div className="col-span-2">
-                <dt className="text-xs text-gray-400 uppercase font-medium">Estimativa</dt>
+                <dt className="text-xs text-gray-400 uppercase font-medium">{tCrm('colEstimativa')}</dt>
                 <dd className="text-gray-800 mt-0.5">
-                  € {lead.estimated_min ?? '?'} – € {lead.estimated_max ?? '?'}
+                  {lead.estimated_min !== null ? fmtEur(lead.estimated_min) : '?'} – {lead.estimated_max !== null ? fmtEur(lead.estimated_max) : '?'}
                 </dd>
               </div>
             )}
             {lead.notes && (
               <div className="col-span-2">
-                <dt className="text-xs text-gray-400 uppercase font-medium">Notas</dt>
+                <dt className="text-xs text-gray-400 uppercase font-medium">{tCommon('notas')}</dt>
                 <dd className="text-gray-700 mt-0.5 whitespace-pre-wrap text-xs leading-relaxed">{lead.notes}</dd>
               </div>
             )}
@@ -329,7 +338,7 @@ function CrmTab({ leads, lead_contacts }: { leads: Lead[]; lead_contacts: LeadCo
               href={`/admin/propostas/${lead.proposal_id}/output`}
               className="inline-flex items-center gap-1.5 text-sm text-green-700 hover:underline"
             >
-              📋 Ver proposta vinculada
+              {t('propostaVinculada')}
             </a>
           )}
 
@@ -340,14 +349,14 @@ function CrmTab({ leads, lead_contacts }: { leads: Lead[]; lead_contacts: LeadCo
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:underline"
             >
-              🤖 Conversa no Claude
+              {t('conversaClaude')}
             </a>
           )}
 
           {/* Contact timeline */}
           {timeline.length > 0 && (
             <div>
-              <p className="text-xs text-gray-400 uppercase font-medium mb-3">Histórico de Contatos</p>
+              <p className="text-xs text-gray-400 uppercase font-medium mb-3">{tCrm('historicoContatos')}</p>
               <ul className="space-y-2">
                 {timeline.map(c => (
                   <li key={c.id} className="flex gap-3 items-start text-sm">
@@ -357,11 +366,11 @@ function CrmTab({ leads, lead_contacts }: { leads: Lead[]; lead_contacts: LeadCo
                         <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
                           c.direction === 'sent' ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-600'
                         }`}>
-                          {c.direction === 'sent' ? 'Enviado' : 'Recebido'}
+                          {tDirection(c.direction)}
                         </span>
-                        <span className="text-xs text-gray-400">{fmt(c.created_at)}</span>
+                        <span className="text-xs text-gray-400">{fmtDate(c.created_at)}</span>
                         {c.is_automatic && (
-                          <span className="text-xs text-gray-400 italic">{c.automatic_label ?? 'automático'}</span>
+                          <span className="text-xs text-gray-400 italic">{c.automatic_label ?? tCrm('automatico')}</span>
                         )}
                       </div>
                       {c.note && <p className="text-gray-600 mt-0.5 text-xs">{c.note}</p>}
@@ -381,29 +390,33 @@ function CrmTab({ leads, lead_contacts }: { leads: Lead[]; lead_contacts: LeadCo
 
 function EmailsTab({ tour_clients, email_logs }: { tour_clients: TourClient[]; email_logs: EmailLog[] }) {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(tour_clients[0]?.id ?? null);
+  const t = useTranslations('admin.contatos');
+  const tCommon = useTranslations('admin.common');
+  const tEmailStatus = useTranslations('admin.status.email');
+  const tClientStatus = useTranslations('admin.status.client');
   const client = tour_clients.find(c => c.id === selectedClientId) ?? tour_clients[0] ?? null;
   const logs = email_logs.filter(l => l.client_id === client?.id);
 
   if (tour_clients.length === 0) {
     return (
       <div className="p-6">
-        <p className="text-sm text-gray-400 italic">Nenhum cliente com tour encontrado para este contato.</p>
+        <p className="text-sm text-gray-400 italic">{t('nenhumClienteTour')}</p>
       </div>
     );
   }
 
-  const STATUS_BADGE: Record<EmailLog['status'], { label: string; cls: string }> = {
-    sent:    { label: 'Enviado',   cls: 'bg-green-100 text-green-700' },
-    pending: { label: 'Agendado',  cls: 'bg-gray-100 text-gray-600' },
-    error:   { label: 'Erro',      cls: 'bg-red-100 text-red-700' },
-    skipped: { label: 'Ignorado',  cls: 'bg-gray-100 text-gray-400' },
+  const STATUS_BADGE_CLASS: Record<EmailLog['status'], string> = {
+    sent:    'bg-green-100 text-green-700',
+    pending: 'bg-gray-100 text-gray-600',
+    error:   'bg-red-100 text-red-700',
+    skipped: 'bg-gray-100 text-gray-400',
   };
 
-  const CLIENT_STATUS: Record<TourClient['status'], { label: string; cls: string }> = {
-    active:    { label: 'Ativo',       cls: 'bg-green-100 text-green-700' },
-    completed: { label: 'Concluído',   cls: 'bg-blue-100 text-blue-700' },
-    cancelled: { label: 'Cancelado',   cls: 'bg-gray-100 text-gray-500' },
-    pending:   { label: 'Pendente',    cls: 'bg-amber-100 text-amber-700' },
+  const CLIENT_STATUS_CLASS: Record<TourClient['status'], string> = {
+    active:    'bg-green-100 text-green-700',
+    completed: 'bg-blue-100 text-blue-700',
+    cancelled: 'bg-gray-100 text-gray-500',
+    pending:   'bg-amber-100 text-amber-700',
   };
 
   return (
@@ -421,7 +434,7 @@ function EmailsTab({ tour_clients, email_logs }: { tour_clients: TourClient[]; e
                   : 'border-gray-200 text-gray-500 hover:border-gray-300'
               }`}
             >
-              {fmt(tc.arrival_date)}
+              {fmtDate(tc.arrival_date)}
             </button>
           ))}
         </div>
@@ -431,35 +444,35 @@ function EmailsTab({ tour_clients, email_logs }: { tour_clients: TourClient[]; e
         <>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
             <div>
-              <dt className="text-xs text-gray-400 uppercase font-medium">Status</dt>
+              <dt className="text-xs text-gray-400 uppercase font-medium">{tCommon('status')}</dt>
               <dd className="mt-0.5">
-                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${CLIENT_STATUS[client.status].cls}`}>
-                  {CLIENT_STATUS[client.status].label}
+                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${CLIENT_STATUS_CLASS[client.status]}`}>
+                  {tClientStatus(client.status)}
                 </span>
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-gray-400 uppercase font-medium">PAX</dt>
+              <dt className="text-xs text-gray-400 uppercase font-medium">{tCommon('pax')}</dt>
               <dd className="text-gray-800 mt-0.5">{client.pax}</dd>
             </div>
             <div>
-              <dt className="text-xs text-gray-400 uppercase font-medium">Chegada</dt>
-              <dd className="text-gray-800 mt-0.5">{fmt(client.arrival_date)}</dd>
+              <dt className="text-xs text-gray-400 uppercase font-medium">{t('chegada')}</dt>
+              <dd className="text-gray-800 mt-0.5">{fmtDate(client.arrival_date)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-gray-400 uppercase font-medium">Saída</dt>
-              <dd className="text-gray-800 mt-0.5">{fmt(client.departure_date)}</dd>
+              <dt className="text-xs text-gray-400 uppercase font-medium">{t('saida')}</dt>
+              <dd className="text-gray-800 mt-0.5">{fmtDate(client.departure_date)}</dd>
             </div>
             {client.total_amount && (
               <div>
-                <dt className="text-xs text-gray-400 uppercase font-medium">Total</dt>
-                <dd className="text-gray-800 mt-0.5">€ {client.total_amount}</dd>
+                <dt className="text-xs text-gray-400 uppercase font-medium">{tCommon('total')}</dt>
+                <dd className="text-gray-800 mt-0.5">{fmtEur(client.total_amount)}</dd>
               </div>
             )}
             {client.deposit_amount && (
               <div>
-                <dt className="text-xs text-gray-400 uppercase font-medium">Sinal</dt>
-                <dd className="text-gray-800 mt-0.5">€ {client.deposit_amount}</dd>
+                <dt className="text-xs text-gray-400 uppercase font-medium">{t('sinal')}</dt>
+                <dd className="text-gray-800 mt-0.5">{fmtEur(client.deposit_amount)}</dd>
               </div>
             )}
           </dl>
@@ -467,10 +480,10 @@ function EmailsTab({ tour_clients, email_logs }: { tour_clients: TourClient[]; e
           {/* Email sequence */}
           {logs.length > 0 ? (
             <div>
-              <p className="text-xs text-gray-400 uppercase font-medium mb-3">Sequência de E-mails</p>
+              <p className="text-xs text-gray-400 uppercase font-medium mb-3">{t('sequenciaEmails')}</p>
               <ul className="space-y-2">
                 {logs.map(log => {
-                  const badge = STATUS_BADGE[log.status];
+                  const badgeClass = STATUS_BADGE_CLASS[log.status];
                   const templateName = log.email_templates?.name ?? log.email_name;
 
                   return (
@@ -483,13 +496,13 @@ function EmailsTab({ tour_clients, email_logs }: { tour_clients: TourClient[]; e
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-800 truncate">{templateName}</p>
                         <p className="text-xs text-gray-400">
-                          {log.phase === 'pre_tour' ? 'Pré-tour' : log.phase === 'pos_tour' ? 'Pós-tour' : ''}
-                          {' · '}{fmt(log.scheduled_date)}
-                          {log.sent_at && ` · enviado ${fmt(log.sent_at)}`}
+                          {log.phase === 'pre_tour' ? t('preTour') : log.phase === 'pos_tour' ? t('posTour') : ''}
+                          {' · '}{fmtDate(log.scheduled_date)}
+                          {log.sent_at && t('enviadoEm', { data: fmtDate(log.sent_at) })}
                         </p>
                       </div>
-                      <span className={`flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full ${badge.cls}`}>
-                        {badge.label}
+                      <span className={`flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full ${badgeClass}`}>
+                        {tEmailStatus(log.status)}
                       </span>
                     </li>
                   );
@@ -497,7 +510,7 @@ function EmailsTab({ tour_clients, email_logs }: { tour_clients: TourClient[]; e
               </ul>
             </div>
           ) : (
-            <p className="text-sm text-gray-400 italic">Nenhum e-mail na sequência ainda.</p>
+            <p className="text-sm text-gray-400 italic">{t('nenhumEmailSequencia')}</p>
           )}
         </>
       )}
@@ -532,18 +545,21 @@ function DokumenteTab({ contactId }: { contactId: string }) {
   const [editLabel, setEditLabel] = useState('');
   const [editNotes, setEditNotes] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
+  const t = useTranslations('admin.contatos.documentos');
+  const tCommon = useTranslations('admin.common');
 
   useEffect(() => {
     fetch(`/api/admin/contacts/${contactId}/documents`)
       .then(r => r.json())
       .then(d => { setDocs(Array.isArray(d) ? d : []); })
-      .catch(() => setError('Fehler beim Laden der Dokumente'))
+      .catch(() => setError(t('erroCarregar')))
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactId]);
 
   const handleFile = async (file: File) => {
-    if (file.type !== 'application/pdf') { setError('Nur PDF-Dateien erlaubt'); return; }
-    if (file.size > 20 * 1024 * 1024) { setError('Datei zu groß (max. 20 MB)'); return; }
+    if (file.type !== 'application/pdf') { setError(t('apenasPdf')); return; }
+    if (file.size > 20 * 1024 * 1024) { setError(t('arquivoGrande')); return; }
     setError(null);
     setPendingFile(file);
     setLabel(file.name.replace(/\.pdf$/i, '').replace(/[_-]/g, ' '));
@@ -576,14 +592,14 @@ function DokumenteTab({ contactId }: { contactId: string }) {
 
       const res = await fetch(`/api/admin/contacts/${contactId}/documents`, { method: 'POST', body: fd });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Upload-Fehler');
+      if (!res.ok) throw new Error(data.error ?? t('erroUpload'));
 
       setDocs(prev => [data, ...prev]);
       setPendingFile(null);
       setLabel('');
       setNotes('');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Upload-Fehler');
+      setError(e instanceof Error ? e.message : t('erroUpload'));
     } finally {
       setUploading(false);
     }
@@ -605,25 +621,25 @@ function DokumenteTab({ contactId }: { contactId: string }) {
         body: JSON.stringify({ label: editLabel.trim() || doc.file_name, notes: editNotes.trim() || null }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Fehler beim Speichern');
+      if (!res.ok) throw new Error(data.error ?? t('erroSalvar'));
       setDocs(prev => prev.map(d => d.id === doc.id ? { ...d, label: data.label, notes: data.notes } : d));
       setEditingId(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Fehler beim Speichern');
+      setError(e instanceof Error ? e.message : t('erroSalvar'));
     } finally {
       setSavingId(null);
     }
   };
 
   const handleDelete = async (doc: ContactDocument) => {
-    if (!confirm(`"${doc.label || doc.file_name}" wirklich löschen?`)) return;
+    if (!confirm(t('confirmarExcluir', { nome: doc.label || doc.file_name }))) return;
     setDeletingId(doc.id);
     try {
       const res = await fetch(`/api/admin/contacts/${contactId}/documents/${doc.id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Fehler beim Löschen');
+      if (!res.ok) throw new Error(t('erroExcluir'));
       setDocs(prev => prev.filter(d => d.id !== doc.id));
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Fehler beim Löschen');
+      setError(e instanceof Error ? e.message : t('erroExcluir'));
     } finally {
       setDeletingId(null);
     }
@@ -654,8 +670,8 @@ function DokumenteTab({ contactId }: { contactId: string }) {
           <svg className="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <p className="text-sm text-gray-500">PDF hier ablegen oder <span className="text-green-600 font-medium">auswählen</span></p>
-          <p className="text-xs text-gray-400 mt-1">Nur PDF · max. 20 MB</p>
+          <p className="text-sm text-gray-500">{t('soltarPdf')}<span className="text-green-600 font-medium">{t('selecionar')}</span></p>
+          <p className="text-xs text-gray-400 mt-1">{t('apenasPdfMax')}</p>
         </div>
       ) : (
         <div className="border border-gray-200 rounded-xl p-4 space-y-3 bg-gray-50">
@@ -675,37 +691,37 @@ function DokumenteTab({ contactId }: { contactId: string }) {
           </div>
 
           <div>
-            <label className="block text-xs text-gray-500 font-medium mb-1">Bezeichnung <span className="text-red-400">*</span></label>
+            <label className="block text-xs text-gray-500 font-medium mb-1">{t('designacao')} <span className="text-red-400">*</span></label>
             <input
               type="text"
               value={label}
               onChange={e => setLabel(e.target.value)}
-              placeholder="z.B. Proposta Larissa – 3 Tage Rio"
+              placeholder={t('designacaoPlaceholder')}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-gray-500 font-medium">Notizen</label>
+              <label className="text-xs text-gray-500 font-medium">{tCommon('notas')}</label>
               {summarizing && (
                 <span className="flex items-center gap-1 text-xs text-purple-600">
                   <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                   </svg>
-                  IA a ler o PDF…
+                  {t('iaLendoPdf')}
                 </span>
               )}
               {!summarizing && notes && (
-                <span className="text-xs text-purple-500">sugerido pela IA · editável</span>
+                <span className="text-xs text-purple-500">{t('sugeridoPelaIa')}</span>
               )}
             </div>
             <textarea
               value={summarizing ? '' : notes}
               onChange={e => setNotes(e.target.value)}
               disabled={summarizing}
-              placeholder={summarizing ? 'Analisando o PDF com IA…' : 'Preis, Programme, Besonderheiten…'}
+              placeholder={summarizing ? t('analisandoPdf') : t('precoProgramas')}
               rows={5}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none disabled:bg-gray-50 disabled:text-gray-400"
             />
@@ -716,7 +732,7 @@ function DokumenteTab({ contactId }: { contactId: string }) {
             disabled={uploading || summarizing || !label.trim()}
             className="w-full py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {uploading ? 'Hochladen…' : summarizing ? 'Aguardando IA…' : 'PDF speichern'}
+            {uploading ? t('enviando') : summarizing ? t('aguardandoIa') : t('salvarPdf')}
           </button>
         </div>
       )}
@@ -729,13 +745,11 @@ function DokumenteTab({ contactId }: { contactId: string }) {
           ))}
         </div>
       ) : docs.length === 0 ? (
-        <p className="text-sm text-gray-400 italic text-center py-4">Noch keine Dokumente hochgeladen.</p>
+        <p className="text-sm text-gray-400 italic text-center py-4">{t('nenhumDocumento')}</p>
       ) : (
         <ul className="space-y-2">
           {docs.map((doc, i) => {
-            const uploadedAt = new Date(doc.uploaded_at);
-            const dateStr = uploadedAt.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            const timeStr = uploadedAt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+            const uploadedAt = fmtDateTime(doc.uploaded_at);
             const isLatest = i === 0 && docs.length > 1;
             return (
             <li key={doc.id} className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${isLatest ? 'border-green-200 bg-green-50/40' : 'border-gray-100 bg-white hover:border-gray-200'}`}>
@@ -748,13 +762,13 @@ function DokumenteTab({ contactId }: { contactId: string }) {
                     type="text"
                     value={editLabel}
                     onChange={e => setEditLabel(e.target.value)}
-                    placeholder="Bezeichnung"
+                    placeholder={t('designacao')}
                     className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                   <textarea
                     value={editNotes}
                     onChange={e => setEditNotes(e.target.value)}
-                    placeholder="Notizen…"
+                    placeholder={t('notasPlaceholder')}
                     rows={3}
                     className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
                   />
@@ -764,13 +778,13 @@ function DokumenteTab({ contactId }: { contactId: string }) {
                       disabled={savingId === doc.id || !editLabel.trim()}
                       className="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                     >
-                      {savingId === doc.id ? 'Salvando…' : 'Salvar'}
+                      {savingId === doc.id ? tCommon('salvando') : tCommon('salvar')}
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
                       className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
-                      Cancelar
+                      {tCommon('cancelar')}
                     </button>
                   </div>
                 </div>
@@ -780,11 +794,11 @@ function DokumenteTab({ contactId }: { contactId: string }) {
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-medium text-gray-800 truncate">{doc.label || doc.file_name}</p>
                       {isLatest && (
-                        <span className="flex-shrink-0 px-1.5 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded-full">Atual</span>
+                        <span className="flex-shrink-0 px-1.5 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded-full">{t('atual')}</span>
                       )}
                     </div>
                     {doc.notes && <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{doc.notes}</p>}
-                    <p className="text-xs font-medium text-gray-500 mt-1">{dateStr} · {timeStr}</p>
+                    <p className="text-xs font-medium text-gray-500 mt-1">{uploadedAt}</p>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     {doc.signed_url && (
@@ -792,7 +806,7 @@ function DokumenteTab({ contactId }: { contactId: string }) {
                         href={doc.signed_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        title="PDF öffnen"
+                        title={t('abrirPdf')}
                         className="p-1.5 text-gray-400 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -802,7 +816,7 @@ function DokumenteTab({ contactId }: { contactId: string }) {
                     )}
                     <button
                       onClick={() => handleStartEdit(doc)}
-                      title="Bearbeiten"
+                      title={tCommon('editar')}
                       className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -812,7 +826,7 @@ function DokumenteTab({ contactId }: { contactId: string }) {
                     <button
                       onClick={() => handleDelete(doc)}
                       disabled={deletingId === doc.id}
-                      title="Löschen"
+                      title={tCommon('excluir')}
                       className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -833,11 +847,11 @@ function DokumenteTab({ contactId }: { contactId: string }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: 'guide',      label: 'Guide' },
-  { key: 'crm',        label: 'CRM' },
-  { key: 'emails',     label: 'E-mails' },
-  { key: 'dokumente',  label: 'Dokumente' },
+const TABS: { key: Tab; labelKey: string }[] = [
+  { key: 'guide',      labelKey: 'abaGuide' },
+  { key: 'crm',        labelKey: 'abaCrm' },
+  { key: 'emails',     labelKey: 'abaEmails' },
+  { key: 'dokumente',  labelKey: 'abaDocumentos' },
 ];
 
 export default function ContactProfile({ contactId, contactEmail, contactName, onEdit, onDelete }: ContactProfileProps) {
@@ -846,6 +860,8 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const t = useTranslations('admin.contatos');
+  const tCommon = useTranslations('admin.common');
 
   const copyEmail = () => {
     navigator.clipboard.writeText(contactEmail).then(() => {
@@ -863,9 +879,10 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
         if (d.error) setError(d.error);
         else setData(d as ContactData);
       })
-      .catch(() => { if (!cancelled) setError('Netzwerkfehler beim Laden des Profils.'); })
+      .catch(() => { if (!cancelled) setError(t('erroCarregarPerfil')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactId]);
 
   const displayName = contactName || contactEmail;
@@ -884,7 +901,7 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
               <p className="text-sm text-gray-500 truncate">{contactEmail}</p>
               <button
                 onClick={copyEmail}
-                title="E-mail kopieren"
+                title={t('copiarEmail')}
                 className="flex-shrink-0 p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 {copied ? (
@@ -908,14 +925,14 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                Editar
+                {tCommon('editar')}
               </button>
             )}
             {onDelete && (
               <button
                 onClick={onDelete}
                 className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                title="Remover contato"
+                title={t('removerContato')}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -927,17 +944,17 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
 
         {/* Tabs */}
         <div className="flex gap-1 mt-5 -mb-px">
-          {TABS.map(t => (
+          {TABS.map(tabItem => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
+              key={tabItem.key}
+              onClick={() => setTab(tabItem.key)}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                tab === t.key
+                tab === tabItem.key
                   ? 'border-green-600 text-green-700'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              {t.label}
+              {t(tabItem.labelKey)}
             </button>
           ))}
         </div>

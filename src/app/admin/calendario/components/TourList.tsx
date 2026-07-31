@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { TourDate } from '@/lib/tourDates';
 import { MONTH_NAMES_PT } from '@/lib/calendarDates';
 import TourCard from './TourCard';
@@ -15,6 +16,8 @@ export default function TourList({
   onEdit: (tour: TourDate) => void;
   onDelete: (tour: TourDate) => void;
 }) {
+  const t = useTranslations('admin.calendario');
+
   if (!groupByMonth) {
     return (
       <div className="space-y-3">
@@ -43,7 +46,7 @@ export default function TourList({
               {MONTH_NAMES_PT[Number(key.slice(5, 7)) - 1]}
             </h3>
             <span className="text-sm text-gray-400">
-              {monthTours.length} tour{monthTours.length > 1 ? 's' : ''}
+              {t('toursCount', { count: monthTours.length })}
             </span>
           </div>
           <div className="space-y-3">

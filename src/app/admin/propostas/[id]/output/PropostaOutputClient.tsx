@@ -2,9 +2,15 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { fmtDate, fmtEur } from '@/lib/adminFormat';
 import type { DepositBankInfo, Proposal, ProposalStatus } from '@/lib/proposals';
 
 // ─── Format helpers ────────────────────────────────────────────────────────────
+// ATENÇÃO: formatDate/formatShortDate/formatEur/formatDuration/formatOnsiteCost e
+// os helpers de dia em alemão (fullGermanDay/abbrGermanDay) alimentam o texto de
+// WhatsApp e o PDF ENVIADOS AO CLIENTE. Não trocar por @/lib/adminFormat nem
+// traduzir: a saída do cliente é em alemão. Para a UI do admin, use fmtDate/fmtEur.
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—';
@@ -69,11 +75,13 @@ function abbrGermanDay(iso: string): string {
 
 // ─── Status config ─────────────────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<ProposalStatus, { label: string; className: string }> = {
-  draft: { label: 'Rascunho', className: 'bg-gray-100 text-gray-600' },
-  sent: { label: 'Enviada', className: 'bg-blue-100 text-blue-700' },
-  accepted: { label: 'Aceita', className: 'bg-green-100 text-green-700' },
-  rejected: { label: 'Recusada', className: 'bg-red-100 text-red-700' },
+// Só a aparência: o rótulo vem de admin.status.proposal e o valor gravado no
+// banco continua em inglês (draft/sent/accepted/rejected).
+const STATUS_CLASSNAME: Record<ProposalStatus, string> = {
+  draft: 'bg-gray-100 text-gray-600',
+  sent: 'bg-blue-100 text-blue-700',
+  accepted: 'bg-green-100 text-green-700',
+  rejected: 'bg-red-100 text-red-700',
 };
 
 // Link público enviado ao cliente — domínio canônico de produção.
@@ -546,6 +554,9 @@ export default function PropostaOutputClient({
   proposal: Proposal;
   bank: DepositBankInfo;
 }) {
+  const t = useTranslations('admin.propostas');
+  const tCommon = useTranslations('admin.common');
+  const tStatus = useTranslations('admin.status.proposal');
   const [status, setStatus] = useState<ProposalStatus>(initial.status);
   const [statusSaving, setStatusSaving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -626,11 +637,11 @@ export default function PropostaOutputClient({
               href="/admin/propostas"
               className="text-sm text-gray-400 hover:text-gray-700 transition-colors shrink-0"
             >
-              ← Propostas
+              {t('voltarPropostas')}
             </Link>
             <span className="text-gray-200">/</span>
             <h1 className="text-xl font-bold text-gray-900 truncate">
-              Proposta — {initial.client_name}
+              {t('propostaSingular')} — {initial.client_name}
             </h1>
             {initial.internal_label && (
               <span className="px-1.5 py-0.5 text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded shrink-0">
@@ -643,34 +654,34 @@ export default function PropostaOutputClient({
               href={`/admin/propostas/${initial.id}/editar`}
               className="px-4 py-2 text-sm font-semibold bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Editar
+              {tCommon('editar')}
             </Link>
             <button
               onClick={handleDownloadPDF}
               disabled={pdfLoading}
               className="px-4 py-2 text-sm font-semibold bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {pdfLoading ? 'Generiere…' : '⬇ Baixar PDF'}
+              {pdfLoading ? t('gerandoPdf') : t('baixarPdf')}
             </button>
             <button
               onClick={handleCopy}
               className="px-4 py-2 text-sm font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
-              {copied ? '✓ Copiado!' : '📋 Copiar WhatsApp'}
+              {copied ? t('copiadoExcl') : t('copiarWhatsapp')}
             </button>
           </div>
         </div>
 
         {/* ── Card 1: Resumo */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-base font-bold text-gray-900 mb-5">Resumo da Proposta</h2>
+          <h2 className="text-base font-bold text-gray-900 mb-5">{t('resumoProposta')}</h2>
           <dl className="space-y-3">
             {(
               [
-                ['Cliente', initial.client_name],
-                ['PAX', `${initial.pax} pessoa${initial.pax !== 1 ? 's' : ''}`],
-                ['Tratamento', initial.treatment === 'Sie' ? 'Sie (formal)' : 'du/ihr (informal)'],
-                ...(initial.valid_until ? [['Gültig bis', formatDate(initial.valid_until)]] : []),
+                [t('colCliente'), initial.client_name],
+                [tCommon('pax'), `${initial.pax} ${initial.pax !== 1 ? tCommon('pessoas') : tCommon('pessoa')}`],
+                [t('tratamento'), initial.treatment === 'Sie' ? t('sieFormal') : t('duInformal')],
+                ...(initial.valid_until ? [[t('validaAte'), fmtDate(initial.valid_until)]] : []),
               ] as Array<[string, string]>
             ).map(([label, value]) => (
               <div key={label} className="flex items-center gap-4">
@@ -682,16 +693,16 @@ export default function PropostaOutputClient({
             {/* Dias de tour (chegada/partida são derivadas deles) */}
             <div className="flex items-start gap-4">
               <dt className="text-sm text-gray-400 w-28 shrink-0">
-                Dias de tour
+                {t('colDiasTour')}
                 {sortedDays.length > 0 && (
                   <span className="block text-xs text-gray-300">
-                    {sortedDays.length} {sortedDays.length === 1 ? 'dia' : 'dias'}
+                    {sortedDays.length} {sortedDays.length === 1 ? tCommon('dia') : tCommon('dias')}
                   </span>
                 )}
               </dt>
               <dd className="flex flex-wrap gap-1.5">
                 {sortedDays.length === 0 ? (
-                  <span className="text-sm font-medium text-gray-800">—</span>
+                  <span className="text-sm font-medium text-gray-800">{tCommon('vazio')}</span>
                 ) : (
                   sortedDays.map(day => (
                     <span
@@ -707,13 +718,13 @@ export default function PropostaOutputClient({
 
             {/* Status — inline editable */}
             <div className="flex items-center gap-4">
-              <dt className="text-sm text-gray-400 w-28 shrink-0">Status</dt>
+              <dt className="text-sm text-gray-400 w-28 shrink-0">{tCommon('status')}</dt>
               <dd>
                 <div className="relative flex items-center gap-2">
                   <span
-                    className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${STATUS_CONFIG[status].className}`}
+                    className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${STATUS_CLASSNAME[status]}`}
                   >
-                    {STATUS_CONFIG[status].label}
+                    {tStatus(status)}
                   </span>
                   <select
                     value={status}
@@ -721,13 +732,13 @@ export default function PropostaOutputClient({
                     onChange={e => handleStatusChange(e.target.value as ProposalStatus)}
                     className="text-xs text-gray-500 border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
                   >
-                    <option value="draft">Rascunho</option>
-                    <option value="sent">Enviada</option>
-                    <option value="accepted">Aceita</option>
-                    <option value="rejected">Recusada</option>
+                    <option value="draft">{tStatus('draft')}</option>
+                    <option value="sent">{tStatus('sent')}</option>
+                    <option value="accepted">{tStatus('accepted')}</option>
+                    <option value="rejected">{tStatus('rejected')}</option>
                   </select>
                   {statusSaving && (
-                    <span className="text-xs text-gray-400">Salvando…</span>
+                    <span className="text-xs text-gray-400">{tCommon('salvando')}</span>
                   )}
                 </div>
               </dd>
@@ -735,7 +746,7 @@ export default function PropostaOutputClient({
 
             {/* Link público do cliente */}
             <div className="flex items-center gap-4">
-              <dt className="text-sm text-gray-400 w-28 shrink-0">Link cliente</dt>
+              <dt className="text-sm text-gray-400 w-28 shrink-0">{t('linkCliente')}</dt>
               <dd className="flex items-center gap-2 min-w-0">
                 {/* href relativo pra abrir também no dev/túnel; o copiado é o canônico */}
                 <a
@@ -750,16 +761,16 @@ export default function PropostaOutputClient({
                   onClick={handleCopyLink}
                   className="text-xs font-semibold px-2 py-1 rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors shrink-0"
                 >
-                  {linkCopied ? '✓ Copiado' : 'Copiar'}
+                  {linkCopied ? tCommon('copiado') : tCommon('copiar')}
                 </button>
               </dd>
             </div>
 
             {/* Total */}
             <div className="flex items-center gap-4 pt-2 border-t border-gray-100 mt-2">
-              <dt className="text-sm text-gray-400 w-28 shrink-0">Total</dt>
+              <dt className="text-sm text-gray-400 w-28 shrink-0">{tCommon('total')}</dt>
               <dd className="text-lg font-bold text-green-600 tabular-nums">
-                {formatEur(initial.total_amount ?? grandTotal)}
+                {fmtEur(initial.total_amount ?? grandTotal)}
               </dd>
             </div>
           </dl>
@@ -768,18 +779,18 @@ export default function PropostaOutputClient({
         {/* ── Card 2: Itinerário */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-6 pt-6 pb-4">
-            <h2 className="text-base font-bold text-gray-900">Itinerário</h2>
+            <h2 className="text-base font-bold text-gray-900">{t('itinerario')}</h2>
           </div>
 
           {sortedDays.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8">Nenhuma leistung adicionada.</p>
+            <p className="text-sm text-gray-400 text-center py-8">{t('nenhumServicoAdicionado')}</p>
           ) : (
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-y border-gray-100">
-                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-6 py-2.5">Atividade</th>
-                  <th className="text-right text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-2.5 whitespace-nowrap">Duração</th>
-                  <th className="text-right text-xs font-semibold text-gray-400 uppercase tracking-wide px-6 py-2.5">Valor</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-6 py-2.5">{t('colAtividade')}</th>
+                  <th className="text-right text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-2.5 whitespace-nowrap">{t('colDuracao')}</th>
+                  <th className="text-right text-xs font-semibold text-gray-400 uppercase tracking-wide px-6 py-2.5">{tCommon('valor')}</th>
                 </tr>
               </thead>
               {sortedDays.map(day => {
@@ -800,7 +811,7 @@ export default function PropostaOutputClient({
                         )}
                       </td>
                       <td className="px-6 py-2 text-right whitespace-nowrap">
-                        <span className="text-xs font-semibold text-green-600 tabular-nums">{formatEur(dayTotal)}</span>
+                        <span className="text-xs font-semibold text-green-600 tabular-nums">{fmtEur(dayTotal)}</span>
                       </td>
                     </tr>
                     {dayItems.map((item, idx) => (
@@ -815,11 +826,11 @@ export default function PropostaOutputClient({
                           {item.duration_hours ? (
                             <span className="text-gray-500 tabular-nums">{formatDuration(item.duration_hours)}</span>
                           ) : (
-                            <span className="text-gray-300">—</span>
+                            <span className="text-gray-300">{tCommon('vazio')}</span>
                           )}
                         </td>
                         <td className="px-6 py-3 text-right whitespace-nowrap">
-                          <span className="text-gray-700 font-medium tabular-nums">{formatEur(item.total_eur)}</span>
+                          <span className="text-gray-700 font-medium tabular-nums">{fmtEur(item.total_eur)}</span>
                         </td>
                       </tr>
                     ))}
@@ -829,9 +840,9 @@ export default function PropostaOutputClient({
               <tfoot>
                 <tr className="border-t-2 border-gray-200 bg-gray-50">
                   <td className="px-6 py-4">
-                    <span className="text-sm font-semibold text-gray-600">Gesamtbetrag</span>
+                    <span className="text-sm font-semibold text-gray-600">{t('valorTotal')}</span>
                     <span className="ml-3 text-xs text-gray-400 tabular-nums">
-                      {sortedDays.length} {sortedDays.length === 1 ? 'Tag' : 'Tage'}
+                      {sortedDays.length} {sortedDays.length === 1 ? tCommon('dia') : tCommon('dias')}
                     </span>
                   </td>
                   <td className="px-4 py-4 text-right whitespace-nowrap">
@@ -841,7 +852,7 @@ export default function PropostaOutputClient({
                   </td>
                   <td className="px-6 py-4 text-right">
                     <span className="text-xl font-bold text-green-600 tabular-nums">
-                      {formatEur(initial.total_amount ?? grandTotal)}
+                      {fmtEur(initial.total_amount ?? grandTotal)}
                     </span>
                   </td>
                 </tr>
@@ -853,7 +864,7 @@ export default function PropostaOutputClient({
         {/* ── Card 3: Texto WhatsApp */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-gray-900">Texto WhatsApp</h2>
+            <h2 className="text-base font-bold text-gray-900">{t('textoWhatsapp')}</h2>
             <button
               onClick={handleCopy}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
@@ -862,7 +873,7 @@ export default function PropostaOutputClient({
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {copied ? '✓ Copiado!' : 'Copiar'}
+              {copied ? t('copiadoExcl') : tCommon('copiar')}
             </button>
           </div>
           <textarea

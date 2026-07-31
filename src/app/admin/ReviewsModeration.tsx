@@ -1,13 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { createClient } from '@/utils/supabase/client';
-import { 
-    Star, CheckCircle, XCircle, Clock, MessageSquare, 
-    ChevronDown, ChevronUp, ExternalLink, Trash2, Plus, 
+import { fmtDate, fmtDateTime } from '@/lib/adminFormat';
+import {
+    Star, CheckCircle, XCircle, Clock, MessageSquare,
+    ChevronDown, ChevronUp, ExternalLink, Trash2, Plus,
     Loader2, Link as LinkIcon, Copy, User, Calendar, Smile, Frown, Meh, MessageSquareHeart
 } from 'lucide-react';
 
+// Valores persistidos e exibidos publicamente — são DADOS, não UI. Não traduzir.
 const ATTRACTIONS = [
   "Arcos da Lapa",
   "Arpoador-Felsen",
@@ -74,6 +77,9 @@ interface NpsResponse {
 }
 
 export default function ReviewsModeration() {
+    const t = useTranslations('admin.avaliacoes');
+    const tc = useTranslations('admin.common');
+    const tReviewStatus = useTranslations('admin.status.review');
     const [reviews, setReviews] = useState<Review[]>([]);
     const [activeTab, setActiveTab] = useState<ReviewStatus>('pending');
     const [loading, setLoading] = useState(true);
@@ -160,14 +166,14 @@ export default function ReviewsModeration() {
             setReviews(prev => prev.filter(r => r.id !== id));
         } catch (error) {
             console.error('Error approving review:', error);
-            alert('Erro ao aprovar review');
+            alert(t('erroAprovar'));
         } finally {
             setActioningId(null);
         }
     };
 
     const handleReject = async (id: string) => {
-        if (!confirm('Deseja realmente rejeitar esta avaliação?')) return;
+        if (!confirm(t('confirmarRejeitar'))) return;
         
         setActioningId(id);
         try {
@@ -183,7 +189,7 @@ export default function ReviewsModeration() {
             setReviews(prev => prev.filter(r => r.id !== id));
         } catch (error) {
             console.error('Error rejecting review:', error);
-            alert('Erro ao rejeitar review');
+            alert(t('erroRejeitar'));
         } finally {
             setActioningId(null);
         }
@@ -194,7 +200,7 @@ export default function ReviewsModeration() {
         photoUrls: string[],
         willPhotoUrls: string[]
     ) => {
-        const confirmed = window.confirm("Diesen Review wirklich löschen? Das pode não ser desfeito.");
+        const confirmed = window.confirm(t('confirmarExcluir'));
         if (!confirmed) return;
 
         setActioningId(reviewId);
@@ -216,7 +222,7 @@ export default function ReviewsModeration() {
 
         } catch (err) {
             console.error('Error deleting review:', err);
-            alert('Erro ao deletar avaliação');
+            alert(t('erroExcluir'));
         } finally {
             setActioningId(null);
         }
@@ -232,7 +238,7 @@ export default function ReviewsModeration() {
         });
 
         if (error) {
-            alert('Erro ao gerar token NPS');
+            alert(t('erroGerarToken'));
             return;
         }
         
@@ -250,7 +256,7 @@ export default function ReviewsModeration() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'update-attractions', attractions }),
         });
-        if (!response.ok) { alert('Fehler beim Speichern'); return; }
+        if (!response.ok) { alert(t('erroSalvarAtracoes')); return; }
         setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, attractions } : r));
     };
 
@@ -260,7 +266,7 @@ export default function ReviewsModeration() {
             .from('reviews')
             .update({ consent_will_photos: next })
             .eq('id', reviewId);
-        if (error) { alert('Fehler beim Aktualisieren'); return; }
+        if (error) { alert(t('erroAtualizar')); return; }
         setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, consent_will_photos: next } : r));
     };
 
@@ -284,7 +290,7 @@ export default function ReviewsModeration() {
     // --- Photo Management Functions ---
 
     const deletePaxPhoto = async (reviewId: string, urlToRemove: string, currentUrls: string[]) => {
-        if (!confirm('Foto des Touristen wirklich löschen?')) return;
+        if (!confirm(t('confirmarExcluirFotoPax'))) return;
         const newUrls = currentUrls.filter(u => u !== urlToRemove);
         await supabase.from('reviews').update({ photo_urls: newUrls }).eq('id', reviewId);
         const path = urlToRemove.split('/review-photos/')[1];
@@ -293,7 +299,7 @@ export default function ReviewsModeration() {
     };
 
     const deleteWillPhoto = async (reviewId: string, urlToRemove: string, currentUrls: string[]) => {
-        if (!confirm('Deine eigene Foto wirklich löschen?')) return;
+        if (!confirm(t('confirmarExcluirFotoWill'))) return;
         const newUrls = currentUrls.filter(u => u !== urlToRemove);
         await supabase.from('reviews').update({ will_photo_urls: newUrls }).eq('id', reviewId);
         const path = urlToRemove.split('/review-photos/')[1];
@@ -326,7 +332,7 @@ export default function ReviewsModeration() {
                 <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                     <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
                         <Smile className="w-6 h-6 text-yellow-500" />
-                        NPS Satisfaction System
+                        {t('npsTitulo')}
                     </h2>
                     {/* Stats summary */}
                     {!loadingNps && npsResponses.length > 0 && (() => {
@@ -340,11 +346,11 @@ export default function ReviewsModeration() {
                                 {pending.length > 0 && (
                                     <span className="flex items-center gap-1.5 bg-orange-50 text-orange-600 border border-orange-100 px-2.5 py-1 rounded-full">
                                         <Clock className="w-3 h-3" />
-                                        {pending.length} ausstehend
+                                        {pending.length} {t('pendente')}
                                     </span>
                                 )}
                                 <span className="flex items-center gap-1.5 bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">
-                                    {answered.length} beantwortet
+                                    {answered.length} {t('respondido')}
                                 </span>
                                 {avg && (
                                     <span className="flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-100 px-2.5 py-1 rounded-full">
@@ -362,7 +368,7 @@ export default function ReviewsModeration() {
                         <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                             <h3 className="text-sm font-extrabold text-gray-900 uppercase tracking-widest mb-4 flex items-center gap-2">
                                 <LinkIcon className="w-4 h-4 text-yellow-500" />
-                                Link generieren
+                                {t('gerarLink')}
                             </h3>
 
                             <div className="space-y-3">
@@ -370,7 +376,7 @@ export default function ReviewsModeration() {
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-yellow-500 transition-colors" />
                                     <input
                                         type="text"
-                                        placeholder="Name des Gastes (Nickname)"
+                                        placeholder={t('nomeConvidado')}
                                         value={npsNickname}
                                         onChange={e => setNpsNickname(e.target.value)}
                                         className="w-full border border-gray-100 bg-white rounded-xl px-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all font-medium"
@@ -390,19 +396,19 @@ export default function ReviewsModeration() {
                                     disabled={!npsNickname.trim()}
                                     className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-100 disabled:text-gray-400 text-gray-900 text-sm font-extrabold rounded-xl transition-all shadow-sm active:scale-95"
                                 >
-                                    Generieren
+                                    {t('gerar')}
                                 </button>
                             </div>
 
                             {generatedLink && (
                                 <div className="mt-4 p-3 bg-white rounded-xl border border-yellow-200 animate-in fade-in slide-in-from-top-2">
-                                    <p className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest mb-1">Link bereit zum Senden:</p>
+                                    <p className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest mb-1">{t('linkPronto')}</p>
                                     <div className="flex items-center gap-3">
                                         <span className="text-[11px] text-gray-500 flex-1 truncate font-medium">{generatedLink}</span>
                                         <button
                                             onClick={() => copyToClipboard(generatedLink, 'generated')}
                                             className={`p-2 rounded-lg transition-all border ${copiedId === 'generated' ? 'bg-green-50 text-green-600 border-green-200' : 'text-yellow-600 hover:text-yellow-700 bg-yellow-50 border-yellow-100'}`}
-                                            title="Kopieren"
+                                            title={tc('copiar')}
                                         >
                                             {copiedId === 'generated' ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                                         </button>
@@ -417,11 +423,11 @@ export default function ReviewsModeration() {
                         {loadingNps ? (
                             <div className="py-10 text-center flex flex-col items-center">
                                 <Loader2 className="w-6 h-6 animate-spin text-gray-200 mb-2" />
-                                <p className="text-gray-400 text-xs font-bold uppercase">Laden...</p>
+                                <p className="text-gray-400 text-xs font-bold uppercase">{tc('carregando')}</p>
                             </div>
                         ) : npsResponses.length === 0 ? (
                             <div className="py-12 border-2 border-dashed border-gray-100 rounded-2xl text-center">
-                                <p className="text-gray-400 text-xs font-bold uppercase">Keine NPS-Daten</p>
+                                <p className="text-gray-400 text-xs font-bold uppercase">{t('semDadosNps')}</p>
                             </div>
                         ) : (() => {
                             const pending = npsResponses.filter(r => !r.used_at);
@@ -433,7 +439,7 @@ export default function ReviewsModeration() {
                                         <div>
                                             <h3 className="text-[10px] font-extrabold text-orange-500 uppercase tracking-[2px] mb-2 flex items-center gap-1.5">
                                                 <Clock className="w-3 h-3" />
-                                                Ausstehend ({pending.length})
+                                                {t('aguardando', { count: pending.length })}
                                             </h3>
                                             <div className="space-y-2">
                                                 {pending.map(r => {
@@ -443,8 +449,8 @@ export default function ReviewsModeration() {
                                                             <div className="flex-1 min-w-0">
                                                                 <p className="font-extrabold text-gray-900 text-sm truncate">{r.nickname}</p>
                                                                 <p className="text-[10px] text-gray-400 font-medium mt-0.5">
-                                                                    Erstellt: {new Date(r.created_at).toLocaleDateString('de-DE')}
-                                                                    {r.tour_date && ` · Tour: ${new Date(r.tour_date).toLocaleDateString('de-DE')}`}
+                                                                    {t('criadoEm')}{fmtDate(r.created_at)}
+                                                                    {r.tour_date && `${t('tourLabel')}${fmtDate(r.tour_date)}`}
                                                                 </p>
                                                             </div>
                                                             <button
@@ -452,7 +458,7 @@ export default function ReviewsModeration() {
                                                                 className={`shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all border ${copiedId === r.id ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white text-orange-600 border-orange-200 hover:bg-orange-100'}`}
                                                             >
                                                                 {copiedId === r.id ? <CheckCircle className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                                                                {copiedId === r.id ? 'Kopiert' : 'Link'}
+                                                                {copiedId === r.id ? t('copiado') : t('link')}
                                                             </button>
                                                         </div>
                                                     );
@@ -466,7 +472,7 @@ export default function ReviewsModeration() {
                                         <div>
                                             <h3 className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[2px] mb-2 flex items-center gap-1.5">
                                                 <MessageSquareHeart className="w-3 h-3" />
-                                                Beantwortet ({answered.length})
+                                                {t('respondidos', { count: answered.length })}
                                             </h3>
                                             <div className="space-y-2">
                                                 {answered.map(r => (
@@ -483,13 +489,13 @@ export default function ReviewsModeration() {
                                                                 <p className="font-extrabold text-gray-900 text-sm truncate">{r.nickname}</p>
                                                                 {r.redirected_to_review && (
                                                                     <span className="text-[10px] text-green-600 font-black bg-green-50 px-1.5 py-0.5 rounded border border-green-100 shrink-0">
-                                                                        → Review
+                                                                        {t('verAvaliacao')}
                                                                     </span>
                                                                 )}
                                                             </div>
                                                             <p className="text-[10px] text-gray-400 font-medium mt-0.5">
-                                                                {new Date(r.used_at!).toLocaleDateString('de-DE')}
-                                                                {r.tour_date && ` · Tour: ${new Date(r.tour_date).toLocaleDateString('de-DE')}`}
+                                                                {fmtDate(r.used_at!)}
+                                                                {r.tour_date && `${t('tourLabel')}${fmtDate(r.tour_date)}`}
                                                             </p>
                                                             {r.best_part && (
                                                                 <p className="text-[11px] text-gray-500 italic mt-1.5 line-clamp-2">"{r.best_part}"</p>
@@ -512,7 +518,7 @@ export default function ReviewsModeration() {
                 <div className="p-6 border-b border-gray-100 bg-gray-50/50">
                     <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
                         <MessageSquareHeart className="w-6 h-6 text-green-600" />
-                        Reviews Moderation
+                        {t('moderacao')}
                     </h2>
                 </div>
 
@@ -526,7 +532,7 @@ export default function ReviewsModeration() {
                             : 'border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50'
                         }`}
                     >
-                        Ausstehend
+                        {t('aguardandoTab')}
                         {activeTab === 'pending' && reviews.length > 0 && (
                             <span className="ml-2 px-2 py-0.5 bg-yellow-400 text-black text-[10px] rounded-full font-bold">
                                 {reviews.length}
@@ -541,7 +547,7 @@ export default function ReviewsModeration() {
                             : 'border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50'
                         }`}
                     >
-                        Genehmigt
+                        {t('aprovadas')}
                     </button>
                     <button
                         onClick={() => setActiveTab('rejected')}
@@ -551,7 +557,7 @@ export default function ReviewsModeration() {
                             : 'border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50'
                         }`}
                     >
-                        Abgelehnt
+                        {t('rejeitadas')}
                     </button>
                 </div>
 
@@ -559,15 +565,19 @@ export default function ReviewsModeration() {
                     {loading ? (
                         <div className="py-20 flex flex-col items-center justify-center text-gray-400">
                             <Loader2 className="w-10 h-10 animate-spin mb-4" />
-                            <p className="font-medium">Wird geladen...</p>
+                            <p className="font-medium">{tc('carregando')}</p>
                         </div>
                     ) : reviews.length === 0 ? (
                         <div className="py-20 text-center">
                             <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-50 rounded-full mb-6">
                                 <Clock className="w-10 h-10 text-gray-200" />
                             </div>
-                            <p className="text-gray-500 font-bold text-lg">Keine Bewertungen vorhanden.</p>
-                            <p className="text-gray-400 text-sm mt-1">Hier erscheinen Einsendungen para a categoria "{activeTab}".</p>
+                            <p className="text-gray-500 font-bold text-lg">{t('nenhumaAvaliacao')}</p>
+                            <p className="text-gray-400 text-sm mt-1">
+                                {t('aparecemAqui', {
+                                    categoria: tReviewStatus.has(activeTab) ? tReviewStatus(activeTab) : activeTab,
+                                })}
+                            </p>
                         </div>
                     ) : (
                         <div className="space-y-8">
@@ -594,9 +604,9 @@ export default function ReviewsModeration() {
                                                 {review.title}
                                             </h3>
                                             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
-                                                <span className="bg-gray-100 px-2.5 py-0.5 rounded text-[11px] font-bold text-gray-600 uppercase">Pax ID: {review.id.slice(0, 8)}</span>
-                                                <span className="font-semibold text-gray-700 underline decoration-yellow-400 underline-offset-4">Besucht: {editingAttractions[review.id]?.join(', ') || 'Keine'}</span>
-                                                <span>{new Date(review.created_at).toLocaleString('de-DE')}</span>
+                                                <span className="bg-gray-100 px-2.5 py-0.5 rounded text-[11px] font-bold text-gray-600 uppercase">{t('paxId')}{review.id.slice(0, 8)}</span>
+                                                <span className="font-semibold text-gray-700 underline decoration-yellow-400 underline-offset-4">{t('visitou')}{editingAttractions[review.id]?.join(', ') || t('nenhumaAtracao')}</span>
+                                                <span>{fmtDateTime(review.created_at)}</span>
                                             </div>
                                         </div>
                                         <div className="lg:text-right shrink-0 bg-yellow-50/50 p-4 rounded-xl border border-yellow-100/50">
@@ -618,21 +628,21 @@ export default function ReviewsModeration() {
                                         {(review.photo_urls?.length ?? 0) > 0 && (
                                             <div>
                                                 <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-[1px] mb-3 flex items-center gap-2">
-                                                    Fotos do Pax
+                                                    {t('fotosPax')}
                                                     {review.consent_own_photos
-                                                        ? <span className="text-[10px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full border border-green-100 normal-case font-bold">✓ Veröffentlichung autorisiert</span>
-                                                        : <span className="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-100 normal-case font-bold">✗ Keine Autorisierung</span>}
+                                                        ? <span className="text-[10px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full border border-green-100 normal-case font-bold">{t('publicacaoAutorizada')}</span>
+                                                        : <span className="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-100 normal-case font-bold">{t('semAutorizacao')}</span>}
                                                 </p>
                                                 <div className="flex gap-3 flex-wrap">
                                                     {review.photo_urls?.map((url: string, i: number) => (
                                                         <div key={i} className="relative group overflow-hidden rounded-xl shadow-sm">
-                                                            <img src={url} alt={`Foto ${i + 1}`}
+                                                            <img src={url} alt={t('fotoNum', { n: i + 1 })}
                                                                 className="w-24 h-24 object-cover border border-gray-100" />
                                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                                                                 <button
                                                                     onClick={() => deletePaxPhoto(review.id, url, review.photo_urls || [])}
                                                                     className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform"
-                                                                    title="Foto löschen"><Trash2 className="w-4 h-4" /></button>
+                                                                    title={t('excluirFoto')}><Trash2 className="w-4 h-4" /></button>
                                                                 <a href={url} target="_blank" rel="noopener noreferrer"
                                                                     className="bg-white/90 hover:bg-white text-gray-900 p-1.5 rounded-full shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform delay-75">
                                                                     <ExternalLink className="w-4 h-4" />
@@ -648,7 +658,7 @@ export default function ReviewsModeration() {
                                         <div>
                                             <div className="flex items-center gap-3 mb-3">
                                                 <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-[1px]">
-                                                    Fotos do Will
+                                                    {t('fotosWill')}
                                                 </p>
                                                 <button
                                                     onClick={() => toggleWillPhotoConsent(review.id, review.consent_will_photos ?? false)}
@@ -657,21 +667,21 @@ export default function ReviewsModeration() {
                                                             ? 'text-green-600 bg-green-50 border-green-200 hover:bg-green-100'
                                                             : 'text-gray-400 bg-gray-50 border-gray-200 hover:bg-gray-100'
                                                     }`}
-                                                    title="Manuelles Einverständnis umschalten"
+                                                    title={t('alternarConsentimento')}
                                                 >
-                                                    {review.consent_will_photos ? '✓ Autorisiert' : '✗ Nicht autorisiert'}
+                                                    {review.consent_will_photos ? t('autorizado') : t('naoAutorizado')}
                                                 </button>
                                             </div>
                                             <div className="flex gap-3 flex-wrap">
                                                 {review.will_photo_urls?.map((url: string, i: number) => (
                                                     <div key={i} className="relative group overflow-hidden rounded-xl shadow-sm">
-                                                        <img src={url} alt={`Foto Will ${i + 1}`}
+                                                        <img src={url} alt={t('fotoWillNum', { n: i + 1 })}
                                                             className="w-24 h-24 object-cover border border-gray-100" />
                                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                                                             <button
                                                                 onClick={() => deleteWillPhoto(review.id, url, review.will_photo_urls || [])}
                                                                 className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform"
-                                                                title="Foto löschen"><Trash2 className="w-4 h-4" /></button>
+                                                                title={t('excluirFoto')}><Trash2 className="w-4 h-4" /></button>
                                                             <a href={url} target="_blank" rel="noopener noreferrer"
                                                                 className="bg-white/90 hover:bg-white text-gray-900 p-1.5 rounded-full shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform delay-75">
                                                                 <ExternalLink className="w-4 h-4" />
@@ -688,7 +698,7 @@ export default function ReviewsModeration() {
                                                         ) : (
                                                             <>
                                                                 <Plus className="w-6 h-6 text-gray-300 group-hover:text-yellow-500 transition-colors" />
-                                                                <span className="text-[10px] font-bold text-gray-400 group-hover:text-yellow-500 uppercase mt-1">Upload</span>
+                                                                <span className="text-[10px] font-bold text-gray-400 group-hover:text-yellow-500 uppercase mt-1">{t('upload')}</span>
                                                             </>
                                                         )}
                                                         <input type="file" accept="image/jpeg,image/png,image/webp" multiple
@@ -707,7 +717,7 @@ export default function ReviewsModeration() {
                                                 onClick={() => setShowAttractionPicker(showAttractionPicker === review.id ? null : review.id)}
                                                 className="w-full flex items-center justify-between p-4 text-sm font-extrabold text-gray-700 hover:bg-gray-50 transition-colors"
                                             >
-                                                Attraktionen bearbeiten ({editingAttractions[review.id]?.length || 0} ausgewählt)
+                                                {t('editarAtracoes', { count: editingAttractions[review.id]?.length || 0 })}
                                                 {showAttractionPicker === review.id ? <ChevronUp className="w-5 h-5 text-yellow-500" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
                                             </button>
 
@@ -732,7 +742,7 @@ export default function ReviewsModeration() {
                                                                 onClick={() => saveAttractions(review.id)}
                                                                 className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-xs font-extrabold rounded-xl transition-all shadow-sm"
                                                             >
-                                                                Speichern
+                                                                {t('salvarAtracoes')}
                                                             </button>
                                                         </div>
                                                     )}
@@ -749,7 +759,7 @@ export default function ReviewsModeration() {
                                                         className="flex-1 inline-flex items-center justify-center gap-2 px-8 py-4 bg-green-600 hover:bg-green-700 text-white text-sm font-extrabold rounded-xl transition-all shadow-lg hover:shadow-green-700/20 disabled:opacity-50"
                                                     >
                                                         <CheckCircle className="w-5 h-5" />
-                                                        Bewertung Genehmigen
+                                                        {t('aprovarAvaliacao')}
                                                     </button>
                                                     <button
                                                         onClick={() => handleReject(review.id)}
@@ -757,7 +767,7 @@ export default function ReviewsModeration() {
                                                         className="flex-1 inline-flex items-center justify-center gap-2 px-8 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-extrabold rounded-xl transition-all shadow-sm disabled:opacity-50"
                                                     >
                                                         <XCircle className="w-5 h-5" />
-                                                        Ablehnen
+                                                        {t('rejeitar')}
                                                     </button>
                                                 </>
                                             )}
@@ -766,10 +776,10 @@ export default function ReviewsModeration() {
                                                 onClick={() => deleteReview(review.id, review.photo_urls || [], review.will_photo_urls || [])}
                                                 disabled={!!actioningId}
                                                 className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white text-sm font-extrabold rounded-xl transition-all shadow-lg hover:shadow-red-700/20 disabled:opacity-50 flex items-center justify-center gap-2"
-                                                title="Review löschen"
+                                                title={t('excluirAvaliacao')}
                                             >
                                                 <Trash2 className="w-5 h-5" />
-                                                Löschen
+                                                {tc('excluir')}
                                             </button>
                                         </div>
                                     </div>

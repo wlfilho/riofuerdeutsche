@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import HtmlEditor from '@/components/admin/HtmlEditor';
 
 interface PageData {
@@ -36,6 +37,8 @@ function slugify(text: string): string {
 
 export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, pageId }: Props) {
   const router = useRouter();
+  const t = useTranslations('admin.guide');
+  const tCommon = useTranslations('admin.common');
   const isEditing = !!pageId;
 
   const [page, setPage] = useState<PageData>({
@@ -71,7 +74,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
           });
         }
       } catch {
-        setMessage({ type: 'error', text: 'Fehler beim Laden.' });
+        setMessage({ type: 'error', text: t('erroCarregar') });
       } finally {
         setLoading(false);
       }
@@ -90,7 +93,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
 
   const handleSave = async () => {
     if (!page.title.trim() || !page.slug.trim()) {
-      setMessage({ type: 'error', text: 'Titel und Slug sind Pflichtfelder.' });
+      setMessage({ type: 'error', text: t('tituloSlugObrigatorios') });
       return;
     }
 
@@ -113,16 +116,16 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
       const data = await res.json();
 
       if (res.ok) {
-        setMessage({ type: 'success', text: isEditing ? 'Seite gespeichert!' : 'Seite erstellt!' });
+        setMessage({ type: 'success', text: isEditing ? t('paginaSalva') : t('paginaCriada') });
         if (!isEditing && data.page?.id) {
           // Redirect to edit after creation
           router.push(`/admin/guide/${chapterId}/pages/${data.page.id}/edit`);
         }
       } else {
-        setMessage({ type: 'error', text: data.error || 'Fehler beim Speichern.' });
+        setMessage({ type: 'error', text: data.error || t('erroSalvar') });
       }
     } catch {
-      setMessage({ type: 'error', text: 'Netzwerkfehler.' });
+      setMessage({ type: 'error', text: tCommon('erroRede') });
     } finally {
       setSaving(false);
     }
@@ -131,7 +134,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-400">Laden...</p>
+        <p className="text-gray-400">{tCommon('carregando')}</p>
       </div>
     );
   }
@@ -147,16 +150,16 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
               onClick={() => router.push(`/admin/guide/${chapterId}/pages`)}
               className="text-sm text-gray-400 hover:text-gray-700 shrink-0 cursor-pointer"
             >
-              ← Zurück
+              {t('voltar')}
             </button>
             <span className="text-gray-200">|</span>
             <h1 className="text-base font-bold text-gray-900 truncate">
-              {isEditing ? page.title || 'Seite bearbeiten' : 'Neue Seite'}
+              {isEditing ? page.title || t('editarPaginaTitulo') : t('novaPaginaTitulo')}
             </h1>
             <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-full shrink-0 ${
               page.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
             }`}>
-              {page.status === 'published' ? 'Live' : 'Entwurf'}
+              {page.status === 'published' ? t('live') : t('rascunhoBadge')}
             </span>
             {/* View on frontend */}
             {isEditing && (
@@ -166,7 +169,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
                 rel="noopener noreferrer"
                 className="text-xs text-blue-500 hover:underline shrink-0"
               >
-                Seite ansehen →
+                {t('verPagina')}
               </Link>
             )}
           </div>
@@ -177,7 +180,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
               onClick={() => setPage((p) => ({ ...p, status: p.status === 'published' ? 'draft' : 'published' }))}
               className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
             >
-              {page.status === 'published' ? 'Als Entwurf' : 'Veröffentlichen'}
+              {page.status === 'published' ? t('comoRascunho') : t('publicar')}
             </button>
             <button
               type="button"
@@ -185,7 +188,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
               disabled={saving}
               className="px-4 py-1.5 text-sm font-semibold text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 cursor-pointer"
             >
-              {saving ? 'Speichern...' : 'Speichern'}
+              {saving ? tCommon('salvando') : tCommon('salvar')}
             </button>
           </div>
         </div>
@@ -195,13 +198,13 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
       <div className="max-w-6xl mx-auto p-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6 flex-wrap">
-          <Link href="/admin" className="hover:text-gray-600">Dashboard</Link>
+          <Link href="/admin" className="hover:text-gray-600">{t('dashboard')}</Link>
           <span>›</span>
           <Link href="/admin/guide" className="hover:text-gray-600">Guide</Link>
           <span>›</span>
           <Link href={`/admin/guide/${chapterId}/pages`} className="hover:text-gray-600">{chapterTitle}</Link>
           <span>›</span>
-          <span className="text-gray-600">{isEditing ? 'Bearbeiten' : 'Neue Seite'}</span>
+          <span className="text-gray-600">{isEditing ? t('editarBreadcrumb') : t('novaPaginaTitulo')}</span>
         </div>
 
         {/* Message */}
@@ -218,7 +221,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main — HTML Editor */}
           <div className="lg:col-span-2 flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Inhalt (HTML)</label>
+            <label className="text-sm font-medium text-gray-700">{t('conteudoHtml')}</label>
             <HtmlEditor value={page.content} onChange={(v) => setPage((p) => ({ ...p, content: v }))} />
           </div>
 
@@ -227,13 +230,13 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
             {/* Titel */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Titel <span className="text-red-400">*</span>
+                {t('tituloCampo')} <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
                 value={page.title}
                 onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="z.B. Sicherheit im Verkehr"
+                placeholder={t('paginaTituloPlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
               />
             </div>
@@ -241,7 +244,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
             {/* Slug */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Slug (URL) <span className="text-red-400">*</span>
+                {t('slugUrl')} <span className="text-red-400">*</span>
               </label>
               <div className="flex items-center gap-1">
                 <span className="text-xs text-gray-400 shrink-0">/dashboard/…/</span>
@@ -249,7 +252,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
                   type="text"
                   value={page.slug}
                   onChange={(e) => setPage((p) => ({ ...p, slug: e.target.value }))}
-                  placeholder="sicherheit-verkehr"
+                  placeholder={t('paginaSlugPlaceholder')}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm font-mono"
                 />
               </div>
@@ -257,19 +260,19 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
 
             {/* Untertitel */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Untertitel</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('subtitulo')}</label>
               <input
                 type="text"
                 value={page.subtitle}
                 onChange={(e) => setPage((p) => ({ ...p, subtitle: e.target.value }))}
-                placeholder="Kurze Beschreibung (optional)"
+                placeholder={t('descricaoOpcional')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
               />
             </div>
 
             {/* Reihenfolge */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Reihenfolge</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('ordem')}</label>
               <input
                 type="number"
                 min={1}
@@ -281,7 +284,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
 
             {/* Zugang */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Zugang</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('acesso')}</label>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -292,7 +295,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
                       : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
                   }`}
                 >
-                  Kostenlos
+                  {t('gratuito')}
                 </button>
                 <button
                   type="button"
@@ -303,14 +306,14 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
                       : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
                   }`}
                 >
-                  Premium
+                  {t('premium')}
                 </button>
               </div>
             </div>
 
             {/* Status */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{tCommon('status')}</label>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -321,7 +324,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
                       : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
                   }`}
                 >
-                  Entwurf
+                  {t('rascunho')}
                 </button>
                 <button
                   type="button"
@@ -332,7 +335,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
                       : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
                   }`}
                 >
-                  Veröffentlicht
+                  {t('publicado')}
                 </button>
               </div>
             </div>
@@ -343,7 +346,7 @@ export default function GuidePageEditor({ chapterId, chapterTitle, chapterSlug, 
               onClick={() => router.push(`/admin/guide/${chapterId}/pages`)}
               className="py-2 text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
             >
-              Abbrechen
+              {tCommon('cancelar')}
             </button>
           </div>
         </div>

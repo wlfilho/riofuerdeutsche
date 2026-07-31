@@ -1,16 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { updateLeadStatus, updateLeadNotes } from '../actions';
 import type { LeadStatus } from '../../page';
 
-const STATUS_OPTIONS: { value: LeadStatus; label: string }[] = [
-  { value: 'new', label: 'Novo' },
-  { value: 'contacted', label: 'Em Contato' },
-  { value: 'proposal_sent', label: 'Proposta Enviada' },
-  { value: 'closed', label: 'Fechado ✓' },
-  { value: 'lost', label: 'Perdido' },
-];
+const STATUS_VALUES: LeadStatus[] = ['new', 'contacted', 'proposal_sent', 'closed', 'lost'];
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -29,6 +24,9 @@ export default function LeadStatusCard({
   const [notes, setNotes] = useState(initialNotes ?? '');
   const [notesSave, setNotesSave] = useState<SaveState>('idle');
   const notesTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
+  const tStatus = useTranslations('admin.status.lead');
 
   const handleStatusChange = async (newStatus: LeadStatus) => {
     setStatus(newStatus);
@@ -75,22 +73,22 @@ export default function LeadStatusCard({
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-100">
-        <h2 className="text-sm font-semibold text-gray-700">Status</h2>
+        <h2 className="text-sm font-semibold text-gray-700">{tCommon('status')}</h2>
       </div>
 
       <div className="px-5 py-4 space-y-5">
         {/* Status selector */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <label className="text-xs font-medium text-gray-500">Status atual</label>
+            <label className="text-xs font-medium text-gray-500">{t('statusAtual')}</label>
             {statusSave === 'saving' && (
-              <span className="text-xs text-gray-400">Salvando...</span>
+              <span className="text-xs text-gray-400">{tCommon('salvando')}</span>
             )}
             {statusSave === 'saved' && (
-              <span className="text-xs text-green-600 font-medium">✓ Salvo</span>
+              <span className="text-xs text-green-600 font-medium">{tCommon('salvoCheck')}</span>
             )}
             {statusSave === 'error' && (
-              <span className="text-xs text-red-600">Erro ao salvar</span>
+              <span className="text-xs text-red-600">{t('erroAoSalvar')}</span>
             )}
           </div>
           <select
@@ -98,9 +96,9 @@ export default function LeadStatusCard({
             onChange={e => handleStatusChange(e.target.value as LeadStatus)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
-            {STATUS_OPTIONS.map(opt => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
+            {STATUS_VALUES.map(value => (
+              <option key={value} value={value}>
+                {tStatus(value)}
               </option>
             ))}
           </select>
@@ -109,22 +107,22 @@ export default function LeadStatusCard({
         {/* Notes */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <label className="text-xs font-medium text-gray-500">Anotações internas</label>
+            <label className="text-xs font-medium text-gray-500">{t('anotacoesInternas')}</label>
             {notesSave === 'saving' && (
-              <span className="text-xs text-gray-400">Salvando...</span>
+              <span className="text-xs text-gray-400">{tCommon('salvando')}</span>
             )}
             {notesSave === 'saved' && (
-              <span className="text-xs text-green-600 font-medium">✓ Salvo</span>
+              <span className="text-xs text-green-600 font-medium">{tCommon('salvoCheck')}</span>
             )}
             {notesSave === 'error' && (
-              <span className="text-xs text-red-600">Erro ao salvar</span>
+              <span className="text-xs text-red-600">{t('erroAoSalvar')}</span>
             )}
           </div>
           <textarea
             value={notes}
             onChange={handleNotesChange}
             rows={4}
-            placeholder="Notas internas sobre este lead..."
+            placeholder={t('notasInternasPlaceholder')}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
           />
         </div>

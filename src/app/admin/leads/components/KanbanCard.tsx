@@ -3,15 +3,13 @@
 import Link from 'next/link';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { useTranslations } from 'next-intl';
 import SourceBadge from './SourceBadge';
+import { fmtDate } from '@/lib/adminFormat';
 import type { Lead } from '../page';
 
-function formatDate(iso: string) {
-  const [y, m, d] = iso.split('T')[0].split('-');
-  return `${d}.${m}.${y}`;
-}
-
 export function KanbanCardContent({ lead, isDragging = false }: { lead: Lead; isDragging?: boolean }) {
+  const t = useTranslations('admin.crm');
   const canConvert = lead.status !== 'closed' && lead.status !== 'lost';
 
   return (
@@ -53,7 +51,7 @@ export function KanbanCardContent({ lead, isDragging = false }: { lead: Lead; is
           <svg className="h-3 w-3 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
           </svg>
-          {formatDate(lead.created_at)}
+          {fmtDate(lead.created_at)}
         </span>
       </div>
 
@@ -64,7 +62,7 @@ export function KanbanCardContent({ lead, isDragging = false }: { lead: Lead; is
           onClick={e => e.stopPropagation()}
           className="flex-1 text-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200 transition-colors"
         >
-          Ver
+          {t('ver')}
         </Link>
         {canConvert && (
           <Link
@@ -72,7 +70,7 @@ export function KanbanCardContent({ lead, isDragging = false }: { lead: Lead; is
             onClick={e => e.stopPropagation()}
             className="flex-1 text-center px-2 py-1 text-xs font-medium bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors"
           >
-            Converter
+            {t('converter')}
           </Link>
         )}
       </div>

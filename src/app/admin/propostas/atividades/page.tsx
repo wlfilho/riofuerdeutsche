@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type {
   ProposalService,
   ProposalServiceCategory,
@@ -43,21 +44,20 @@ const EMPTY_FORM: FormState = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CATEGORY_CONFIG: Record<ProposalServiceCategory, { label: string; cls: string }> = {
-  transfer: { label: 'Transfer', cls: 'bg-blue-100 text-blue-700' },
-  tour:     { label: 'Tour',     cls: 'bg-green-100 text-green-700' },
-  extra:    { label: 'Extra',    cls: 'bg-purple-100 text-purple-700' },
-  atração:  { label: 'Atração',  cls: 'bg-amber-100 text-amber-700' },
+// Só a aparência: os rótulos vêm de admin.atividades.categorias / .periodos.
+const CATEGORY_CLS: Record<ProposalServiceCategory, string> = {
+  transfer: 'bg-blue-100 text-blue-700',
+  tour:     'bg-green-100 text-green-700',
+  extra:    'bg-purple-100 text-purple-700',
+  atração:  'bg-amber-100 text-amber-700',
 };
 
-const PERIOD_CONFIG: Record<ProposalServicePeriod, { label: string; icon: string }> = {
-  morning:   { label: 'Manhã',       icon: '🌅' },
-  afternoon: { label: 'Tarde',       icon: '🌇' },
-  evening:   { label: 'Noite',       icon: '🌙' },
-  full_day:  { label: 'Dia inteiro', icon: '☀️' },
+const PERIOD_ICON: Record<ProposalServicePeriod, string> = {
+  morning:   '🌅',
+  afternoon: '🌇',
+  evening:   '🌙',
+  full_day:  '☀️',
 };
-
-const PRICE_TYPE_LABELS = { fixed: 'Fixo', per_pax: 'Por pessoa', per_hour: 'Por hora' };
 
 const INPUT_CLS =
   'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent';
@@ -90,10 +90,11 @@ function formatHours(h: number): string {
 // ─── CategoryBadge ────────────────────────────────────────────────────────────
 
 function CategoryBadge({ category }: { category: ProposalServiceCategory }) {
-  const cfg = CATEGORY_CONFIG[category] ?? { label: category, cls: 'bg-gray-100 text-gray-600' };
+  const tCat = useTranslations('admin.atividades.categorias');
+  const cls = CATEGORY_CLS[category] ?? 'bg-gray-100 text-gray-600';
   return (
-    <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${cfg.cls}`}>
-      {cfg.label}
+    <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${cls}`}>
+      {tCat.has(category) ? tCat(category) : category}
     </span>
   );
 }
@@ -109,13 +110,15 @@ function CostRow({
   onChange: (updates: Partial<CostDraft>) => void;
   onRemove: () => void;
 }) {
+  const t = useTranslations('admin.atividades');
+  const tPropostas = useTranslations('admin.propostas');
   return (
     <div className="grid grid-cols-[1fr_6rem_5rem_9rem_auto_2rem] gap-2 items-center">
       <input
         type="text"
         value={cost.description}
         onChange={e => onChange({ description: e.target.value })}
-        placeholder="Guia Rocinha"
+        placeholder={t('guiaPlaceholder')}
         className={INPUT_CLS}
       />
       <input
@@ -140,13 +143,13 @@ function CostRow({
         onChange={e => onChange({ price_type: e.target.value as CostDraft['price_type'] })}
         className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
       >
-        <option value="fixed">Fixo</option>
-        <option value="per_pax">Por pessoa</option>
-        <option value="per_hour">Por hora</option>
+        <option value="fixed">{t('tiposPreco.fixed')}</option>
+        <option value="per_pax">{t('tiposPreco.per_pax')}</option>
+        <option value="per_hour">{t('tiposPreco.per_hour')}</option>
       </select>
       <label
         className="flex items-center gap-1 cursor-pointer select-none"
-        title="Marcado: entra no preço da proposta. Desmarcado: cliente paga no local (valor exibido na proposta)."
+        title={tPropostas('marcadoEntraPreco')}
       >
         <input
           type="checkbox"
@@ -154,7 +157,7 @@ function CostRow({
           onChange={e => onChange({ include_in_price: e.target.checked })}
           className="rounded"
         />
-        <span className="text-xs text-gray-500 whitespace-nowrap">cobrar</span>
+        <span className="text-xs text-gray-500 whitespace-nowrap">{t('cobrar')}</span>
       </label>
       <button
         onClick={onRemove}
@@ -181,6 +184,8 @@ function ActivityModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const t = useTranslations('admin.atividades');
+  const tCommon = useTranslations('admin.common');
   const [form, setForm] = useState<FormState>(() => {
     if (!service) return EMPTY_FORM;
     return {
@@ -220,12 +225,11 @@ function ActivityModal({
 
   const transportHint = useMemo(() => {
     if (!selectedTransport) return null;
-    if (selectedTransport.is_included) return 'Nenhum custo de transporte adicional — já está nos itens de custo.';
-    if (selectedTransport.is_manual) return 'Valor ajustado manualmente ao montar a proposta.';
-    if (selectedTransport.tiers.length > 0)
-      return `Custo calculado automaticamente por faixa de pessoas × (horas ida + horas volta).`;
-    return 'Sem custo de transporte.';
-  }, [selectedTransport]);
+    if (selectedTransport.is_included) return t('custoNaoAdicional');
+    if (selectedTransport.is_manual) return t('valorAjustadoManual');
+    if (selectedTransport.tiers.length > 0) return t('custoCalculadoAuto');
+    return t('semCustoTransporte');
+  }, [selectedTransport, t]);
 
   const totalHours = useMemo(() => {
     const to = timeToHours(form.transfer_hours_to) ?? 0;
@@ -248,8 +252,8 @@ function ActivityModal({
 
   const handleSave = async () => {
     setError(null);
-    if (!form.name.trim()) { setError('Título é obrigatório.'); return; }
-    if (!form.category) { setError('Categoria é obrigatória.'); return; }
+    if (!form.name.trim()) { setError(t('tituloObrigatorio')); return; }
+    if (!form.category) { setError(t('categoriaObrigatoria')); return; }
 
     setSaving(true);
     try {
@@ -285,11 +289,11 @@ function ActivityModal({
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? 'Fehler beim Speichern.'); return; }
+      if (!res.ok) { setError(data.error ?? tCommon('erroSalvar')); return; }
 
       onSaved();
     } catch {
-      setError('Netzwerkfehler.');
+      setError(tCommon('erroRede'));
     } finally {
       setSaving(false);
     }
@@ -303,7 +307,7 @@ function ActivityModal({
         {/* Modal header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">
           <h2 className="text-lg font-bold text-gray-900">
-            {service ? 'Atividade bearbeiten' : 'Nova Atividade'}
+            {service ? t('editarAtividade') : t('novaAtividadeTitulo')}
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
@@ -314,35 +318,35 @@ function ActivityModal({
           {/* ── Section 1: Informações Gerais */}
           <div>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">
-              Informações Gerais
+              {t('informacoesGerais')}
             </h3>
             <div className="space-y-4">
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Título <span className="text-red-500">*</span>
+                    {t('tituloCampo')} <span className="text-red-500">*</span>
                   </label>
-                  <input type="text" value={form.name} onChange={set('name')} className={INPUT_CLS} placeholder="Favela Tour Rocinha" />
+                  <input type="text" value={form.name} onChange={set('name')} className={INPUT_CLS} placeholder={t('tituloPlaceholder')} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Categoria <span className="text-red-500">*</span>
+                    {t('categoria')} <span className="text-red-500">*</span>
                   </label>
                   <select value={form.category} onChange={set('category')} className={INPUT_CLS}>
-                    <option value="">Selecionar…</option>
-                    <option value="tour">Tour</option>
-                    <option value="transfer">Transfer</option>
-                    <option value="atração">Atração</option>
-                    <option value="extra">Extra</option>
+                    <option value="">{t('selecionar')}</option>
+                    <option value="tour">{t('categorias.tour')}</option>
+                    <option value="transfer">{t('categorias.transfer')}</option>
+                    <option value="atração">{t('categorias.atração')}</option>
+                    <option value="extra">{t('categorias.extra')}</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de transporte</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('tipoTransporte')}</label>
                 <select value={form.transport_type_id} onChange={set('transport_type_id')} className={INPUT_CLS}>
-                  <option value="">Nenhum / não definido</option>
+                  <option value="">{t('nenhumNaoDefinido')}</option>
                   {transportTypes.map(t => (
                     <option key={t.id} value={t.id}>{t.name}</option>
                   ))}
@@ -353,19 +357,19 @@ function ActivityModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descrição curta</label>
-                <textarea value={form.description} onChange={set('description')} rows={2} className={`${INPUT_CLS} resize-none`} placeholder="Aparece pro cliente embaixo do nome da atividade (link da proposta e PDF). Escreva em alemão." />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('descricaoCurta')}</label>
+                <textarea value={form.description} onChange={set('description')} rows={2} className={`${INPUT_CLS} resize-none`} placeholder={t('descricaoCurtaPlaceholder')} />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nota fixa para o PDF</label>
-                <textarea value={form.pdf_note} onChange={set('pdf_note')} rows={2} className={`${INPUT_CLS} resize-none`} placeholder="Texto que aparece sempre na proposta ao selecionar esta atividade" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('notaFixaPdf')}</label>
+                <textarea value={form.pdf_note} onChange={set('pdf_note')} rows={2} className={`${INPUT_CLS} resize-none`} placeholder={t('notaFixaPlaceholder')} />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Observação interna{' '}
-                  <span className="text-xs font-normal text-gray-400">(não aparece no PDF)</span>
+                  {t('observacaoInterna')}{' '}
+                  <span className="text-xs font-normal text-gray-400">{t('naoApareceNoPdf')}</span>
                 </label>
                 <textarea value={form.notes} onChange={set('notes')} rows={2} className={`${INPUT_CLS} resize-none`} />
               </div>
@@ -378,42 +382,42 @@ function ActivityModal({
                 >
                   <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.is_active ? 'translate-x-4' : 'translate-x-0'}`} />
                 </button>
-                <span className="text-sm font-medium text-gray-700">Ativo</span>
+                <span className="text-sm font-medium text-gray-700">{tCommon('ativo')}</span>
               </label>
             </div>
           </div>
 
           {/* ── Section 2: Tempo */}
           <div>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Tempo</h3>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">{t('tempo')}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Duração</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('duracao')}</label>
                 <input type="time" value={form.duration_hours} onChange={set('duration_hours')} className={INPUT_CLS} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ida</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('ida')}</label>
                 <input type="time" value={form.transfer_hours_to} onChange={set('transfer_hours_to')} className={INPUT_CLS} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Volta</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('volta')}</label>
                 <input type="time" value={form.transfer_hours_back} onChange={set('transfer_hours_back')} className={INPUT_CLS} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Total estimado</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('totalEstimado')}</label>
                 <div className={`${INPUT_CLS} bg-gray-50 text-gray-700 font-semibold pointer-events-none`}>
-                  {totalHours > 0 ? formatHours(totalHours) : '—'}
+                  {totalHours > 0 ? formatHours(totalHours) : tCommon('vazio')}
                 </div>
               </div>
             </div>
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Período sugerido</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('periodoSugerido')}</label>
               <select value={form.suggested_period} onChange={set('suggested_period')} className={INPUT_CLS}>
-                <option value="">Não especificado</option>
-                <option value="morning">🌅 Manhã</option>
-                <option value="afternoon">🌇 Tarde</option>
-                <option value="evening">🌙 Noite</option>
-                <option value="full_day">☀️ Dia inteiro</option>
+                <option value="">{t('naoEspecificado')}</option>
+                <option value="morning">{PERIOD_ICON.morning} {t('periodos.morning')}</option>
+                <option value="afternoon">{PERIOD_ICON.afternoon} {t('periodos.afternoon')}</option>
+                <option value="evening">{PERIOD_ICON.evening} {t('periodos.evening')}</option>
+                <option value="full_day">{PERIOD_ICON.full_day} {t('periodos.full_day')}</option>
               </select>
             </div>
           </div>
@@ -421,26 +425,26 @@ function ActivityModal({
           {/* ── Section 3: Itens de Custo */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Itens de Custo</h3>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{t('itensCusto')}</h3>
               <button
                 onClick={addCost}
                 className="text-xs font-semibold text-green-600 hover:text-green-800 transition-colors"
               >
-                + Custo
+                {t('adicionarCusto')}
               </button>
             </div>
 
             {costs.length === 0 ? (
               <p className="text-sm text-gray-400 italic">
-                Sem custos adicionais — cada um paga na hora.
+                {t('semCustosAdicionais')}
               </p>
             ) : (
               <div className="space-y-2">
                 <div className="grid grid-cols-[1fr_6rem_5rem_9rem_2rem] gap-2 mb-1">
-                  <span className="text-xs text-gray-400">Descrição</span>
-                  <span className="text-xs text-gray-400">Valor</span>
-                  <span className="text-xs text-gray-400">Moeda</span>
-                  <span className="text-xs text-gray-400">Tipo</span>
+                  <span className="text-xs text-gray-400">{t('descricao')}</span>
+                  <span className="text-xs text-gray-400">{tCommon('valor')}</span>
+                  <span className="text-xs text-gray-400">{t('moeda')}</span>
+                  <span className="text-xs text-gray-400">{t('tipo')}</span>
                   <span />
                 </div>
                 {costs.map(cost => (
@@ -465,14 +469,14 @@ function ActivityModal({
         {/* Modal footer */}
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
           <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-            Abbrechen
+            {tCommon('cancelar')}
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
             className="px-5 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
           >
-            {saving ? 'Wird gespeichert…' : 'Salvar'}
+            {saving ? tCommon('salvando') : tCommon('salvar')}
           </button>
         </div>
       </div>
@@ -493,20 +497,25 @@ function DeleteModal({
   onConfirm: () => void;
   loading: boolean;
 }) {
+  const t = useTranslations('admin.atividades');
+  const tCommon = useTranslations('admin.common');
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-2">Atividade löschen?</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-2">{t('atividadeExcluir')}</h2>
         <p className="text-sm text-gray-600 mb-6">
-          Tem certeza? <strong>{service.name}</strong> será removida do catálogo.
+          {t.rich('temCerteza', {
+            nome: service.name,
+            strong: chunks => <strong>{chunks}</strong>,
+          })}
         </p>
         <div className="flex justify-end gap-3">
           <button onClick={onCancel} disabled={loading} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">
-            Abbrechen
+            {tCommon('cancelar')}
           </button>
           <button onClick={onConfirm} disabled={loading} className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50">
-            {loading ? 'Wird gelöscht…' : 'Löschen'}
+            {loading ? t('excluindo') : tCommon('excluir')}
           </button>
         </div>
       </div>
@@ -517,6 +526,9 @@ function DeleteModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AtividadesPage() {
+  const t = useTranslations('admin.atividades');
+  const tCommon = useTranslations('admin.common');
+  const tPropostas = useTranslations('admin.propostas');
   const [services, setServices] = useState<ProposalService[]>([]);
   const [transportTypes, setTransportTypes] = useState<ProposalTransportType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -539,15 +551,15 @@ export default function AtividadesPage() {
       ]);
       const sData = await sRes.json();
       const tData = await tRes.json();
-      if (!sRes.ok) { setError(sData.error ?? 'Fehler beim Laden.'); return; }
+      if (!sRes.ok) { setError(sData.error ?? t('erroCarregar')); return; }
       setServices(sData.services ?? []);
       if (tRes.ok) setTransportTypes(tData.transports ?? []);
     } catch {
-      setError('Netzwerkfehler.');
+      setError(tCommon('erroRede'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t, tCommon]);
 
   useEffect(() => { fetchServices(); }, [fetchServices]);
 
@@ -578,11 +590,11 @@ export default function AtividadesPage() {
     setDeleteLoading(true);
     try {
       const res = await fetch(`/api/admin/proposals/services/${deleteTarget.id}`, { method: 'DELETE' });
-      if (!res.ok) { const d = await res.json(); alert(d.error ?? 'Fehler beim Löschen.'); return; }
+      if (!res.ok) { const d = await res.json(); alert(d.error ?? tCommon('erroDeletar')); return; }
       setServices(prev => prev.filter(s => s.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch {
-      alert('Netzwerkfehler.');
+      alert(tCommon('erroRede'));
     } finally {
       setDeleteLoading(false);
     }
@@ -599,17 +611,17 @@ export default function AtividadesPage() {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
             <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
-              <Link href="/admin/propostas" className="hover:text-gray-700 transition-colors">Propostas</Link>
+              <Link href="/admin/propostas" className="hover:text-gray-700 transition-colors">{tPropostas('titulo')}</Link>
               <span>/</span>
-              <span className="text-gray-600">Atividades</span>
+              <span className="text-gray-600">{t('breadcrumb')}</span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Atividades</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
           </div>
           <button
             onClick={openCreate}
             className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
           >
-            + Nova Atividade
+            {t('novaAtividade')}
           </button>
         </div>
 
@@ -623,14 +635,14 @@ export default function AtividadesPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Nome</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Categoria</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Transporte</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Duração total</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Período</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Custos</th>
-                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Ativo</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Ações</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('nome')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('categoria')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colTransporte')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colDuracaoTotal')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colPeriodo')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colCustos')}</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('ativo')}</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('acoes')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -647,19 +659,19 @@ export default function AtividadesPage() {
                 ) : services.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="px-4 py-16 text-center">
-                      <p className="text-gray-400 text-sm mb-3">Nenhuma atividade cadastrada</p>
+                      <p className="text-gray-400 text-sm mb-3">{t('nenhumaAtividade')}</p>
                       <button
                         onClick={openCreate}
                         className="inline-block px-4 py-2 text-sm font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                       >
-                        + Criar primeira atividade
+                        {t('criarPrimeira')}
                       </button>
                     </td>
                   </tr>
                 ) : (
                   services.map(s => {
                     const total = (s.transfer_hours_to ?? 0) + (s.duration_hours ?? 0) + (s.transfer_hours_back ?? 0);
-                    const period = s.suggested_period ? PERIOD_CONFIG[s.suggested_period] : null;
+                    const periodIcon = s.suggested_period ? PERIOD_ICON[s.suggested_period] : null;
                     const transportName = transportTypes.find(t => t.id === s.transport_type_id)?.name ?? null;
                     return (
                       <tr key={s.id} className="hover:bg-gray-50">
@@ -668,18 +680,20 @@ export default function AtividadesPage() {
                           <CategoryBadge category={s.category} />
                         </td>
                         <td className="px-4 py-3 text-gray-600 text-sm">
-                          {transportName ?? <span className="text-gray-300">—</span>}
+                          {transportName ?? <span className="text-gray-300">{tCommon('vazio')}</span>}
                         </td>
                         <td className="px-4 py-3 text-gray-600 tabular-nums">
-                          {total > 0 ? formatHours(total) : '—'}
+                          {total > 0 ? formatHours(total) : tCommon('vazio')}
                         </td>
                         <td className="px-4 py-3 text-gray-600">
-                          {period ? `${period.icon} ${period.label}` : '—'}
+                          {periodIcon && s.suggested_period
+                            ? `${periodIcon} ${t(`periodos.${s.suggested_period}`)}`
+                            : tCommon('vazio')}
                         </td>
                         <td className="px-4 py-3 text-gray-500">
                           {s.costs.length === 0
-                            ? <span className="text-gray-300 text-xs">Sem custo</span>
-                            : <span className="text-xs">{s.costs.length} custo{s.costs.length !== 1 ? 's' : ''}</span>}
+                            ? <span className="text-gray-300 text-xs">{t('semCusto')}</span>
+                            : <span className="text-xs">{t('custos', { count: s.costs.length })}</span>}
                         </td>
                         <td className="px-4 py-3 text-center">
                           <button
@@ -693,7 +707,7 @@ export default function AtividadesPage() {
                           <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => openEdit(s)}
-                              title="Bearbeiten"
+                              title={tCommon('editar')}
                               className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -702,7 +716,7 @@ export default function AtividadesPage() {
                             </button>
                             <button
                               onClick={() => setDeleteTarget(s)}
-                              title="Löschen"
+                              title={tCommon('excluir')}
                               className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

@@ -1,7 +1,13 @@
+import { getAdminTranslations } from '@/i18n/admin';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
+import { fmtNumber } from '@/lib/adminFormat';
 
-export const metadata = { title: 'Cadastur — Admin' };
+export async function generateMetadata() {
+  const t = await getAdminTranslations('admin.cadastur');
+  return { title: t('metaTitle') };
+}
+
 export const dynamic = 'force-dynamic';
 
 // Tabela cadastur_prestadores tem RLS sem policies (contém CPF e dados
@@ -51,10 +57,12 @@ function parseIdiomas(idiomas: string): string[] {
     .filter(s => s !== '' && s !== '-');
 }
 
-const CATEGORIA_LABELS: Record<string, { label: string; className: string }> = {
-  agencia: { label: 'Agência', className: 'bg-green-50 text-green-700 border-green-200' },
-  guia_pf: { label: 'Guia (PF)', className: 'bg-blue-50 text-blue-700 border-blue-200' },
-  guia_pj: { label: 'Guia (PJ)', className: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+// Chaveado pelo valor bruto de `categoria` no banco; o rótulo vem do catálogo
+// (admin.cadastur.categorias), com fallback para o valor cru.
+const CATEGORIA_CLASSES: Record<string, string> = {
+  agencia: 'bg-green-50 text-green-700 border-green-200',
+  guia_pf: 'bg-blue-50 text-blue-700 border-blue-200',
+  guia_pj: 'bg-indigo-50 text-indigo-700 border-indigo-200',
 };
 
 interface CadasturRow {
@@ -86,6 +94,9 @@ export default async function CadasturPage({
 }: {
   searchParams: Promise<{ q?: string; categoria?: string; uf?: string; municipio?: string; idioma?: string; page?: string }>;
 }) {
+  const t = await getAdminTranslations('admin.cadastur');
+  const tCategorias = await getAdminTranslations('admin.cadastur.categorias');
+  const tCommon = await getAdminTranslations('admin.common');
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1);
   // Caracteres com significado na sintaxe .or() do PostgREST
@@ -124,10 +135,10 @@ export default async function CadasturPage({
   const totalPages = Math.max(1, Math.ceil(filteredTotal / PAGE_SIZE));
 
   const metrics = [
-    { label: 'Agências', value: totals[0].count ?? 0 },
-    { label: 'Guias PF', value: totals[1].count ?? 0 },
-    { label: 'Guias PJ', value: totals[2].count ?? 0 },
-    { label: 'Resultado do filtro', value: filteredTotal },
+    { label: t('agencias'), value: totals[0].count ?? 0 },
+    { label: t('guiasPf'), value: totals[1].count ?? 0 },
+    { label: t('guiasPj'), value: totals[2].count ?? 0 },
+    { label: t('resultadoFiltro'), value: filteredTotal },
   ];
 
   const pageHref = (p: number) => {
@@ -147,9 +158,9 @@ export default async function CadasturPage({
       <div className="max-w-7xl">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Cadastur</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
           <p className="text-gray-500 mt-1">
-            Base pública do Ministério do Turismo — guias e agências para prospecção B2B
+            {t('subtitulo')}
           </p>
         </div>
 
@@ -157,7 +168,7 @@ export default async function CadasturPage({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {metrics.map(card => (
             <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{card.value.toLocaleString('pt-BR')}</p>
+              <p className="text-2xl font-bold text-gray-900">{fmtNumber(card.value)}</p>
               <p className="text-xs text-gray-500 mt-0.5">{card.label}</p>
             </div>
           ))}
@@ -166,66 +177,66 @@ export default async function CadasturPage({
         {/* Filtros (form GET — recarrega a página com searchParams) */}
         <form method="get" className="bg-white rounded-xl border border-gray-200 p-4 mb-6 flex flex-wrap items-end gap-3">
           <div className="flex-1 min-w-48">
-            <label htmlFor="q" className="block text-xs font-medium text-gray-500 mb-1">Busca</label>
+            <label htmlFor="q" className="block text-xs font-medium text-gray-500 mb-1">{tCommon('buscar')}</label>
             <input
               id="q"
               name="q"
               type="text"
               defaultValue={params.q ?? ''}
-              placeholder="Nome, nome fantasia ou e-mail"
+              placeholder={t('buscaPlaceholder')}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
           <div>
-            <label htmlFor="categoria" className="block text-xs font-medium text-gray-500 mb-1">Categoria</label>
+            <label htmlFor="categoria" className="block text-xs font-medium text-gray-500 mb-1">{t('categoria')}</label>
             <select
               id="categoria"
               name="categoria"
               defaultValue={params.categoria ?? ''}
               className="rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              <option value="">Todas</option>
-              <option value="agencia">Agência</option>
-              <option value="guia_pf">Guia (PF)</option>
-              <option value="guia_pj">Guia (PJ)</option>
+              <option value="">{tCommon('todas')}</option>
+              <option value="agencia">{tCategorias('agencia')}</option>
+              <option value="guia_pf">{tCategorias('guia_pf')}</option>
+              <option value="guia_pj">{tCategorias('guia_pj')}</option>
             </select>
           </div>
           <div>
-            <label htmlFor="uf" className="block text-xs font-medium text-gray-500 mb-1">UF</label>
+            <label htmlFor="uf" className="block text-xs font-medium text-gray-500 mb-1">{t('uf')}</label>
             <select
               id="uf"
               name="uf"
               defaultValue={params.uf ?? ''}
               className="rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              <option value="">Todas</option>
+              <option value="">{tCommon('todas')}</option>
               {UFS.map(uf => (
                 <option key={uf} value={uf}>{uf}</option>
               ))}
             </select>
           </div>
           <div>
-            <label htmlFor="idioma" className="block text-xs font-medium text-gray-500 mb-1">Idioma (guias)</label>
+            <label htmlFor="idioma" className="block text-xs font-medium text-gray-500 mb-1">{t('idiomaGuias')}</label>
             <select
               id="idioma"
               name="idioma"
               defaultValue={params.idioma ?? ''}
               className="rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              <option value="">Todos</option>
+              <option value="">{tCommon('todos')}</option>
               {IDIOMAS.map(idioma => (
                 <option key={idioma} value={idioma}>{idioma}</option>
               ))}
             </select>
           </div>
           <div>
-            <label htmlFor="municipio" className="block text-xs font-medium text-gray-500 mb-1">Município</label>
+            <label htmlFor="municipio" className="block text-xs font-medium text-gray-500 mb-1">{t('municipio')}</label>
             <input
               id="municipio"
               name="municipio"
               type="text"
               defaultValue={params.municipio ?? ''}
-              placeholder="Ex.: Rio de Janeiro"
+              placeholder={t('municipioPlaceholder')}
               className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
@@ -234,13 +245,13 @@ export default async function CadasturPage({
               type="submit"
               className="rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition-colors"
             >
-              Filtrar
+              {tCommon('filtrar')}
             </button>
             <Link
               href="/admin/cadastur"
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
             >
-              Limpar
+              {tCommon('limpar')}
             </Link>
           </div>
         </form>
@@ -248,7 +259,7 @@ export default async function CadasturPage({
         {/* Fetch error */}
         {error && (
           <div className="mb-4 p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200">
-            Erro ao carregar dados: {error.message}
+            {tCommon('erroPrefixo', { mensagem: error.message })}
           </div>
         )}
 
@@ -257,33 +268,34 @@ export default async function CadasturPage({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 text-left text-xs text-gray-500 uppercase">
-                <th className="px-4 py-3 font-medium">Nome</th>
-                <th className="px-4 py-3 font-medium">Categoria</th>
-                <th className="px-4 py-3 font-medium">Local</th>
-                <th className="px-4 py-3 font-medium">Telefone</th>
-                <th className="px-4 py-3 font-medium">E-mail</th>
-                <th className="px-4 py-3 font-medium">Website</th>
+                <th className="px-4 py-3 font-medium">{tCommon('nome')}</th>
+                <th className="px-4 py-3 font-medium">{t('categoria')}</th>
+                <th className="px-4 py-3 font-medium">{t('colLocal')}</th>
+                <th className="px-4 py-3 font-medium">{tCommon('telefone')}</th>
+                <th className="px-4 py-3 font-medium">{tCommon('email')}</th>
+                <th className="px-4 py-3 font-medium">{t('colWebsite')}</th>
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                    Nenhum registro encontrado com esses filtros.
+                    {t('nenhumRegistro')}
                   </td>
                 </tr>
               )}
               {rows.map(row => {
-                const badge = CATEGORIA_LABELS[row.categoria] ?? {
-                  label: row.categoria,
-                  className: 'bg-gray-50 text-gray-600 border-gray-200',
-                };
+                const badgeClassName =
+                  CATEGORIA_CLASSES[row.categoria] ?? 'bg-gray-50 text-gray-600 border-gray-200';
+                const badgeLabel = tCategorias.has(row.categoria)
+                  ? tCategorias(row.categoria)
+                  : row.categoria;
                 return (
                   <tr key={row.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <p className="font-medium text-gray-900">{displayName(row)}</p>
                       <p className="text-xs text-gray-400">
-                        Cert. {row.numero_certificado}
+                        {t('certPrefixo')}{row.numero_certificado}
                         {row.idiomas && parseIdiomas(row.idiomas).length > 0 && (
                           <span title={parseIdiomas(row.idiomas).join(', ')} className="ml-1.5 text-sm align-middle">
                             {parseIdiomas(row.idiomas).map(i => IDIOMA_FLAGS[i] ?? i).join(' ')}
@@ -292,8 +304,8 @@ export default async function CadasturPage({
                       </p>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${badge.className}`}>
-                        {badge.label}
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${badgeClassName}`}>
+                        {badgeLabel}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
@@ -332,7 +344,7 @@ export default async function CadasturPage({
         {totalPages > 1 && (
           <div className="flex flex-wrap items-center justify-between gap-2 mt-4 text-sm text-gray-600">
             <p>
-              Página {page} de {totalPages.toLocaleString('pt-BR')} · {filteredTotal.toLocaleString('pt-BR')} registros
+              {t('paginacao', { pagina: page, total: fmtNumber(totalPages), registros: fmtNumber(filteredTotal) })}
             </p>
             <div className="flex gap-2">
               {page > 1 && (
@@ -340,7 +352,7 @@ export default async function CadasturPage({
                   href={pageHref(page - 1)}
                   className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-50 transition-colors"
                 >
-                  ← Anterior
+                  {t('anterior')}
                 </Link>
               )}
               {page < totalPages && (
@@ -348,7 +360,7 @@ export default async function CadasturPage({
                   href={pageHref(page + 1)}
                   className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-50 transition-colors"
                 >
-                  Próxima →
+                  {t('proxima')}
                 </Link>
               )}
             </div>

@@ -12,6 +12,7 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core';
+import { useTranslations } from 'next-intl';
 import KanbanColumn, { KANBAN_COLUMNS } from './KanbanColumn';
 import { KanbanCardContent } from './KanbanCard';
 import TourDateKanbanFlow, { type KanbanStatusChange } from '@/components/admin/TourDateKanbanFlow';
@@ -35,6 +36,8 @@ export default function LeadsKanban({ allLeads }: { allLeads: Lead[] }) {
   const [toast, setToast] = useState<string | null>(null);
   const [tourFlow, setTourFlow] = useState<KanbanStatusChange | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
 
   const searchParams = useSearchParams();
 
@@ -85,7 +88,7 @@ export default function LeadsKanban({ allLeads }: { allLeads: Lead[] }) {
       if (!res.ok) {
         const data = await res.json();
         setLeads(prev);
-        setToast(`Erro: ${data.error ?? 'Falha ao atualizar status'}`);
+        setToast(tCommon('erroPrefixo', { mensagem: data.error ?? t('falhaAtualizarStatus') }));
       } else {
         setTourFlow({
           leadId: lead.id,
@@ -97,7 +100,7 @@ export default function LeadsKanban({ allLeads }: { allLeads: Lead[] }) {
       }
     } catch {
       setLeads(prev);
-      setToast('Erro de rede. Tente novamente.');
+      setToast(tCommon('erroRede'));
     }
   };
 
