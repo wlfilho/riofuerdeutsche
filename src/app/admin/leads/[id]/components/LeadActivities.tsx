@@ -1,3 +1,6 @@
+import { getTranslations } from 'next-intl/server';
+import { fmtEur } from '@/lib/adminFormat';
+
 type Activity = {
   id: string;
   name: string;
@@ -12,7 +15,8 @@ function formatDuration(minutes: number): string {
   return m > 0 ? `${h}h${m}min` : `${h}h`;
 }
 
-export default function LeadActivities({ activities }: { activities: unknown }) {
+export default async function LeadActivities({ activities }: { activities: unknown }) {
+  const t = await getTranslations('admin.crm');
   const items: Activity[] = Array.isArray(activities)
     ? (activities as Activity[]).filter(
         a => a && typeof a === 'object' && 'name' in a
@@ -22,9 +26,9 @@ export default function LeadActivities({ activities }: { activities: unknown }) 
   if (items.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 px-5 py-6">
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">Atividades Selecionadas</h2>
+        <h2 className="text-sm font-semibold text-gray-700 mb-3">{t('atividadesSelecionadas')}</h2>
         <p className="text-xs text-gray-400 italic">
-          Lead sem atividades pré-selecionadas (entrada manual).
+          {t('leadSemAtividades')}
         </p>
       </div>
     );
@@ -37,7 +41,7 @@ export default function LeadActivities({ activities }: { activities: unknown }) 
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-100">
         <h2 className="text-sm font-semibold text-gray-700">
-          Atividades Selecionadas{' '}
+          {t('atividadesSelecionadas')}{' '}
           <span className="text-gray-400 font-normal">({items.length})</span>
         </h2>
       </div>
@@ -52,7 +56,7 @@ export default function LeadActivities({ activities }: { activities: unknown }) 
               {formatDuration(activity.duration_min)}
             </span>
             <span className="text-sm font-medium text-gray-700 tabular-nums w-16 text-right">
-              €{activity.price_eur}
+              {fmtEur(activity.price_eur)}
             </span>
           </div>
         ))}
@@ -61,13 +65,13 @@ export default function LeadActivities({ activities }: { activities: unknown }) 
       {/* Total */}
       <div className="flex items-center gap-3 px-5 py-3 bg-gray-50 border-t border-gray-100">
         <div className="flex-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Total estimado
+          {t('totalEstimado')}
         </div>
         <span className="text-xs text-gray-400 tabular-nums w-12 text-right">
           {formatDuration(totalMinutes)}
         </span>
         <span className="text-sm font-bold text-gray-800 tabular-nums w-16 text-right">
-          €{totalPrice}
+          {fmtEur(totalPrice)}
         </span>
       </div>
     </div>

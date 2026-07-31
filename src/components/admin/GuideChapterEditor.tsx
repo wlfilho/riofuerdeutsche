@@ -3,6 +3,7 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import RichEditor from '@/components/admin/RichEditor';
 import GuideContent from '@/components/dashboard/GuideContent';
 interface ChapterData {
@@ -23,6 +24,9 @@ interface Props {
 
 export default function GuideChapterEditor({ chapterId }: Props) {
   const router = useRouter();
+  const t = useTranslations('admin.guide');
+  const tCommon = useTranslations('admin.common');
+  const tEdicoes = useTranslations('admin.guide.edicoes');
   const isEditing = !!chapterId;
 
   const [chapter, setChapter] = useState<ChapterData>({
@@ -56,7 +60,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
           setChapter(data.chapter);
         }
       } catch (error) {
-        setMessage({ type: 'error', text: 'Fehler beim Laden.' });
+        setMessage({ type: 'error', text: t('erroCarregar') });
       } finally {
         setLoading(false);
       }
@@ -106,8 +110,8 @@ export default function GuideChapterEditor({ chapterId }: Props) {
         setMessage({
           type: 'success',
           text: isEditing
-            ? 'Kapitel gespeichert!'
-            : 'Kapitel erstellt!',
+            ? t('capituloSalvo')
+            : t('capituloCriado'),
         });
 
         if (!isEditing && data.chapter?.id) {
@@ -117,11 +121,11 @@ export default function GuideChapterEditor({ chapterId }: Props) {
       } else {
         setMessage({
           type: 'error',
-          text: data.error || 'Fehler beim Speichern.',
+          text: data.error || t('erroSalvar'),
         });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Netzwerkfehler.' });
+      setMessage({ type: 'error', text: tCommon('erroRede') });
     } finally {
       setSaving(false);
     }
@@ -130,7 +134,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-400">Laden...</p>
+        <p className="text-gray-400">{tCommon('carregando')}</p>
       </div>
     );
   }
@@ -145,10 +149,10 @@ export default function GuideChapterEditor({ chapterId }: Props) {
               onClick={() => router.push('/admin/guide')}
               className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
             >
-              ← Zurück
+              {t('voltar')}
             </button>
             <h1 className="text-lg font-bold text-gray-900">
-              {isEditing ? `${chapter.icon} ${chapter.title}` : '+ Neues Kapitel'}
+              {isEditing ? `${chapter.icon} ${chapter.title}` : t('novoCapituloTitulo')}
             </h1>
             <span
               className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
@@ -157,7 +161,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
                   : 'bg-yellow-100 text-yellow-700'
               }`}
             >
-              {chapter.status === 'published' ? 'Live' : 'Entwurf'}
+              {chapter.status === 'published' ? t('live') : t('rascunhoBadge')}
             </span>
           </div>
 
@@ -174,8 +178,8 @@ export default function GuideChapterEditor({ chapterId }: Props) {
               className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
             >
               {chapter.status === 'published'
-                ? 'Als Entwurf'
-                : 'Veröffentlichen'}
+                ? t('comoRascunho')
+                : t('publicar')}
             </button>
 
             {/* Save */}
@@ -184,7 +188,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
               disabled={saving}
               className="px-4 py-1.5 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 cursor-pointer"
             >
-              {saving ? 'Speichern...' : 'Speichern'}
+              {saving ? tCommon('salvando') : tCommon('salvar')}
             </button>
           </div>
         </div>
@@ -217,7 +221,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                ✏️ Bearbeiten
+                {t('abaEditar')}
               </button>
               <button
                 onClick={() => setActiveTab('preview')}
@@ -227,7 +231,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                👁️ Vorschau
+                {t('abaPrevia')}
               </button>
             </div>
 
@@ -246,7 +250,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
                 {chapter.content ? (
                   <GuideContent content={chapter.content} />
                 ) : (
-                  <p className="text-gray-400 italic">Noch kein Inhalt.</p>
+                  <p className="text-gray-400 italic">{t('semConteudo')}</p>
                 )}
               </div>
             )}
@@ -259,13 +263,13 @@ export default function GuideChapterEditor({ chapterId }: Props) {
             {/* Titel */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Titel
+                {t('tituloCampo')}
               </label>
               <input
                 type="text"
                 value={chapter.title}
                 onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="z.B. Sicherheit in Rio"
+                placeholder={t('tituloPlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
               />
             </div>
@@ -273,7 +277,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
             {/* Slug */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Slug (URL)
+                {t('slugUrl')}
               </label>
               <div className="flex items-center gap-1">
                 <span className="text-xs text-gray-400">/dashboard/</span>
@@ -286,7 +290,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
                       slug: e.target.value,
                     }))
                   }
-                  placeholder="sicherheit"
+                  placeholder={t('slugPlaceholder')}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 />
               </div>
@@ -295,7 +299,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
             {/* Untertitel */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Untertitel
+                {t('subtitulo')}
               </label>
               <input
                 type="text"
@@ -306,7 +310,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
                     subtitle: e.target.value,
                   }))
                 }
-                placeholder="Kurze Beschreibung"
+                placeholder={t('subtituloPlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
               />
             </div>
@@ -314,7 +318,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
             {/* Icon */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Icon (Emoji)
+                {t('iconeEmoji')}
               </label>
               <input
                 type="text"
@@ -330,7 +334,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
             {/* Edition */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Edition
+                {t('edicao')}
               </label>
               <select
                 value={chapter.edition}
@@ -342,10 +346,11 @@ export default function GuideChapterEditor({ chapterId }: Props) {
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm bg-white"
               >
-                <option value={1}>Edition 1 — O Essencial</option>
-                <option value={2}>Edition 2 — Viver o Rio</option>
-                <option value={3}>Edition 3 — Como um Local</option>
-                <option value={4}>Edition 4 — Rio Completo</option>
+                {[1, 2, 3, 4].map((ed) => (
+                  <option key={ed} value={ed}>
+                    {tEdicoes(String(ed))}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -353,7 +358,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
               <label className="flex items-center justify-between cursor-pointer">
                 <span className="text-sm font-medium text-gray-700">
-                  Kostenlos (Lead Magnet)
+                  {t('gratuitoLeadMagnet')}
                 </span>
                 <div className="relative">
                   <input
@@ -383,8 +388,7 @@ export default function GuideChapterEditor({ chapterId }: Props) {
                 </div>
               </label>
               <p className="text-xs text-gray-400 mt-2">
-                Wenn aktiv, können alle registrierten Benutzer dieses Kapitel
-                lesen.
+                {t('leadMagnetHint')}
               </p>
             </div>
           </div>

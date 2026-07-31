@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { TourDate, TourDateStatus } from '@/lib/tourDates';
 import { todayISO } from '@/lib/calendarDates';
 
@@ -38,6 +39,9 @@ export default function TourDateModal({
   onSaved: (tourDates: TourDate[]) => void;
   onClose: () => void;
 }) {
+  const t = useTranslations('admin.calendario');
+  const tc = useTranslations('admin.common');
+  const tStatus = useTranslations('admin.status.tourDate');
   const initialLead = fixedLead ?? (editing
     ? { id: editing.lead_id, name: editing.lead?.name ?? '', status: '', pax: editing.pax }
     : null);
@@ -82,9 +86,9 @@ export default function TourDateModal({
   };
 
   const handleSave = async () => {
-    if (!leadId) { setError('Selecione um cliente.'); return; }
-    if (!tourName.trim()) { setError('Informe o nome do tour.'); return; }
-    if (dateRows.some(r => !r.date)) { setError('Preencha todas as datas.'); return; }
+    if (!leadId) { setError(t('selecioneCliente')); return; }
+    if (!tourName.trim()) { setError(t('informeNomeTour')); return; }
+    if (dateRows.some(r => !r.date)) { setError(t('preenchaDatas')); return; }
 
     setSaving(true);
     setError(null);
@@ -127,12 +131,12 @@ export default function TourDateModal({
       }
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? 'Falha ao salvar.');
+        setError(data.error ?? t('falhaSalvar'));
         return;
       }
       onSaved(isEdit ? [data.tourDate] : data.tourDates);
     } catch {
-      setError('Erro de rede. Tente novamente.');
+      setError(tc('erroRede'));
     } finally {
       setSaving(false);
     }
@@ -148,7 +152,7 @@ export default function TourDateModal({
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="text-lg font-bold text-gray-900">
-            {isEdit ? 'Editar data de tour' : 'Adicionar data de tour'}
+            {isEdit ? t('editarDataTour') : t('adicionarDataTour')}
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1">✕</button>
         </div>
@@ -156,19 +160,19 @@ export default function TourDateModal({
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {/* Cliente */}
           <div>
-            <label className={labelClass}>Cliente</label>
+            <label className={labelClass}>{t('cliente')}</label>
             {needsLeadPicker ? (
               <select value={leadId} onChange={e => handleLeadChange(e.target.value)} className={inputClass}>
-                <option value="">Selecione um cliente...</option>
+                <option value="">{t('selecioneClientePlaceholder')}</option>
                 {leadOptions.map(l => (
                   <option key={l.id} value={l.id}>
-                    {l.name} ({l.status === 'closed' ? 'Fechado' : 'Proposta Enviada'})
+                    {l.name} ({tStatus(leadStatusToTourStatus(l.status))})
                   </option>
                 ))}
               </select>
             ) : (
               <p className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800">
-                {fixedLead?.name ?? editing?.lead?.name ?? '—'}
+                {fixedLead?.name ?? editing?.lead?.name ?? tc('vazio')}
               </p>
             )}
           </div>
@@ -176,27 +180,27 @@ export default function TourDateModal({
           {/* Tour + status */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Nome do tour</label>
+              <label className={labelClass}>{t('nomeTour')}</label>
               <input
                 type="text"
                 value={tourName}
                 onChange={e => setTourName(e.target.value)}
-                placeholder="Ex: City Tour Rio Clássico"
+                placeholder={t('nomeTourPlaceholder')}
                 className={inputClass}
               />
             </div>
             <div>
-              <label className={labelClass}>Status</label>
+              <label className={labelClass}>{tc('status')}</label>
               <select value={status} onChange={e => setStatus(e.target.value as TourDateStatus)} className={inputClass}>
-                <option value="proposta_enviada">Proposta Enviada</option>
-                <option value="fechado">Fechado</option>
+                <option value="proposta_enviada">{tStatus('proposta_enviada')}</option>
+                <option value="fechado">{tStatus('fechado')}</option>
               </select>
             </div>
           </div>
 
           {/* Datas */}
           <div>
-            <label className={labelClass}>{isEdit ? 'Data e horário' : 'Datas e horários'}</label>
+            <label className={labelClass}>{isEdit ? t('dataHorario') : t('datasHorarios')}</label>
             <div className="space-y-2">
               {dateRows.map((row, i) => (
                 <div key={i} className="flex items-center gap-2">
@@ -216,7 +220,7 @@ export default function TourDateModal({
                     <button
                       onClick={() => setDateRows(rows => rows.filter((_, idx) => idx !== i))}
                       className="text-gray-400 hover:text-red-600 p-1 shrink-0"
-                      title="Remover dia"
+                      title={t('removerDia')}
                     >
                       ✕
                     </button>
@@ -229,7 +233,7 @@ export default function TourDateModal({
                 onClick={() => setDateRows(rows => [...rows, { date: rows[rows.length - 1]?.date ?? todayISO(), start_time: '' }])}
                 className="mt-2 text-xs font-medium text-green-700 hover:text-green-800"
               >
-                + Adicionar outro dia
+                {t('adicionarOutroDia')}
               </button>
             )}
           </div>
@@ -237,23 +241,23 @@ export default function TourDateModal({
           {/* Pax + valor */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Nº de pessoas</label>
+              <label className={labelClass}>{t('numeroPessoas')}</label>
               <input type="number" min="1" value={pax} onChange={e => setPax(e.target.value)} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Valor combinado (€)</label>
+              <label className={labelClass}>{t('valorCombinado')}</label>
               <input type="number" min="0" step="0.01" value={agreedPrice} onChange={e => setAgreedPrice(e.target.value)} className={inputClass} />
             </div>
           </div>
 
           {/* Ponto de encontro */}
           <div>
-            <label className={labelClass}>Ponto de encontro</label>
+            <label className={labelClass}>{t('pontoEncontro')}</label>
             <input
               type="text"
               value={meetingPoint}
               onChange={e => setMeetingPoint(e.target.value)}
-              placeholder="Ex: Lobby do hotel Copacabana Palace"
+              placeholder={t('pontoEncontroPlaceholder')}
               className={inputClass}
             />
           </div>
@@ -266,12 +270,12 @@ export default function TourDateModal({
               onChange={e => setAnzahlungPaid(e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
             />
-            Anzahlung pago
+            {t('sinalPago')}
           </label>
 
           {/* Observações */}
           <div>
-            <label className={labelClass}>Observações</label>
+            <label className={labelClass}>{tc('observacoes')}</label>
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
@@ -290,14 +294,14 @@ export default function TourDateModal({
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
           >
-            Cancelar
+            {tc('cancelar')}
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
             className="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
           >
-            {saving ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Adicionar'}
+            {saving ? tc('salvando') : isEdit ? tc('salvarAlteracoes') : tc('adicionar')}
           </button>
         </div>
       </div>

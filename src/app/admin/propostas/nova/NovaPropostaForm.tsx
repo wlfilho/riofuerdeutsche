@@ -3,6 +3,8 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { ADMIN_LOCALE, fmtEur } from '@/lib/adminFormat';
 import type {
   Proposal,
   ProposalPriceDisplay,
@@ -52,8 +54,10 @@ type EditableItem = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatGermanDay(iso: string): string {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('de-DE', {
+// Cabeçalho de dia do itinerário — UI do admin, portanto pt-BR. O texto que o
+// cliente recebe (WhatsApp/PDF) é gerado em PropostaOutputClient, em alemão.
+function formatDayHeader(iso: string): string {
+  return new Date(iso + 'T12:00:00').toLocaleDateString(ADMIN_LOCALE, {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
@@ -205,17 +209,13 @@ function calcItemTotalEur(
   return guideFee + calcItemAdditionalCosts(item, pax, exchangeRate);
 }
 
-function formatEur(n: number): string {
-  return `€${n.toFixed(2).replace('.', ',')}`;
-}
-
 function formatCostPrice(cost: EditableItem['costs'][0]): string {
   const sym = cost.currency === 'EUR' ? '€' : 'R$';
   const val = cost.base_price % 1 === 0
     ? cost.base_price.toFixed(0)
     : cost.base_price.toFixed(2).replace('.', ',');
   const suffix = cost.price_type === 'per_pax' ? ' / pessoa'
-    : cost.price_type === 'per_hour' ? ' / Std.'
+    : cost.price_type === 'per_hour' ? ' / h'
     : ' fixo';
   return `${sym}${val}${suffix}`;
 }
@@ -332,11 +332,12 @@ function buildDaySegments(items: EditableItem[], startTime: string): DaySegment[
 const INPUT_CLS =
   'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent';
 
+// Rótulos vêm de admin.atividades.categoriasPlural.
 const CATEGORIES = [
-  { key: 'tour' as const,      label: 'Tours',      icon: '🗺️' },
-  { key: 'transfer' as const,  label: 'Transfers',  icon: '🚗' },
-  { key: 'extra' as const,     label: 'Extras',     icon: '⭐' },
-  { key: 'atração' as const,   label: 'Atrações',   icon: '🏛️' },
+  { key: 'tour' as const,      icon: '🗺️' },
+  { key: 'transfer' as const,  icon: '🚗' },
+  { key: 'extra' as const,     icon: '⭐' },
+  { key: 'atração' as const,   icon: '🏛️' },
 ];
 
 // ─── ServicePickerModal ───────────────────────────────────────────────────────
@@ -350,24 +351,26 @@ function ServicePickerModal({
   onAdd: (service: ProposalService) => void;
   onClose: () => void;
 }) {
+  const t = useTranslations('admin.propostas');
+  const tCat = useTranslations('admin.atividades.categoriasPlural');
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-          <h3 className="text-base font-bold text-gray-900">Adicionar serviço</h3>
+          <h3 className="text-base font-bold text-gray-900">{t('adicionarServico')}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">
             ✕
           </button>
         </div>
         <div className="overflow-y-auto p-4 space-y-5">
-          {CATEGORIES.map(({ key, label, icon }) => {
+          {CATEGORIES.map(({ key, icon }) => {
             const list = services.filter(s => s.category === key);
             if (!list.length) return null;
             return (
               <div key={key}>
                 <p className="text-xs font-semibold text-gray-400 uppercase mb-2 tracking-wide">
-                  {icon} {label}
+                  {icon} {tCat(key)}
                 </p>
                 <div className="space-y-0.5">
                   {list.map(s => (
@@ -391,7 +394,7 @@ function ServicePickerModal({
             );
           })}
           {services.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-6">Nenhum serviço disponível.</p>
+            <p className="text-sm text-gray-400 text-center py-6">{t('nenhumServicoDisponivel')}</p>
           )}
         </div>
       </div>
@@ -430,6 +433,8 @@ function DayScheduleGrid({
   onRequestAdd: (position: InsertPosition) => void;
   onDropItem: (draggedId: string, targetItemId?: string) => void;
 }) {
+  const t = useTranslations('admin.propostas');
+  const tCommon = useTranslations('admin.common');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | 'grid' | null>(null);
 
@@ -499,7 +504,7 @@ function DayScheduleGrid({
                 {seg.insert && (
                   <button
                     onClick={() => onRequestAdd(seg.insert!)}
-                    title="Inserir serviço aqui"
+                    title={t('inserirServicoAqui')}
                     className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-5 h-5 flex items-center justify-center rounded-full bg-white border border-gray-300 text-gray-400 text-xs leading-none hover:border-green-400 hover:text-green-600 shadow-sm transition-colors"
                   >
                     +
@@ -526,7 +531,7 @@ function DayScheduleGrid({
               <button
                 onClick={() => onMoveItem(item._id, -1)}
                 disabled={isFirst}
-                title="Mover para mais cedo"
+                title={t('moverMaisCedo')}
                 className="p-0.5 text-gray-300 hover:text-green-600 transition-colors rounded disabled:opacity-30 disabled:hover:text-gray-300"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -536,7 +541,7 @@ function DayScheduleGrid({
               <button
                 onClick={() => onMoveItem(item._id, 1)}
                 disabled={isLast}
-                title="Mover para mais tarde"
+                title={t('moverMaisTarde')}
                 className="p-0.5 text-gray-300 hover:text-green-600 transition-colors rounded disabled:opacity-30 disabled:hover:text-gray-300"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -545,7 +550,7 @@ function DayScheduleGrid({
               </button>
               <button
                 onClick={() => onRemoveItem(item._id)}
-                title="Entfernen"
+                title={t('removerServico')}
                 className="p-0.5 text-gray-300 hover:text-red-500 transition-colors rounded"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -574,7 +579,7 @@ function DayScheduleGrid({
                     {controls}
                     <button
                       onClick={() => setExpandedId(null)}
-                      title="Recolher"
+                      title={t('recolher')}
                       className="p-0.5 text-gray-400 hover:text-gray-700 transition-colors rounded"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -588,10 +593,10 @@ function DayScheduleGrid({
                   {guideHours > 0 && (
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-gray-500">
-                        Honorário guia
-                        <span className="text-gray-400"> · {guideHours}h × {guideRate} EUR/h</span>
+                        {t('honorarioGuiaResumo')}
+                        <span className="text-gray-400"> · {t('horasVezesTaxa', { horas: guideHours, taxa: guideRate })}</span>
                       </span>
-                      <span className="tabular-nums text-gray-600 ml-4 shrink-0">{formatEur(guideFee)}</span>
+                      <span className="tabular-nums text-gray-600 ml-4 shrink-0">{fmtEur(guideFee)}</span>
                     </div>
                   )}
                   {(item.costs ?? []).map((cost, cIdx) => {
@@ -600,7 +605,7 @@ function DayScheduleGrid({
                       <div key={cIdx} className="flex items-center justify-between text-xs">
                         <label
                           className="flex items-center gap-1.5 cursor-pointer select-none text-gray-500"
-                          title="Marcado: entra no preço da proposta. Desmarcado: cliente paga no local (valor exibido na proposta)."
+                          title={t('marcadoEntraPreco')}
                         >
                           <input
                             type="checkbox"
@@ -616,12 +621,12 @@ function DayScheduleGrid({
                             {cost.description}
                             <span className="text-gray-400"> · {formatCostPrice(cost)}</span>
                             {!cost.included && (
-                              <span className="text-amber-600 font-medium"> · pax paga no local</span>
+                              <span className="text-amber-600 font-medium"> {t('paxPagaNoLocal')}</span>
                             )}
                           </span>
                         </label>
                         <span className={`tabular-nums ml-4 shrink-0 ${cost.included ? 'text-gray-600' : 'text-gray-300 line-through'}`}>
-                          {formatEur(eur)}
+                          {fmtEur(eur)}
                         </span>
                       </div>
                     );
@@ -633,13 +638,13 @@ function DayScheduleGrid({
                   value={item.note}
                   onChange={e => onUpdateItem(item._id, { note: e.target.value })}
                   className={INPUT_CLS}
-                  placeholder="Anotação (ex.: GIG → Ipanema)"
+                  placeholder={t('anotacaoTransfer')}
                 />
 
                 <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-gray-200">
-                  <span className="text-xs text-gray-400">Total:</span>
-                  <span className="text-sm font-semibold text-gray-700 tabular-nums">{formatEur(totalEur)}</span>
-                  {hasBrl && <span className="text-xs text-gray-400">(câmbio {exchangeRate})</span>}
+                  <span className="text-xs text-gray-400">{tCommon('total')}:</span>
+                  <span className="text-sm font-semibold text-gray-700 tabular-nums">{fmtEur(totalEur)}</span>
+                  {hasBrl && <span className="text-xs text-gray-400">{t('cambio', { taxa: exchangeRate })}</span>}
                 </div>
               </div>
             );
@@ -673,7 +678,7 @@ function DayScheduleGrid({
                 }}
                 className={`h-full bg-green-50 border-l-4 border-green-500 rounded-r-md px-2 py-1 overflow-hidden cursor-grab active:cursor-grabbing hover:bg-green-100 transition-colors ${dragOverId === item._id ? 'ring-2 ring-green-400' : ''}`}
                 onClick={() => setExpandedId(item._id)}
-                title="Clique para detalhes · arraste para reordenar"
+                title={t('cliqueDetalhes')}
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-xs font-semibold text-green-900 leading-tight truncate">
@@ -682,7 +687,7 @@ function DayScheduleGrid({
                   {controls}
                 </div>
                 <p className="text-[11px] text-green-700 tabular-nums truncate">
-                  {minutesToLabel(seg.startMin)}–{minutesToLabel(seg.endMin)} · {formatHoursShort(seg.hours)} · {formatEur(totalEur)}
+                  {minutesToLabel(seg.startMin)}–{minutesToLabel(seg.endMin)} · {formatHoursShort(seg.hours)} · {fmtEur(totalEur)}
                   {item.note && <span className="text-green-600"> · 📝 {item.note}</span>}
                 </p>
               </div>
@@ -697,32 +702,32 @@ function DayScheduleGrid({
             style={{ top: topOf(windowEndMin) }}
           >
             <span className="absolute -top-2.5 right-0 text-[10px] font-semibold text-amber-600 bg-white pl-1">
-              fim do dia {minutesToLabel(windowEndMin)}
+              {t('fimDoDia', { hora: minutesToLabel(windowEndMin) })}
             </span>
           </div>
         )}
 
         {segments.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-xs text-gray-300">Dia livre — adicione um serviço acima.</p>
+            <p className="text-xs text-gray-300">{t('diaLivre')}</p>
           </div>
         )}
       </div>
 
       <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t border-gray-100">
         <span>
-          Ocupado: <span className="font-semibold text-gray-600 tabular-nums">{formatHoursShort(occupiedMin / 60)}</span>
+          {t('ocupado')}<span className="font-semibold text-gray-600 tabular-nums">{formatHoursShort(occupiedMin / 60)}</span>
           {segments.length > 0 && (
-            <span className="tabular-nums"> (até {minutesToLabel(contentEndMin)})</span>
+            <span className="tabular-nums">{t('ate', { hora: minutesToLabel(contentEndMin) })}</span>
           )}
         </span>
         {overflowMin > 0 ? (
           <span className="text-amber-600 font-medium">
-            ⚠️ passa {formatHoursShort(overflowMin / 60)} do fim do dia
+            {t('passaFimDia', { tempo: formatHoursShort(overflowMin / 60) })}
           </span>
         ) : (
           <span>
-            Livre: <span className="font-semibold text-green-600 tabular-nums">{formatHoursShort(freeMin / 60)}</span>
+            {t('livre')}<span className="font-semibold text-green-600 tabular-nums">{formatHoursShort(freeMin / 60)}</span>
           </span>
         )}
       </div>
@@ -777,6 +782,7 @@ function DayBlock({
   onDropItem: (draggedId: string, targetDay: string, targetItemId?: string) => void;
   onRemoveDay: () => void;
 }) {
+  const t = useTranslations('admin.propostas');
   const [pickerFor, setPickerFor] = useState<InsertPosition | null>(null);
 
   const transport = calcDayTransport(items, transportRates, exchangeRate, toggles);
@@ -794,29 +800,29 @@ function DayBlock({
       <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-semibold text-gray-800">{formatGermanDay(day)}</p>
+            <p className="text-sm font-semibold text-gray-800">{formatDayHeader(day)}</p>
             {items.length > 0 && (
               <p className="text-xs text-gray-400 mt-0.5">
-                {items.length} serviço{items.length !== 1 ? 's' : ''} · {formatEur(dayTotal)}
+                {t('servicos', { count: items.length })} · {fmtEur(dayTotal)}
                 {dayHours > 0 && ` · ${dayHours}h`}
               </p>
             )}
             {transport.status === 'ok' && (
               <p className="text-xs text-gray-500 mt-0.5">
-                🚗 Transporte do dia:{' '}
+                {t('transporteDoDia')}{' '}
                 {[
-                  toggles.uses_rental_car && 'diária do carro',
-                  toggles.uses_driver && `${transport.hours}h motorista`,
+                  toggles.uses_rental_car && t('diariaCarro'),
+                  toggles.uses_driver && t('horasMotorista', { horas: transport.hours }),
                 ].filter(Boolean).join(' + ')}
-                {' · '}{formatEur(chargeableEur)}
+                {' · '}{fmtEur(chargeableEur)}
                 {embeddedEur > 0 && (
-                  <span className="text-gray-400"> (+{formatEur(embeddedEur)} embutido no honorário)</span>
+                  <span className="text-gray-400"> {t('embutidoHonorario', { valor: fmtEur(embeddedEur) })}</span>
                 )}
               </p>
             )}
             {transport.status === 'no-rates' && (
               <p className="text-xs text-amber-600 font-medium mt-1">
-                ⚠️ Sem faixa de transporte para {pax} pessoas — defina os valores no bloco Transporte acima.
+                {t('semFaixaTransporte', { pax })}
               </p>
             )}
             {items.length > 0 && (
@@ -828,7 +834,7 @@ function DayBlock({
                     onChange={e => onChangeToggles({ uses_driver: e.target.checked })}
                     className="rounded"
                   />
-                  Usa motorista
+                  {t('usaMotorista')}
                 </label>
                 <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-600">
                   <input
@@ -837,13 +843,13 @@ function DayBlock({
                     onChange={e => onChangeToggles({ uses_rental_car: e.target.checked })}
                     className="rounded"
                   />
-                  Carro alugado
+                  {t('carroAlugado')}
                 </label>
               </div>
             )}
             {overloaded && (
               <p className="text-xs text-amber-600 font-medium mt-1">
-                ⚠️ Mais de {maxHoursPerDay}h neste dia — verifique o programa.
+                {t('maisDeHoras', { horas: maxHoursPerDay })}
               </p>
             )}
           </div>
@@ -853,7 +859,7 @@ function DayBlock({
                 type="time"
                 value={startTime}
                 onChange={e => e.target.value && onChangeStartTime(e.target.value)}
-                title="Início do dia"
+                title={t('inicioDoDia')}
                 className="px-2 py-1 border border-gray-300 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
               <span className="text-xs text-gray-400">–</span>
@@ -861,13 +867,13 @@ function DayBlock({
                 type="time"
                 value={endTime}
                 onChange={e => e.target.value && onChangeEndTime(e.target.value)}
-                title="Fim do dia"
+                title={t('fimDoDiaTitle')}
                 className="px-2 py-1 border border-gray-300 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
             <button
               onClick={onRemoveDay}
-              title="Remover dia"
+              title={t('removerDia')}
               className="p-1.5 text-gray-300 hover:text-red-500 transition-colors rounded"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -880,7 +886,7 @@ function DayBlock({
           onClick={() => setPickerFor('end')}
           className="mt-2 w-full px-3 py-1.5 text-xs font-semibold bg-white border border-dashed border-gray-300 text-gray-500 rounded-lg hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-colors"
         >
-          + Adicionar serviço
+          {t('adicionarServicoBotao')}
         </button>
       </div>
 
@@ -933,6 +939,9 @@ export default function NovaPropostaForm({
   proposalId?: string;
   initialLead?: InitialLead;
 }) {
+  const t = useTranslations('admin.propostas');
+  const tCommon = useTranslations('admin.common');
+  const tTransportes = useTranslations('admin.transportes');
   const router = useRouter();
   const isEditing = !!proposalId;
 
@@ -1002,7 +1011,7 @@ export default function NovaPropostaForm({
   const [internalNotes, setInternalNotes] = useState(
     initialData?.internal_notes
       ?? ((initialLead?.children ?? 0) > 0
-        ? `Grupo com ${initialLead!.children} criança${initialLead!.children !== 1 ? 's' : ''} (não contam no preço).`
+        ? t('grupoComCriancas', { count: initialLead!.children ?? 0 })
         : '')
   );
   const [items, setItems] = useState<EditableItem[]>(initialItems);
@@ -1263,8 +1272,8 @@ export default function NovaPropostaForm({
 
   const handleGoToItinerary = () => {
     setError(null);
-    if (!clientName.trim()) { setError('Nome é obrigatório.'); return; }
-    if (pax < 1) { setError('Mínimo de 1 pessoa.'); return; }
+    if (!clientName.trim()) { setError(tCommon('nomeObrigatorio')); return; }
+    if (pax < 1) { setError(t('minimoUmaPessoa')); return; }
     setStep(2);
     window.scrollTo({ top: 0 });
   };
@@ -1279,9 +1288,9 @@ export default function NovaPropostaForm({
 
   const handleSubmit = async () => {
     setError(null);
-    if (!clientName.trim()) { setError('Nome é obrigatório.'); return; }
-    if (pax < 1) { setError('Mínimo de 1 pessoa.'); return; }
-    if (summaryItems.length === 0) { setError('Adicione ao menos um serviço ao itinerário.'); return; }
+    if (!clientName.trim()) { setError(tCommon('nomeObrigatorio')); return; }
+    if (pax < 1) { setError(t('minimoUmaPessoa')); return; }
+    if (summaryItems.length === 0) { setError(t('adicioneServicoItinerario')); return; }
 
     setSubmitting(true);
     try {
@@ -1391,12 +1400,12 @@ export default function NovaPropostaForm({
       });
 
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? 'Erro ao salvar.'); return; }
+      if (!res.ok) { setError(data.error ?? tCommon('erroSalvar')); return; }
 
       setDirty(false); // salvo: libera a guarda de saída antes de navegar
       router.push(`/admin/propostas/${data.id}/output`);
     } catch {
-      setError('Erro de rede. Tente novamente.');
+      setError(tCommon('erroRede'));
     } finally {
       setSubmitting(false);
     }
@@ -1412,7 +1421,7 @@ export default function NovaPropostaForm({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/admin/propostas" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
-              ← Propostas
+              {t('voltarPropostas')}
             </Link>
             <span className="text-gray-200">/</span>
             {isEditing && (
@@ -1424,7 +1433,7 @@ export default function NovaPropostaForm({
               </>
             )}
             <h1 className="text-2xl font-bold text-gray-900">
-              {isEditing ? 'Editar Proposta' : 'Nova Proposta'}
+              {isEditing ? t('editarProposta') : t('novaPropostaTitulo')}
             </h1>
           </div>
           {singlePage ? (
@@ -1433,14 +1442,14 @@ export default function NovaPropostaForm({
               disabled={submitting || !dirty}
               className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Salvando…' : dirty ? 'Salvar alterações' : 'Salvo'}
+              {submitting ? tCommon('salvando') : dirty ? tCommon('salvarAlteracoes') : tCommon('salvo')}
             </button>
           ) : step === 1 ? (
             <button
               onClick={handleGoToItinerary}
               className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
             >
-              Continuar →
+              {t('continuar')}
             </button>
           ) : (
             <button
@@ -1448,7 +1457,7 @@ export default function NovaPropostaForm({
               disabled={submitting}
               className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Salvando…' : 'Gerar Proposta'}
+              {submitting ? tCommon('salvando') : t('gerarProposta')}
             </button>
           )}
         </div>
@@ -1463,14 +1472,14 @@ export default function NovaPropostaForm({
             <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${step === 1 ? 'bg-green-600 text-white' : 'bg-green-100 text-green-700'}`}>
               {step === 2 ? '✓' : '1'}
             </span>
-            Dados do cliente
+            {t('dadosCliente')}
           </button>
           <div className={`h-px w-10 ${step === 2 ? 'bg-green-300' : 'bg-gray-200'}`} />
           <div className={`flex items-center gap-2 ${step === 2 ? 'text-green-700 font-semibold' : 'text-gray-400'}`}>
             <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${step === 2 ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
               2
             </span>
-            Itinerário
+            {t('itinerario')}
           </div>
         </div>
         )}
@@ -1485,48 +1494,48 @@ export default function NovaPropostaForm({
         {(singlePage || step === 1) && (
         <>
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-base font-bold text-gray-900 mb-5">Dados do Cliente</h2>
+          <h2 className="text-base font-bold text-gray-900 mb-5">{t('dadosCliente')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nome <span className="text-red-500">*</span>
+                {tCommon('nome')} <span className="text-red-500">*</span>
               </label>
               <input type="text" value={clientName} onChange={e => setClientName(e.target.value)} className={INPUT_CLS} placeholder="Martin Müller" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Rótulo interno
-                <span className="ml-1 text-xs font-normal text-gray-400">só você vê — ex.: Plano chuva</span>
+                {t('rotuloInterno')}
+                <span className="ml-1 text-xs font-normal text-gray-400">{t('rotuloInternoHint')}</span>
               </label>
               <input type="text" value={internalLabel} onChange={e => setInternalLabel(e.target.value)} className={INPUT_CLS} placeholder="Plano chuva" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{tCommon('email')}</label>
               <input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} className={INPUT_CLS} placeholder="martin@email.de" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{tCommon('whatsapp')}</label>
               <input type="text" value={clientPhone} onChange={e => setClientPhone(e.target.value)} className={INPUT_CLS} placeholder="+49 170 1234567" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nº de pessoas <span className="text-red-500">*</span>
+                {t('numeroPessoas')} <span className="text-red-500">*</span>
               </label>
               <input type="number" min="1" value={pax} onChange={e => setPax(Math.max(1, parseInt(e.target.value) || 1))} className={INPUT_CLS} placeholder="2" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tratamento <span className="text-red-500">*</span>
+                {t('tratamento')} <span className="text-red-500">*</span>
               </label>
               <select value={treatment} onChange={e => setTreatment(e.target.value as ProposalTreatment)} className={INPUT_CLS}>
-                <option value="Sie">Sie (formal)</option>
-                <option value="du-ihr">du/ihr (informal)</option>
+                <option value="Sie">{t('sieFormal')}</option>
+                <option value="du-ihr">{t('duInformal')}</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Honorário do guia (€/h)
-                <span className="ml-1 text-xs font-normal text-gray-400">padrão: {defaultGuideRate}</span>
+                {t('honorarioGuia')}
+                <span className="ml-1 text-xs font-normal text-gray-400">{t('padrao', { valor: defaultGuideRate })}</span>
               </label>
               <input
                 type="number"
@@ -1542,22 +1551,22 @@ export default function NovaPropostaForm({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Preços na proposta
-                <span className="ml-1 text-xs font-normal text-gray-400">o que o cliente vê</span>
+                {t('precosNaProposta')}
+                <span className="ml-1 text-xs font-normal text-gray-400">{t('oQueClienteVe')}</span>
               </label>
               <select
                 value={priceDisplay}
                 onChange={e => setPriceDisplay(e.target.value as ProposalPriceDisplay)}
                 className={INPUT_CLS}
               >
-                <option value="total">Só o total final</option>
-                <option value="per_day">Total por dia + final</option>
+                <option value="total">{t('soTotalFinal')}</option>
+                <option value="per_day">{t('totalPorDia')}</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Anzahlung (€)
-                <span className="ml-1 text-xs font-normal text-gray-400">vazio = sem sinal</span>
+                {t('sinal')}
+                <span className="ml-1 text-xs font-normal text-gray-400">{t('sinalHint')}</span>
               </label>
               <input
                 type="number"
@@ -1574,8 +1583,8 @@ export default function NovaPropostaForm({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Gültig bis
-                <span className="ml-1 text-xs font-normal text-gray-400">vazio = sem prazo</span>
+                {t('validaAte')}
+                <span className="ml-1 text-xs font-normal text-gray-400">{t('validaAteHint')}</span>
               </label>
               <input
                 type="date"
@@ -1586,10 +1595,10 @@ export default function NovaPropostaForm({
             </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Observações internas{' '}
-                <span className="text-xs font-normal text-gray-400">(apenas visível para você)</span>
+                {t('observacoesInternas')}{' '}
+                <span className="text-xs font-normal text-gray-400">{t('apenasVisivelVoce')}</span>
               </label>
-              <textarea value={internalNotes} onChange={e => setInternalNotes(e.target.value)} rows={3} className={`${INPUT_CLS} resize-none`} placeholder="Notas internas..." />
+              <textarea value={internalNotes} onChange={e => setInternalNotes(e.target.value)} rows={3} className={`${INPUT_CLS} resize-none`} placeholder={t('notasInternas')} />
             </div>
           </div>
         </div>
@@ -1601,7 +1610,7 @@ export default function NovaPropostaForm({
             onClick={handleGoToItinerary}
             className="px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors"
           >
-            Continuar para o itinerário →
+            {t('continuarItinerario')}
           </button>
         </div>
         )}
@@ -1620,16 +1629,16 @@ export default function NovaPropostaForm({
               {internalLabel.trim()}
             </span>
           )}
-          <span>{pax} {pax === 1 ? 'pessoa' : 'pessoas'}</span>
+          <span>{pax} {pax === 1 ? tCommon('pessoa') : tCommon('pessoas')}</span>
           {activeDays.length > 0 && (
-            <span>{activeDays.length} {activeDays.length === 1 ? 'dia' : 'dias'} de tour</span>
+            <span>{activeDays.length} {t('colDiasTour').toLowerCase()}</span>
           )}
-          <span className="text-gray-400">{guideRate} EUR/h · câmbio {exchangeRate}</span>
+          <span className="text-gray-400">{guideRate} EUR/h · {t('cambio', { taxa: exchangeRate })}</span>
           <button
             onClick={handleBackToData}
             className="ml-auto text-xs font-semibold text-green-700 hover:text-green-900 transition-colors"
           >
-            Editar dados
+            {t('editarDados')}
           </button>
         </div>
         )}
@@ -1637,17 +1646,17 @@ export default function NovaPropostaForm({
         {/* ── Transporte da proposta ── */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <h2 className="text-base font-bold text-gray-900">🚗 Transporte</h2>
+            <h2 className="text-base font-bold text-gray-900">{t('transporteTitulo')}</h2>
             <span className="text-xs text-gray-400">
               {transportTier
-                ? `padrão da faixa ${transportRates.tierLabel} — editável só nesta proposta`
-                : `sem faixa para ${pax} pessoas — defina os valores manualmente`}
+                ? t('padraoDaFaixa', { faixa: transportRates.tierLabel ?? '' })
+                : t('semFaixaPara', { pax })}
             </span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Diária do carro ({transportRates.currency === 'EUR' ? '€' : 'R$'})
+                {t('diariaCarroLabel', { moeda: transportRates.currency === 'EUR' ? '€' : 'R$' })}
               </label>
               <input
                 type="number"
@@ -1664,7 +1673,7 @@ export default function NovaPropostaForm({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Motorista ({transportRates.currency === 'EUR' ? '€' : 'R$'}/h)
+                {t('motoristaLabel', { moeda: transportRates.currency === 'EUR' ? '€' : 'R$' })}
               </label>
               <input
                 type="number"
@@ -1685,16 +1694,17 @@ export default function NovaPropostaForm({
               onClick={() => { setCarRateOverride(null); setDriverRateOverride(null); }}
               className="mt-2 text-xs font-semibold text-green-700 hover:text-green-900 transition-colors"
             >
-              ↺ Restaurar padrão da faixa ({transportTier.currency === 'EUR' ? '€' : 'R$'}
-              {transportTier.car_daily_rate} diária + {transportTier.currency === 'EUR' ? '€' : 'R$'}
-              {transportTier.driver_price_per_hour}/h motorista)
+              {t('restaurarPadrao', {
+                diaria: `${transportTier.currency === 'EUR' ? '€' : 'R$'}${transportTier.car_daily_rate}`,
+                hora: `${transportTier.currency === 'EUR' ? '€' : 'R$'}${transportTier.driver_price_per_hour}`,
+              })}
             </button>
           )}
           <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Embutir no honorário
+              {t('embutirHonorario')}
               <span className="ml-2 font-normal normal-case text-gray-400">
-                custo coberto pelo seu honorário — não soma no total do cliente
+                {t('embutirHonorarioHint')}
               </span>
             </p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
@@ -1705,7 +1715,7 @@ export default function NovaPropostaForm({
                   onChange={e => setEmbedCar(e.target.checked)}
                   className="rounded"
                 />
-                Diária do carro
+                {tTransportes('diariaCarro')}
               </label>
               <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-700">
                 <input
@@ -1714,20 +1724,20 @@ export default function NovaPropostaForm({
                   onChange={e => setEmbedDriver(e.target.checked)}
                   className="rounded"
                 />
-                Motorista
+                {t('motorista')}
               </label>
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-base font-bold text-gray-900 mb-5">Itinerário</h2>
+          <h2 className="text-base font-bold text-gray-900 mb-5">{t('itinerario')}</h2>
 
           <div className="space-y-3">
             {activeDays.length === 0 && (
               <div className="flex flex-col items-center justify-center py-10 text-center text-gray-400">
                 <div className="text-3xl mb-3">🗓</div>
-                <p className="text-sm mb-4">Adicione os dias de tour do cliente para montar o itinerário.</p>
+                <p className="text-sm mb-4">{t('adicioneDiasTour')}</p>
               </div>
             )}
 
@@ -1773,13 +1783,13 @@ export default function NovaPropostaForm({
                     disabled={!dayInput}
                     className="px-3 py-2 text-xs font-semibold bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-green-50 hover:border-green-300 hover:text-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Adicionar
+                    {tCommon('adicionar')}
                   </button>
                   <button
                     onClick={() => { setShowDayPicker(false); setDayInput(''); }}
                     className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    Cancelar
+                    {tCommon('cancelar')}
                   </button>
                 </div>
               ) : (
@@ -1787,7 +1797,7 @@ export default function NovaPropostaForm({
                   onClick={() => setShowDayPicker(true)}
                   className="px-4 py-2 text-sm font-semibold border border-dashed border-gray-300 text-gray-500 rounded-lg hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-colors w-full"
                 >
-                  + Adicionar dia
+                  {t('adicionarDia')}
                 </button>
               )}
             </div>
@@ -1797,7 +1807,7 @@ export default function NovaPropostaForm({
         {/* ── Section 3: Price Summary ── */}
         {summaryItems.length > 0 && (
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-base font-bold text-gray-900 mb-4">Resumo de Preços</h2>
+            <h2 className="text-base font-bold text-gray-900 mb-4">{t('resumoPrecos')}</h2>
             <div className="space-y-2">
               {activeDays.flatMap(day => {
                 const dayItems = items.filter(i => i.day === day);
@@ -1809,35 +1819,35 @@ export default function NovaPropostaForm({
                   <div key={item._id} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-gray-400 text-xs shrink-0">
-                        {formatGermanDay(item.day).split(',')[0]}
+                        {formatDayHeader(item.day).split(',')[0]}
                       </span>
                       <span className="text-gray-700 truncate">{item.service_name}</span>
                     </div>
                     <span className="tabular-nums text-gray-700 font-medium ml-4 shrink-0">
-                      {formatEur(dayTotals[idx])}
+                      {fmtEur(dayTotals[idx])}
                     </span>
                   </div>
                 ));
                 if (transport.status === 'ok' && (chargeableEur > 0 || embeddedEur > 0)) {
                   const parts = [
-                    toggles.uses_rental_car && 'diária',
-                    toggles.uses_driver && `${transport.hours}h motorista`,
+                    toggles.uses_rental_car && t('diariaCarro'),
+                    toggles.uses_driver && t('horasMotorista', { horas: transport.hours }),
                   ].filter(Boolean).join(' + ');
                   rows.push(
                     <div key={`${day}-transport`} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-gray-400 text-xs shrink-0">
-                          {formatGermanDay(day).split(',')[0]}
+                          {formatDayHeader(day).split(',')[0]}
                         </span>
                         <span className="text-gray-500 truncate">
-                          🚗 Transporte ({parts})
+                          {t('transporte', { partes: parts })}
                           {embeddedEur > 0 && (
-                            <span className="text-gray-400"> · {formatEur(embeddedEur)} embutido</span>
+                            <span className="text-gray-400"> {t('embutido', { valor: fmtEur(embeddedEur) })}</span>
                           )}
                         </span>
                       </div>
                       <span className="tabular-nums text-gray-700 font-medium ml-4 shrink-0">
-                        {formatEur(chargeableEur)}
+                        {fmtEur(chargeableEur)}
                       </span>
                     </div>,
                   );
@@ -1846,9 +1856,9 @@ export default function NovaPropostaForm({
               })}
             </div>
             <div className="mt-4 pt-4 border-t-2 border-gray-200 flex items-center justify-between">
-              <span className="font-semibold text-gray-600">Valor total</span>
+              <span className="font-semibold text-gray-600">{t('valorTotal')}</span>
               <span className="text-2xl font-bold text-green-600 tabular-nums">
-                {formatEur(grandTotal)}
+                {fmtEur(grandTotal)}
               </span>
             </div>
           </div>
@@ -1861,14 +1871,14 @@ export default function NovaPropostaForm({
             onClick={handleBackToData}
             className="px-4 py-3 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors"
           >
-            ← Voltar aos dados
+            {t('voltarDados')}
           </button>
           <button
             onClick={handleSubmit}
             disabled={submitting}
             className="px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Salvando…' : 'Gerar Proposta →'}
+            {submitting ? tCommon('salvando') : t('gerarPropostaSeta')}
           </button>
         </div>
         )}
@@ -1885,14 +1895,14 @@ export default function NovaPropostaForm({
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-gray-200">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-10 py-3 flex items-center justify-between gap-4">
             <span className={`text-sm ${dirty ? 'text-amber-600 font-medium' : 'text-gray-400'}`}>
-              {dirty ? '● Alterações não salvas' : 'Tudo salvo'}
+              {dirty ? t('alteracoesNaoSalvas') : t('tudoSalvo')}
             </span>
             <button
               onClick={handleSubmit}
               disabled={submitting || !dirty}
               className="px-6 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Salvando…' : 'Salvar alterações'}
+              {submitting ? tCommon('salvando') : tCommon('salvarAlteracoes')}
             </button>
           </div>
         </div>

@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { fmtDateTime } from '@/lib/adminFormat';
 import RegisterContactDialog from './RegisterContactDialog';
 
 export type LeadContact = {
@@ -15,16 +17,6 @@ export type LeadContact = {
   created_at: string;
   created_by: string | null;
 };
-
-function formatDateTime(iso: string) {
-  const d = new Date(iso);
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const yyyy = d.getFullYear();
-  const hh = String(d.getHours()).padStart(2, '0');
-  const min = String(d.getMinutes()).padStart(2, '0');
-  return `${dd}.${mm}.${yyyy} ${hh}:${min}`;
-}
 
 function TypeIcon({ type }: { type: LeadContact['type'] }) {
   if (type === 'whatsapp') {
@@ -71,18 +63,6 @@ function DirectionIcon({ direction }: { direction: 'sent' | 'received' }) {
   );
 }
 
-const TYPE_LABEL: Record<LeadContact['type'], string> = {
-  whatsapp: 'WhatsApp',
-  email: 'Email',
-  phone: 'Telefone',
-  other: 'Outro',
-};
-
-const DIRECTION_LABEL: Record<string, string> = {
-  sent: 'enviado',
-  received: 'recebido',
-};
-
 export default function LeadContactTimeline({
   leadId,
   initialContacts,
@@ -93,6 +73,10 @@ export default function LeadContactTimeline({
   const router = useRouter();
   const [contacts, setContacts] = useState<LeadContact[]>(initialContacts);
   const [showDialog, setShowDialog] = useState(false);
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
+  const tType = useTranslations('admin.status.contactType');
+  const tDirection = useTranslations('admin.status.directionLower');
 
   const handleSaved = useCallback(
     (contact: LeadContact) => {
@@ -107,7 +91,7 @@ export default function LeadContactTimeline({
     <>
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-700">Histórico de Contatos</h2>
+          <h2 className="text-sm font-semibold text-gray-700">{t('historicoContatos')}</h2>
           <button
             onClick={() => setShowDialog(true)}
             className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
@@ -115,14 +99,14 @@ export default function LeadContactTimeline({
             <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
-            Registrar
+            {tCommon('registrar')}
           </button>
         </div>
 
         <div className="px-5 py-4">
           {contacts.length === 0 ? (
             <p className="text-xs text-gray-400 italic text-center py-4">
-              Nenhum contato registrado ainda.
+              {t('nenhumContatoRegistrado')}
             </p>
           ) : (
             <div className="relative">
@@ -151,19 +135,19 @@ export default function LeadContactTimeline({
                           }`}
                         >
                           {contact.is_automatic
-                            ? contact.automatic_label ?? 'Automático'
-                            : `${TYPE_LABEL[contact.type]} ${DIRECTION_LABEL[contact.direction]}`}
+                            ? contact.automatic_label ?? t('automaticoLabel')
+                            : `${tType(contact.type)} ${tDirection(contact.direction)}`}
                         </span>
                         {!contact.is_automatic && (
                           <DirectionIcon direction={contact.direction} />
                         )}
                         {contact.is_automatic && (
-                          <span className="text-xs text-gray-300 italic">automático</span>
+                          <span className="text-xs text-gray-300 italic">{t('automatico')}</span>
                         )}
                       </div>
 
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {formatDateTime(contact.created_at)}
+                        {fmtDateTime(contact.created_at)}
                       </p>
 
                       {contact.note && (

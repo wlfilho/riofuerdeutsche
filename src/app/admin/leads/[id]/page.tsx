@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/utils/supabase/server';
 import LeadHeader from './components/LeadHeader';
 import LeadDataCard from './components/LeadDataCard';
@@ -15,13 +16,18 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const t = await getTranslations('admin.crm');
   const supabase = await createClient();
   const { data } = await supabase
     .from('price_leads')
     .select('name')
     .eq('id', id)
     .single();
-  return { title: data?.name ? `${data.name} — Lead` : 'Lead — Admin' };
+  return {
+    title: data?.name
+      ? t('metaTitleLeadNome', { nome: data.name })
+      : t('metaTitleLead'),
+  };
 }
 
 export default async function LeadDetailPage({

@@ -4,11 +4,12 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 
-type NavChild = { label: string; href: string };
+type NavChild = { labelKey: string; href: string };
 type NavItem = {
-  label: string;
+  labelKey: string;
   href: string;
   icon: string;
   exact?: boolean;
@@ -17,65 +18,65 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-    label: 'Übersicht',
+    labelKey: 'visaoGeral',
     href: '/admin',
     icon: '📊',
     exact: true,
   },
   {
-    label: 'Kontakte',
+    labelKey: 'contatos',
     href: '/admin/contatos',
     icon: '👥',
   },
   {
-    label: 'CRM',
+    labelKey: 'crm',
     href: '/admin/crm',
     icon: '🎯',
   },
   {
-    label: 'Calendário',
+    labelKey: 'calendario',
     href: '/admin/calendario',
     icon: '📅',
   },
   {
-    label: 'Guide-Inhalte',
+    labelKey: 'conteudoGuide',
     href: '/admin/guide',
     icon: '📖',
   },
   {
-    label: 'Bewertungen',
+    labelKey: 'avaliacoes',
     href: '/admin/bewertungen',
     icon: '⭐',
   },
   {
-    label: 'Propostas',
+    labelKey: 'propostas',
     href: '/admin/propostas',
     icon: '📋',
     children: [
-      { label: 'Atividades',  href: '/admin/propostas/atividades' },
-      { label: 'Transportes', href: '/admin/propostas/transportes' },
+      { labelKey: 'atividades',  href: '/admin/propostas/atividades' },
+      { labelKey: 'transportes', href: '/admin/propostas/transportes' },
     ],
   },
   {
-    label: 'E-Mail Templates',
+    labelKey: 'templatesEmail',
     href: '/admin/email-templates',
     icon: '✉️',
   },
   {
-    label: 'Cadastur',
+    labelKey: 'cadastur',
     href: '/admin/cadastur',
     icon: '🧭',
   },
   {
-    label: 'Configurações',
+    labelKey: 'configuracoes',
     href: '/admin/configuracoes',
     icon: '⚙️',
   },
 ];
 
 const footerItems = [
-  { label: 'Zur Website', href: '/', icon: '🌐' },
-  { label: 'Guide-Vorschau', href: '/dashboard', icon: '📗' },
+  { labelKey: 'irParaSite', href: '/', icon: '🌐' },
+  { labelKey: 'previaGuide', href: '/dashboard', icon: '📗' },
 ];
 
 function SidebarNav({
@@ -86,6 +87,7 @@ function SidebarNav({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const t = useTranslations('admin.nav');
 
   const isActive = (item: NavItem) => {
     if (item.exact) return pathname === item.href;
@@ -101,7 +103,7 @@ function SidebarNav({
           <div key={item.href}>
             <Link
               href={item.href}
-              title={collapsed ? item.label : undefined}
+              title={collapsed ? t(item.labelKey) : undefined}
               onClick={onNavigate}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive(item)
@@ -110,7 +112,7 @@ function SidebarNav({
               } ${collapsed ? 'justify-center px-2' : ''}`}
             >
               <span className="flex-shrink-0">{item.icon}</span>
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              {!collapsed && <span className="truncate">{t(item.labelKey)}</span>}
             </Link>
 
             {!collapsed && item.children && item.children.map((child) => (
@@ -125,7 +127,7 @@ function SidebarNav({
                 }`}
               >
                 <span className="text-gray-300">›</span>
-                <span>{child.label}</span>
+                <span>{t(child.labelKey)}</span>
               </Link>
             ))}
           </div>
@@ -138,14 +140,14 @@ function SidebarNav({
           <Link
             key={item.href}
             href={item.href}
-            title={collapsed ? item.label : undefined}
+            title={collapsed ? t(item.labelKey) : undefined}
             onClick={onNavigate}
             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors ${
               collapsed ? 'justify-center px-2' : ''
             }`}
           >
             <span className="flex-shrink-0">{item.icon}</span>
-            {!collapsed && <span className="truncate">{item.label}</span>}
+            {!collapsed && <span className="truncate">{t(item.labelKey)}</span>}
           </Link>
         ))}
       </div>
@@ -155,6 +157,7 @@ function SidebarNav({
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const t = useTranslations('admin.nav');
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -190,7 +193,7 @@ export default function AdminSidebar() {
         <button
           onClick={() => setMobileOpen(true)}
           className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-          aria-label="Menü öffnen"
+          aria-label={t('abrirMenu')}
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -216,7 +219,7 @@ export default function AdminSidebar() {
               <button
                 onClick={() => setMobileOpen(false)}
                 className="p-1.5 rounded-md hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700 flex-shrink-0"
-                aria-label="Menü schließen"
+                aria-label={t('fecharMenu')}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -245,7 +248,7 @@ export default function AdminSidebar() {
             </Link>
           )}
           {collapsed && (
-            <Link href="/admin" title="Admin" className="text-lg leading-none">
+            <Link href="/admin" title={t('admin')} className="text-lg leading-none">
               ⚙️
             </Link>
           )}
@@ -254,7 +257,7 @@ export default function AdminSidebar() {
             className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700 flex-shrink-0 ${
               collapsed ? 'hidden' : ''
             }`}
-            title="Sidebar einklappen"
+            title={t('recolherSidebar')}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -266,7 +269,7 @@ export default function AdminSidebar() {
             <button
               onClick={toggleSidebar}
               className="p-1.5 rounded-md hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700"
-              title="Sidebar ausklappen"
+              title={t('expandirSidebar')}
             >
               <ChevronRight className="w-4 h-4" />
             </button>

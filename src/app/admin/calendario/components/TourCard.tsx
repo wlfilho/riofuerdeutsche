@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   CheckCircle2,
   Clock,
@@ -17,17 +18,19 @@ import {
 } from 'lucide-react';
 import type { TourDate } from '@/lib/tourDates';
 import { WEEKDAY_SHORT_PT, formatTime, parseISODate } from '@/lib/calendarDates';
+import { fmtEur } from '@/lib/adminFormat';
 
 function StatusBadge({ status }: { status: TourDate['status'] }) {
+  const tStatus = useTranslations('admin.status.tourDate');
   return status === 'fechado' ? (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[11px] font-semibold whitespace-nowrap">
       <CheckCircle2 className="w-3 h-3 shrink-0" />
-      Fechado
+      {tStatus('fechado')}
     </span>
   ) : (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[11px] font-semibold whitespace-nowrap">
       <Send className="w-3 h-3 shrink-0" />
-      Proposta enviada
+      {tStatus('proposta_enviada')}
     </span>
   );
 }
@@ -73,6 +76,8 @@ export default function TourCard({
   onEdit: (tour: TourDate) => void;
   onDelete: (tour: TourDate) => void;
 }) {
+  const t = useTranslations('admin.calendario');
+  const tc = useTranslations('admin.common');
   const phone = tour.lead?.phone?.replace(/\D/g, '');
   const email = tour.lead?.email;
   const pdfUrl = tour.lead?.proposal?.pdf_url;
@@ -85,14 +90,14 @@ export default function TourCard({
         <button
           onClick={() => onEdit(tour)}
           className="p-1 rounded-md text-gray-300 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-          title="Editar"
+          title={tc('editar')}
         >
           <Pencil className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={() => onDelete(tour)}
           className="p-1 rounded-md text-gray-300 hover:text-red-600 hover:bg-red-50 transition-colors"
-          title="Remover"
+          title={tc('remover')}
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
@@ -111,7 +116,7 @@ export default function TourCard({
             }`}
           >
             <Clock className="w-3 h-3 shrink-0" />
-            {formatTime(tour.start_time) ?? '—'}
+            {formatTime(tour.start_time) ?? tc('vazio')}
           </span>
         </div>
 
@@ -120,24 +125,24 @@ export default function TourCard({
         {/* Client + contact actions + tour + status */}
         <div className="lg:w-52 xl:w-64 shrink-0 min-w-0">
           <div className="flex items-center gap-0.5 min-w-0">
-            <p className="text-sm font-bold text-gray-900 truncate mr-1">{tour.lead?.name ?? '—'}</p>
+            <p className="text-sm font-bold text-gray-900 truncate mr-1">{tour.lead?.name ?? tc('vazio')}</p>
             {phone && (
               <a
                 href={`https://wa.me/${phone}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                title="WhatsApp"
+                title={tc('whatsapp')}
                 className={INLINE_ACTION_BTN}
               >
                 <MessageCircle className="w-3.5 h-3.5" />
               </a>
             )}
             {email && (
-              <a href={`mailto:${email}`} title="E-mail" className={INLINE_ACTION_BTN}>
+              <a href={`mailto:${email}`} title={tc('email')} className={INLINE_ACTION_BTN}>
                 <Mail className="w-3.5 h-3.5" />
               </a>
             )}
-            <Link href={`/admin/crm?lead=${tour.lead_id}`} title="Ver no CRM" className={INLINE_ACTION_BTN}>
+            <Link href={`/admin/crm?lead=${tour.lead_id}`} title={t('verNoCrm')} className={INLINE_ACTION_BTN}>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
             {pdfUrl && (
@@ -145,7 +150,7 @@ export default function TourCard({
                 href={pdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Proposta em PDF"
+                title={t('propostaPdf')}
                 className={INLINE_ACTION_BTN}
               >
                 <FileText className="w-3.5 h-3.5" />
@@ -160,20 +165,20 @@ export default function TourCard({
 
         {/* Tour details in aligned columns */}
         <div className="flex-1 min-w-0 grid grid-cols-2 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,1.4fr)_minmax(0,1fr)] gap-x-5 gap-y-2.5">
-          <InfoItem icon={Users} label="Pessoas" muted={tour.pax == null}>
-            {tour.pax ?? 'A confirmar'}
+          <InfoItem icon={Users} label={t('pessoasLabel')} muted={tour.pax == null}>
+            {tour.pax ?? t('aConfirmar')}
           </InfoItem>
-          <InfoItem icon={MapPin} label="Encontro" muted={tour.meeting_point == null} wrap>
-            {tour.meeting_point ?? 'A confirmar'}
+          <InfoItem icon={MapPin} label={t('encontro')} muted={tour.meeting_point == null} wrap>
+            {tour.meeting_point ?? t('aConfirmar')}
           </InfoItem>
-          <InfoItem icon={Wallet} label="Valor" muted={tour.agreed_price == null}>
-            {tour.agreed_price != null ? `${tour.agreed_price} €` : 'A definir'}
+          <InfoItem icon={Wallet} label={tc('valor')} muted={tour.agreed_price == null}>
+            {tour.agreed_price != null ? fmtEur(tour.agreed_price) : t('aDefinir')}
             {tour.anzahlung_paid ? (
-              <span title="Anzahlung pago" className="inline-flex ml-1.5 align-middle">
+              <span title={t('sinalPago')} className="inline-flex ml-1.5 align-middle">
                 <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
               </span>
             ) : (
-              <span title="Anzahlung pendente" className="inline-flex ml-1.5 align-middle">
+              <span title={t('sinalPendente')} className="inline-flex ml-1.5 align-middle">
                 <Clock className="w-3.5 h-3.5 text-amber-500" />
               </span>
             )}

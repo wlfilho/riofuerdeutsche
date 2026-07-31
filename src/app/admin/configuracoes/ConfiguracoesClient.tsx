@@ -1,17 +1,20 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { saveSiteSettings, type SiteSettings } from '@/app/actions/site-settings'
 
 type Tab = 'negocio' | 'proposta' | 'email'
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'negocio', label: 'Dados do Negócio' },
-  { id: 'proposta', label: 'Proposal Builder' },
-  { id: 'email', label: 'Assinatura de E-mail' },
+const TAB_KEYS: { id: Tab; labelKey: 'abaNegocio' | 'abaProposta' | 'abaEmail' }[] = [
+  { id: 'negocio', labelKey: 'abaNegocio' },
+  { id: 'proposta', labelKey: 'abaProposta' },
+  { id: 'email', labelKey: 'abaEmail' },
 ]
 
 export default function ConfiguracoesClient({ initial }: { initial: SiteSettings }) {
+  const t = useTranslations('admin.configuracoes')
+  const tCommon = useTranslations('admin.common')
   const [form, setForm] = useState(initial)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<'success' | 'error' | null>(null)
@@ -34,37 +37,37 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
     <>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Configurações</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('titulo')}</h1>
         <div className="flex items-center gap-3">
           {toast === 'success' && (
-            <span className="text-sm text-green-700 font-medium">Configurações salvas ✓</span>
+            <span className="text-sm text-green-700 font-medium">{t('salvas')}</span>
           )}
           {toast === 'error' && (
-            <span className="text-sm text-red-600 font-medium">Erro ao salvar.</span>
+            <span className="text-sm text-red-600 font-medium">{tCommon('erroSalvar')}</span>
           )}
           <button
             onClick={handleSave}
             disabled={saving}
             className="bg-green-700 hover:bg-green-800 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors"
           >
-            {saving ? 'Salvando…' : 'Salvar'}
+            {saving ? tCommon('salvando') : tCommon('salvar')}
           </button>
         </div>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200 mb-6">
-        {TABS.map((t) => (
+        {TAB_KEYS.map((item) => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
+            key={item.id}
+            onClick={() => setTab(item.id)}
             className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
-              tab === t.id
+              tab === item.id
                 ? 'text-green-700 border-b-2 border-green-700 -mb-px bg-white'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            {t.label}
+            {t(item.labelKey)}
           </button>
         ))}
       </div>
@@ -73,15 +76,15 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
       {tab === 'negocio' && (
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <div className="mb-5">
-            <h2 className="text-base font-semibold text-gray-900">Dados do Negócio</h2>
+            <h2 className="text-base font-semibold text-gray-900">{t('dadosNegocio')}</h2>
             <p className="text-sm text-gray-500 mt-0.5">
-              Informações de contato centralizadas — usadas automaticamente em todo o site.
+              {t('dadosNegocioSub')}
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{tCommon('telefone')}</label>
               <input
                 type="tel"
                 placeholder="+55 21 9 9999-9999"
@@ -92,7 +95,7 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{tCommon('whatsapp')}</label>
               <input
                 type="tel"
                 placeholder="+55 21 9 9999-9999"
@@ -103,7 +106,7 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{tCommon('email')}</label>
               <input
                 type="email"
                 placeholder="contato@riofuerdeutsche.de"
@@ -114,7 +117,7 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('instagram')}</label>
               <input
                 type="text"
                 placeholder="@riofuerdeutsche"
@@ -125,7 +128,7 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Facebook</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('facebook')}</label>
               <input
                 type="text"
                 placeholder="facebook.com/riofuerdeutsche"
@@ -136,7 +139,7 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">YouTube</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('youtube')}</label>
               <input
                 type="text"
                 placeholder="youtube.com/@riofuerdeutsche"
@@ -147,7 +150,7 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Telegram</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('telegram')}</label>
               <input
                 type="text"
                 placeholder="@wlfilho"
@@ -158,7 +161,7 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('endereco')}</label>
               <input
                 type="text"
                 placeholder="Rio de Janeiro, RJ, Brasil"
@@ -174,12 +177,12 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
       {/* Tab: Proposal Builder */}
       {tab === 'proposta' && (
         <div className="bg-white border border-gray-200 rounded-xl p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-5">Proposal Builder</h2>
+          <h2 className="text-base font-semibold text-gray-900 mb-5">{t('geradorPropostas')}</h2>
 
           <div className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Honorário padrão (€/hr)
+                {t('honorarioPadrao')}
               </label>
               <input
                 type="number"
@@ -191,13 +194,13 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
                 className="w-48 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               />
               <p className="text-xs text-gray-400 mt-1">
-                Valor cobrado por hora de guia. Usado como padrão ao criar novas propostas — editável por proposta.
+                {t('honorarioHint')}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Taxa de câmbio padrão BRL→EUR
+                {t('taxaCambio')}
               </label>
               <input
                 type="number"
@@ -209,13 +212,13 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
                 className="w-48 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               />
               <p className="text-xs text-gray-400 mt-1">
-                Fallback usado se a API de cotação falhar ao carregar o formulário de proposta.
+                {t('taxaCambioHint')}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Limite de horas por dia
+                {t('limiteHoras')}
               </label>
               <input
                 type="number"
@@ -227,20 +230,19 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
                 className="w-48 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               />
               <p className="text-xs text-gray-400 mt-1">
-                Acima deste valor, aparece o aviso ⚠️ no itinerário da proposta.
+                {t('limiteHorasHint')}
               </p>
             </div>
 
             {/* Dados bancários da Anzahlung */}
             <div className="pt-5 border-t border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-900">Anzahlung — dados bancários</h3>
+              <h3 className="text-sm font-semibold text-gray-900">{t('sinalDadosBancarios')}</h3>
               <p className="text-xs text-gray-400 mt-0.5 mb-4">
-                Exibidos no bloco &quot;Buchung &amp; Anzahlung&quot; da proposta (link e PDF) quando a
-                proposta tem valor de sinal. O valor é definido em cada proposta.
+                {t('sinalDadosHint')}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Kontoinhaber (titular)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('titular')}</label>
                   <input
                     type="text"
                     placeholder="William Lantelme Filho"
@@ -250,7 +252,7 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Banco</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('banco')}</label>
                   <input
                     type="text"
                     placeholder="Revolut"
@@ -260,7 +262,7 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">IBAN</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('iban')}</label>
                   <input
                     type="text"
                     placeholder="LT62 3250 0338 6470 5980"
@@ -270,7 +272,7 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">BIC/SWIFT</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('bicSwift')}</label>
                   <input
                     type="text"
                     placeholder="REVOLT21"
@@ -290,18 +292,16 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h2 className="text-base font-semibold text-gray-900">Assinatura de E-mail</h2>
+              <h2 className="text-base font-semibold text-gray-900">{t('assinaturaEmail')}</h2>
               <p className="text-sm text-gray-500 mt-0.5">
-                Inserida automaticamente via{' '}
-                <code className="bg-gray-100 px-1 rounded text-xs font-mono">{'{{assinatura}}'}</code>{' '}
-                em todos os templates. Aceita HTML.
+                {t('assinaturaHint')}
               </p>
             </div>
             <button
               onClick={() => setShowSignaturePreview(!showSignaturePreview)}
               className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors shrink-0 ml-4"
             >
-              {showSignaturePreview ? 'Editor' : 'Vorschau'}
+              {showSignaturePreview ? t('editor') : t('previa')}
             </button>
           </div>
 

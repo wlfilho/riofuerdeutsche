@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { getProposals } from '@/lib/proposals';
 import { createClient } from '@/utils/supabase/server';
 import PropostasListClient from './PropostasListClient';
@@ -15,32 +16,23 @@ type PendingLead = {
   created_at: string;
 };
 
-const SOURCE_LABELS: Record<string, string> = {
-  calculator: 'Calculadora',
-  email: 'E-Mail',
-  whatsapp: 'WhatsApp',
-  instagram: 'Instagram',
-  referral: 'Indicação',
-  other: 'Outro',
-};
-
-const LEAD_STATUS_LABELS: Record<PendingLead['status'], string> = {
-  new: 'Novo',
-  contacted: 'Em Contato',
-};
-
+// Data curta pro chip do lead: dd/MM, sem ano (o ano cabe no contexto da lista).
 function formatShortDate(iso: string): string {
   const [, m, d] = iso.split('T')[0].split('-');
-  return `${d}.${m}`;
+  return `${d}/${m}`;
 }
 
-function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
+async function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
+  const t = await getTranslations('admin.propostas');
+  const tSource = await getTranslations('admin.status.source');
+  const tLeadStatus = await getTranslations('admin.status.lead');
+
   if (leads.length === 0) return null;
 
   return (
     <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
       <h2 className="text-sm font-bold text-amber-900 mb-3">
-        🔔 Solicitações aguardando proposta ({leads.length})
+        {t('solicitacoesAguardando', { count: leads.length })}
       </h2>
       <div className="space-y-2">
         {leads.map(lead => (
@@ -54,23 +46,26 @@ function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
                 lead.status === 'new' ? 'bg-gray-100 text-gray-700' : 'bg-blue-100 text-blue-700'
               }`}
             >
-              {LEAD_STATUS_LABELS[lead.status]}
+              {tLeadStatus(lead.status)}
             </span>
             <span className="text-gray-600">
               {lead.pax} pax
-              {(lead.children ?? 0) > 0 && ` + ${lead.children} criança${lead.children !== 1 ? 's' : ''}`}
+              {(lead.children ?? 0) > 0 && ` + ${t('criancas', { count: lead.children ?? 0 })}`}
             </span>
             {(lead.requested_days?.length ?? 0) > 0 && (
               <span className="text-gray-500">
                 📅 {(lead.requested_days ?? []).map(formatShortDate).join(' · ')}
               </span>
             )}
-            <span className="text-xs text-gray-400">via {SOURCE_LABELS[lead.source] ?? lead.source}</span>
+            <span className="text-xs text-gray-400">
+              {t('via')}
+              {tSource.has(lead.source) ? tSource(lead.source) : lead.source}
+            </span>
             <Link
               href={`/admin/propostas/nova?lead_id=${lead.id}`}
               className="ml-auto px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shrink-0"
             >
-              Criar proposta →
+              {t('criarProposta')}
             </Link>
           </div>
         ))}
@@ -80,6 +75,7 @@ function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
 }
 
 export default async function PropostasPage() {
+  const t = await getTranslations('admin.propostas');
   const supabase = await createClient();
   const [proposals, { data: pendingLeads }] = await Promise.all([
     getProposals(),
@@ -97,14 +93,14 @@ export default async function PropostasPage() {
     <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Propostas</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
           <div className="flex flex-wrap items-center gap-2">
             <AnfrageLinkButton />
             <Link
               href="/admin/propostas/nova"
               className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
             >
-              + Nova Proposta
+              {t('novaProposta')}
             </Link>
           </div>
         </div>

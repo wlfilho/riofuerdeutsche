@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function NavArrows({
@@ -11,12 +12,13 @@ export default function NavArrows({
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const t = useTranslations('admin.calendario');
   return (
     <div className="flex items-center justify-between mb-4">
       <button
         onClick={onPrev}
         className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors"
-        aria-label="Anterior"
+        aria-label={t('anterior')}
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
@@ -24,7 +26,7 @@ export default function NavArrows({
       <button
         onClick={onNext}
         className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors"
-        aria-label="Próximo"
+        aria-label={t('proximo')}
       >
         <ChevronRight className="w-5 h-5" />
       </button>

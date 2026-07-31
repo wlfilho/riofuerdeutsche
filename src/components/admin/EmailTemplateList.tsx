@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Send, Loader2 } from 'lucide-react'
 import {
   DndContext,
@@ -20,9 +21,19 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { EmailTemplate } from '@/types/email-templates'
 import { updateEmailTemplatesOrder } from '@/app/actions/email-templates'
+import { fmtDateTime } from '@/lib/adminFormat'
 
+// Valores gravados na coluna `category` do banco — o casamento é feito contra
+// eles, sem tradução. Só o rótulo exibido passa pelo catálogo, via `labelKey`.
 const CATEGORIES = ['Reserva', 'Pós-Tour', 'Membros', 'Sistema'] as const
 type Category = typeof CATEGORIES[number]
+
+const CATEGORY_LABEL_KEYS: Record<Category, string> = {
+  'Reserva': 'reserva',
+  'Pós-Tour': 'posTour',
+  'Membros': 'membros',
+  'Sistema': 'sistema',
+}
 
 const CATEGORY_COLORS: Record<Category, { bg: string; text: string; border: string }> = {
   'Reserva':   { bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-200' },
@@ -35,6 +46,8 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: template.id,
   })
+  const t = useTranslations('admin.emailTemplates')
+  const tCommon = useTranslations('admin.common')
   const [sending, setSending] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
@@ -49,13 +62,13 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
       })
       const data = await res.json()
       if (data.success) {
-        setToast('Test-E-Mail gesendet ✓')
+        setToast(t('testeEnviado'))
         setTimeout(() => setToast(null), 3000)
       } else {
-        alert('Fehler: ' + data.error)
+        alert(tCommon('erroPrefixo', { mensagem: data.error }))
       }
     } catch (err: any) {
-      alert('Fehler: ' + err.message)
+      alert(tCommon('erroPrefixo', { mensagem: err.message }))
     } finally {
       setSending(false)
     }
@@ -78,7 +91,7 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
         {...attributes}
         {...listeners}
         className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors shrink-0 select-none"
-        title="Arrastar para reordenar"
+        title={t('arrastarReordenar')}
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
           <circle cx="5" cy="4" r="1.5"/>
@@ -99,13 +112,10 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
           </span>
         </div>
         <p className="text-xs text-gray-500 truncate">
-          <span className="font-medium text-gray-600">Betreff:</span> {template.subject}
+          <span className="font-medium text-gray-600">{t('assuntoPrefixo')}</span> {template.subject}
         </p>
         <p className="text-xs text-gray-400 mt-0.5">
-          Bearbeitet: {new Date(template.updated_at).toLocaleDateString('de-DE', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit',
-          })}
+          {t('editadoPrefixo')}{fmtDateTime(template.updated_at)}
         </p>
       </div>
 
@@ -120,12 +130,12 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
             {sending ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                Wird gesendet…
+                {tCommon('enviando')}
               </>
             ) : (
               <>
                 <Send className="w-3.5 h-3.5" />
-                Test senden
+                {t('enviarTeste')}
               </>
             )}
           </button>
@@ -139,7 +149,7 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
           href={`/admin/email-templates/${template.slug}`}
           className="bg-green-700 hover:bg-green-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
-          Bearbeiten
+          {tCommon('editar')}
         </Link>
       </div>
     </div>
@@ -147,6 +157,8 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
 }
 
 export default function EmailTemplateList({ initialTemplates }: { initialTemplates: EmailTemplate[] }) {
+  const t = useTranslations('admin.emailTemplates')
+  const tCategorias = useTranslations('admin.emailTemplates.categorias')
   const [templates, setTemplates] = useState(initialTemplates)
   const [saving, setSaving] = useState(false)
 
@@ -154,7 +166,7 @@ export default function EmailTemplateList({ initialTemplates }: { initialTemplat
 
   const templatesByCategory = (category: string) =>
     templates
-      .filter((t) => t.category === category)
+      .filter((tpl) => tpl.category === category)
       .sort((a, b) => a.sort_order - b.sort_order)
 
   const handleDragEnd = async (event: DragEndEvent, category: string) => {
@@ -162,20 +174,20 @@ export default function EmailTemplateList({ initialTemplates }: { initialTemplat
     if (!over || active.id === over.id) return
 
     const categoryTemplates = templatesByCategory(category)
-    const oldIndex = categoryTemplates.findIndex((t) => t.id === active.id)
-    const newIndex = categoryTemplates.findIndex((t) => t.id === over.id)
+    const oldIndex = categoryTemplates.findIndex((tpl) => tpl.id === active.id)
+    const newIndex = categoryTemplates.findIndex((tpl) => tpl.id === over.id)
     const reordered = arrayMove(categoryTemplates, oldIndex, newIndex)
 
-    const updatedTemplates = templates.map((t) => {
-      const newPos = reordered.findIndex((r) => r.id === t.id)
-      if (newPos !== -1) return { ...t, sort_order: newPos + 1 }
-      return t
+    const updatedTemplates = templates.map((tpl) => {
+      const newPos = reordered.findIndex((r) => r.id === tpl.id)
+      if (newPos !== -1) return { ...tpl, sort_order: newPos + 1 }
+      return tpl
     })
     setTemplates(updatedTemplates)
 
     setSaving(true)
     await updateEmailTemplatesOrder(
-      reordered.map((t, i) => ({ id: t.id, sort_order: i + 1 }))
+      reordered.map((tpl, i) => ({ id: tpl.id, sort_order: i + 1 }))
     )
     setSaving(false)
   }
@@ -183,22 +195,23 @@ export default function EmailTemplateList({ initialTemplates }: { initialTemplat
   return (
     <div className="space-y-8">
       {saving && (
-        <p className="text-xs text-gray-400 text-right">Reihenfolge wird gespeichert…</p>
+        <p className="text-xs text-gray-400 text-right">{t('salvandoOrdem')}</p>
       )}
 
       {CATEGORIES.map((category) => {
         const items = templatesByCategory(category)
         if (items.length === 0) return null
         const colors = CATEGORY_COLORS[category]
+        const labelKey = CATEGORY_LABEL_KEYS[category]
 
         return (
           <div key={category}>
             {/* Category header */}
             <div className="flex items-center gap-3 mb-3">
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${colors.bg} ${colors.text} ${colors.border}`}>
-                {category}
+                {tCategorias.has(labelKey) ? tCategorias(labelKey) : category}
               </span>
-              <span className="text-xs text-gray-400">{items.length} Template{items.length !== 1 ? 's' : ''}</span>
+              <span className="text-xs text-gray-400">{t('templatesCount', { count: items.length })}</span>
               <div className="flex-1 h-px bg-gray-100" />
             </div>
 

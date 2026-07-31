@@ -1,8 +1,12 @@
+import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/utils/supabase/server';
 import LeadsViewWrapper from './components/LeadsViewWrapper';
 import LeadManualSheet from './components/LeadManualSheet';
 
-export const metadata = { title: 'Leads — Admin' };
+export async function generateMetadata() {
+  const t = await getTranslations('admin.crm');
+  return { title: t('metaTitleLeads') };
+}
 
 export type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'lost';
 export type LeadSource = 'calculator' | 'email' | 'whatsapp' | 'instagram' | 'referral' | 'other';
@@ -32,6 +36,8 @@ export default async function LeadsPage({
   searchParams: Promise<{ status?: string; source?: string; q?: string }>;
 }) {
   const params = await searchParams;
+  const t = await getTranslations('admin.crm');
+  const tc = await getTranslations('admin.common');
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -60,11 +66,11 @@ export default async function LeadsPage({
   }
 
   const metrics = [
-    { label: 'Total', value: total },
-    { label: 'Novos', value: countNew },
-    { label: 'Em Contato', value: countContacted },
-    { label: 'Fechados', value: countClosed },
-    { label: 'Conversão', value: `${conversionRate}%` },
+    { label: tc('total'), value: total },
+    { label: t('novos'), value: countNew },
+    { label: t('emContato'), value: countContacted },
+    { label: t('fechados'), value: countClosed },
+    { label: t('conversao'), value: `${conversionRate}%` },
   ];
 
   return (
@@ -73,8 +79,8 @@ export default async function LeadsPage({
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Leads</h1>
-            <p className="text-gray-500 mt-1">Anfragen da calculadora e contatos diretos</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('leads')}</h1>
+            <p className="text-gray-500 mt-1">{t('subtituloLeads')}</p>
           </div>
           <LeadManualSheet />
         </div>
@@ -92,7 +98,7 @@ export default async function LeadsPage({
         {/* Fetch error */}
         {error && (
           <div className="mb-4 p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200">
-            Erro ao carregar leads: {error.message}
+            {t('erroCarregarLeads')}{error.message}
           </div>
         )}
 

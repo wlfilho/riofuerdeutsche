@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/utils/supabase/server';
 import ContactProfile from '@/components/admin/ContactProfile';
 
@@ -9,13 +10,14 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const t = await getTranslations('admin.contatos');
   const supabase = await createClient();
   const { data } = await supabase
     .from('contacts')
     .select('name, email')
     .eq('id', id)
     .single();
-  return { title: data?.name ?? data?.email ?? 'Kontakt — Admin' };
+  return { title: data?.name ?? data?.email ?? t('metaTitleDetalhe') };
 }
 
 export default async function ContactDetailPage({
@@ -24,6 +26,7 @@ export default async function ContactDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const t = await getTranslations('admin.contatos');
   const supabase = await createClient();
 
   const { data: contact, error } = await supabase
@@ -46,7 +49,7 @@ export default async function ContactDetailPage({
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Zurück zu Kontakten
+          {t('voltarParaContatos')}
         </Link>
       </div>
       <div className="flex-1">

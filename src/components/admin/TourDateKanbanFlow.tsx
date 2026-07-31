@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { TourDate } from '@/lib/tourDates';
-import { TOUR_DATE_STATUS_LABELS } from '@/lib/tourDates';
 import TourDateModal, { leadStatusToTourStatus } from './TourDateModal';
 
 export interface KanbanStatusChange {
@@ -37,6 +37,10 @@ export default function TourDateKanbanFlow({
   change: KanbanStatusChange | null;
   onClose: () => void;
 }) {
+  const t = useTranslations('admin.calendario');
+  const tc = useTranslations('admin.common');
+  const tStatus = useTranslations('admin.status.tourDate');
+  const tLeadStatus = useTranslations('admin.status.lead');
   const [step, setStep] = useState<'sync' | 'delete' | 'offer' | 'modal' | null>(null);
   const [existing, setExisting] = useState<TourDate[]>([]);
   const [busy, setBusy] = useState(false);
@@ -132,13 +136,15 @@ export default function TourDateKanbanFlow({
       <Dialog>
         <p className="text-sm text-gray-800 mb-1 font-semibold">{change.leadName}</p>
         <p className="text-sm text-gray-600 mb-4">
-          Este lead tem {mismatched.length} data{mismatched.length > 1 ? 's' : ''} de tour no calendário.
-          Atualizar o status para <strong>{TOUR_DATE_STATUS_LABELS[target]}</strong> também?
+          {t('atualizarStatusDatas', {
+            count: mismatched.length,
+            status: tStatus(target),
+          })}
         </p>
         <div className="flex justify-end gap-2">
-          <button onClick={() => handleSync(false)} disabled={busy} className={btnSecondary}>Não</button>
+          <button onClick={() => handleSync(false)} disabled={busy} className={btnSecondary}>{tc('nao')}</button>
           <button onClick={() => handleSync(true)} disabled={busy} className={btnPrimary}>
-            {busy ? 'Atualizando...' : 'Sim, atualizar'}
+            {busy ? t('atualizando') : t('simAtualizar')}
           </button>
         </div>
       </Dialog>
@@ -150,17 +156,19 @@ export default function TourDateKanbanFlow({
       <Dialog>
         <p className="text-sm text-gray-800 mb-1 font-semibold">{change.leadName}</p>
         <p className="text-sm text-gray-600 mb-4">
-          Este lead foi marcado como <strong>Perdido</strong>, mas tem {existing.length} data
-          {existing.length > 1 ? 's' : ''} de tour no calendário. Remover essas datas?
+          {t('leadPerdidoDatas', {
+            count: existing.length,
+            status: tLeadStatus('lost'),
+          })}
         </p>
         <div className="flex justify-end gap-2">
-          <button onClick={() => handleDelete(false)} disabled={busy} className={btnSecondary}>Manter</button>
+          <button onClick={() => handleDelete(false)} disabled={busy} className={btnSecondary}>{t('manter')}</button>
           <button
             onClick={() => handleDelete(true)}
             disabled={busy}
             className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
           >
-            {busy ? 'Removendo...' : 'Remover datas'}
+            {busy ? t('removendo') : t('removerDatas')}
           </button>
         </div>
       </Dialog>
@@ -172,12 +180,13 @@ export default function TourDateKanbanFlow({
       <Dialog>
         <p className="text-sm text-gray-800 mb-1 font-semibold">{change.leadName}</p>
         <p className="text-sm text-gray-600 mb-4">
-          Adicionar data de tour ao calendário?
-          {existing.length > 0 && ` (já tem ${existing.length} data${existing.length > 1 ? 's' : ''})`}
+          {existing.length > 0
+            ? t('adicionarDataPergunta', { count: existing.length })
+            : t('adicionarDataCalendario')}
         </p>
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className={btnSecondary}>Agora não</button>
-          <button onClick={() => setStep('modal')} className={btnPrimary}>Adicionar data de tour</button>
+          <button onClick={onClose} className={btnSecondary}>{t('agoraNao')}</button>
+          <button onClick={() => setStep('modal')} className={btnPrimary}>{t('adicionarDataTourBotao')}</button>
         </div>
       </Dialog>
     );

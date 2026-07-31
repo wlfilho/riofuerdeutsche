@@ -1,5 +1,6 @@
 // src/app/admin/page.tsx
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/utils/supabase/server';
 import {
   todayISO,
@@ -8,13 +9,15 @@ import {
   formatTime,
   WEEKDAY_SHORT_PT,
 } from '@/lib/calendarDates';
+import { fmtEur } from '@/lib/adminFormat';
 import type { TourDateStatus } from '@/lib/tourDates';
 import type { LeadStatus } from './crm/page';
 import type { ProposalStatus } from '@/lib/proposals';
 
-export const metadata = {
-  title: 'Admin Dashboard — Rio für Deutsche',
-};
+export async function generateMetadata() {
+  const t = await getTranslations('admin.dashboard');
+  return { title: t('metaTitle') };
+}
 
 interface DashboardTour {
   id: string;
@@ -37,12 +40,6 @@ interface DashboardProposal {
   created_at: string;
 }
 
-const eur = new Intl.NumberFormat('de-DE', {
-  style: 'currency',
-  currency: 'EUR',
-  maximumFractionDigits: 0,
-});
-
 function formatShortDate(iso: string): string {
   const d = parseISODate(iso);
   const dd = String(d.getDate()).padStart(2, '0');
@@ -50,22 +47,26 @@ function formatShortDate(iso: string): string {
   return `${WEEKDAY_SHORT_PT[d.getDay()]}, ${dd}/${mm}`;
 }
 
-const LEAD_STATUS_META: Record<LeadStatus, { label: string; bar: string }> = {
-  new: { label: 'Novos', bar: 'bg-blue-500' },
-  contacted: { label: 'Em contato', bar: 'bg-amber-500' },
-  proposal_sent: { label: 'Proposta enviada', bar: 'bg-purple-500' },
-  closed: { label: 'Fechados', bar: 'bg-green-600' },
-  lost: { label: 'Perdidos', bar: 'bg-gray-400' },
+const LEAD_STATUS_BAR: Record<LeadStatus, string> = {
+  new: 'bg-blue-500',
+  contacted: 'bg-amber-500',
+  proposal_sent: 'bg-purple-500',
+  closed: 'bg-green-600',
+  lost: 'bg-gray-400',
 };
 
-const PROPOSAL_STATUS_META: Record<ProposalStatus, { label: string; badge: string }> = {
-  draft: { label: 'Rascunho', badge: 'bg-gray-100 text-gray-700' },
-  sent: { label: 'Enviada', badge: 'bg-blue-50 text-blue-700' },
-  accepted: { label: 'Aceita', badge: 'bg-green-50 text-green-700' },
-  rejected: { label: 'Recusada', badge: 'bg-red-50 text-red-700' },
+const PROPOSAL_STATUS_BADGE: Record<ProposalStatus, string> = {
+  draft: 'bg-gray-100 text-gray-700',
+  sent: 'bg-blue-50 text-blue-700',
+  accepted: 'bg-green-50 text-green-700',
+  rejected: 'bg-red-50 text-red-700',
 };
 
 export default async function DashboardPage() {
+  const t = await getTranslations('admin.dashboard');
+  const tLeadStatus = await getTranslations('admin.status.leadPlural');
+  const tProposalStatus = await getTranslations('admin.status.proposal');
+  const tTourStatus = await getTranslations('admin.status.tourDateShort');
   const supabase = await createClient();
 
   const today = todayISO();
@@ -101,7 +102,7 @@ export default async function DashboardPage() {
   // — CRM —
   const leads = (leadsRes.data ?? []) as Array<{ status: LeadStatus; created_at: string }>;
   const leadCounts = Object.fromEntries(
-    (Object.keys(LEAD_STATUS_META) as LeadStatus[]).map(s => [
+    (Object.keys(LEAD_STATUS_BAR) as LeadStatus[]).map(s => [
       s,
       leads.filter(l => l.status === s).length,
     ]),
@@ -133,55 +134,55 @@ export default async function DashboardPage() {
   const pendingReviews = reviewsRes.count ?? 0;
 
   const kpis = [
-    { label: 'Leads novos', value: leadCounts.new, href: '/admin/crm' },
-    { label: 'Conversão', value: `${conversion}%`, href: '/admin/crm' },
+    { label: t('leadsNovos'), value: leadCounts.new, href: '/admin/crm' },
+    { label: t('conversao'), value: `${conversion}%`, href: '/admin/crm' },
     {
-      label: 'Propostas aguardando',
+      label: t('propostasAguardando'),
       value: sentProposals.length,
-      sub: sentValue > 0 ? eur.format(sentValue) : undefined,
+      sub: sentValue > 0 ? fmtEur(sentValue) : undefined,
       href: '/admin/propostas',
     },
-    { label: 'Tours futuros fechados', value: upcomingClosed.length, href: '/admin/calendario' },
-    { label: 'Receita do mês', value: eur.format(monthRevenue), href: '/admin/calendario' },
-    { label: 'Receita futura', value: eur.format(futureRevenue), href: '/admin/calendario' },
+    { label: t('toursFuturos'), value: upcomingClosed.length, href: '/admin/calendario' },
+    { label: t('receitaMes'), value: fmtEur(monthRevenue), href: '/admin/calendario' },
+    { label: t('receitaFutura'), value: fmtEur(futureRevenue), href: '/admin/calendario' },
   ];
 
   const pendingActions = [
     leadCounts.new > 0 && {
       href: '/admin/crm',
-      label: `${leadCounts.new} lead${leadCounts.new > 1 ? 's' : ''} sem contato`,
+      label: t('alertaLeadsSemContato', { count: leadCounts.new }),
     },
     draftProposals > 0 && {
       href: '/admin/propostas',
-      label: `${draftProposals} proposta${draftProposals > 1 ? 's' : ''} em rascunho`,
+      label: t('alertaPropostasRascunho', { count: draftProposals }),
     },
     pendingAnzahlung > 0 && {
       href: '/admin/calendario',
-      label: `${pendingAnzahlung} Anzahlung${pendingAnzahlung > 1 ? 'en' : ''} pendente${pendingAnzahlung > 1 ? 's' : ''}`,
+      label: t('alertaSinalPendente', { count: pendingAnzahlung }),
     },
     pendingReviews > 0 && {
       href: '/admin/bewertungen',
-      label: `${pendingReviews} avaliaç${pendingReviews > 1 ? 'ões' : 'ão'} para moderar`,
+      label: t('alertaAvaliacoesModerar', { count: pendingReviews }),
     },
   ].filter(Boolean) as Array<{ href: string; label: string }>;
 
   const platformCards = [
     {
-      label: 'Membros',
+      label: t('membros'),
       value: profiles.length,
-      sub: `${profiles.filter(p => p.role === 'premium').length} premium`,
+      sub: t('premium', { count: profiles.filter(p => p.role === 'premium').length }),
       href: '/admin/users',
     },
     {
-      label: 'Capítulos publicados',
+      label: t('capitulosPublicados'),
       value: chapters.filter(c => c.status === 'published').length,
-      sub: `${chapters.filter(c => c.status === 'draft').length} rascunhos`,
+      sub: t('rascunhos', { count: chapters.filter(c => c.status === 'draft').length }),
       href: '/admin/guide',
     },
     {
-      label: 'Avaliações pendentes',
+      label: t('avaliacoesPendentes'),
       value: pendingReviews,
-      sub: 'moderação',
+      sub: t('moderacao'),
       href: '/admin/bewertungen',
     },
   ];
@@ -190,13 +191,13 @@ export default async function DashboardPage() {
     <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-[1600px]">
         <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 mt-1">Visão geral do negócio e da plataforma</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
+          <p className="text-gray-500 mt-1">{t('subtitulo')}</p>
         </div>
 
         {loadError && (
           <div className="mb-4 p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200">
-            Erro ao carregar dados: {loadError}
+            {t('erroCarregar')}{loadError}
           </div>
         )}
 
@@ -235,13 +236,13 @@ export default async function DashboardPage() {
           {/* Próximos tours */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">Próximos tours</h2>
+              <h2 className="text-lg font-semibold text-gray-800">{t('proximosTours')}</h2>
               <Link href="/admin/calendario" className="text-sm text-green-700 hover:underline">
-                Ver calendário →
+                {t('verCalendario')}
               </Link>
             </div>
             {upcomingTours.length === 0 ? (
-              <p className="text-sm text-gray-400 py-4">Nenhum tour futuro agendado.</p>
+              <p className="text-sm text-gray-400 py-4">{t('nenhumTourFuturo')}</p>
             ) : (
               <ul className="divide-y divide-gray-100">
                 {upcomingTours.slice(0, 6).map(tour => (
@@ -259,9 +260,9 @@ export default async function DashboardPage() {
                         {tour.tour_name}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
-                        {tour.lead?.name ?? 'Sem lead'}
-                        {tour.pax != null && ` · ${tour.pax} pax`}
-                        {tour.agreed_price != null && ` · ${eur.format(tour.agreed_price)}`}
+                        {tour.lead?.name ?? t('semLead')}
+                        {tour.pax != null && t('paxSufixo', { pax: tour.pax })}
+                        {tour.agreed_price != null && ` · ${fmtEur(tour.agreed_price)}`}
                       </p>
                     </div>
                     <span
@@ -271,7 +272,7 @@ export default async function DashboardPage() {
                           : 'bg-amber-50 text-amber-700'
                       }`}
                     >
-                      {tour.status === 'fechado' ? 'FECHADO' : 'PROPOSTA'}
+                      {tTourStatus(tour.status)}
                     </span>
                   </li>
                 ))}
@@ -283,20 +284,20 @@ export default async function DashboardPage() {
             {/* Pipeline CRM */}
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">Pipeline CRM</h2>
+                <h2 className="text-lg font-semibold text-gray-800">{t('pipelineCrm')}</h2>
                 <Link href="/admin/crm" className="text-sm text-green-700 hover:underline">
-                  Abrir CRM →
+                  {t('abrirCrm')}
                 </Link>
               </div>
               <div className="space-y-2.5">
-                {(Object.keys(LEAD_STATUS_META) as LeadStatus[]).map(status => (
+                {(Object.keys(LEAD_STATUS_BAR) as LeadStatus[]).map(status => (
                   <div key={status} className="flex items-center gap-3">
                     <span className="w-32 flex-shrink-0 text-xs text-gray-500">
-                      {LEAD_STATUS_META[status].label}
+                      {tLeadStatus(status)}
                     </span>
                     <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${LEAD_STATUS_META[status].bar}`}
+                        className={`h-full rounded-full ${LEAD_STATUS_BAR[status]}`}
                         style={{ width: `${(leadCounts[status] / maxLeadCount) * 100}%` }}
                       />
                     </div>
@@ -311,13 +312,13 @@ export default async function DashboardPage() {
             {/* Propostas recentes */}
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">Propostas recentes</h2>
+                <h2 className="text-lg font-semibold text-gray-800">{t('propostasRecentes')}</h2>
                 <Link href="/admin/propostas" className="text-sm text-green-700 hover:underline">
-                  Ver propostas →
+                  {t('verPropostas')}
                 </Link>
               </div>
               {recentProposals.length === 0 ? (
-                <p className="text-sm text-gray-400 py-4">Nenhuma proposta criada.</p>
+                <p className="text-sm text-gray-400 py-4">{t('nenhumaProposta')}</p>
               ) : (
                 <ul className="divide-y divide-gray-100">
                   {recentProposals.map(proposal => (
@@ -330,18 +331,19 @@ export default async function DashboardPage() {
                           {proposal.client_name}
                         </Link>
                         <p className="text-xs text-gray-500">
-                          {formatShortDate(proposal.created_at.slice(0, 10))} · {proposal.pax} pax
+                          {formatShortDate(proposal.created_at.slice(0, 10))}
+                          {t('paxSufixo', { pax: proposal.pax })}
                         </p>
                       </div>
                       {proposal.total_amount != null && (
                         <span className="text-sm font-semibold text-gray-900 flex-shrink-0">
-                          {eur.format(proposal.total_amount)}
+                          {fmtEur(proposal.total_amount)}
                         </span>
                       )}
                       <span
-                        className={`flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${PROPOSAL_STATUS_META[proposal.status].badge}`}
+                        className={`flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${PROPOSAL_STATUS_BADGE[proposal.status]}`}
                       >
-                        {PROPOSAL_STATUS_META[proposal.status].label}
+                        {tProposalStatus(proposal.status)}
                       </span>
                     </li>
                   ))}
@@ -352,7 +354,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Plataforma */}
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Plataforma</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('plataforma')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {platformCards.map(card => (
             <Link

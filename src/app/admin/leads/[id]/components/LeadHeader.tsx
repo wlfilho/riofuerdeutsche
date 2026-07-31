@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import StatusBadge from '../../components/StatusBadge';
 import type { Lead } from '../../page';
 
-export default function LeadHeader({ lead }: { lead: Lead }) {
+export default async function LeadHeader({ lead }: { lead: Lead }) {
+  const t = await getTranslations('admin.crm');
   return (
     <div className="flex items-center gap-3 mb-6 flex-wrap">
       <Link
@@ -16,7 +18,7 @@ export default function LeadHeader({ lead }: { lead: Lead }) {
             clipRule="evenodd"
           />
         </svg>
-        Leads
+        {t('leads')}
       </Link>
 
       <span className="text-gray-300">/</span>

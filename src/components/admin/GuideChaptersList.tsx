@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { fmtDateTime } from '@/lib/adminFormat';
 import { 
   ChevronDown, 
   ChevronRight, 
@@ -40,6 +42,9 @@ interface Chapter {
 }
 
 export default function GuideChaptersList() {
+  const t = useTranslations('admin.guide');
+  const tCommon = useTranslations('admin.common');
+  const tUsuarios = useTranslations('admin.usuarios');
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
@@ -88,17 +93,20 @@ export default function GuideChaptersList() {
       if (res.ok) {
         setMessage({
           type: 'success',
-          text: `"${chapter.title}" ist jetzt ${newStatus === 'published' ? 'veröffentlicht' : 'ein Entwurf'}.`,
+          text:
+            newStatus === 'published'
+              ? t('agoraPublicado', { titulo: chapter.title })
+              : t('agoraRascunho', { titulo: chapter.title }),
         });
         fetchChapters();
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Fehler beim Aktualisieren.' });
+      setMessage({ type: 'error', text: t('erroAtualizar') });
     }
   };
 
   const deleteChapter = async (chapter: Chapter) => {
-    if (!confirm(`Bist du sicher, dass du "${chapter.title}" löschen möchtest?`)) {
+    if (!confirm(t('confirmarExcluirCapitulo', { titulo: chapter.title }))) {
       return;
     }
 
@@ -107,11 +115,11 @@ export default function GuideChaptersList() {
         method: 'DELETE',
       });
       if (res.ok) {
-        setMessage({ type: 'success', text: `"${chapter.title}" gelöscht.` });
+        setMessage({ type: 'success', text: t('capituloExcluido', { titulo: chapter.title }) });
         fetchChapters();
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Fehler beim Löschen.' });
+      setMessage({ type: 'error', text: t('erroExcluir') });
     }
   };
 
@@ -153,15 +161,6 @@ export default function GuideChaptersList() {
     }
   };
 
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
   const publishedCount = chapters.filter((c) => c.status === 'published').length;
   const draftCount = chapters.filter((c) => c.status === 'draft').length;
 
@@ -176,22 +175,25 @@ export default function GuideChaptersList() {
                 href="/admin"
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
-                ← Übersicht
+                {t('voltarVisaoGeral')}
               </Link>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              📖 Guide verwalten
+              {t('titulo')}
             </h1>
             <p className="text-gray-500 mt-1">
-              {publishedCount} veröffentlicht · {draftCount} Entwürfe ·{' '}
-              {chapters.length} gesamt
+              {t('resumo', {
+                publicados: publishedCount,
+                rascunhos: draftCount,
+                total: chapters.length,
+              })}
             </p>
           </div>
           <Link
             href="/admin/guide/new"
             className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
           >
-            + Neues Kapitel
+            {t('novoCapitulo')}
           </Link>
         </div>
 
@@ -211,10 +213,10 @@ export default function GuideChaptersList() {
         {/* Chapters List */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-gray-400">Laden...</div>
+            <div className="p-8 text-center text-gray-400">{tCommon('carregando')}</div>
           ) : chapters.length === 0 ? (
             <div className="p-8 text-center text-gray-400">
-              Noch keine Kapitel vorhanden.
+              {t('nenhumCapitulo')}
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
@@ -266,16 +268,18 @@ export default function GuideChaptersList() {
                           </p>
                           {chapter.is_free && (
                             <span className="px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded">
-                              GRATIS
+                              {t('gratis')}
                             </span>
                           )}
                         </div>
                         <p className="text-xs text-gray-400 truncate">
-                          /{chapter.slug} · Ed. {chapter.edition} ·{' '}
+                          /{chapter.slug} ·{' '}
+                          {tUsuarios('edicaoAbrev', { n: chapter.edition })} ·{' '}
                           <span className="text-blue-500 font-medium">
-                            {chapter.page_count} Seiten
+                            {t('paginasCount', { count: chapter.page_count })}
                           </span>{' '}
-                          · Aktualisiert {formatDate(chapter.updated_at)}
+                          · {t('atualizadoEm')}
+                          {fmtDateTime(chapter.updated_at)}
                         </p>
                       </div>
                     </div>
@@ -289,7 +293,7 @@ export default function GuideChaptersList() {
                           : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
                       }`}
                     >
-                      {chapter.status === 'published' ? '● Live' : '○ Entwurf'}
+                      {chapter.status === 'published' ? t('live') : t('rascunhoBadge')}
                     </button>
 
                     {/* Actions */}
@@ -297,21 +301,21 @@ export default function GuideChaptersList() {
                        <Link
                         href={`/admin/guide/${chapter.id}/pages/new`}
                         className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                        title="Neue Seite hinzufügen"
+                        title={t('adicionarPagina')}
                       >
                         <Plus className="w-4 h-4" />
                       </Link>
                       <Link
                         href={`/admin/guide/${chapter.id}/edit`}
                         className="p-1 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
-                        title="Bearbeiten"
+                        title={t('editarCapitulo')}
                       >
                         <Settings className="w-4 h-4" />
                       </Link>
                       <button
                         onClick={() => deleteChapter(chapter)}
                         className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
-                        title="Löschen"
+                        title={t('excluirCapitulo')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -323,9 +327,9 @@ export default function GuideChaptersList() {
                     <div className="bg-gray-50 px-4 py-2 border-t border-gray-100 divide-y divide-gray-200/50">
                       {chapter.pages.length === 0 ? (
                         <div className="py-4 px-12 text-sm text-gray-400">
-                          Keine Seiten in diesem Kapitel. 
+                          {t('nenhumaPagina')}{' '}
                           <Link href={`/admin/guide/${chapter.id}/pages/new`} className="text-blue-500 hover:underline ml-1">
-                            Erste Seite erstellen
+                            {t('criarPrimeiraPagina')}
                           </Link>
                         </div>
                       ) : (
@@ -344,14 +348,14 @@ export default function GuideChaptersList() {
                             <div className={`px-2 py-0.5 text-[9px] font-bold rounded uppercase ${
                               page.status === 'published' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'
                             }`}>
-                              {page.status === 'published' ? 'Live' : 'Entwurf'}
+                              {page.status === 'published' ? t('publicado') : t('rascunho')}
                             </div>
 
                             <div className="flex items-center gap-1 opacity-10 md:opacity-0 group-hover:opacity-100 transition-opacity">
                               <Link
                                 href={`/admin/guide/${chapter.id}/pages/${page.id}/edit`}
                                 className="p-1 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
-                                title="Seite bearbeiten"
+                                title={t('editarPaginaTitle')}
                               >
                                 <Settings className="w-3.5 h-3.5" />
                               </Link>
@@ -359,7 +363,7 @@ export default function GuideChaptersList() {
                                 href={`/guide/${chapter.slug}/${page.slug}`}
                                 target="_blank"
                                 className="p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors"
-                                title="Ansehen"
+                                title={t('visualizar')}
                               >
                                 <ExternalLink className="w-3.5 h-3.5" />
                               </Link>
@@ -374,7 +378,7 @@ export default function GuideChaptersList() {
                           href={`/admin/guide/${chapter.id}/pages`}
                           className="text-xs text-blue-500 hover:text-blue-700 font-medium"
                         >
-                          Alle Seiten dieses Kapitels verwalten →
+                          {t('gerenciarPaginas')}
                         </Link>
                       </div>
                     </div>

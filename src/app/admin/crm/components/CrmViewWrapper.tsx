@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import CrmKanban from './CrmKanban';
 import CrmTable from './CrmTable';
 import LeadDrawer from '@/components/admin/LeadDrawer';
@@ -17,6 +18,7 @@ export default function CrmViewWrapper({ leads: initialLeads }: { leads: CrmLead
   const [view, setView] = useState<View>('kanban');
   const [leads, setLeads] = useState<CrmLead[]>(initialLeads);
   const [selectedLead, setSelectedLead] = useState<CrmLead | null>(null);
+  const t = useTranslations('admin.crm');
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -63,7 +65,7 @@ export default function CrmViewWrapper({ leads: initialLeads }: { leads: CrmLead
               view === 'kanban' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            Kanban
+            {t('kanban')}
           </button>
           <button
             onClick={() => handleViewChange('table')}
@@ -71,7 +73,7 @@ export default function CrmViewWrapper({ leads: initialLeads }: { leads: CrmLead
               view === 'table' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            Tabelle
+            {t('tabela')}
           </button>
         </div>
 

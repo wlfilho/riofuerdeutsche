@@ -1,8 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 import type { TourDate, TourDateStatus } from '@/lib/tourDates';
+import { fmtDate } from '@/lib/adminFormat';
 import TourDateModal, { type TourDateLeadOption } from '@/components/admin/TourDateModal';
 import {
   MONTH_NAMES_PT,
@@ -17,10 +19,10 @@ import {
 import MiniCalendar, { type CalendarView as View } from './MiniCalendar';
 import TourList from './TourList';
 
-const VIEW_OPTIONS: { id: View; label: string }[] = [
-  { id: 'ano', label: 'Ano' },
-  { id: 'mes', label: 'Mês' },
-  { id: 'semana', label: 'Semana' },
+const VIEW_OPTIONS: { id: View; key: 'ano' | 'mes' | 'semana' }[] = [
+  { id: 'ano', key: 'ano' },
+  { id: 'mes', key: 'mes' },
+  { id: 'semana', key: 'semana' },
 ];
 
 export default function CalendarClient({
@@ -30,6 +32,9 @@ export default function CalendarClient({
   initialTours: TourDate[];
   leadOptions: TourDateLeadOption[];
 }) {
+  const t = useTranslations('admin.calendario');
+  const tc = useTranslations('admin.common');
+  const tStatus = useTranslations('admin.status.tourDate');
   const [tours, setTours] = useState<TourDate[]>(initialTours);
   const [view, setView] = useState<View>('mes');
   const [anchorISO, setAnchorISO] = useState<string>(todayISO());
@@ -109,7 +114,7 @@ export default function CalendarClient({
   };
 
   const handleDelete = async (tour: TourDate) => {
-    if (!window.confirm(`Remover "${tour.tour_name}" de ${tour.date.split('-').reverse().join('.')}?`)) return;
+    if (!window.confirm(t('confirmarRemover', { tour: tour.tour_name, data: fmtDate(tour.date) }))) return;
     const res = await fetch(`/api/admin/tour-dates/${tour.id}`, { method: 'DELETE' });
     if (res.ok) {
       setTours(prev => prev.filter(t => t.id !== tour.id));
@@ -143,7 +148,7 @@ export default function CalendarClient({
                   : 'border-transparent text-gray-500 hover:bg-gray-100'
               }`}
             >
-              Todos
+              {tc('todos')}
             </button>
             <button
               onClick={() => setStatusFilter(prev => (prev === 'fechado' ? null : 'fechado'))}
@@ -154,7 +159,7 @@ export default function CalendarClient({
               }`}
             >
               <span className="h-2 w-2 rounded-full bg-green-600" />
-              Fechado
+              {tStatus('fechado')}
             </button>
             <button
               onClick={() => setStatusFilter(prev => (prev === 'proposta_enviada' ? null : 'proposta_enviada'))}
@@ -165,7 +170,7 @@ export default function CalendarClient({
               }`}
             >
               <span className="h-2 w-2 rounded-full bg-amber-400" />
-              Proposta
+              {t('proposta')}
             </button>
           </div>
         </div>
@@ -180,7 +185,7 @@ export default function CalendarClient({
                   view === opt.id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                {opt.label}
+                {t(opt.key)}
               </button>
             ))}
           </div>
@@ -190,7 +195,7 @@ export default function CalendarClient({
           onClick={() => setModal({ defaultDate: selectedDay ?? undefined })}
           className="w-full px-3 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 transition-colors"
         >
-          + Nova data
+          {t('novaData')}
         </button>
       </aside>
 
@@ -200,8 +205,8 @@ export default function CalendarClient({
           <h2 className="text-lg font-bold text-gray-900">{listTitle}</h2>
           <span className="text-sm text-gray-400">
             {listTours.length === 0
-              ? 'Nenhum tour'
-              : `${listTours.length} tour${listTours.length > 1 ? 's' : ''}`}
+              ? t('nenhumTour')
+              : t('toursCount', { count: listTours.length })}
           </span>
           {selectedDay && (
             <button
@@ -209,19 +214,19 @@ export default function CalendarClient({
               className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
             >
               <X className="w-3 h-3" />
-              Limpar filtro
+              {t('limparFiltro')}
             </button>
           )}
         </div>
 
         {listTours.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 p-10 text-center">
-            <p className="text-sm text-gray-400 mb-4">Nenhum tour neste período.</p>
+            <p className="text-sm text-gray-400 mb-4">{t('nenhumTourPeriodo')}</p>
             <button
               onClick={() => setModal({ defaultDate: selectedDay ?? undefined })}
               className="px-3 py-2 text-xs font-semibold text-green-700 border border-green-200 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
             >
-              + Nova data
+              {t('novaData')}
             </button>
           </div>
         ) : (

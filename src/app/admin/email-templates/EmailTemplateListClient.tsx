@@ -2,10 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Send, Loader2 } from 'lucide-react'
 import { EmailTemplate } from '@/types/email-templates'
+import { fmtDateTime } from '@/lib/adminFormat'
 
 export default function EmailTemplateListClient({ templates }: { templates: EmailTemplate[] }) {
+  const t = useTranslations('admin.emailTemplates')
+  const tCommon = useTranslations('admin.common')
   const [sending, setSending] = useState<string | null>(null)
   const [toastMsg, setToastMsg] = useState<{ id: string, msg: string } | null>(null)
 
@@ -20,13 +24,13 @@ export default function EmailTemplateListClient({ templates }: { templates: Emai
       })
       const data = await res.json()
       if (data.success) {
-        setToastMsg({ id: slug, msg: 'Test-E-Mail gesendet ✓' })
+        setToastMsg({ id: slug, msg: t('testeEnviado') })
         setTimeout(() => setToastMsg(null), 3000)
       } else {
-        alert('Fehler: ' + data.error)
+        alert(tCommon('erroPrefixo', { mensagem: data.error }))
       }
     } catch (err: any) {
-      alert('Fehler: ' + err.message)
+      alert(tCommon('erroPrefixo', { mensagem: err.message }))
     } finally {
       setSending(null)
     }
@@ -47,16 +51,10 @@ export default function EmailTemplateListClient({ templates }: { templates: Emai
               </span>
             </div>
             <p className="text-sm text-gray-500">
-              <span className="font-medium text-gray-700">Betreff:</span> {template.subject}
+              <span className="font-medium text-gray-700">{t('assuntoPrefixo')}</span> {template.subject}
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              Zuletzt bearbeitet: {new Date(template.updated_at).toLocaleDateString('de-DE', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
+              {t('editadoEm')}{fmtDateTime(template.updated_at)}
             </p>
           </div>
           <div className="flex items-center gap-3 sm:ml-4 shrink-0">
@@ -69,12 +67,12 @@ export default function EmailTemplateListClient({ templates }: { templates: Emai
                 {sending === template.slug ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Wird gesendet…
+                    {tCommon('enviando')}
                   </>
                 ) : (
                   <>
                     <Send className="w-3.5 h-3.5" />
-                    Test senden
+                    {t('enviarTeste')}
                   </>
                 )}
               </button>
@@ -88,7 +86,7 @@ export default function EmailTemplateListClient({ templates }: { templates: Emai
               href={`/admin/email-templates/${template.slug}`}
               className="bg-green-700 hover:bg-green-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
             >
-              Bearbeiten
+              {tCommon('editar')}
             </Link>
           </div>
         </div>

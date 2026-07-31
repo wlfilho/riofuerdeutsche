@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { registerContact } from '../actions';
 
 type ContactType = 'whatsapp' | 'email' | 'phone' | 'other';
@@ -33,6 +34,10 @@ export default function RegisterContactDialog({ leadId, onClose, onSaved }: Prop
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
+  const tType = useTranslations('admin.status.contactType');
+  const tDirection = useTranslations('admin.status.direction');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +57,7 @@ export default function RegisterContactDialog({ leadId, onClose, onSaved }: Prop
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md">
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
-          <h2 className="text-base font-bold text-gray-900">Registrar Contato</h2>
+          <h2 className="text-base font-bold text-gray-900">{t('registrarContato')}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none"
@@ -66,7 +71,7 @@ export default function RegisterContactDialog({ leadId, onClose, onSaved }: Prop
             {/* Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tipo <span className="text-red-500">*</span>
+                {t('tipo')} <span className="text-red-500">*</span>
               </label>
               <select
                 value={type}
@@ -74,23 +79,23 @@ export default function RegisterContactDialog({ leadId, onClose, onSaved }: Prop
                 disabled={loading}
                 className={INPUT_CLS}
               >
-                <option value="whatsapp">WhatsApp</option>
-                <option value="email">Email</option>
-                <option value="phone">Telefone</option>
-                <option value="other">Outro</option>
+                <option value="whatsapp">{tType('whatsapp')}</option>
+                <option value="email">{tType('email')}</option>
+                <option value="phone">{tType('phone')}</option>
+                <option value="other">{tType('other')}</option>
               </select>
             </div>
 
             {/* Direction */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Direção <span className="text-red-500">*</span>
+                {t('direcao')} <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-3">
                 {(
                   [
-                    { value: 'sent', label: '↑ Enviado', desc: 'você enviou' },
-                    { value: 'received', label: '↓ Recebido', desc: 'você recebeu' },
+                    { value: 'sent', label: `↑ ${tDirection('sent')}`, desc: t('enviadoDesc') },
+                    { value: 'received', label: `↓ ${tDirection('received')}`, desc: t('recebidoDesc') },
                   ] as const
                 ).map(opt => (
                   <label
@@ -121,13 +126,13 @@ export default function RegisterContactDialog({ leadId, onClose, onSaved }: Prop
 
             {/* Note */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nota</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('nota')}</label>
               <textarea
                 value={note}
                 onChange={e => setNote(e.target.value)}
                 rows={3}
                 disabled={loading}
-                placeholder="Descreva brevemente o contato..."
+                placeholder={t('descrevaContato')}
                 className={`${INPUT_CLS} resize-none`}
               />
             </div>
@@ -146,14 +151,14 @@ export default function RegisterContactDialog({ leadId, onClose, onSaved }: Prop
               disabled={loading}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
             >
-              Cancelar
+              {tCommon('cancelar')}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-5 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Registrando...' : 'Registrar'}
+              {loading ? tCommon('registrando') : tCommon('registrar')}
             </button>
           </div>
         </form>
