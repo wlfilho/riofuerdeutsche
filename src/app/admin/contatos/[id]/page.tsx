@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getAdminTranslations } from '@/i18n/admin';
 import { createClient } from '@/utils/supabase/server';
 import ContactProfile from '@/components/admin/ContactProfile';
 
@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const t = await getTranslations('admin.contatos');
+  const t = await getAdminTranslations('admin.contatos');
   const supabase = await createClient();
   const { data } = await supabase
     .from('contacts')
@@ -26,7 +26,7 @@ export default async function ContactDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const t = await getTranslations('admin.contatos');
+  const t = await getAdminTranslations('admin.contatos');
   const supabase = await createClient();
 
   const { data: contact, error } = await supabase

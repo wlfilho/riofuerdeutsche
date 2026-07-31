@@ -7,31 +7,37 @@ import {
   type Locale,
 } from './config';
 
-/**
- * Header a proxy/middleware can set to pin the locale explicitly. Nothing sets
- * it today; see the note below on why pathname detection is not automatic.
- */
+/** Header opcional para fixar o locale explicitamente (proxy/middleware). */
 export const LOCALE_HEADER = 'x-app-locale';
 
 /**
- * Resolving the locale from the request pathname is NOT possible here without
- * middleware support: Next strips `next-url` from document requests, and
- * `getRequestConfig` receives no pathname of its own. Verified empirically on
- * Next 16.1.6 — the only headers that reach this point are host/user-agent/
- * accept/x-forwarded-*.
+ * Resolve locale + mensagens de cada request.
  *
- * Rather than depend on `referer` (absent on direct loads, and pointing at the
- * *previous* page during navigation, which would render admin pages in German),
- * we default to the public locale and let admin surfaces opt in explicitly via
- * `getTranslations({locale: adminLocale})` or the `x-app-locale` header.
+ * CAUSA RAIZ do bug das chaves cruas no admin: este callback ignorava o
+ * parâmetro `requestLocale`. Quando alguém chama `getTranslations({locale})`,
+ * o next-intl reexecuta este config passando o locale pedido em
+ * `requestLocale` — é ASSIM que um locale explícito carrega o catálogo certo.
+ * Sem ler esse parâmetro, o pedido era descartado e as mensagens vinham sempre
+ * do locale detectado do request (no admin sem header: `de`, que é vazio →
+ * MISSING_MESSAGE → next-intl imprime a própria chave).
  *
- * When the admin panel starts consuming translations, the clean fix is to set
- * `x-app-locale` in the middleware/proxy — a one-line change there, at which
- * point this resolves automatically.
+ * A detecção por `x-pathname` (setado no middleware) continua como fallback do
+ * lado público. O admin não depende mais dela: passa o locale explicitamente
+ * via `@/i18n/admin`, o que é determinístico em qualquer runtime — a mutação
+ * `request.headers.set()` no middleware não é confiável no edge da Vercel.
  */
-export default getRequestConfig(async () => {
-  const headerList = await headers();
+export default getRequestConfig(async ({ requestLocale }) => {
+  // 1) locale pedido explicitamente por quem chamou
+  const requested = await requestLocale;
+  if (isLocale(requested)) {
+    return {
+      locale: requested,
+      messages: (await import(`./messages/${requested}.json`)).default,
+    };
+  }
 
+  // 2) senão, detecta a partir do request
+  const headerList = await headers();
   const pinned = headerList.get(LOCALE_HEADER);
   const pathname = headerList.get('x-pathname');
 

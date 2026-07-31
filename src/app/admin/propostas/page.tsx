@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getAdminTranslations } from '@/i18n/admin';
 import { getProposals } from '@/lib/proposals';
 import { createClient } from '@/utils/supabase/server';
 import PropostasListClient from './PropostasListClient';
@@ -23,9 +23,9 @@ function formatShortDate(iso: string): string {
 }
 
 async function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
-  const t = await getTranslations('admin.propostas');
-  const tSource = await getTranslations('admin.status.source');
-  const tLeadStatus = await getTranslations('admin.status.lead');
+  const t = await getAdminTranslations('admin.propostas');
+  const tSource = await getAdminTranslations('admin.status.source');
+  const tLeadStatus = await getAdminTranslations('admin.status.lead');
 
   if (leads.length === 0) return null;
 
@@ -75,7 +75,7 @@ async function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
 }
 
 export default async function PropostasPage() {
-  const t = await getTranslations('admin.propostas');
+  const t = await getAdminTranslations('admin.propostas');
   const supabase = await createClient();
   const [proposals, { data: pendingLeads }] = await Promise.all([
     getProposals(),

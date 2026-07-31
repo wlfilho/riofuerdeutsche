@@ -1,10 +1,10 @@
-import { getTranslations } from 'next-intl/server';
+import { getAdminTranslations } from '@/i18n/admin';
 import { createClient } from '@/utils/supabase/server';
 import LeadsViewWrapper from './components/LeadsViewWrapper';
 import LeadManualSheet from './components/LeadManualSheet';
 
 export async function generateMetadata() {
-  const t = await getTranslations('admin.crm');
+  const t = await getAdminTranslations('admin.crm');
   return { title: t('metaTitleLeads') };
 }
 
@@ -36,8 +36,8 @@ export default async function LeadsPage({
   searchParams: Promise<{ status?: string; source?: string; q?: string }>;
 }) {
   const params = await searchParams;
-  const t = await getTranslations('admin.crm');
-  const tc = await getTranslations('admin.common');
+  const t = await getAdminTranslations('admin.crm');
+  const tc = await getAdminTranslations('admin.common');
   const supabase = await createClient();
 
   const { data, error } = await supabase

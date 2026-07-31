@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { getAdminTranslations } from '@/i18n/admin';
 import { fmtEur } from '@/lib/adminFormat';
 
 type Activity = {
@@ -16,7 +16,7 @@ function formatDuration(minutes: number): string {
 }
 
 export default async function LeadActivities({ activities }: { activities: unknown }) {
-  const t = await getTranslations('admin.crm');
+  const t = await getAdminTranslations('admin.crm');
   const items: Activity[] = Array.isArray(activities)
     ? (activities as Activity[]).filter(
         a => a && typeof a === 'object' && 'name' in a

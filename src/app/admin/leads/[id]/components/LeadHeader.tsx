@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getAdminTranslations } from '@/i18n/admin';
 import StatusBadge from '../../components/StatusBadge';
 import type { Lead } from '../../page';
 
 export default async function LeadHeader({ lead }: { lead: Lead }) {
-  const t = await getTranslations('admin.crm');
+  const t = await getAdminTranslations('admin.crm');
   return (
     <div className="flex items-center gap-3 mb-6 flex-wrap">
       <Link

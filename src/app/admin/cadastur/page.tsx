@@ -1,10 +1,10 @@
-import { getTranslations } from 'next-intl/server';
+import { getAdminTranslations } from '@/i18n/admin';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { fmtNumber } from '@/lib/adminFormat';
 
 export async function generateMetadata() {
-  const t = await getTranslations('admin.cadastur');
+  const t = await getAdminTranslations('admin.cadastur');
   return { title: t('metaTitle') };
 }
 
@@ -94,9 +94,9 @@ export default async function CadasturPage({
 }: {
   searchParams: Promise<{ q?: string; categoria?: string; uf?: string; municipio?: string; idioma?: string; page?: string }>;
 }) {
-  const t = await getTranslations('admin.cadastur');
-  const tCategorias = await getTranslations('admin.cadastur.categorias');
-  const tCommon = await getTranslations('admin.common');
+  const t = await getAdminTranslations('admin.cadastur');
+  const tCategorias = await getAdminTranslations('admin.cadastur.categorias');
+  const tCommon = await getAdminTranslations('admin.common');
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1);
   // Caracteres com significado na sintaxe .or() do PostgREST

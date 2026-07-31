@@ -1,6 +1,6 @@
 // src/app/admin/page.tsx
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getAdminTranslations } from '@/i18n/admin';
 import { createClient } from '@/utils/supabase/server';
 import {
   todayISO,
@@ -15,7 +15,7 @@ import type { LeadStatus } from './crm/page';
 import type { ProposalStatus } from '@/lib/proposals';
 
 export async function generateMetadata() {
-  const t = await getTranslations('admin.dashboard');
+  const t = await getAdminTranslations('admin.dashboard');
   return { title: t('metaTitle') };
 }
 
@@ -63,10 +63,10 @@ const PROPOSAL_STATUS_BADGE: Record<ProposalStatus, string> = {
 };
 
 export default async function DashboardPage() {
-  const t = await getTranslations('admin.dashboard');
-  const tLeadStatus = await getTranslations('admin.status.leadPlural');
-  const tProposalStatus = await getTranslations('admin.status.proposal');
-  const tTourStatus = await getTranslations('admin.status.tourDateShort');
+  const t = await getAdminTranslations('admin.dashboard');
+  const tLeadStatus = await getAdminTranslations('admin.status.leadPlural');
+  const tProposalStatus = await getAdminTranslations('admin.status.proposal');
+  const tTourStatus = await getAdminTranslations('admin.status.tourDateShort');
   const supabase = await createClient();
 
   const today = todayISO();

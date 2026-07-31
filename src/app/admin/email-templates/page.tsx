@@ -1,11 +1,11 @@
-import { getTranslations } from 'next-intl/server'
+import { getAdminTranslations } from '@/i18n/admin'
 import { getEmailTemplates } from '@/app/actions/email-templates'
 import { getEmailSignature } from '@/app/actions/email-signature'
 import EmailTemplateList from '@/components/admin/EmailTemplateList'
 import EmailSignatureEditor from '@/components/admin/EmailSignatureEditor'
 
 export default async function EmailTemplatesPage() {
-  const t = await getTranslations('admin.emailTemplates')
+  const t = await getAdminTranslations('admin.emailTemplates')
   const [templates, signature] = await Promise.all([
     getEmailTemplates(),
     getEmailSignature(),

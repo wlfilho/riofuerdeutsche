@@ -1,11 +1,11 @@
-import { getTranslations } from 'next-intl/server';
+import { getAdminTranslations } from '@/i18n/admin';
 import { createClient } from '@/utils/supabase/server';
 import CalendarClient from './components/CalendarClient';
 import { type TourDate } from '@/lib/tourDates';
 import type { TourDateLeadOption } from '@/components/admin/TourDateModal';
 
 export async function generateMetadata() {
-  const t = await getTranslations('admin.calendario');
+  const t = await getAdminTranslations('admin.calendario');
   return { title: t('metaTitle') };
 }
 
@@ -15,7 +15,7 @@ const CALENDAR_TOUR_SELECT =
   '*, lead:price_leads!inner(id, name, email, phone, status, proposal:proposals(id, pdf_url))';
 
 export default async function CalendarioPage() {
-  const t = await getTranslations('admin.calendario');
+  const t = await getAdminTranslations('admin.calendario');
   const supabase = await createClient();
 
   const [toursResult, leadsResult] = await Promise.all([
