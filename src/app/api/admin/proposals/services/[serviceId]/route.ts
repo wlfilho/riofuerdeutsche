@@ -1,5 +1,10 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import {
+  getSupportedLocales,
+  saveServiceTranslations,
+  type TranslationsPayload,
+} from '@/lib/services-i18n';
 
 type CostPayload = {
   description: string;
@@ -32,7 +37,26 @@ export async function PATCH(
 
   if ('costs' in body) {
     // Full update: replace service fields + delete/recreate costs
-    const { costs, ...serviceFields } = body;
+    const { costs, translations, ...serviceFields } = body;
+
+    // Colunas deprecated: nunca mais escritas, mesmo que cheguem no payload.
+    delete serviceFields.name;
+    delete serviceFields.description;
+    delete serviceFields.pdf_note;
+
+    const supportedLocales = await getSupportedLocales();
+
+    // proposal_services.name é NOT NULL. Mantemos a cópia sincronizada com o
+    // locale padrão só para a constraint continuar satisfeita — ninguém lê dela.
+    if (translations) {
+      const defaultLocale = supportedLocales[0];
+      const canonicalName =
+        (translations as TranslationsPayload)[defaultLocale]?.name?.trim() ||
+        supportedLocales
+          .map((l) => (translations as TranslationsPayload)[l]?.name?.trim())
+          .find(Boolean);
+      if (canonicalName) serviceFields.name = canonicalName;
+    }
 
     const { error: updateErr } = await supabase
       .from('proposal_services')
@@ -40,6 +64,13 @@ export async function PATCH(
       .eq('id', serviceId);
 
     if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
+
+    if (translations) {
+      const trErr = await saveServiceTranslations(
+        supabase, serviceId, translations as TranslationsPayload, supportedLocales,
+      );
+      if (trErr) return NextResponse.json({ error: trErr }, { status: 500 });
+    }
 
     const { error: deleteErr } = await supabase
       .from('proposal_service_costs')
@@ -66,12 +97,28 @@ export async function PATCH(
     }
   } else {
     // Partial update (toggle is_active, etc.)
-    const { error } = await supabase
-      .from('proposal_services')
-      .update({ ...body, updated_at: new Date().toISOString() })
-      .eq('id', serviceId);
+    const { translations, ...fields } = body;
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    // Colunas deprecated: o texto só vive em proposal_service_translations.
+    delete fields.name;
+    delete fields.description;
+    delete fields.pdf_note;
+
+    if (Object.keys(fields).length > 0) {
+      const { error } = await supabase
+        .from('proposal_services')
+        .update({ ...fields, updated_at: new Date().toISOString() })
+        .eq('id', serviceId);
+
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (translations) {
+      const trErr = await saveServiceTranslations(
+        supabase, serviceId, translations as TranslationsPayload, await getSupportedLocales(),
+      );
+      if (trErr) return NextResponse.json({ error: trErr }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ success: true });

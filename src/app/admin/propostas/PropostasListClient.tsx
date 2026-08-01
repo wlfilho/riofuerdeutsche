@@ -48,9 +48,14 @@ function buildWhatsAppText(p: Proposal): string {
   lines.push(`👥 Personen: ${p.pax}`);
   lines.push('');
 
-  if (p.items.length > 0) {
+  // Linhas 'day_transport' são contabilidade interna (carro/motorista do dia):
+  // ficam fora do que o cliente lê, igual à página pública e ao PDF. Elas nunca
+  // deveriam ter aparecido aqui — o service_name delas hoje é um identificador
+  // sem idioma, não um texto para o cliente.
+  const activities = p.items.filter(i => i.kind !== 'day_transport');
+  if (activities.length > 0) {
     lines.push('🗓 Ihr Programm:');
-    for (const item of p.items) {
+    for (const item of activities) {
       const date = formatDate(item.day);
       const price = `€${item.total_eur.toFixed(2).replace('.', ',')}`;
       lines.push(`• ${date} – ${item.service_name} (${price})`);

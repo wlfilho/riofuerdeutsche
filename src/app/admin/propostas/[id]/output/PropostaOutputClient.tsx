@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
+import { resolveDayTransportKey } from '@/lib/dayTransportLabel';
 import type { DepositBankInfo, Proposal, ProposalStatus } from '@/lib/proposals';
 
 // ─── Format helpers ────────────────────────────────────────────────────────────
@@ -567,6 +568,19 @@ export default function PropostaOutputClient({
 
   const whatsappText = useMemo(() => generateWhatsAppText(initial), [initial]);
 
+  // A tabela de itinerário desta tela é do admin (o cliente vê /angebot e o
+  // PDF). Linhas 'day_transport' guardam um identificador sem idioma, então o
+  // rótulo é traduzido aqui — aceitando também os literais alemães das
+  // propostas gravadas antes dessa mudança.
+  const itemLabel = useCallback(
+    (item: Proposal['items'][number]): string => {
+      if (item.kind !== 'day_transport') return item.service_name;
+      const key = resolveDayTransportKey(item.service_name);
+      return key ? t(`transporteDia.${key}`) : item.service_name;
+    },
+    [t],
+  );
+
   const shownItems = useMemo(() => visibleItems(initial.items), [initial.items]);
 
   const sortedDays = useMemo(
@@ -817,7 +831,7 @@ export default function PropostaOutputClient({
                     {dayItems.map((item, idx) => (
                       <tr key={`${day}-${idx}`} className="border-t border-gray-50 hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-3">
-                          <span className="text-gray-800 font-medium">{item.service_name}</span>
+                          <span className="text-gray-800 font-medium">{itemLabel(item)}</span>
                           {item.note && (
                             <span className="block text-xs text-gray-400 mt-0.5">{item.note}</span>
                           )}
