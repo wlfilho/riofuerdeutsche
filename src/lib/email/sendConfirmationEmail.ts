@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { sendTemplatedEmail } from './sendTemplatedEmail'
+import { formatDate as formatDateDe, formatEuro } from '@/lib/email-templates/utils'
 
 function formatTourDetails(raw: string): string {
   if (!raw) return ''
@@ -10,14 +11,13 @@ function formatTourDetails(raw: string): string {
 
 function formatDate(dateStr: string): string {
   if (!dateStr) return ''
-  const [year, month, day] = dateStr.split('-')
-  if (!day) return dateStr
-  return `${day}.${month}.${year}`
+  // Preserva o fallback anterior: data malformada volta como veio, em vez de
+  // sumir do e-mail (formatDate do format.ts devolve '' nesse caso).
+  return formatDateDe(dateStr) || dateStr
 }
 
 function formatCurrency(value: number | null): string {
-  if (!value) return '0,00 €'
-  return value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+  return formatEuro(value)
 }
 
 export async function sendConfirmationEmail(clientId: string) {

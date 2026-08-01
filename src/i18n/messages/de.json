@@ -458,7 +458,9 @@
         "rioGuide": "Rio-Guide",
         "kontakt": "Kontakt"
       },
-      "hallo": "Hallo, {name}!"
+      "hallo": "Hallo, {name}!",
+      "contentRenderError": "Der Inhalt konnte nicht geladen werden.",
+      "contentUnavailable": "Der Inhalt ist derzeit nicht verfügbar."
     }
   }
 }

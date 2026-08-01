@@ -14,12 +14,16 @@ import Link from '@tiptap/extension-link'
 import Highlight from '@tiptap/extension-highlight'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
+import { useTranslations } from 'next-intl'
 
 interface GuideContentProps {
   content: any // JSON do TipTap
 }
 
 export default function GuideContent({ content }: GuideContentProps) {
+  // Hook antes de qualquer early return (Rules of Hooks).
+  const t = useTranslations('public.dashboard')
+
   if (!content) return null
 
   // Se o conteúdo for string, tenta fazer o parse caso seja um JSON stringificado
@@ -63,7 +67,7 @@ export default function GuideContent({ content }: GuideContentProps) {
       ])
     } catch (e) {
       console.error('Error generating HTML from TipTap JSON:', e)
-      return <p className="text-red-500">Erro ao renderizar conteúdo.</p>
+      return <p className="text-red-500">{t('contentRenderError')}</p>
     }
   }
 
