@@ -22,11 +22,25 @@ type CostDraft = {
   include_in_price: boolean;
 };
 
-type FormState = {
+// Texto traduzível de um serviço, por idioma. É o que vai para
+// proposal_service_translations — as colunas antigas de proposal_services
+// (name/description/pdf_note) estão deprecated e não são mais escritas.
+type LocaleText = {
   name: string;
-  category: ProposalServiceCategory | '';
   description: string;
   pdf_note: string;
+};
+
+const EMPTY_LOCALE_TEXT: LocaleText = { name: '', description: '', pdf_note: '' };
+
+// Serviço como vem da API: além das colunas, o mapa locale → texto.
+type ServiceWithTranslations = ProposalService & {
+  translations?: Record<string, Partial<LocaleText> | undefined>;
+};
+
+// Campos NÃO traduzíveis. O texto por idioma vive em `texts`, à parte.
+type FormState = {
+  category: ProposalServiceCategory | '';
   notes: string;
   is_active: boolean;
   duration_hours: string;
@@ -37,10 +51,15 @@ type FormState = {
 };
 
 const EMPTY_FORM: FormState = {
-  name: '', category: '', description: '', pdf_note: '', notes: '',
+  category: '', notes: '',
   is_active: true, duration_hours: '', transfer_hours_to: '',
   transfer_hours_back: '', suggested_period: '', transport_type_id: '',
 };
+
+// Rótulo curto da aba/badge: 'pt-BR' → 'PT'.
+function localeLabel(locale: string): string {
+  return locale.split('-')[0].toUpperCase();
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -96,6 +115,38 @@ function CategoryBadge({ category }: { category: ProposalServiceCategory }) {
     <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${cls}`}>
       {tCat.has(category) ? tCat(category) : category}
     </span>
+  );
+}
+
+// ─── CoverageBadges ───────────────────────────────────────────────────────────
+
+// "DE ✓ PT —": um locale conta como traduzido quando existe linha com name
+// não-vazio em proposal_service_translations.
+function CoverageBadges({
+  locales,
+  translations,
+}: {
+  locales: string[];
+  translations: Record<string, Partial<LocaleText> | undefined> | undefined;
+}) {
+  const t = useTranslations('admin.atividades');
+  return (
+    <div className="flex items-center gap-1.5">
+      {locales.map(locale => {
+        const done = Boolean(translations?.[locale]?.name?.trim());
+        return (
+          <span
+            key={locale}
+            title={done ? t('idiomaTraduzido', { idioma: locale }) : t('idiomaFaltando', { idioma: locale })}
+            className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[11px] font-semibold rounded ${
+              done ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-400'
+            }`}
+          >
+            {localeLabel(locale)} {done ? '✓' : '—'}
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
@@ -176,11 +227,13 @@ function CostRow({
 function ActivityModal({
   service,
   transportTypes,
+  locales,
   onClose,
   onSaved,
 }: {
-  service: ProposalService | null; // null = create mode
+  service: ServiceWithTranslations | null; // null = create mode
   transportTypes: ProposalTransportType[];
+  locales: string[];
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -189,10 +242,7 @@ function ActivityModal({
   const [form, setForm] = useState<FormState>(() => {
     if (!service) return EMPTY_FORM;
     return {
-      name: service.name,
       category: service.category,
-      description: service.description ?? '',
-      pdf_note: service.pdf_note ?? '',
       notes: service.notes ?? '',
       is_active: service.is_active,
       duration_hours: hoursToTime(service.duration_hours),
@@ -202,6 +252,30 @@ function ActivityModal({
       transport_type_id: service.transport_type_id ?? '',
     };
   });
+
+  // Um rascunho por idioma suportado; a aba só troca qual deles está à vista.
+  const [texts, setTexts] = useState<Record<string, LocaleText>>(() => {
+    const out: Record<string, LocaleText> = {};
+    for (const locale of locales) {
+      const tr = service?.translations?.[locale];
+      out[locale] = {
+        name: tr?.name ?? '',
+        description: tr?.description ?? '',
+        pdf_note: tr?.pdf_note ?? '',
+      };
+    }
+    return out;
+  });
+
+  const [activeLocale, setActiveLocale] = useState(() => locales[0] ?? 'de');
+  const activeText = texts[activeLocale] ?? EMPTY_LOCALE_TEXT;
+
+  const setText = (field: keyof LocaleText) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setTexts(prev => ({
+        ...prev,
+        [activeLocale]: { ...(prev[activeLocale] ?? EMPTY_LOCALE_TEXT), [field]: e.target.value },
+      }));
 
   const [costs, setCosts] = useState<CostDraft[]>(() =>
     (service?.costs ?? []).map(c => ({
@@ -252,16 +326,31 @@ function ActivityModal({
 
   const handleSave = async () => {
     setError(null);
-    if (!form.name.trim()) { setError(t('tituloObrigatorio')); return; }
+
+    // Pelo menos um idioma precisa de título — o resto o guia preenche depois.
+    // Nada é traduzido automaticamente: idioma em branco fica em branco.
+    const primaryLocale = locales[0];
+    if (!texts[primaryLocale]?.name.trim()) {
+      setError(t('tituloObrigatorioIdioma', { idioma: localeLabel(primaryLocale) }));
+      return;
+    }
     if (!form.category) { setError(t('categoriaObrigatoria')); return; }
 
     setSaving(true);
     try {
+      const translations: Record<string, LocaleText> = {};
+      for (const locale of locales) {
+        const txt = texts[locale] ?? EMPTY_LOCALE_TEXT;
+        translations[locale] = {
+          name: txt.name.trim(),
+          description: txt.description.trim(),
+          pdf_note: txt.pdf_note.trim(),
+        };
+      }
+
       const payload = {
-        name: form.name.trim(),
+        translations,
         category: form.category,
-        description: form.description.trim() || null,
-        pdf_note: form.pdf_note.trim() || null,
         notes: form.notes.trim() || null,
         is_active: form.is_active,
         duration_hours: timeToHours(form.duration_hours),
@@ -322,25 +411,17 @@ function ActivityModal({
             </h3>
             <div className="space-y-4">
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('tituloCampo')} <span className="text-red-500">*</span>
-                  </label>
-                  <input type="text" value={form.name} onChange={set('name')} className={INPUT_CLS} placeholder={t('tituloPlaceholder')} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('categoria')} <span className="text-red-500">*</span>
-                  </label>
-                  <select value={form.category} onChange={set('category')} className={INPUT_CLS}>
-                    <option value="">{t('selecionar')}</option>
-                    <option value="tour">{t('categorias.tour')}</option>
-                    <option value="transfer">{t('categorias.transfer')}</option>
-                    <option value="atração">{t('categorias.atração')}</option>
-                    <option value="extra">{t('categorias.extra')}</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('categoria')} <span className="text-red-500">*</span>
+                </label>
+                <select value={form.category} onChange={set('category')} className={INPUT_CLS}>
+                  <option value="">{t('selecionar')}</option>
+                  <option value="tour">{t('categorias.tour')}</option>
+                  <option value="transfer">{t('categorias.transfer')}</option>
+                  <option value="atração">{t('categorias.atração')}</option>
+                  <option value="extra">{t('categorias.extra')}</option>
+                </select>
               </div>
 
               <div>
@@ -357,18 +438,7 @@ function ActivityModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('descricaoCurta')}</label>
-                <textarea value={form.description} onChange={set('description')} rows={2} className={`${INPUT_CLS} resize-none`} placeholder={t('descricaoCurtaPlaceholder')} />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('notaFixaPdf')}</label>
-                <textarea value={form.pdf_note} onChange={set('pdf_note')} rows={2} className={`${INPUT_CLS} resize-none`} placeholder={t('notaFixaPlaceholder')} />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('observacaoInterna')}{' '}
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('observacaoInterna')}{' '}
                   <span className="text-xs font-normal text-gray-400">{t('naoApareceNoPdf')}</span>
                 </label>
                 <textarea value={form.notes} onChange={set('notes')} rows={2} className={`${INPUT_CLS} resize-none`} />
@@ -387,7 +457,77 @@ function ActivityModal({
             </div>
           </div>
 
-          {/* ── Section 2: Tempo */}
+          {/* ── Section 2: Textos por idioma */}
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                {t('textosPorIdioma')}
+              </h3>
+              {/* Abas de idioma: trocam qual rascunho está à vista. Cada idioma
+                  é salvo separado — nada é traduzido automaticamente. */}
+              <div className="flex items-center gap-1 p-0.5 bg-gray-100 rounded-lg">
+                {locales.map(locale => {
+                  const isActive = locale === activeLocale;
+                  const filled = Boolean(texts[locale]?.name.trim());
+                  return (
+                    <button
+                      key={locale}
+                      type="button"
+                      onClick={() => setActiveLocale(locale)}
+                      className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
+                        isActive ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {localeLabel(locale)}
+                      <span className={filled ? 'text-green-600' : 'text-gray-300'}> {filled ? '✓' : '—'}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('tituloCampo')}{' '}
+                  {activeLocale === locales[0] && <span className="text-red-500">*</span>}
+                </label>
+                <input
+                  type="text"
+                  value={activeText.name}
+                  onChange={setText('name')}
+                  className={INPUT_CLS}
+                  placeholder={t('tituloPlaceholder')}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('descricaoCurta')}</label>
+                <textarea
+                  value={activeText.description}
+                  onChange={setText('description')}
+                  rows={2}
+                  className={`${INPUT_CLS} resize-none`}
+                  placeholder={t('descricaoCurtaPlaceholder')}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('notaFixaPdf')}</label>
+                <textarea
+                  value={activeText.pdf_note}
+                  onChange={setText('pdf_note')}
+                  rows={2}
+                  className={`${INPUT_CLS} resize-none`}
+                  placeholder={t('notaFixaPlaceholder')}
+                />
+              </div>
+
+              <p className="text-xs text-gray-400">{t('idiomaVazioDica')}</p>
+            </div>
+          </div>
+
+          {/* ── Section 3: Tempo */}
           <div>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">{t('tempo')}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -488,17 +628,22 @@ function ActivityModal({
 
 function DeleteModal({
   service,
+  locales,
   onCancel,
   onConfirm,
   loading,
 }: {
-  service: ProposalService;
+  service: ServiceWithTranslations;
+  locales: string[];
   onCancel: () => void;
   onConfirm: () => void;
   loading: boolean;
 }) {
   const t = useTranslations('admin.atividades');
   const tCommon = useTranslations('admin.common');
+  // Excluir o serviço leva junto as traduções (FK ON DELETE CASCADE).
+  const displayName =
+    locales.map(l => service.translations?.[l]?.name?.trim()).find(Boolean) ?? service.name;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
@@ -506,7 +651,7 @@ function DeleteModal({
         <h2 className="text-lg font-bold text-gray-900 mb-2">{t('atividadeExcluir')}</h2>
         <p className="text-sm text-gray-600 mb-6">
           {t.rich('temCerteza', {
-            nome: service.name,
+            nome: displayName,
             strong: chunks => <strong>{chunks}</strong>,
           })}
         </p>
@@ -529,18 +674,19 @@ export default function AtividadesPage() {
   const t = useTranslations('admin.atividades');
   const tCommon = useTranslations('admin.common');
   const tPropostas = useTranslations('admin.propostas');
-  const [services, setServices] = useState<ProposalService[]>([]);
+  const [services, setServices] = useState<ServiceWithTranslations[]>([]);
   const [transportTypes, setTransportTypes] = useState<ProposalTransportType[]>([]);
+  // Idiomas vêm de site_settings.supported_locales, nunca hardcoded aqui.
+  const [locales, setLocales] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [editTarget, setEditTarget] = useState<ProposalService | null | 'new'>('new' as never);
   const [modalOpen, setModalOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<ProposalService | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ServiceWithTranslations | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // editTarget = null → create; ProposalService → edit
-  const [modalService, setModalService] = useState<ProposalService | null>(null);
+  // null → create; ServiceWithTranslations → edit
+  const [modalService, setModalService] = useState<ServiceWithTranslations | null>(null);
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
@@ -553,6 +699,7 @@ export default function AtividadesPage() {
       const tData = await tRes.json();
       if (!sRes.ok) { setError(sData.error ?? t('erroCarregar')); return; }
       setServices(sData.services ?? []);
+      setLocales(sData.supportedLocales ?? []);
       if (tRes.ok) setTransportTypes(tData.transports ?? []);
     } catch {
       setError(tCommon('erroRede'));
@@ -564,12 +711,12 @@ export default function AtividadesPage() {
   useEffect(() => { fetchServices(); }, [fetchServices]);
 
   const openCreate = () => { setModalService(null); setModalOpen(true); };
-  const openEdit = (s: ProposalService) => { setModalService(s); setModalOpen(true); };
+  const openEdit = (s: ServiceWithTranslations) => { setModalService(s); setModalOpen(true); };
   const closeModal = () => setModalOpen(false);
 
   const handleSaved = () => { closeModal(); fetchServices(); };
 
-  const handleToggle = async (service: ProposalService) => {
+  const handleToggle = async (service: ServiceWithTranslations) => {
     const newValue = !service.is_active;
     // Optimistic update
     setServices(prev => prev.map(s => s.id === service.id ? { ...s, is_active: newValue } : s));
@@ -599,9 +746,6 @@ export default function AtividadesPage() {
       setDeleteLoading(false);
     }
   };
-
-  // Avoid unused state warning
-  void editTarget; void setEditTarget;
 
   return (
     <div className="p-4 sm:p-6 md:p-10">
@@ -636,6 +780,7 @@ export default function AtividadesPage() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('nome')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colIdiomas')}</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('categoria')}</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colTransporte')}</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colDuracaoTotal')}</th>
@@ -649,7 +794,7 @@ export default function AtividadesPage() {
                 {loading ? (
                   [...Array(4)].map((_, i) => (
                     <tr key={i}>
-                      {[...Array(8)].map((_, j) => (
+                      {[...Array(9)].map((_, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-gray-100 rounded animate-pulse" style={{ width: j === 0 ? '60%' : '50%' }} />
                         </td>
@@ -658,7 +803,7 @@ export default function AtividadesPage() {
                   ))
                 ) : services.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-16 text-center">
+                    <td colSpan={9} className="px-4 py-16 text-center">
                       <p className="text-gray-400 text-sm mb-3">{t('nenhumaAtividade')}</p>
                       <button
                         onClick={openCreate}
@@ -673,9 +818,16 @@ export default function AtividadesPage() {
                     const total = (s.transfer_hours_to ?? 0) + (s.duration_hours ?? 0) + (s.transfer_hours_back ?? 0);
                     const periodIcon = s.suggested_period ? PERIOD_ICON[s.suggested_period] : null;
                     const transportName = transportTypes.find(t => t.id === s.transport_type_id)?.name ?? null;
+                    // O nome exibido vem das traduções (primeiro idioma que tiver
+                    // texto), não da coluna deprecated proposal_services.name.
+                    const displayName =
+                      locales.map(l => s.translations?.[l]?.name?.trim()).find(Boolean) ?? s.name;
                     return (
                       <tr key={s.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium text-gray-900">{s.name}</td>
+                        <td className="px-4 py-3 font-medium text-gray-900">{displayName}</td>
+                        <td className="px-4 py-3">
+                          <CoverageBadges locales={locales} translations={s.translations} />
+                        </td>
                         <td className="px-4 py-3">
                           <CategoryBadge category={s.category} />
                         </td>
@@ -735,10 +887,11 @@ export default function AtividadesPage() {
         </div>
       </div>
 
-      {modalOpen && (
+      {modalOpen && locales.length > 0 && (
         <ActivityModal
           service={modalService}
           transportTypes={transportTypes}
+          locales={locales}
           onClose={closeModal}
           onSaved={handleSaved}
         />
@@ -747,6 +900,7 @@ export default function AtividadesPage() {
       {deleteTarget && (
         <DeleteModal
           service={deleteTarget}
+          locales={locales}
           onCancel={() => setDeleteTarget(null)}
           onConfirm={handleDelete}
           loading={deleteLoading}

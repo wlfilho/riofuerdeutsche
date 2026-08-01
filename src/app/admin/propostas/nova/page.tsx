@@ -1,4 +1,4 @@
-import { getProposalServices, getTransportTypes } from '@/lib/proposals';
+import { DEFAULT_PROPOSAL_LOCALE, getProposalServices, getTransportTypes } from '@/lib/proposals';
 import { getSettings } from '@/lib/settings';
 import { createClient } from '@/utils/supabase/server';
 import NovaPropostaForm, { type InitialLead } from './NovaPropostaForm';
@@ -9,8 +9,10 @@ export default async function NovaPropostaPage({
   searchParams: Promise<{ lead_id?: string }>;
 }) {
   const { lead_id } = await searchParams;
+  // Proposta nova nasce no idioma padrão (hoje sempre 'de'); a escolha por
+  // proposta é trabalho futuro.
   const [services, transportTypes, settings] = await Promise.all([
-    getProposalServices(),
+    getProposalServices(DEFAULT_PROPOSAL_LOCALE),
     getTransportTypes(),
     getSettings(),
   ]);

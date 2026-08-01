@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { getServicesWithTranslations } from '@/lib/services-i18n';
 import { syncTourDatesWithLeadStatus } from '@/lib/tourDates';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 
@@ -52,20 +53,29 @@ export interface ProposalTransportType {
 export interface ProposalService {
   id: string;
   slug: string;
-  name: string;
   category: ProposalServiceCategory;
-  description: string | null;
   duration_hours: number | null;
   transfer_hours_to: number | null;
   transfer_hours_back: number | null;
   suggested_period: ProposalServicePeriod | null;
-  pdf_note: string | null;
   notes: string | null;
   is_active: boolean;
   sort_order: number;
   transport_type_id: string | null;
   transport_type: ProposalTransportType | null;
   costs: ProposalServiceCost[];
+  // ── Texto ──────────────────────────────────────────────────────────────────
+  // Vem de proposal_service_translations (ver src/lib/services-i18n.ts), NÃO
+  // das colunas homônimas de proposal_services, que estão DEPRECATED.
+  name: string;
+  description: string | null;
+  pdf_note: string | null;
+  // Idioma de onde o texto realmente veio + flag de fallback, para o builder
+  // sinalizar ao admin que aquele serviço não tem tradução no idioma pedido.
+  // Opcionais: só o Proposal Builder (getProposalServices) os preenche; o CRUD
+  // do catálogo trabalha com o mapa de traduções inteiro.
+  resolved_locale?: string;
+  is_fallback?: boolean;
 }
 
 export interface ProposalItem {
@@ -134,6 +144,10 @@ export interface Proposal {
   deposit_amount: number | null;
   // "Angebot gültig bis" (ISO date); null = sem prazo de validade.
   valid_until: string | null;
+  // Idioma do texto que o cliente recebe. Hoje sempre 'de' (não há seletor por
+  // proposta); existe para o Proposal Builder resolver o catálogo no idioma
+  // certo quando a seleção por proposta chegar.
+  locale?: string | null;
   // Token do link público /angebot/[token] enviado ao cliente.
   public_token: string;
   status: ProposalStatus;
@@ -202,20 +216,61 @@ export async function getTransportTypes(): Promise<ProposalTransportType[]> {
   return (data ?? []) as ProposalTransportType[];
 }
 
-export async function getProposalServices(): Promise<ProposalService[]> {
+// Idioma padrão de uma proposta enquanto não existe seleção por proposta:
+// proposals.locale já existe no banco com default 'de'.
+export const DEFAULT_PROPOSAL_LOCALE = 'de';
+
+/**
+ * Catálogo de serviços do Proposal Builder já resolvido em um idioma.
+ *
+ * A parte NÃO-textual (custos, horas, transporte, categoria, ordenação) vem de
+ * proposal_services; o texto (name/description/pdf_note) vem exclusivamente de
+ * proposal_service_translations, via getServicesWithTranslations — as colunas
+ * de texto de proposal_services estão DEPRECATED e não são mais lidas.
+ *
+ * Serviço ativo sem nenhuma tradução fica de fora (não há o que exibir), que é
+ * o mesmo critério de getServicesWithTranslations.
+ */
+export async function getProposalServices(
+  locale: string = DEFAULT_PROPOSAL_LOCALE,
+): Promise<ProposalService[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('proposal_services')
-    .select(`
-      *,
-      costs:proposal_service_costs(*),
-      transport_type:proposal_transport_types(*, tiers:proposal_transport_tiers(*))
-    `)
-    .eq('is_active', true)
-    .order('sort_order');
+  const [{ data, error }, translations] = await Promise.all([
+    supabase
+      .from('proposal_services')
+      .select(`
+        id, slug, category, notes, is_active, sort_order,
+        duration_hours, transfer_hours_to, transfer_hours_back,
+        suggested_period, transport_type_id,
+        costs:proposal_service_costs(*),
+        transport_type:proposal_transport_types(*, tiers:proposal_transport_tiers(*))
+      `)
+      .eq('is_active', true)
+      .order('sort_order'),
+    getServicesWithTranslations(locale),
+  ]);
 
   if (error) throw new Error(error.message);
-  return (data ?? []) as ProposalService[];
+
+  const textById = new Map(translations.map((t) => [t.id, t]));
+
+  return (data ?? []).flatMap((row) => {
+    const text = textById.get(row.id);
+    if (!text) return [];
+    return [
+      {
+        ...(row as unknown as Omit<
+          ProposalService,
+          'name' | 'description' | 'pdf_note' | 'resolved_locale' | 'is_fallback'
+        >),
+        name: text.name,
+        description: text.description,
+        pdf_note: text.pdfNote,
+        resolved_locale: text.resolvedLocale,
+        is_fallback: text.isFallback,
+      },
+    ];
+  });
 }
 
 export async function getProposals(): Promise<Proposal[]> {

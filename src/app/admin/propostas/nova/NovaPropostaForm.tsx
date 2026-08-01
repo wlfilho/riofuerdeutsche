@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ADMIN_LOCALE, fmtEur } from '@/lib/adminFormat';
+import { dayTransportServiceName, resolveDayTransportKey } from '@/lib/dayTransportLabel';
 import type {
   Proposal,
   ProposalPriceDisplay,
@@ -340,6 +341,24 @@ const CATEGORIES = [
   { key: 'atração' as const,   icon: '🏛️' },
 ];
 
+// ─── FallbackBadge ────────────────────────────────────────────────────────────
+
+// Dica discreta para o admin: o texto deste serviço não existe no idioma da
+// proposta e veio de outro (ver a cascata em src/lib/services-i18n.ts). Não é
+// erro — só sinaliza que falta traduzir em /admin/propostas/atividades.
+function FallbackBadge({ service }: { service: ProposalService }) {
+  const t = useTranslations('admin.propostas');
+  if (!service.is_fallback || !service.resolved_locale) return null;
+  return (
+    <span
+      title={t('traducaoFallbackTitulo')}
+      className="ml-1.5 align-middle px-1 py-px rounded bg-gray-100 text-gray-400 text-[10px] font-medium tracking-wide"
+    >
+      {t('traducaoFallback', { idioma: service.resolved_locale })}
+    </span>
+  );
+}
+
 // ─── ServicePickerModal ───────────────────────────────────────────────────────
 
 function ServicePickerModal({
@@ -381,6 +400,7 @@ function ServicePickerModal({
                     >
                       <span className="font-medium text-gray-800 group-hover:text-green-800 truncate">
                         {s.name}
+                        <FallbackBadge service={s} />
                       </span>
                       <div className="flex items-center gap-2 ml-4 shrink-0 text-xs text-gray-400">
                         <span className="tabular-nums">{formatServiceHours(s)}</span>
@@ -1172,6 +1192,25 @@ export default function NovaPropostaForm({
 
   // ─── Item handlers ────────────────────────────────────────────────────────────
 
+  // Índice por slug: o item do itinerário guarda o snapshot do texto, mas o
+  // badge de fallback precisa do serviço vivo do catálogo.
+  const serviceBySlug = useMemo(
+    () => new Map(services.map(s => [s.slug, s])),
+    [services],
+  );
+
+  // Nome exibido de um item. Atividades já guardam o texto pronto; a linha
+  // sintética de transporte do dia guarda um identificador sem idioma (ou, em
+  // propostas antigas, o literal alemão), que vira rótulo pt-BR aqui. Valor
+  // desconhecido é exibido cru, sem esconder informação.
+  const displayItemName = useCallback(
+    (storedName: string): string => {
+      const key = resolveDayTransportKey(storedName);
+      return key ? t(`transporteDia.${key}`) : storedName;
+    },
+    [t],
+  );
+
   const handleAddItem = useCallback((day: string, service: ProposalService, position: InsertPosition = 'end') => {
     const newItem: EditableItem = {
       _id: Math.random().toString(36).slice(2),
@@ -1340,11 +1379,9 @@ export default function NovaPropostaForm({
             ]
           : [];
 
-        const serviceName =
-          toggles.uses_driver && toggles.uses_rental_car ? 'Privattransport (Fahrzeug + Fahrer)'
-          : toggles.uses_driver ? 'Privater Fahrer'
-          : toggles.uses_rental_car ? 'Mietwagen'
-          : 'Privattransport (deaktiviert)';
+        // Identificador estável, sem idioma: a linha é só de admin e é
+        // traduzida na exibição (ver src/lib/dayTransportLabel.ts).
+        const serviceName = dayTransportServiceName(toggles);
 
         const transportRow = {
           kind: 'day_transport' as const,
@@ -1821,7 +1858,12 @@ export default function NovaPropostaForm({
                       <span className="text-gray-400 text-xs shrink-0">
                         {formatDayHeader(item.day).split(',')[0]}
                       </span>
-                      <span className="text-gray-700 truncate">{item.service_name}</span>
+                      <span className="text-gray-700 truncate">
+                        {displayItemName(item.service_name)}
+                        {serviceBySlug.get(item.service_slug) && (
+                          <FallbackBadge service={serviceBySlug.get(item.service_slug)!} />
+                        )}
+                      </span>
                     </div>
                     <span className="tabular-nums text-gray-700 font-medium ml-4 shrink-0">
                       {fmtEur(dayTotals[idx])}
