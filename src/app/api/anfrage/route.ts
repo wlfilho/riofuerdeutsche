@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { adminWhatsAppNumbers, sendWhatsAppText } from '@/lib/uazapi';
+import { EMAIL_LOCALE } from '@/lib/email-templates/utils';
 
 const VALID_SOURCES = ['whatsapp', 'email', 'instagram'] as const;
 
@@ -21,13 +22,17 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+// Notificação interna pro Will, mas os dias vão em alemão: é o que o cliente
+// selecionou no formulário. Formato longo (weekday + mês por extenso) não é
+// coberto por format.ts, então o Intl fica aqui com o locale dos e-mails.
 function formatGermanDay(iso: string): string {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('de-DE', {
+  return new Intl.DateTimeFormat(EMAIL_LOCALE, {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
     year: 'numeric',
-  });
+    timeZone: 'UTC',
+  }).format(new Date(iso + 'T12:00:00Z'));
 }
 
 export async function POST(request: NextRequest) {

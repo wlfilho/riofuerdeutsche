@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@/utils/supabase/server'
 import { getEmailTemplateBySlug } from '@/app/actions/email-templates'
+import { formatEuro } from '@/lib/email-templates/utils'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -63,9 +64,10 @@ export async function POST(request: Request) {
       return `${d}.${m}.${y}`
     }
 
+    // null/undefined continuam virando string vazia (não "0,00 €"), como antes.
     const formatAmount = (val: number | null) => {
       if (val === null || val === undefined) return ''
-      return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+      return formatEuro(val)
     }
 
     const shortcodeData: Record<string, string> = {

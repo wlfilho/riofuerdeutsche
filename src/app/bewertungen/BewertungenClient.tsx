@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { createClient } from "@/utils/supabase/client";
 import { Star, ArrowRight, X, ChevronLeft, ChevronRight, Loader2, MessageCircle, Mail } from "lucide-react";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import ReviewCard, { Review } from "@/components/ReviewCard";
 
 export default function BewertungenClient({ whatsappHref }: { whatsappHref: string }) {
     const t = useTranslations('public.bewertungen');
+    const locale = useLocale();
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
     const [lightbox, setLightbox] = useState<{ photos: string[]; index: number } | null>(null);
@@ -63,7 +64,14 @@ export default function BewertungenClient({ whatsappHref }: { whatsappHref: stri
 
     const hasReviews = reviews.length > 0;
     const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0) || 0;
-    const avgRating = hasReviews ? (totalRating / reviews.length).toFixed(1) : 0;
+    // Sempre 1 casa decimal (nota 5 vira "5,0", não "5") com o separador do
+    // locale — antes usava toFixed(1) e mostrava "4.8" com ponto pro alemão.
+    const avgRating = hasReviews
+        ? new Intl.NumberFormat(locale, {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+          }).format(totalRating / reviews.length)
+        : 0;
     const reviewCount = reviews.length || 0;
 
     return (

@@ -1,4 +1,4 @@
-import { formatDate } from './utils'
+import { formatDate, formatEuro } from './utils'
 
 function parseTourDetails(text: string): string {
   if (!text) return ''
@@ -35,15 +35,15 @@ export function tourConfirmationEmail(client: TourClient) {
   const financeBlock = client.total_amount ? `
   <tr>
     <td style="padding: 6px 0; font-weight: bold; color: #1a7a4a;">💰 Gesamtbetrag:</td>
-    <td style="padding: 6px 0;">${client.total_amount.toFixed(2).replace('.', ',')} €</td>
+    <td style="padding: 6px 0;">${formatEuro(client.total_amount)}</td>
   </tr>
   <tr>
     <td style="padding: 6px 0; font-weight: bold; color: #1a7a4a;">✅ Anzahlung erhalten:</td>
-    <td style="padding: 6px 0;">${(client.deposit_amount ?? 0).toFixed(2).replace('.', ',')} € ✓</td>
+    <td style="padding: 6px 0;">${formatEuro(client.deposit_amount)} ✓</td>
   </tr>
   <tr>
     <td style="padding: 6px 0; font-weight: bold; color: #1a7a4a;">💵 Restbetrag:</td>
-    <td style="padding: 6px 0;">${restbetrag.toFixed(2).replace('.', ',')} € (bar am letzten Tag der Tour in Rio)</td>
+    <td style="padding: 6px 0;">${formatEuro(restbetrag)} (bar am letzten Tag der Tour in Rio)</td>
   </tr>
 ` : ''
 

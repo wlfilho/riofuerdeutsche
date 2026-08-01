@@ -2,6 +2,7 @@
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useTranslations } from "next-intl";
 
 interface ChapterContentProps {
   content: string | any;
@@ -12,6 +13,8 @@ export default function ChapterContent({
   content,
   isLockedPreview,
 }: ChapterContentProps) {
+  const t = useTranslations("public.dashboard");
+
   // Parsing the content if it's string array or normal markdown
   let text = typeof content === "string" ? content : "";
 
@@ -21,7 +24,7 @@ export default function ChapterContent({
       text =
         content.content
           ?.map((c: any) => c.content?.map((n: any) => n.text).join(" "))
-          .join("\n\n") || "Conteúdo formatado na base como JSON.";
+          .join("\n\n") || t("contentUnavailable");
     } catch (e) {
       text = "";
     }
