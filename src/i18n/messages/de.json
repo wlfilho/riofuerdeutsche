@@ -128,7 +128,25 @@
       "depositRequest": {
         "sie": "Um Ihren Wunschtermin verbindlich zu reservieren, bitte ich um eine Anzahlung von <strong>{amount}</strong> per Banküberweisung:",
         "du": "Um euren Wunschtermin verbindlich zu reservieren, bitte ich um eine Anzahlung von <strong>{amount}</strong> per Banküberweisung:"
-      }
+      },
+      "aboutText": {
+        "sie": "Mein Name ist Will, ich bin gebürtiger Carioca und lebe seit jeher in Rio de Janeiro. Ich habe mehrere Jahre in Köln verbracht, spreche fließend Deutsch und kenne beide Welten. Ich biete ausschließlich private, individuelle Führungen an – kein Gruppentrubel, kein Massentourismus. Sie haben mich ganz für sich allein.",
+        "du": "Mein Name ist Will, ich bin gebürtiger Carioca und lebe seit jeher in Rio de Janeiro. Ich habe mehrere Jahre in Köln verbracht, spreche fließend Deutsch und kenne beide Welten. Ich biete ausschließlich private, individuelle Führungen an – kein Gruppentrubel, kein Massentourismus. Ihr habt mich ganz für euch allein."
+      },
+      "valueStack": {
+        "guide": "Privater deutschsprachiger Guide",
+        "vehicle": "Klimatisiertes Privatfahrzeug mit Fahrer",
+        "pickup": "Abholung direkt am Hotel",
+        "safety": "Sicherheit & Komfort an erster Stelle",
+        "pace": {
+          "sie": "Individuelle Planung – Ihr Tempo",
+          "du": "Individuelle Planung – euer Tempo"
+        },
+        "payLater": "Zahlung erst am Ende der Tour"
+      },
+      "approx": "ca.",
+      "perPerson": "pro Person",
+      "perHour": "pro Stunde"
     },
     "bewertungen": {
       "metaTitle": "Bewertungen",

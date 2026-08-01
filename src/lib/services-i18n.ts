@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
 
 /**
  * Camada de leitura do texto dos serviços do catálogo.
@@ -64,7 +65,7 @@ function resolveFromRows(
 const SETTINGS_ROW_KEY = 'email_assinatura';
 
 /** Locale padrão dos clientes, de site_settings (proto-tenant, linha única). */
-async function getDefaultClientLocale(): Promise<string> {
+export async function getDefaultClientLocale(): Promise<string> {
   const supabase = await createClient();
   const { data } = await supabase
     .from('site_settings')
@@ -82,6 +83,33 @@ async function getDefaultClientLocale(): Promise<string> {
 export async function getSupportedLocales(): Promise<string[]> {
   const supabase = await createClient();
   const { data } = await supabase
+    .from('site_settings')
+    .select('supported_locales')
+    .eq('key', SETTINGS_ROW_KEY)
+    .single();
+
+  const locales = data?.supported_locales;
+  return Array.isArray(locales) && locales.length > 0 ? locales : ['de'];
+}
+
+/**
+ * Mesma lista, mas legível por visitante ANÔNIMO.
+ *
+ * `site_settings` tem uma única policy de RLS, restrita a admin autenticado.
+ * Com o client de sessão a leitura anônima não retorna linha nenhuma e cai no
+ * fallback ['de'] EM SILÊNCIO — foi assim que /pt-BR/p/[token] respondeu 404
+ * mesmo com 'pt-BR' gravado em supported_locales.
+ *
+ * A página pública da proposta precisa da lista real para validar o locale da
+ * URL, então lê com service role — exatamente o que getDepositBankInfo() já faz
+ * pelos dados bancários. Só no servidor; a chave nunca chega ao browser.
+ */
+export async function getPublicSupportedLocales(): Promise<string[]> {
+  const admin = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+  const { data } = await admin
     .from('site_settings')
     .select('supported_locales')
     .eq('key', SETTINGS_ROW_KEY)

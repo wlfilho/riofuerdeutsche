@@ -50,6 +50,24 @@ export function fmtMoney(
   return formatCurrency(Number(value ?? 0), currency, ADMIN_LOCALE);
 }
 
+/**
+ * Nome de um idioma em pt-BR, a partir do código BCP 47 ('de' → "alemão").
+ *
+ * Os códigos vêm de site_settings.supported_locales, que é configurável: uma
+ * tabela de rótulos aqui ficaria desatualizada assim que um idioma novo fosse
+ * habilitado. Intl.DisplayNames cobre qualquer código válido; código
+ * desconhecido volta como veio, sem esconder informação do admin.
+ */
+export function fmtLanguage(code: string): string {
+  try {
+    const label = new Intl.DisplayNames([ADMIN_LOCALE], { type: 'language' }).of(code);
+    if (!label || label === code) return code;
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  } catch {
+    return code;
+  }
+}
+
 /** Número simples com separadores de milhar. */
 export function fmtNumber(value: number | null | undefined): string {
   return formatNumber(Number(value ?? 0), ADMIN_LOCALE);

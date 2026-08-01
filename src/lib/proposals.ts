@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { getServicesWithTranslations } from '@/lib/services-i18n';
+import { getServiceTranslation, getServicesWithTranslations } from '@/lib/services-i18n';
 import { syncTourDatesWithLeadStatus } from '@/lib/tourDates';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 
@@ -9,6 +9,8 @@ export type ProposalServiceCostType = 'fixed' | 'per_pax' | 'per_hour';
 export type ProposalServicePeriod = 'morning' | 'afternoon' | 'evening' | 'full_day';
 export type ProposalStatus = 'draft' | 'sent' | 'accepted' | 'rejected';
 export type ProposalTreatment = 'Sie' | 'du-ihr';
+// Moeda em que a proposta é apresentada ao cliente (coluna proposals.currency).
+export type ProposalCurrency = 'EUR' | 'BRL';
 // O que o cliente vê de preços no PDF/WhatsApp: só o total final, ou também o
 // subtotal por dia. Preço por atividade nunca é exibido ao cliente.
 export type ProposalPriceDisplay = 'total' | 'per_day';
@@ -144,10 +146,11 @@ export interface Proposal {
   deposit_amount: number | null;
   // "Angebot gültig bis" (ISO date); null = sem prazo de validade.
   valid_until: string | null;
-  // Idioma do texto que o cliente recebe. Hoje sempre 'de' (não há seletor por
-  // proposta); existe para o Proposal Builder resolver o catálogo no idioma
-  // certo quando a seleção por proposta chegar.
+  // Idioma do texto que o cliente recebe, escolhido no Proposal Builder a
+  // partir de site_settings.supported_locales. Congelado no envio.
   locale?: string | null;
+  // Moeda em que o cliente vê os preços. Congelada no envio junto do locale.
+  currency?: ProposalCurrency | null;
   // Token do link público /angebot/[token] enviado ao cliente.
   public_token: string;
   status: ProposalStatus;
@@ -166,6 +169,10 @@ export interface ProposalFormData {
   arrival_date: string;
   departure_date: string;
   treatment: ProposalTreatment;
+  // Idioma e moeda escolhidos no builder; ambos NOT NULL no banco, então o
+  // formulário sempre manda um valor concreto.
+  locale: string;
+  currency: ProposalCurrency;
   internal_notes: string;
   items: ProposalItem[];
   exchange_rate: number;
@@ -216,9 +223,11 @@ export async function getTransportTypes(): Promise<ProposalTransportType[]> {
   return (data ?? []) as ProposalTransportType[];
 }
 
-// Idioma padrão de uma proposta enquanto não existe seleção por proposta:
-// proposals.locale já existe no banco com default 'de'.
+// Últimos fallbacks de idioma/moeda, iguais aos defaults das colunas
+// proposals.locale e proposals.currency. Só entram em jogo quando nem a
+// proposta nem site_settings dizem outra coisa.
 export const DEFAULT_PROPOSAL_LOCALE = 'de';
+export const DEFAULT_PROPOSAL_CURRENCY: ProposalCurrency = 'EUR';
 
 /**
  * Catálogo de serviços do Proposal Builder já resolvido em um idioma.
@@ -375,6 +384,8 @@ export async function duplicateProposal(id: string): Promise<Proposal> {
       arrival_date: original.arrival_date,
       departure_date: original.departure_date,
       treatment: original.treatment,
+      locale: original.locale ?? DEFAULT_PROPOSAL_LOCALE,
+      currency: original.currency ?? DEFAULT_PROPOSAL_CURRENCY,
       items: original.items,
       total_amount: original.total_amount,
       exchange_rate: original.exchange_rate,
@@ -402,14 +413,115 @@ const LEAD_STATUS_BY_PROPOSAL_STATUS: Record<ProposalStatus, string> = {
   rejected: 'lost',
 };
 
+// Slug sintético da linha de transporte do dia: não existe no catálogo de
+// serviços, então não há tradução para resolver — a linha passa intacta.
+const DAY_TRANSPORT_SLUG = '__day_transport__';
+
+/**
+ * Congela o conteúdo da proposta no momento do envio.
+ *
+ * O que o cliente recebeu não pode mudar depois: quando a proposta vira 'sent',
+ * cada item ganha o `service_description` resolvido no idioma da proposta e
+ * gravado no jsonb. A partir daí, editar o texto do serviço no catálogo não
+ * mexe mais em nada que já foi enviado.
+ *
+ * Idempotente por construção:
+ *  - só roda na transição draft → sent (o chamador verifica o status atual);
+ *  - dentro do item, só preenche `service_description` que esteja AUSENTE —
+ *    reenviar uma proposta nunca re-resolve do catálogo atual;
+ *  - `locale`/`currency` só são gravados se estiverem vazios (as colunas têm
+ *    default NOT NULL, então na prática já vêm do builder).
+ *
+ * Best-effort quanto ao texto: um serviço sem tradução nenhuma fica com
+ * description null, e não é motivo para abortar o envio.
+ */
+async function freezeProposalOnSend(id: string): Promise<void> {
+  const supabase = await createClient();
+
+  const { data: proposal, error: readError } = await supabase
+    .from('proposals')
+    .select('id, locale, currency, items')
+    .eq('id', id)
+    .single();
+
+  if (readError || !proposal) {
+    console.error('[freezeProposalOnSend] proposal not found:', readError?.message);
+    return;
+  }
+
+  const locale = proposal.locale ?? DEFAULT_PROPOSAL_LOCALE;
+  const currency = (proposal.currency ?? DEFAULT_PROPOSAL_CURRENCY) as ProposalCurrency;
+  const items = (proposal.items ?? []) as ProposalItem[];
+
+  // slug → id do serviço: os itens referenciam o catálogo por slug, mas
+  // getServiceTranslation trabalha com o id.
+  const slugsToResolve = [
+    ...new Set(
+      items
+        .filter(
+          (item) =>
+            item.service_slug !== DAY_TRANSPORT_SLUG &&
+            item.kind !== 'day_transport' &&
+            // Só o que está faltando: descrição já congelada é intocável.
+            (item.service_description === undefined || item.service_description === null),
+        )
+        .map((item) => item.service_slug),
+    ),
+  ];
+
+  const descriptionBySlug = new Map<string, string | null>();
+  if (slugsToResolve.length > 0) {
+    const { data: services } = await supabase
+      .from('proposal_services')
+      .select('id, slug')
+      .in('slug', slugsToResolve);
+
+    await Promise.all(
+      (services ?? []).map(async (svc) => {
+        const translation = await getServiceTranslation(svc.id, locale);
+        descriptionBySlug.set(svc.slug, translation?.description ?? null);
+      }),
+    );
+  }
+
+  const frozenItems = items.map((item) => {
+    if (!descriptionBySlug.has(item.service_slug)) return item;
+    return { ...item, service_description: descriptionBySlug.get(item.service_slug) ?? null };
+  });
+
+  const { error: writeError } = await supabase
+    .from('proposals')
+    .update({ locale, currency, items: frozenItems })
+    .eq('id', id);
+
+  if (writeError) {
+    console.error('[freezeProposalOnSend] failed to freeze content:', writeError.message);
+  }
+}
+
 export async function updateProposalStatus(id: string, status: ProposalStatus): Promise<void> {
   const supabase = await createClient();
+
+  // O congelamento acontece SÓ na entrada em 'sent' vinda de outro status:
+  // reenviar (sent → sent) não pode re-resolver texto do catálogo.
+  let shouldFreeze = false;
+  if (status === 'sent') {
+    const { data: current } = await supabase
+      .from('proposals')
+      .select('status')
+      .eq('id', id)
+      .single();
+    shouldFreeze = current?.status !== 'sent';
+  }
+
   const { error } = await supabase
     .from('proposals')
     .update({ status })
     .eq('id', id);
 
   if (error) throw new Error(error.message);
+
+  if (shouldFreeze) await freezeProposalOnSend(id);
 
   // Sincroniza o lead vinculado (best-effort: proposta sem lead é normal, e
   // uma falha aqui não deve derrubar a troca de status da proposta).

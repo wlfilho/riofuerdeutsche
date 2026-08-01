@@ -4,10 +4,11 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ADMIN_LOCALE, fmtEur } from '@/lib/adminFormat';
+import { ADMIN_LOCALE, fmtEur, fmtLanguage } from '@/lib/adminFormat';
 import { dayTransportServiceName, resolveDayTransportKey } from '@/lib/dayTransportLabel';
 import type {
   Proposal,
+  ProposalCurrency,
   ProposalPriceDisplay,
   ProposalService,
   ProposalTransportType,
@@ -15,6 +16,13 @@ import type {
 } from '@/lib/proposals';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+// Moedas oferecidas no select. Lista local (e não importada de @/lib/proposals)
+// porque aquele módulo importa o client Supabase de servidor: um import de
+// VALOR daqui arrastaria código de servidor para o bundle do browser. O tipo
+// ProposalCurrency mantém as duas listas em sincronia — acrescentar uma moeda
+// lá sem acrescentar aqui não é erro de tipo, mas remover uma é.
+const CURRENCY_OPTIONS: ProposalCurrency[] = ['EUR', 'BRL'];
 
 export type InitialLead = {
   id: string;
@@ -946,6 +954,9 @@ export default function NovaPropostaForm({
   defaultGuideRate,
   defaultExchangeRate,
   maxHoursPerDay,
+  supportedLocales,
+  initialLocale,
+  initialCurrency,
   initialData,
   proposalId,
   initialLead,
@@ -955,6 +966,12 @@ export default function NovaPropostaForm({
   defaultGuideRate: number;
   defaultExchangeRate: number;
   maxHoursPerDay: number;
+  // Idiomas oferecidos no select, vindos de site_settings.supported_locales
+  // (resolvidos no servidor — nada hardcoded aqui).
+  supportedLocales: string[];
+  // Idioma já resolvido pela cascata contato → configuração → padrão.
+  initialLocale: string;
+  initialCurrency?: ProposalCurrency;
   initialData?: Proposal;
   proposalId?: string;
   initialLead?: InitialLead;
@@ -1023,6 +1040,14 @@ export default function NovaPropostaForm({
   const [clientPhone, setClientPhone] = useState(initialData?.client_phone ?? initialLead?.phone ?? '');
   const [pax, setPax] = useState(initialData?.pax ?? initialLead?.pax ?? 2);
   const [treatment, setTreatment] = useState<ProposalTreatment>(initialData?.treatment ?? 'du-ihr');
+  // Idioma e moeda da proposta. O idioma governa em que língua o catálogo é
+  // resolvido, então trocá-lo recarrega a página do builder (ver abaixo).
+  const [locale, setLocale] = useState<string>(initialLocale);
+  const [currency, setCurrency] = useState<ProposalCurrency>(initialCurrency ?? 'EUR');
+  // Sie/du-ihr é distinção do alemão. Em qualquer outro idioma o controle não
+  // aparece e a proposta guarda 'du-ihr', o valor neutro.
+  const showTreatment = locale === 'de';
+  const effectiveTreatment: ProposalTreatment = showTreatment ? treatment : 'du-ihr';
   const [exchangeRate, setExchangeRate] = useState(initialData?.exchange_rate ?? defaultExchangeRate);
   // Hourly guide rate: /admin/configuracoes provides the default, but each
   // proposal can override it; existing proposals keep the rate they were
@@ -1114,11 +1139,13 @@ export default function NovaPropostaForm({
   const formSnapshot = useMemo(
     () => JSON.stringify({
       clientName, internalLabel, clientEmail, clientPhone, pax, treatment,
+      locale, currency,
       exchangeRate, guideRate, internalNotes, items, activeDays, dayStartTimes,
       dayEndTimes, dayToggles, carRateOverride, driverRateOverride, embedCar,
       embedDriver, priceDisplay, depositAmount, validUntil,
     }),
     [clientName, internalLabel, clientEmail, clientPhone, pax, treatment,
+     locale, currency,
      exchangeRate, guideRate, internalNotes, items, activeDays, dayStartTimes,
      dayEndTimes, dayToggles, carRateOverride, driverRateOverride, embedCar,
      embedDriver, priceDisplay, depositAmount, validUntil],
@@ -1210,6 +1237,17 @@ export default function NovaPropostaForm({
     },
     [t],
   );
+
+  // Trocar o idioma da proposta invalida o texto já copiado do catálogo: as
+  // descrições dos itens foram resolvidas no idioma anterior. Zerando-as aqui,
+  // o congelamento do envio (freezeProposalOnSend) as resolve no idioma novo,
+  // que é a única resolução que precisa estar certa para o cliente. O catálogo
+  // exibido na barra lateral só acompanha depois de salvar e reabrir, já que
+  // ele é resolvido no servidor.
+  const handleChangeLocale = useCallback((next: string) => {
+    setLocale(next);
+    setItems(prev => prev.map(i => ({ ...i, service_description: null })));
+  }, []);
 
   const handleAddItem = useCallback((day: string, service: ProposalService, position: InsertPosition = 'end') => {
     const newItem: EditableItem = {
@@ -1425,7 +1463,9 @@ export default function NovaPropostaForm({
           lead_id: !isEditing ? initialLead?.id : undefined,
           arrival_date: tourDays[0],
           departure_date: tourDays[tourDays.length - 1],
-          treatment,
+          treatment: effectiveTreatment,
+          locale,
+          currency,
           internal_notes: internalNotes.trim(),
           items: cleanItems,
           exchange_rate: exchangeRate,
@@ -1562,6 +1602,41 @@ export default function NovaPropostaForm({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('idiomaProposta')} <span className="text-red-500">*</span>
+                <span className="ml-1 text-xs font-normal text-gray-400">{t('idiomaPropostaHint')}</span>
+              </label>
+              <select
+                value={locale}
+                onChange={e => handleChangeLocale(e.target.value)}
+                className={INPUT_CLS}
+              >
+                {supportedLocales.map(code => (
+                  <option key={code} value={code}>
+                    {fmtLanguage(code)} ({code})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('moeda')} <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={currency}
+                onChange={e => setCurrency(e.target.value as ProposalCurrency)}
+                className={INPUT_CLS}
+              >
+                {CURRENCY_OPTIONS.map(code => (
+                  <option key={code} value={code}>
+                    {t(`moedas.${code}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* Sie/du-ihr só existe em alemão. */}
+            {showTreatment && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('tratamento')} <span className="text-red-500">*</span>
               </label>
               <select value={treatment} onChange={e => setTreatment(e.target.value as ProposalTreatment)} className={INPUT_CLS}>
@@ -1569,6 +1644,7 @@ export default function NovaPropostaForm({
                 <option value="du-ihr">{t('duInformal')}</option>
               </select>
             </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('honorarioGuia')}

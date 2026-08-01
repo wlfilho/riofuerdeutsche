@@ -86,8 +86,14 @@ const STATUS_CLASSNAME: Record<ProposalStatus, string> = {
 };
 
 // Link público enviado ao cliente — domínio canônico de produção.
+// Rota neutra /{locale}/p/{token}: o path deixa de ser alemão e o idioma fica
+// explícito na URL. /angebot/{token} continua respondendo para os links já
+// enviados, então trocar aqui não quebra nada que está na mão do cliente.
 function publicProposalUrl(proposal: Proposal): string {
-  return `https://riofuerdeutsche.de/angebot/${proposal.public_token}`;
+  // 'de' inline de propósito: importar o valor de @/lib/proposals arrastaria o
+  // client Supabase de servidor para o bundle do browser.
+  const locale = proposal.locale || 'de';
+  return `https://riofuerdeutsche.de/${locale}/p/${proposal.public_token}`;
 }
 
 // Custos que o cliente paga no local (included=false): fora do total, mas
@@ -764,7 +770,7 @@ export default function PropostaOutputClient({
               <dd className="flex items-center gap-2 min-w-0">
                 {/* href relativo pra abrir também no dev/túnel; o copiado é o canônico */}
                 <a
-                  href={`/angebot/${initial.public_token}`}
+                  href={`/${initial.locale || 'de'}/p/${initial.public_token}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-green-700 hover:underline truncate"
