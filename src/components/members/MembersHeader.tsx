@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { MapPin, BookOpen, Settings, Star, ChevronDown, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/utils/supabase/client";
 
 interface MembersHeaderProps {
@@ -13,6 +14,9 @@ interface MembersHeaderProps {
 }
 
 export default function MembersHeader({ userName, userEmail, userRole }: MembersHeaderProps) {
+  const t = useTranslations("public.dashboard");
+  const tNav = useTranslations("public.nav");
+  const tAuth = useTranslations("public.auth");
   const pathname = usePathname();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -50,9 +54,9 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
   };
 
   const roleBadge = () => {
-    if (userRole === "admin") return { label: "🛡️ Admin", className: "bg-red-50 text-red-600 border border-red-100" };
-    if (userRole === "premium") return { label: "⭐ Premium", className: "bg-yellow-50 text-yellow-700 border border-yellow-100" };
-    return { label: "Kostenlos", className: "bg-green-50 text-green-700 border border-green-100" };
+    if (userRole === "admin") return { label: t("rollen.admin"), className: "bg-red-50 text-red-600 border border-red-100" };
+    if (userRole === "premium") return { label: t("rollen.premium"), className: "bg-yellow-50 text-yellow-700 border border-yellow-100" };
+    return { label: t("rollen.kostenlos"), className: "bg-green-50 text-green-700 border border-green-100" };
   };
 
   const badge = roleBadge();
@@ -70,14 +74,14 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex gap-8 items-center" aria-label="Members Navigation">
+        <nav className="hidden lg:flex gap-8 items-center" aria-label={tNav("membersNavigation")}>
           <a
             href="https://riofuerdeutsche.de"
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 text-sm font-medium text-gray-500 hover:text-rio-green transition-colors duration-200"
           >
-            ↗ riofuerdeutsche.de
+            {t("membersHeader.externerLink")}
           </a>
           <Link
             href="/dashboard"
@@ -87,7 +91,7 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
                 : "font-medium text-gray-700 hover:text-rio-green"
             }`}
           >
-            Rio-Guide
+            {t("membersHeader.rioGuide")}
           </Link>
           <a
             href="https://riofuerdeutsche.de/kontakt"
@@ -95,7 +99,7 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
             rel="noopener noreferrer"
             className="p-2 text-sm font-medium text-gray-700 hover:text-rio-green transition-colors duration-200"
           >
-            Kontakt
+            {t("membersHeader.kontakt")}
           </a>
         </nav>
 
@@ -135,7 +139,7 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
                   className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green rounded-xl transition-colors"
                 >
                   <BookOpen className="w-4 h-4" />
-                  <span>Mein Guide</span>
+                  <span>{t("meinGuide")}</span>
                 </Link>
 
                 {userRole === "admin" && (
@@ -145,7 +149,7 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
                     className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green rounded-xl transition-colors"
                   >
                     <Settings className="w-4 h-4" />
-                    <span>Dashboard</span>
+                    <span>{t("dashboard")}</span>
                   </Link>
                 )}
 
@@ -156,7 +160,7 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
                     className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-rio-blue hover:bg-rio-blue/5 rounded-xl transition-colors"
                   >
                     <Star className="w-4 h-4" />
-                    <span>Guide freischalten</span>
+                    <span>{t("guideFreischalten")}</span>
                   </Link>
                 )}
               </div>
@@ -168,7 +172,7 @@ export default function MembersHeader({ userName, userEmail, userRole }: Members
                   className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>Abmelden</span>
+                  <span>{tAuth("abmelden")}</span>
                 </button>
               </div>
             </div>

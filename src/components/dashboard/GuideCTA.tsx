@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
 interface CTAConfig {
   icon: string
@@ -10,48 +11,57 @@ interface CTAConfig {
   secondaryHref?: string
 }
 
-const CTA_MAP: Record<string, CTAConfig> = {
-  sicherheit: {
-    icon: '🛡️',
-    title: 'Kostenloser Sicherheits-Guide als PDF',
-    subtitle: 'Lade dir unsere kompakte Zusammenfassung der wichtigsten Sicherheitstipps für Rio herunter — kostenlos und sofort verfügbar.',
-    buttonLabel: 'PDF kostenlos herunterladen',
-    buttonHref: '/dashboard?upgrade=true',
-  },
-  unterkunft: {
-    icon: '🏨',
-    title: 'Persönliche Unterkunft-Beratung',
-    subtitle: '60 Minuten mit Will per Videocall — sichere Unterkunft finden, Routen planen und alle Fragen beantwortet. Von einem Carioca, der fließend Deutsch spricht.',
-    buttonLabel: 'Beratung buchen',
-    buttonHref: 'https://riofuerdeutsche.de/unterkunft/beratung',
-    secondaryLabel: 'Mehr erfahren',
-    secondaryHref: 'https://riofuerdeutsche.de/unterkunft/beratung#details',
-  },
-  transport: {
-    icon: '✈️',
-    title: 'Transfer vom Flughafen',
-    subtitle: 'Komm sicher und stressfrei vom Flughafen ins Hotel — mit unserem privaten Transferservice, der nur für unsere Mitglieder verfügbar ist.',
-    buttonLabel: 'Transfer anfragen',
-    buttonHref: 'https://riofuerdeutsche.de/kontakt',
-  },
+/**
+ * Os subtítulos continuam literais aqui: são texto editorial de marketing, não
+ * chrome reutilizável. Só título/rótulos de botão foram para o catálogo.
+ */
+function buildCtaMap(t: (key: string) => string): Record<string, CTAConfig> {
+  return {
+    sicherheit: {
+      icon: '🛡️',
+      title: t('sicherheitTitle'),
+      subtitle: 'Lade dir unsere kompakte Zusammenfassung der wichtigsten Sicherheitstipps für Rio herunter — kostenlos und sofort verfügbar.',
+      buttonLabel: t('sicherheitButton'),
+      buttonHref: '/dashboard?upgrade=true',
+    },
+    unterkunft: {
+      icon: '🏨',
+      title: t('unterkunftTitle'),
+      subtitle: '60 Minuten mit Will per Videocall — sichere Unterkunft finden, Routen planen und alle Fragen beantwortet. Von einem Carioca, der fließend Deutsch spricht.',
+      buttonLabel: t('unterkunftButton'),
+      buttonHref: 'https://riofuerdeutsche.de/unterkunft/beratung',
+      secondaryLabel: t('mehrErfahren'),
+      secondaryHref: 'https://riofuerdeutsche.de/unterkunft/beratung#details',
+    },
+    transport: {
+      icon: '✈️',
+      title: t('transportTitle'),
+      subtitle: 'Komm sicher und stressfrei vom Flughafen ins Hotel — mit unserem privaten Transferservice, der nur für unsere Mitglieder verfügbar ist.',
+      buttonLabel: t('transportButton'),
+      buttonHref: 'https://riofuerdeutsche.de/kontakt',
+    },
+  }
 }
 
-const DEFAULT_CTA: CTAConfig = {
-  icon: '🌴',
-  title: 'Persönliche Tour durch Rio',
-  subtitle: 'Erlebe Rio mit einem echten Carioca als Guide — maßgeschneidert auf deine Interessen, auf Deutsch.',
-  buttonLabel: 'Tour anfragen',
-  buttonHref: 'https://riofuerdeutsche.de/kontakt',
-  secondaryLabel: 'Kontakt aufnehmen',
-  secondaryHref: 'https://riofuerdeutsche.de/kontakt',
+function buildDefaultCta(t: (key: string) => string): CTAConfig {
+  return {
+    icon: '🌴',
+    title: t('defaultTitle'),
+    subtitle: 'Erlebe Rio mit einem echten Carioca als Guide — maßgeschneidert auf deine Interessen, auf Deutsch.',
+    buttonLabel: t('defaultButton'),
+    buttonHref: 'https://riofuerdeutsche.de/kontakt',
+    secondaryLabel: t('kontaktAufnehmen'),
+    secondaryHref: 'https://riofuerdeutsche.de/kontakt',
+  }
 }
 
 interface GuideCTAProps {
   chapterSlug: string
 }
 
-export default function GuideCTA({ chapterSlug }: GuideCTAProps) {
-  const cta = CTA_MAP[chapterSlug] ?? DEFAULT_CTA
+export default async function GuideCTA({ chapterSlug }: GuideCTAProps) {
+  const t = await getTranslations('public.cta.guideCta')
+  const cta = buildCtaMap(t)[chapterSlug] ?? buildDefaultCta(t)
 
   const isExternal = (href: string) => href.startsWith('http')
 

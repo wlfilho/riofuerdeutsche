@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from "next-intl";
 import { createClient } from "@/utils/supabase/client";
 import { Star, ArrowRight, X, ChevronLeft, ChevronRight, Loader2, MessageCircle, Mail } from "lucide-react";
 import Link from "next/link";
 import ReviewCard, { Review } from "@/components/ReviewCard";
 
 export default function BewertungenClient({ whatsappHref }: { whatsappHref: string }) {
+    const t = useTranslations('public.bewertungen');
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
     const [lightbox, setLightbox] = useState<{ photos: string[]; index: number } | null>(null);
@@ -70,10 +72,10 @@ export default function BewertungenClient({ whatsappHref }: { whatsappHref: stri
             <div className="bg-white border-b border-gray-200 pt-36 pb-16 px-4">
                 <div className="max-w-4xl mx-auto text-center">
                     <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">
-                        Was unsere Gäste sagen
+                        {t('heroTitle')}
                     </h1>
                     <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                        Echte Erfahrungen von deutschen Reisenden — ungefiltert und authentisch.
+                        {t('heroSubtitle')}
                     </p>
 
                     {!loading && hasReviews && (
@@ -81,9 +83,9 @@ export default function BewertungenClient({ whatsappHref }: { whatsappHref: stri
                             <div className="flex items-center gap-1.5 bg-yellow-50 px-6 py-3 rounded-full border border-yellow-100 shadow-sm">
                                 <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                                 <span className="text-xl font-bold text-gray-900">{avgRating}</span>
-                                <span className="text-gray-400 font-medium">von 5</span>
+                                <span className="text-gray-400 font-medium">{t('outOfFive')}</span>
                                 <span className="mx-2 text-gray-300">·</span>
-                                <span className="text-gray-700 font-medium">{reviewCount} Bewertungen</span>
+                                <span className="text-gray-700 font-medium">{t('reviewCount', { count: String(reviewCount) })}</span>
                             </div>
                         </div>
                     )}
@@ -95,7 +97,7 @@ export default function BewertungenClient({ whatsappHref }: { whatsappHref: stri
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                         <Loader2 className="w-10 h-10 animate-spin mb-4" />
-                        <p className="font-medium">Bewertungen werden geladen...</p>
+                        <p className="font-medium">{t('loading')}</p>
                     </div>
                 ) : !hasReviews ? (
                     <div className="text-center py-20 bg-white rounded-3xl border border-gray-200 shadow-sm max-w-2xl mx-auto px-6">
@@ -103,14 +105,14 @@ export default function BewertungenClient({ whatsappHref }: { whatsappHref: stri
                             <Star className="w-20 h-20 text-gray-200" />
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            Noch keine Bewertungen vorhanden.
+                            {t('emptyTitle')}
                         </h2>
-                        <p className="text-gray-500 mb-8">Sei der Erste!</p>
+                        <p className="text-gray-500 mb-8">{t('emptySubtitle')}</p>
                         <Link
                             href="/bewertung-schreiben"
                             className="inline-flex items-center justify-center bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3.5 px-8 rounded-xl transition-all shadow-sm hover:shadow-lg group"
                         >
-                            Bewertung schreiben
+                            {t('writeReview')}
                             <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
@@ -148,14 +150,14 @@ export default function BewertungenClient({ whatsappHref }: { whatsappHref: stri
                                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-full font-bold text-lg hover:bg-gray-800 hover:scale-[1.02] transition-all shadow-xl shadow-black/20"
                                 >
                                     <MessageCircle className="w-5 h-5" />
-                                    WhatsApp schreiben
+                                    {t('ctaWhatsApp')}
                                 </a>
                                 <Link
                                     href="/kontakt"
                                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-gray-900 rounded-full font-bold text-lg hover:bg-gray-50 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
                                 >
                                     <Mail className="w-5 h-5" />
-                                    E-Mail schreiben
+                                    {t('ctaEmail')}
                                 </Link>
                             </div>
                         </div>
@@ -175,7 +177,7 @@ export default function BewertungenClient({ whatsappHref }: { whatsappHref: stri
                     >
                         <img
                             src={lightbox.photos[lightbox.index]}
-                            alt={`Foto ${lightbox.index + 1}`}
+                            alt={t('photoAlt', { n: String(lightbox.index + 1) })}
                             className="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl transition-all duration-300 transform scale-100"
                         />
 
@@ -208,7 +210,7 @@ export default function BewertungenClient({ whatsappHref }: { whatsappHref: stri
                     </button>
 
                     <p className="absolute bottom-6 left-6 text-white/30 text-[10px] uppercase font-bold tracking-[2px]">
-                        Rio für Deutsche Gallery
+                        {t('galleryLabel')}
                     </p>
                 </div>
             )}

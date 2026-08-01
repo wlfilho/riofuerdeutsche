@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useReading } from './ReadingContext'
 
 interface ReadToggleProps {
@@ -9,6 +10,7 @@ interface ReadToggleProps {
 }
 
 export function ReadToggle({ pageId }: ReadToggleProps) {
+  const t = useTranslations('public.dashboard.lesen')
   const { isPageRead, toggleRead } = useReading()
   const isRead = isPageRead(pageId)
   const [loading, setLoading] = useState(false)
@@ -32,7 +34,7 @@ export function ReadToggle({ pageId }: ReadToggleProps) {
     >
       <span className={`text-[11px] font-mono uppercase tracking-widest transition-colors duration-200 
                         ${isRead ? 'text-green-600 font-bold' : 'text-gray-400 group-hover:text-gray-600'}`}>
-        {isRead ? 'Gelesen' : 'Als gelesen markieren'}
+        {isRead ? t('gelesen') : t('alsGelesenMarkieren')}
       </span>
 
       <div 

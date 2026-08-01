@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import type { MembershipAccess } from '@/types/membership';
 
 interface Chapter {
@@ -21,6 +22,7 @@ interface GuideSidebarProps {
 }
 
 export default function GuideSidebar({ access }: GuideSidebarProps) {
+  const t = useTranslations('public.dashboard.sidebar');
   const pathname = usePathname();
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,23 +51,23 @@ export default function GuideSidebar({ access }: GuideSidebarProps) {
       <div className="mb-6">
         <Link href="/dashboard" className="block">
           <h2 className="text-lg font-bold text-gray-900">
-            📖 Rio für Deutsche
+            {t('rioFuerDeutsche')}
           </h2>
-          <p className="text-sm text-gray-500">Kompletter Guide</p>
+          <p className="text-sm text-gray-500">{t('kompletterGuide')}</p>
         </Link>
 
         {/* Badge do nível de acesso */}
         {access.isAdmin ? (
           <span className="inline-block mt-2 px-3 py-1 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full">
-            ⚡ Admin
+            {t('adminBadge')}
           </span>
         ) : access.isPremium ? (
           <span className="inline-block mt-2 px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">
-            ⭐ Premium
+            {t('premiumBadge')}
           </span>
         ) : (
           <span className="inline-block mt-2 px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">
-            Kostenlos
+            {t('kostenlosBadge')}
           </span>
         )}
       </div>
@@ -126,7 +128,7 @@ export default function GuideSidebar({ access }: GuideSidebarProps) {
                     </div>
                     {chapter.is_free && !access.isPremium && !access.isAdmin && (
                       <span className="text-xs text-green-600 mt-1">
-                        Gratis
+                        {t('gratis')}
                       </span>
                     )}
                   </Link>
@@ -141,17 +143,16 @@ export default function GuideSidebar({ access }: GuideSidebarProps) {
       {!access.isPremium && !access.isAdmin && (
         <div className="mt-8 p-4 bg-gradient-to-br from-green-50 to-yellow-50 rounded-xl border border-green-200">
           <p className="text-sm font-bold text-gray-800 mb-1">
-            🔓 Alles freischalten
+            {t('allesFreischalten')}
           </p>
           <p className="text-xs text-gray-600 mb-3">
-            Hol dir den kompletten Rio-Guide mit allen Kapiteln, Karten und
-            Insider-Tipps.
+            {t('allesFreischaltenText')}
           </p>
           <Link
             href="/dashboard?upgrade=true"
             className="block w-full text-center px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
           >
-            Guide kaufen — ab 9€
+            {t('guideKaufen')}
           </Link>
         </div>
       )}

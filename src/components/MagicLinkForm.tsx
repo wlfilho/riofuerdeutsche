@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { useTranslations } from "next-intl";
 import { Shield, ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
@@ -12,6 +13,7 @@ interface MagicLinkFormProps {
 export default function MagicLinkForm({
   variant,
 }: MagicLinkFormProps) {
+  const t = useTranslations("public.cta.magicLink");
   const [email, setEmail] = useState("");
   const [vorname, setVorname] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -49,7 +51,7 @@ export default function MagicLinkForm({
         setSuccess(true);
       }
     } catch (err: unknown) {
-      const errorMsgDetails = err instanceof Error ? err.message : "Ein Fehler ist aufgetreten. Bitte versuche es später noch einmal.";
+      const errorMsgDetails = err instanceof Error ? err.message : t("fehlerAufgetreten");
       setErrorMsg(errorMsgDetails);
     } finally {
       setLoading(false);
@@ -63,8 +65,8 @@ export default function MagicLinkForm({
           icon: <Shield className="w-10 h-10 text-[#0d1f15] mb-4" />,
           headline: "Willst du die vollständigen Tipps zu jedem dieser 7 Fehler?",
           subtext: "Trag deinen Namen und deine E-Mail ein — wir schicken dir sofort einen Zugangslink. Kein Passwort nötig.",
-          submitText: "Kostenlosen Zugang sichern",
-          trustText: "Kein Passwort. Kein Spam. Jederzeit abmeldbar.",
+          submitText: t("submitKostenlosenZugang"),
+          trustText: t("trustKeinPasswortAbmeldbar"),
           containerStyle: "bg-rio-yellow p-8 md:p-10 rounded-3xl shadow-lg border border-yellow-300",
           headlineStyle: "text-2xl md:text-3xl font-bold text-[#0d1f15] mb-3",
         };
@@ -73,8 +75,8 @@ export default function MagicLinkForm({
           icon: null,
           headline: "Die kompletten 15 Regeln — kostenlos",
           subtext: "Melde dich an und erhalte sofort Zugang zur vollständigen Sicherheits-Sektion im Rio für Deutsche Guide.",
-          submitText: "Jetzt kostenlos anmelden",
-          trustText: "Kein Passwort. Kein Spam. Jederzeit abmeldbar.",
+          submitText: t("submitJetztKostenlosAnmelden"),
+          trustText: t("trustKeinPasswortAbmeldbar"),
           containerStyle: "bg-rio-yellow p-8 md:p-10 rounded-3xl shadow-lg border border-yellow-300",
           headlineStyle: "text-2xl md:text-3xl font-bold text-[#0d1f15] mb-3",
         };
@@ -83,8 +85,8 @@ export default function MagicLinkForm({
           icon: null,
           headline: "Rio wartet auf dich. Geh vorbereitet hin.",
           subtext: "Alles was du brauchst, um sicher und selbstbewusst durch Rio zu reisen — kostenlos, in einem Guide, von einem Carioca der fließend Deutsch spricht.",
-          submitText: "Kostenlosen Sicherheits-Guide sichern",
-          trustText: "Kein Passwort. Kein Spam. Sofortiger Zugang per E-Mail.",
+          submitText: t("submitSicherheitsGuide"),
+          trustText: t("trustKeinPasswortSofort"),
           containerStyle: "bg-rio-yellow p-10 md:p-14 rounded-3xl w-full shadow-xl border border-yellow-300",
           headlineStyle: "text-3xl md:text-5xl font-bold text-[#0d1f15] mb-4 tracking-tight",
         };
@@ -103,7 +105,7 @@ export default function MagicLinkForm({
           href="/guide/sicherheit"
           className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#0d1f15] text-white rounded-full font-bold text-lg hover:bg-[#1a3826] hover:scale-[1.02] transition-all shadow-md"
         >
-          Jetzt lesen
+          {t("jetztLesen")}
           <ArrowRight className="w-5 h-5" />
         </Link>
       </div>
@@ -114,9 +116,12 @@ export default function MagicLinkForm({
     return (
       <div className={`${content.containerStyle} text-center flex flex-col items-center justify-center`}>
         <CheckCircle2 className="w-16 h-16 text-[#0d1f15] mb-6" />
-        <h3 className="text-3xl font-bold text-[#0d1f15] mb-3">Fast geschafft!</h3>
+        <h3 className="text-3xl font-bold text-[#0d1f15] mb-3">{t("fastGeschafft")}</h3>
         <p className="text-[#0d1f15]/80 text-lg">
-          Wir haben dir einen Zugangslink an <span className="font-bold text-[#0d1f15]">{email}</span> geschickt. Schau in dein Postfach.
+          {t.rich("zugangslinkGesendet", {
+            email,
+            strong: (chunks) => <span className="font-bold text-[#0d1f15]">{chunks}</span>,
+          })}
         </p>
       </div>
     );
@@ -140,7 +145,7 @@ export default function MagicLinkForm({
             <input
               type="text"
               required
-              placeholder="Vorname"
+              placeholder={t("vorname")}
               value={vorname}
               onChange={(e) => setVorname(e.target.value)}
               disabled={loading}
@@ -149,7 +154,7 @@ export default function MagicLinkForm({
             <input
               type="email"
               required
-              placeholder="E-Mail-Adresse"
+              placeholder={t("emailAdresse")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
@@ -162,7 +167,7 @@ export default function MagicLinkForm({
             disabled={loading}
             className="w-full inline-flex md:mt-2 items-center justify-center gap-2 px-8 py-4 bg-[#0d1f15] text-white rounded-full font-bold text-xl hover:bg-[#1a3826] hover:scale-[1.02] transition-all shadow-lg disabled:opacity-70 disabled:hover:scale-100"
           >
-            {loading ? "Wird gesendet..." : content.submitText}
+            {loading ? t("wirdGesendet") : content.submitText}
             {!loading && <ArrowRight className="w-6 h-6" />}
           </button>
 

@@ -1,13 +1,16 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
+import { getTranslations } from 'next-intl/server';
 import AnfrageForm from './AnfrageForm';
 
-export const metadata: Metadata = {
-  title: 'Tour-Anfrage — Rio für Deutsche',
-  description:
-    'Erzähl Will kurz, wer du bist und an welchen Tagen du Rio erleben möchtest — er meldet sich mit einem persönlichen Vorschlag.',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('public.anfrage');
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+    robots: { index: false, follow: false },
+  };
+}
 
 export default function AnfragePage() {
   return (

@@ -2,6 +2,7 @@
 
 import { m } from "framer-motion";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowLeft, MapPin } from "lucide-react";
 
 export default function AuthLayout({
@@ -13,12 +14,14 @@ export default function AuthLayout({
     title: string;
     subtitle?: string;
 }) {
+    const t = useTranslations("public.auth");
+
     return (
         <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-rio-sand selection:bg-rio-green selection:text-white">
             <div className="absolute top-6 left-6 z-10">
                 <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-rio-green transition-colors text-sm font-medium">
                     <ArrowLeft className="w-4 h-4" />
-                    Zurück zur Startseite
+                    {t("zurueckZurStartseite")}
                 </Link>
             </div>
 

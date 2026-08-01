@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
 import { CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
 
 const INPUT_CLS =
   'w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent';
 
-function formatGermanDay(iso: string): string {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('de-DE', {
+function formatGermanDay(iso: string, locale: string): string {
+  return new Date(iso + 'T12:00:00').toLocaleDateString(locale, {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
@@ -22,6 +23,8 @@ function todayIso(): string {
 }
 
 export default function AnfrageForm() {
+  const t = useTranslations('public.anfrage');
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const von = searchParams.get('von');
   const source = von === 'whatsapp' || von === 'email' || von === 'instagram' ? von : 'other';
@@ -49,9 +52,9 @@ export default function AnfrageForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!name.trim()) { setError('Bitte gib deinen Namen an.'); return; }
-    if (!email.trim()) { setError('Bitte gib deine E-Mail-Adresse an.'); return; }
-    if (days.length === 0) { setError('Bitte wähle mindestens einen Wunschtag aus.'); return; }
+    if (!name.trim()) { setError(t('errorName')); return; }
+    if (!email.trim()) { setError(t('errorEmail')); return; }
+    if (days.length === 0) { setError(t('errorDays')); return; }
 
     setSubmitting(true);
     try {
@@ -62,12 +65,12 @@ export default function AnfrageForm() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? 'Etwas ist schiefgelaufen. Bitte versuche es später erneut.');
+        setError(data.error ?? t('errorGeneric'));
         return;
       }
       setSubmitted(true);
     } catch {
-      setError('Netzwerkfehler. Bitte versuche es später erneut.');
+      setError(t('errorNetwork'));
     } finally {
       setSubmitting(false);
     }
@@ -83,19 +86,17 @@ export default function AnfrageForm() {
             </div>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Vielen Dank, {name.trim().split(' ')[0]}!
+            {t('successTitle', { name: name.trim().split(' ')[0] })}
           </h2>
           <p className="text-gray-600 mb-8 leading-relaxed">
-            Deine Anfrage ist bei Will angekommen. Er schaut sich deine Wunschtage an
-            und meldet sich in Kürze persönlich bei dir — mit einem Vorschlag für dein
-            Rio-Erlebnis.
+            {t('successText')}
           </p>
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-gray-900 font-semibold hover:text-gray-600 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Zurück zur Startseite
+            {t('backHome')}
           </Link>
         </div>
       </div>
@@ -105,10 +106,9 @@ export default function AnfrageForm() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-sans">
       <div className="max-w-lg w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Deine Tour-Anfrage</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('title')}</h1>
         <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-          Erzähl mir kurz, wer du bist und an welchen Tagen du Rio erleben möchtest.
-          Ich melde mich persönlich mit einem Vorschlag bei dir. — Will
+          {t('intro')}
         </p>
 
         {error && (
@@ -120,14 +120,14 @@ export default function AnfrageForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name <span className="text-red-500">*</span>
+              {t('nameLabel')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
               className={INPUT_CLS}
-              placeholder="Martin Müller"
+              placeholder={t('namePlaceholder')}
               autoComplete="name"
             />
           </div>
@@ -135,27 +135,27 @@ export default function AnfrageForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                E-Mail <span className="text-red-500">*</span>
+                {t('emailLabel')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className={INPUT_CLS}
-                placeholder="martin@email.de"
+                placeholder={t('emailPlaceholder')}
                 autoComplete="email"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Telefon / WhatsApp
+                {t('phoneLabel')}
               </label>
               <input
                 type="tel"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 className={INPUT_CLS}
-                placeholder="+49 170 1234567"
+                placeholder={t('phonePlaceholder')}
                 autoComplete="tel"
               />
             </div>
@@ -164,7 +164,7 @@ export default function AnfrageForm() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Erwachsene <span className="text-red-500">*</span>
+                {t('adultsLabel')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -176,7 +176,7 @@ export default function AnfrageForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Kinder</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('childrenLabel')}</label>
               <input
                 type="number"
                 min="0"
@@ -190,10 +190,10 @@ export default function AnfrageForm() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Wunschtage <span className="text-red-500">*</span>
+              {t('daysLabel')} <span className="text-red-500">*</span>
             </label>
             <p className="text-xs text-gray-400 mb-2">
-              An welchen Tagen möchtest du Touren machen? Du kannst mehrere Tage auswählen.
+              {t('daysHint')}
             </p>
             <div className="flex items-center gap-2">
               <input
@@ -209,7 +209,7 @@ export default function AnfrageForm() {
                 disabled={!dayInput}
                 className="px-4 py-2.5 text-sm font-semibold bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-green-50 hover:border-green-300 hover:text-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
               >
-                + Hinzufügen
+                {t('addDay')}
               </button>
             </div>
             {days.length > 0 && (
@@ -219,11 +219,11 @@ export default function AnfrageForm() {
                     key={d}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 text-green-800 rounded-full text-xs font-medium"
                   >
-                    {formatGermanDay(d)}
+                    {formatGermanDay(d, locale)}
                     <button
                       type="button"
                       onClick={() => removeDay(d)}
-                      title="Entfernen"
+                      title={t('removeDay')}
                       className="text-green-400 hover:text-red-500 transition-colors leading-none"
                     >
                       ✕
@@ -252,12 +252,11 @@ export default function AnfrageForm() {
             className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-            {submitting ? 'Wird gesendet…' : 'Anfrage senden'}
+            {submitting ? t('submitting') : t('submit')}
           </button>
 
           <p className="text-xs text-gray-400 text-center leading-relaxed">
-            Deine Daten werden nur zur Bearbeitung deiner Anfrage verwendet und nicht
-            an Dritte weitergegeben.
+            {t('privacyNote')}
           </p>
         </form>
       </div>
