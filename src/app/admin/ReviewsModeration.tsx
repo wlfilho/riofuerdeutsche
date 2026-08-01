@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { createClient } from '@/utils/supabase/client';
-import { fmtDate, fmtDateTime } from '@/lib/adminFormat';
+import { fmtDate, fmtDateTime, fmtScore } from '@/lib/adminFormat';
 import {
     Star, CheckCircle, XCircle, Clock, MessageSquare,
     ChevronDown, ChevronUp, ExternalLink, Trash2, Plus,
@@ -338,8 +338,10 @@ export default function ReviewsModeration() {
                     {!loadingNps && npsResponses.length > 0 && (() => {
                         const pending = npsResponses.filter(r => !r.used_at);
                         const answered = npsResponses.filter(r => r.used_at && r.score !== null);
+                        // 1 casa decimal fixa com o separador do locale do admin:
+                        // toFixed(1) mostrava "8.4" com ponto em vez de "8,4".
                         const avg = answered.length > 0
-                            ? (answered.reduce((s, r) => s + (r.score ?? 0), 0) / answered.length).toFixed(1)
+                            ? fmtScore(answered.reduce((s, r) => s + (r.score ?? 0), 0) / answered.length)
                             : null;
                         return (
                             <div className="hidden sm:flex items-center gap-3 text-xs font-bold">

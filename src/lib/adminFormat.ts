@@ -54,3 +54,14 @@ export function fmtMoney(
 export function fmtNumber(value: number | null | undefined): string {
   return formatNumber(Number(value ?? 0), ADMIN_LOCALE);
 }
+
+/**
+ * Nota/score com exatamente 1 casa decimal: 5 vira "5,0", não "5".
+ * `fmtNumber` não serve aqui porque descartaria a casa decimal.
+ */
+export function fmtScore(value: number | null | undefined): string {
+  return new Intl.NumberFormat(ADMIN_LOCALE, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(Number(value ?? 0));
+}
