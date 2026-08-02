@@ -118,6 +118,10 @@ export async function updateSession(request: NextRequest) {
 
     // --- REGRA GERAL: apenas rotas explicitamente protegidas requerem autenticação ---
     // Rotas desconhecidas são deixadas passar para o Next.js renderizar o not-found.tsx
+    // /update-password NÃO entra aqui de propósito: sem sessão ela precisa renderizar
+    // o aviso de "link expirado" + botão de novo link. Um redirect para /login engoliria
+    // esse contexto (e o ?error=expired vindo do /auth/callback), deixando o usuário
+    // numa tela de login sem explicação de por que o link dele não funcionou.
     const protectedPrefixes: string[] = [];
     const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix));
 
