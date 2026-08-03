@@ -1,6 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function CTAGuideCompleto() {
+  const t = useTranslations("public.cta.guideCompleto");
+
   return (
     <section
       id="cta-guide"
@@ -35,7 +40,7 @@ export default function CTAGuideCompleto() {
             marginBottom: "20px",
           }}
         >
-          Early Access
+          {t("badge")}
         </span>
 
         {/* Título */}
@@ -50,7 +55,7 @@ export default function CTAGuideCompleto() {
             lineHeight: 1.2,
           }}
         >
-          Den kompletten Rio-Guide freischalten
+          {t("titel")}
         </h2>
 
         {/* Subtítulo */}
@@ -83,7 +88,7 @@ export default function CTAGuideCompleto() {
               whiteSpace: "nowrap",
             }}
           >
-            📖 Jetzt freischalten
+            {t("jetztFreischalten")}
           </Link>
           <a
             href="#kapitel"
@@ -99,7 +104,7 @@ export default function CTAGuideCompleto() {
               whiteSpace: "nowrap",
             }}
           >
-            Mehr erfahren
+            {t("mehrErfahren")}
           </a>
         </div>
       </div>

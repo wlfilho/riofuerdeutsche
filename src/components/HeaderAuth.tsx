@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { User, LogOut, BookOpen, Settings, Star, ChevronDown, Loader2 } from 'lucide-react';
 
@@ -19,6 +20,8 @@ interface HeaderAuthProps {
 }
 
 export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
+  const tAuth = useTranslations('public.auth');
+  const tDash = useTranslations('public.dashboard');
   const [user, setUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -62,7 +65,8 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
 
     const initAuth = async () => {
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const authUser = session?.user ?? null;
 
         if (authUser && mounted) {
           // Fallback imediato com os dados do Auth
@@ -189,7 +193,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
         }
       >
         <User className={isMobile ? "h-6 w-6 text-rio-green" : "h-4 w-4 text-rio-green"} />
-        <span>Anmelden</span>
+        <span>{tAuth('anmelden')}</span>
       </Link>
     );
   }
@@ -205,9 +209,9 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
           <span className="w-12 h-12 flex items-center justify-center bg-rio-green/10 text-rio-green text-xl font-bold rounded-full border border-rio-green/20">
             {displayName.charAt(0).toUpperCase()}
           </span>
-          <p className="text-xl font-bold text-gray-900">Hallo, {displayName}!</p>
+          <p className="text-xl font-bold text-gray-900">{tDash('hallo', { name: displayName })}</p>
           <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-            {user.role === 'admin' ? '🛡️ Admin' : user.role === 'premium' ? '⭐ Premium' : 'Gratis-Konto'}
+            {user.role === 'admin' ? tDash('rollen.admin') : user.role === 'premium' ? tDash('rollen.premium') : tDash('rollen.gratisKonto')}
           </span>
         </div>
 
@@ -218,7 +222,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
             className="flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-900 rounded-xl font-bold text-lg border border-gray-100"
           >
             <BookOpen className="w-5 h-5 text-rio-green" />
-            Mein Guide
+            {tDash('meinGuide')}
           </Link>
 
           {user.role === 'admin' && (
@@ -228,7 +232,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
               className="flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-900 rounded-xl font-bold text-lg border border-gray-100"
             >
               <Settings className="w-5 h-5 text-rio-blue" />
-              Dashboard
+              {tDash('dashboard')}
             </Link>
           )}
 
@@ -239,7 +243,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
               className="flex items-center justify-center gap-2 py-3 bg-rio-blue/5 text-rio-blue rounded-xl font-bold text-lg border border-rio-blue/10"
             >
               <Star className="w-5 h-5" />
-              Upgrade auf Premium
+              {tDash('upgradeAufPremium')}
             </Link>
           )}
 
@@ -248,7 +252,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
             className="flex items-center justify-center gap-2 py-3 text-red-500 font-bold text-lg"
           >
             <LogOut className="w-5 h-5" />
-            Abmelden
+            {tAuth('abmelden')}
           </button>
         </div>
       </div>
@@ -275,7 +279,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
         <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] z-50 py-3">
           <div className="px-5 py-2 border-b border-gray-50 mb-2">
             <p className="text-sm font-bold text-gray-900 truncate">
-              {user.firstName || 'Benutzer'}
+              {user.firstName || tDash('benutzer')}
             </p>
             <p className="text-[11px] text-gray-500 truncate mb-2">{user.email}</p>
             <span
@@ -286,7 +290,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
                     : 'bg-green-50 text-green-700 border border-green-100'
                 }`}
             >
-              {user.role === 'admin' ? '🛡️ Admin' : user.role === 'premium' ? '⭐ Premium' : 'Kostenlos'}
+              {user.role === 'admin' ? tDash('rollen.admin') : user.role === 'premium' ? tDash('rollen.premium') : tDash('rollen.kostenlos')}
             </span>
           </div>
 
@@ -297,7 +301,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
               className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green rounded-xl transition-colors"
             >
               <BookOpen className="w-4 h-4" />
-              <span>Mein Guide</span>
+              <span>{tDash('meinGuide')}</span>
             </Link>
 
             {user.role === 'admin' && (
@@ -307,7 +311,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
                 className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-rio-green/5 hover:text-rio-green rounded-xl transition-colors"
               >
                 <Settings className="w-4 h-4" />
-                <span>Dashboard</span>
+                <span>{tDash('dashboard')}</span>
               </Link>
             )}
 
@@ -318,7 +322,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
                 className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-rio-blue hover:bg-rio-blue/5 rounded-xl transition-colors"
               >
                 <Star className="w-4 h-4" />
-                <span>Guide freischalten</span>
+                <span>{tDash('guideFreischalten')}</span>
               </Link>
             )}
           </div>
@@ -329,7 +333,7 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
               className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              <span>Abmelden</span>
+              <span>{tAuth('abmelden')}</span>
             </button>
           </div>
         </div>

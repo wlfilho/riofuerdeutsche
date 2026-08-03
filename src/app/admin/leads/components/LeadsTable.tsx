@@ -3,19 +3,16 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import StatusBadge from './StatusBadge';
 import SourceBadge from './SourceBadge';
+import { fmtDate, fmtEur } from '@/lib/adminFormat';
 import type { Lead } from '../page';
-
-function formatDate(iso: string) {
-  const [y, m, d] = iso.split('T')[0].split('-');
-  return `${d}.${m}.${y}`;
-}
 
 function formatEstimate(min: number | null, max: number | null) {
   if (min === null && max === null) return '—';
-  if (min !== null && max !== null) return `${min}–${max} €`;
-  return `${min ?? max} €`;
+  if (min !== null && max !== null) return `${fmtEur(min)}–${fmtEur(max)}`;
+  return fmtEur(min ?? max);
 }
 
 function Toast({ message, onDone }: { message: string; onDone: () => void }) {
@@ -41,13 +38,18 @@ function DeleteModal({
   onConfirm: () => void;
   loading: boolean;
 }) {
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-2">Deletar lead?</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-2">{t('deletarLead')}</h2>
         <p className="text-sm text-gray-600 mb-6">
-          O lead de <strong>{lead.name}</strong> será excluído permanentemente.
+          {t.rich('leadSeraExcluido', {
+            nome: lead.name,
+            strong: chunks => <strong>{chunks}</strong>,
+          })}
         </p>
         <div className="flex justify-end gap-3">
           <button
@@ -55,14 +57,14 @@ function DeleteModal({
             disabled={loading}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
-            Cancelar
+            {tCommon('cancelar')}
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
             className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Deletando...' : 'Deletar'}
+            {loading ? tCommon('deletando') : tCommon('deletar')}
           </button>
         </div>
       </div>
@@ -77,6 +79,8 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -85,15 +89,15 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
       const res = await fetch(`/api/admin/leads/${deleteTarget.id}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json();
-        setToast(`Erro: ${data.error ?? 'Falha ao deletar'}`);
+        setToast(tCommon('erroPrefixo', { mensagem: data.error ?? t('falhaDeletar') }));
         return;
       }
       setLeads(prev => prev.filter(l => l.id !== deleteTarget.id));
       setDeleteTarget(null);
-      setToast('Lead deletado');
+      setToast(t('leadDeletado'));
       router.refresh();
     } catch {
-      setToast('Erro de rede. Tente novamente.');
+      setToast(tCommon('erroRede'));
     } finally {
       setDeleteLoading(false);
     }
@@ -103,9 +107,9 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 flex flex-col items-center justify-center py-24 text-center">
         <div className="text-5xl mb-4">📥</div>
-        <p className="text-gray-700 font-medium mb-1">Nenhum lead encontrado</p>
+        <p className="text-gray-700 font-medium mb-1">{t('nenhumLeadEncontrado')}</p>
         <p className="text-gray-400 text-sm mb-6">
-          Os leads da calculadora /preise aparecerão aqui automaticamente.
+          {t('leadsCalculadoraAparecem')}
         </p>
       </div>
     );
@@ -118,13 +122,13 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Nome / Contato</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">PAX</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Estimativa</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Origem</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Data</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Ações</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colNomeContato')}</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('pax')}</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colEstimativa')}</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('origem')}</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('status')}</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('data')}</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('acoes')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -190,7 +194,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
 
                   {/* Data */}
                   <td className="px-4 py-3 text-gray-500 text-xs tabular-nums whitespace-nowrap">
-                    {formatDate(lead.created_at)}
+                    {fmtDate(lead.created_at)}
                   </td>
 
                   {/* Ações */}
@@ -199,7 +203,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
                       {/* Ver */}
                       <Link
                         href={`/admin/leads/${lead.id}`}
-                        title="Ver detalhes"
+                        title={t('verDetalhes')}
                         className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                       >
                         <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -212,7 +216,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
                       {lead.status !== 'closed' && lead.status !== 'lost' && (
                         <Link
                           href={`/admin/propostas/nova?lead_id=${lead.id}`}
-                          title="Converter em proposta"
+                          title={t('converterProposta')}
                           className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         >
                           <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -225,7 +229,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
                       {/* Deletar */}
                       <button
                         onClick={() => setDeleteTarget(lead)}
-                        title="Deletar"
+                        title={tCommon('deletar')}
                         className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import ContactProfile from '@/components/admin/ContactProfile';
 import ContactForm from '@/components/admin/ContactForm';
 import ContactDeleteConfirm from '@/components/admin/ContactDeleteConfirm';
@@ -20,15 +21,22 @@ export type ContactListItem = {
 type Filter = 'all' | 'leads' | 'clients' | 'guide';
 type PanelState = 'empty' | 'view' | 'edit' | 'new' | 'delete';
 
-function getStatusDot(contact: ContactListItem): { color: string; title: string } {
-  if (contact.client_status === 'active') return { color: 'bg-green-500', title: 'Ativo' };
-  if (contact.client_status === 'completed') return { color: 'bg-blue-500', title: 'Abgeschlossen' };
-  if (contact.lead_status === 'proposal_sent') return { color: 'bg-amber-400', title: 'Proposta enviada' };
-  if (contact.lead_status === 'contacted') return { color: 'bg-amber-400', title: 'Em contato' };
-  if (contact.lead_status === 'closed') return { color: 'bg-green-500', title: 'Fechado' };
-  if (contact.lead_status === 'lost') return { color: 'bg-red-500', title: 'Perdido' };
-  if (contact.lead_status === 'new') return { color: 'bg-gray-300', title: 'Novo lead' };
-  if (contact.guide_role) return { color: 'bg-gray-300', title: 'Usuário Guide' };
+type Translate = (key: string) => string;
+
+function getStatusDot(
+  contact: ContactListItem,
+  tClient: Translate,
+  tLead: Translate,
+  tContatos: Translate,
+): { color: string; title: string } {
+  if (contact.client_status === 'active') return { color: 'bg-green-500', title: tClient('active') };
+  if (contact.client_status === 'completed') return { color: 'bg-blue-500', title: tClient('completed') };
+  if (contact.lead_status === 'proposal_sent') return { color: 'bg-amber-400', title: tLead('proposal_sent') };
+  if (contact.lead_status === 'contacted') return { color: 'bg-amber-400', title: tLead('contacted') };
+  if (contact.lead_status === 'closed') return { color: 'bg-green-500', title: tLead('closed') };
+  if (contact.lead_status === 'lost') return { color: 'bg-red-500', title: tLead('lost') };
+  if (contact.lead_status === 'new') return { color: 'bg-gray-300', title: tContatos('novoLead') };
+  if (contact.guide_role) return { color: 'bg-gray-300', title: tContatos('usuarioGuide') };
   return { color: 'bg-gray-200', title: '' };
 }
 
@@ -39,22 +47,25 @@ function getInitials(name: string | null, email: string): string {
   return email.slice(0, 2).toUpperCase();
 }
 
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'Todos' },
-  { key: 'leads', label: 'Leads' },
-  { key: 'clients', label: 'Clientes' },
-  { key: 'guide', label: 'Guide' },
+const FILTER_KEYS: { key: Filter; labelKey: string }[] = [
+  { key: 'all', labelKey: 'filtroTodos' },
+  { key: 'leads', labelKey: 'filtroLeads' },
+  { key: 'clients', labelKey: 'filtroClientes' },
+  { key: 'guide', labelKey: 'filtroGuide' },
 ];
 
-function Toast({ message, onDone }: { message: string; onDone: () => void }) {
+type ToastVariant = 'success' | 'error';
+type ToastState = { message: string; variant: ToastVariant };
+
+function Toast({ toast, onDone }: { toast: ToastState; onDone: () => void }) {
   useState(() => {
     const t = setTimeout(onDone, 3000);
     return () => clearTimeout(t);
   });
-  const isError = message.toLowerCase().startsWith('erro');
+  const isError = toast.variant === 'error';
   return (
     <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 text-white text-sm rounded-xl shadow-lg ${isError ? 'bg-red-700' : 'bg-gray-900'}`}>
-      {message}
+      {toast.message}
     </div>
   );
 }
@@ -66,8 +77,12 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [panel, setPanel] = useState<PanelState>('empty');
   const [prevPanel, setPrevPanel] = useState<PanelState>('empty');
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
   const [profileKey, setProfileKey] = useState(0);
+  const t = useTranslations('admin.contatos');
+  const tCommon = useTranslations('admin.common');
+  const tLead = useTranslations('admin.status.lead');
+  const tClient = useTranslations('admin.status.client');
 
   const selected = contacts.find(c => c.id === selectedId) ?? null;
 
@@ -85,7 +100,8 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
     return list;
   }, [contacts, filter, search]);
 
-  const showToast = (msg: string) => setToast(msg);
+  const showToast = (message: string, variant: ToastVariant = 'success') =>
+    setToast({ message, variant });
   const clearToast = useCallback(() => setToast(null), []);
 
   const goTo = (next: PanelState) => {
@@ -128,7 +144,7 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
       body: JSON.stringify(form),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error ?? 'Erro ao criar contato');
+    if (!res.ok) throw new Error(data.error ?? t('erroCriar'));
 
     const newContact: ContactListItem = {
       id: data.id,
@@ -150,7 +166,7 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
     setSelectedId(data.id);
     setPanel('view');
     setProfileKey(k => k + 1);
-    showToast('Contato criado com sucesso');
+    showToast(t('contatoCriado'));
   };
 
   const handleEditSave = async (form: { name: string; phone: string; email: string; source: string }) => {
@@ -161,7 +177,7 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
       body: JSON.stringify(form),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error ?? 'Erro ao salvar');
+    if (!res.ok) throw new Error(data.error ?? tCommon('erroSalvar'));
 
     setContacts(prev => prev.map(c =>
       c.id === selectedId
@@ -171,28 +187,32 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
 
     setPanel('view');
     setProfileKey(k => k + 1);
-    showToast('Alterações salvas');
+    showToast(t('alteracoesSalvas'));
   };
 
   const handleDeleteConfirm = async () => {
     if (!selectedId) return;
     const res = await fetch(`/api/admin/contacts/${selectedId}`, { method: 'DELETE' });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error ?? 'Erro ao remover');
+    if (!res.ok) throw new Error(data.error ?? t('erroRemover'));
 
     setContacts(prev => prev.filter(c => c.id !== selectedId));
     setSelectedId(null);
     setPanel('empty');
-    showToast('Contato removido');
+    showToast(t('contatoRemovido'));
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Left panel: contact list */}
-      <div className="w-72 flex-shrink-0 border-r border-gray-200 flex flex-col bg-white">
+    <div className="flex h-[calc(100dvh-3.5rem)] md:h-screen overflow-hidden">
+      {/* Left panel: contact list (no mobile some quando um painel está aberto) */}
+      <div
+        className={`w-full md:w-72 flex-shrink-0 border-r border-gray-200 flex-col bg-white ${
+          panel === 'empty' ? 'flex' : 'hidden md:flex'
+        }`}
+      >
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-lg font-bold text-gray-900">Contatos</h1>
+            <h1 className="text-lg font-bold text-gray-900">{t('titulo')}</h1>
             <button
               onClick={handleNewContact}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
@@ -200,12 +220,12 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
               </svg>
-              Novo
+              {t('novo')}
             </button>
           </div>
           <input
             type="search"
-            placeholder="Buscar por nome ou e-mail…"
+            placeholder={t('buscarPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -213,7 +233,7 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
         </div>
 
         <div className="px-4 py-3 border-b border-gray-100 flex flex-wrap gap-1.5">
-          {FILTERS.map(f => (
+          {FILTER_KEYS.map(f => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
@@ -223,18 +243,18 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {f.label}
+              {t(f.labelKey)}
             </button>
           ))}
         </div>
 
         <div className="flex-1 overflow-y-auto">
           {filtered.length === 0 ? (
-            <p className="p-6 text-center text-sm text-gray-400">Nenhum contato encontrado</p>
+            <p className="p-6 text-center text-sm text-gray-400">{t('nenhumContato')}</p>
           ) : (
             <ul className="py-1">
               {filtered.map(contact => {
-                const dot = getStatusDot(contact);
+                const dot = getStatusDot(contact, tClient, tLead, t);
                 const isSelected = contact.id === selectedId;
 
                 return (
@@ -265,7 +285,7 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
                           role="button"
                           onClick={e => { handleSelectContact(contact.id); handleEditContact(e); }}
                           className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors"
-                          title="Editar"
+                          title={tCommon('editar')}
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -275,7 +295,7 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
                           role="button"
                           onClick={e => handleDeleteContact(contact.id, e)}
                           className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                          title="Remover"
+                          title={tCommon('remover')}
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -298,7 +318,17 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 overflow-y-auto bg-gray-50">
+      <div className={`flex-1 overflow-y-auto bg-gray-50 ${panel === 'empty' ? 'hidden md:block' : 'block'}`}>
+        {panel !== 'empty' && (
+          <div className="md:hidden sticky top-0 z-10 bg-white border-b border-gray-200 px-3 py-2">
+            <button
+              onClick={() => setPanel('empty')}
+              className="inline-flex items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              {t('voltarContatos')}
+            </button>
+          </div>
+        )}
         {panel === 'new' && (
           <ContactForm
             mode="new"
@@ -346,13 +376,13 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
           <div className="flex items-center justify-center h-full text-gray-400">
             <div className="text-center">
               <p className="text-5xl mb-4">👤</p>
-              <p className="text-sm">Wähle einen Kontakt aus der Liste aus</p>
+              <p className="text-sm">{t('selecioneContato')}</p>
             </div>
           </div>
         )}
       </div>
 
-      {toast && <Toast message={toast} onDone={clearToast} />}
+      {toast && <Toast toast={toast} onDone={clearToast} />}
     </div>
   );
 }

@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 import { m, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 export default function CookieBanner() {
+  const t = useTranslations('public.cta.cookieBanner')
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function CookieBanner() {
       {visible && (
         <m.div
           role="dialog"
-          aria-label="Cookie-Einstellungen"
+          aria-label={t('ariaLabel')}
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
@@ -79,13 +81,12 @@ export default function CookieBanner() {
 
               {/* Text */}
               <p className="min-w-0 flex-1 text-sm leading-relaxed text-[var(--rfd-text-mid)]">
-                Wir verwenden Cookies, um dein Erlebnis zu verbessern und
-                anonymisierte Nutzungsstatistiken zu erheben.{' '}
+                {t('text')}{' '}
                 <Link
                   href="/datenschutz"
                   className="font-medium text-[var(--rfd-green-brand)] underline-offset-2 hover:underline"
                 >
-                  Mehr&nbsp;erfahren
+                  {t('mehrErfahren')}
                 </Link>
               </p>
 
@@ -95,13 +96,13 @@ export default function CookieBanner() {
                   onClick={handleReject}
                   className="cursor-pointer rounded-full border border-[var(--rfd-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--rfd-text-dark)] transition-all hover:border-[var(--rfd-text-muted)] hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rfd-green-brand)] focus-visible:ring-offset-2"
                 >
-                  Nur Notwendige
+                  {t('nurNotwendige')}
                 </button>
                 <button
                   onClick={handleAccept}
                   className="cursor-pointer rounded-full bg-[var(--rfd-green-brand)] px-4 py-2 text-sm font-medium text-white transition-all hover:bg-[var(--rfd-green-mid)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rfd-green-brand)] focus-visible:ring-offset-2"
                 >
-                  Alle akzeptieren
+                  {t('alleAkzeptieren')}
                 </button>
               </div>
             </div>

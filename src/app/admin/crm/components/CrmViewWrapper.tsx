@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import CrmKanban from './CrmKanban';
 import CrmTable from './CrmTable';
 import LeadDrawer from '@/components/admin/LeadDrawer';
@@ -13,14 +14,25 @@ const STORAGE_KEY = 'crm-view';
 
 export default function CrmViewWrapper({ leads: initialLeads }: { leads: CrmLead[] }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [view, setView] = useState<View>('kanban');
   const [leads, setLeads] = useState<CrmLead[]>(initialLeads);
   const [selectedLead, setSelectedLead] = useState<CrmLead | null>(null);
+  const t = useTranslations('admin.crm');
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === 'kanban' || saved === 'table') setView(saved as View);
   }, []);
+
+  // Deep link from the calendar ("Ver no CRM"): open the lead's drawer
+  useEffect(() => {
+    const leadId = searchParams.get('lead');
+    if (!leadId) return;
+    const lead = initialLeads.find(l => l.id === leadId);
+    if (lead) setSelectedLead(lead);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Sync when server re-renders (e.g. after creating a lead)
   useEffect(() => {
@@ -45,7 +57,7 @@ export default function CrmViewWrapper({ leads: initialLeads }: { leads: CrmLead
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex items-center bg-gray-100 rounded-lg p-1 gap-1">
           <button
             onClick={() => handleViewChange('kanban')}
@@ -53,7 +65,7 @@ export default function CrmViewWrapper({ leads: initialLeads }: { leads: CrmLead
               view === 'kanban' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            Kanban
+            {t('kanban')}
           </button>
           <button
             onClick={() => handleViewChange('table')}
@@ -61,7 +73,7 @@ export default function CrmViewWrapper({ leads: initialLeads }: { leads: CrmLead
               view === 'table' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            Tabelle
+            {t('tabela')}
           </button>
         </div>
 

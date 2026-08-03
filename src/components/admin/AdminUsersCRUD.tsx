@@ -2,6 +2,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
+import { fmtDate, fmtDateTime, fmtEur } from '@/lib/adminFormat';
 
 interface UserProfile {
   id: string;
@@ -17,7 +19,16 @@ interface UserProfile {
 
 type ModalMode = 'closed' | 'create' | 'edit' | 'view';
 
+/** Preços por edição do Guide, em euros — exibidos junto ao nome no select. */
+const EDITION_PRICES_EUR: Record<number, number> = { 1: 9, 2: 14, 3: 19, 4: 24 };
+const EDITIONS = [1, 2, 3, 4] as const;
+
 export default function AdminUsersCRUD() {
+  const t = useTranslations('admin.usuarios');
+  const tCommon = useTranslations('admin.common');
+  const tRole = useTranslations('admin.status.role');
+  const tEdicoes = useTranslations('admin.guide.edicoes');
+
   // Lista
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -135,14 +146,14 @@ export default function AdminUsersCRUD() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage({ type: 'success', text: `Benutzer "${formEmail}" erstellt.` });
+        setMessage({ type: 'success', text: t('usuarioCriado', { email: formEmail }) });
         fetchUsers();
         setTimeout(() => closeModal(), 1500);
       } else {
-        setMessage({ type: 'error', text: data.error || 'Fehler beim Erstellen.' });
+        setMessage({ type: 'error', text: data.error || t('erroCriar') });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Netzwerkfehler.' });
+      setMessage({ type: 'error', text: tCommon('erroRede') });
     } finally {
       setActionLoading(false);
     }
@@ -172,14 +183,14 @@ export default function AdminUsersCRUD() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage({ type: 'success', text: 'Benutzer aktualisiert.' });
+        setMessage({ type: 'success', text: t('usuarioAtualizado') });
         fetchUsers();
         setTimeout(() => closeModal(), 1500);
       } else {
-        setMessage({ type: 'error', text: data.error || 'Fehler beim Aktualisieren.' });
+        setMessage({ type: 'error', text: data.error || t('erroAtualizar') });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Netzwerkfehler.' });
+      setMessage({ type: 'error', text: tCommon('erroRede') });
     } finally {
       setActionLoading(false);
     }
@@ -187,11 +198,7 @@ export default function AdminUsersCRUD() {
 
   // DELETAR usuário
   const handleDelete = async (user: UserProfile) => {
-    if (
-      !confirm(
-        `Bist du sicher, dass du "${user.email}" DAUERHAFT löschen möchtest?\n\nDiese Aktion kann não rückgängig gemacht werden.`
-      )
-    ) {
+    if (!confirm(t('confirmarExcluir', { email: user.email }))) {
       return;
     }
 
@@ -206,13 +213,13 @@ export default function AdminUsersCRUD() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage({ type: 'success', text: `"${user.email}" gelöscht.` });
+        setMessage({ type: 'success', text: t('usuarioExcluido', { email: user.email }) });
         fetchUsers();
       } else {
-        setMessage({ type: 'error', text: data.error || 'Fehler beim Löschen.' });
+        setMessage({ type: 'error', text: data.error || t('erroExcluir') });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Netzwerkfehler.' });
+      setMessage({ type: 'error', text: tCommon('erroRede') });
     } finally {
       setActionLoading(false);
     }
@@ -226,7 +233,7 @@ export default function AdminUsersCRUD() {
 
   // Ação rápida: Revogar premium
   const quickRevoke = async (user: UserProfile) => {
-    if (!confirm(`Premium-Zugang von "${user.email}" widerrufen?`)) return;
+    if (!confirm(t('confirmarRevogar', { email: user.email }))) return;
 
     try {
       const res = await fetch(`/api/admin/users/${user.id}`, {
@@ -236,53 +243,35 @@ export default function AdminUsersCRUD() {
       });
 
       if (res.ok) {
-        setMessage({ type: 'success', text: `Premium von "${user.email}" widerrufen.` });
+        setMessage({ type: 'success', text: t('premiumRevogado', { email: user.email }) });
         fetchUsers();
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Fehler.' });
+      setMessage({ type: 'error', text: t('erro') });
     }
   };
 
   // Helpers
-  const formatDate = (date: string | null) => {
-    if (!date) return '—';
-    return new Date(date).toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  };
-
-  const formatDateTime = (date: string | null) => {
-    if (!date) return '—';
-    return new Date(date).toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const roleLabel = (role: string) => (tRole.has(role) ? tRole(role) : role);
 
   const roleBadge = (role: string) => {
     switch (role) {
       case 'admin':
         return (
           <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700">
-            🔑 Admin
+            {t('papelAdmin')}
           </span>
         );
       case 'premium':
         return (
           <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-700">
-            ⭐ Premium
+            {t('papelPremium')}
           </span>
         );
       default:
         return (
           <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">
-            Kostenlos
+            {roleLabel('user')}
           </span>
         );
     }
@@ -295,40 +284,45 @@ export default function AdminUsersCRUD() {
   const adminUsers = users.filter((u) => u.role === 'admin').length;
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-6xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">👥 Benutzer</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
             <p className="text-gray-500 mt-1">
-              {totalUsers} gesamt · {freeUsers} kostenlos · {premiumUsers} premium · {adminUsers} admin
+              {t('resumoContagem', {
+                total: totalUsers,
+                gratuitos: freeUsers,
+                premium: premiumUsers,
+                admins: adminUsers,
+              })}
             </p>
           </div>
           <button
             onClick={openCreateModal}
             className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
           >
-            + Benutzer erstellen
+            {t('criarUsuario')}
           </button>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <p className="text-xs text-gray-500">Gesamt</p>
+            <p className="text-xs text-gray-500">{t('cardTotal')}</p>
             <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <p className="text-xs text-gray-500">Kostenlos</p>
+            <p className="text-xs text-gray-500">{t('cardGratuitos')}</p>
             <p className="text-2xl font-bold text-blue-600">{freeUsers}</p>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <p className="text-xs text-gray-500">⭐ Premium</p>
+            <p className="text-xs text-gray-500">{t('cardPremium')}</p>
             <p className="text-2xl font-bold text-yellow-600">{premiumUsers}</p>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <p className="text-xs text-gray-500">🔑 Admin</p>
+            <p className="text-xs text-gray-500">{t('cardAdmin')}</p>
             <p className="text-2xl font-bold text-red-600">{adminUsers}</p>
           </div>
         </div>
@@ -350,7 +344,7 @@ export default function AdminUsersCRUD() {
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <input
             type="text"
-            placeholder="E-Mail suchen..."
+            placeholder={t('buscarEmail')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
@@ -360,10 +354,10 @@ export default function AdminUsersCRUD() {
             onChange={(e) => setRoleFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-sm"
           >
-            <option value="all">Alle Rollen</option>
-            <option value="user">Kostenlos</option>
-            <option value="premium">Premium</option>
-            <option value="admin">Admin</option>
+            <option value="all">{t('todosPapeis')}</option>
+            <option value="user">{tRole('user')}</option>
+            <option value="premium">{tRole('premium')}</option>
+            <option value="admin">{tRole('admin')}</option>
           </select>
         </div>
 
@@ -374,25 +368,25 @@ export default function AdminUsersCRUD() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
-                    E-Mail
+                    {tCommon('email')}
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
-                    Name
+                    {tCommon('nome')}
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
-                    Rolle
+                    {t('colPapel')}
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">
-                    Registriert
+                    {t('colRegistrado')}
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">
-                    Premium seit
+                    {t('colPremiumDesde')}
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden lg:table-cell">
-                    Edition
+                    {t('colEdicao')}
                   </th>
                   <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
-                    Aktionen
+                    {tCommon('acoes')}
                   </th>
                 </tr>
               </thead>
@@ -400,13 +394,13 @@ export default function AdminUsersCRUD() {
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                      Laden...
+                      {tCommon('carregando')}
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                      Keine Benutzer gefunden.
+                      {t('nenhumUsuario')}
                     </td>
                   </tr>
                 ) : (
@@ -420,7 +414,7 @@ export default function AdminUsersCRUD() {
                           {u.email}
                         </button>
                         <p className="text-xs text-gray-400 md:hidden">
-                          {formatDate(u.created_at)}
+                          {fmtDate(u.created_at)}
                         </p>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700">
@@ -428,13 +422,13 @@ export default function AdminUsersCRUD() {
                       </td>
                       <td className="px-4 py-3">{roleBadge(u.role)}</td>
                       <td className="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">
-                        {formatDate(u.created_at)}
+                        {fmtDate(u.created_at)}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">
-                        {formatDate(u.premium_since)}
+                        {fmtDate(u.premium_since)}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-500 hidden lg:table-cell">
-                        {u.guide_edition ? `Ed. ${u.guide_edition}` : '—'}
+                        {u.guide_edition ? t('edicaoAbrev', { n: u.guide_edition }) : tCommon('vazio')}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex justify-end gap-1">
@@ -442,7 +436,7 @@ export default function AdminUsersCRUD() {
                           <button
                             onClick={() => openEditModal(u)}
                             className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
-                            title="Bearbeiten"
+                            title={t('editarTitle')}
                           >
                             ✏️
                           </button>
@@ -452,18 +446,18 @@ export default function AdminUsersCRUD() {
                             <button
                               onClick={() => quickUpgrade(u)}
                               className="px-2.5 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors cursor-pointer"
-                              title="Upgrade zu Premium"
+                              title={t('upgradePremium')}
                             >
-                              ⭐ Upgrade
+                              {t('upgrade')}
                             </button>
                           )}
                           {u.role === 'premium' && (
                             <button
                               onClick={() => quickRevoke(u)}
                               className="px-2.5 py-1 text-xs font-medium bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
-                              title="Premium widerrufen"
+                              title={t('revogarPremium')}
                             >
-                              ✕ Widerrufen
+                              {t('revogar')}
                             </button>
                           )}
 
@@ -472,7 +466,7 @@ export default function AdminUsersCRUD() {
                             <button
                               onClick={() => handleDelete(u)}
                               className="px-2 py-1 text-xs text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                              title="Löschen"
+                              title={t('excluirTitle')}
                             >
                               🗑️
                             </button>
@@ -495,9 +489,9 @@ export default function AdminUsersCRUD() {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">
-                {modalMode === 'create' && '+ Neuen Benutzer erstellen'}
-                {modalMode === 'edit' && '✏️ Benutzer bearbeiten'}
-                {modalMode === 'view' && '👤 Benutzerdetails'}
+                {modalMode === 'create' && t('criarNovoUsuario')}
+                {modalMode === 'edit' && t('editarUsuario')}
+                {modalMode === 'view' && t('detalhesUsuario')}
               </h3>
               <button
                 onClick={closeModal}
@@ -530,47 +524,47 @@ export default function AdminUsersCRUD() {
                     <p className="text-sm font-medium">{selectedUser.email}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Vorname</p>
+                    <p className="text-xs text-gray-500">{t('primeiroNome')}</p>
                     <p className="text-sm font-medium">{selectedUser.first_name || '—'}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Rolle</p>
+                    <p className="text-xs text-gray-500">{t('papel')}</p>
                     <div className="mt-1">{roleBadge(selectedUser.role)}</div>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Registriert</p>
-                    <p className="text-sm">{formatDateTime(selectedUser.created_at)}</p>
+                    <p className="text-xs text-gray-500">{t('colRegistrado')}</p>
+                    <p className="text-sm">{fmtDateTime(selectedUser.created_at)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Premium seit</p>
-                    <p className="text-sm">{formatDateTime(selectedUser.premium_since)}</p>
+                    <p className="text-xs text-gray-500">{t('colPremiumDesde')}</p>
+                    <p className="text-sm">{fmtDateTime(selectedUser.premium_since)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Premium bis</p>
+                    <p className="text-xs text-gray-500">{t('premiumAte')}</p>
                     <p className="text-sm">
                       {selectedUser.premium_until
-                        ? formatDate(selectedUser.premium_until)
+                        ? fmtDate(selectedUser.premium_until)
                         : selectedUser.role === 'premium'
-                        ? 'Lebenslang'
+                        ? t('vitalicio')
                         : '—'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Guide-Edition</p>
+                    <p className="text-xs text-gray-500">{t('edicaoGuide')}</p>
                     <p className="text-sm">
                       {selectedUser.guide_edition
-                        ? `Edition ${selectedUser.guide_edition}`
+                        ? t('edicao', { n: selectedUser.guide_edition })
                         : '—'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Payment ID</p>
+                    <p className="text-xs text-gray-500">{t('paymentId')}</p>
                     <p className="text-sm font-mono text-xs">
                       {selectedUser.payment_id || '—'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">User ID</p>
+                    <p className="text-xs text-gray-500">{t('userId')}</p>
                     <p className="text-sm font-mono text-xs text-gray-400">
                       {selectedUser.id}
                     </p>
@@ -582,7 +576,7 @@ export default function AdminUsersCRUD() {
                       onClick={() => openEditModal(selectedUser)}
                       className="flex-1 px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
                     >
-                      ✏️ Bearbeiten
+                      {t('editarUsuario')}
                     </button>
                     {selectedUser.role !== 'admin' && (
                       <button
@@ -592,7 +586,7 @@ export default function AdminUsersCRUD() {
                         }}
                         className="px-4 py-2 text-sm font-medium bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
                       >
-                        🗑️ Löschen
+                        🗑️ {tCommon('excluir')}
                       </button>
                     )}
                   </div>
@@ -602,16 +596,16 @@ export default function AdminUsersCRUD() {
               {/* === CREATE / EDIT MODE === */}
               {(modalMode === 'create' || modalMode === 'edit') && (
                 <div className="space-y-4">
-                  {/* Vorname */}
+                  {/* Primeiro nome */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Vorname
+                      {t('primeiroNome')}
                     </label>
                     <input
                       type="text"
                       value={formFirstName}
                       onChange={(e) => setFormFirstName(e.target.value)}
-                      placeholder="z.B. Sarah"
+                      placeholder={t('primeiroNomePlaceholder')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     />
                   </div>
@@ -619,7 +613,7 @@ export default function AdminUsersCRUD() {
                   {/* Email */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      E-Mail
+                      {tCommon('email')}
                     </label>
                     <input
                       type="email"
@@ -635,13 +629,13 @@ export default function AdminUsersCRUD() {
                   {modalMode === 'create' && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Passwort
+                        {t('senha')}
                       </label>
                       <input
                         type="text"
                         value={formPassword}
                         onChange={(e) => setFormPassword(e.target.value)}
-                        placeholder="Mindestens 6 Zeichen"
+                        placeholder={t('senhaHint')}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                       />
                     </div>
@@ -650,7 +644,7 @@ export default function AdminUsersCRUD() {
                   {/* Role */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Rolle
+                      {t('papel')}
                     </label>
                     <select
                       value={formRole}
@@ -659,9 +653,9 @@ export default function AdminUsersCRUD() {
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm bg-white"
                     >
-                      <option value="user">Kostenlos (user)</option>
-                      <option value="premium">⭐ Premium</option>
-                      <option value="admin">🔑 Admin</option>
+                      <option value="user">{t('opcaoUser')}</option>
+                      <option value="premium">{t('papelPremium')}</option>
+                      <option value="admin">{t('papelAdmin')}</option>
                     </select>
                   </div>
 
@@ -670,23 +664,27 @@ export default function AdminUsersCRUD() {
                     <>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Guide-Edition
+                          {t('edicaoGuide')}
                         </label>
                         <select
                           value={formEdition}
                           onChange={(e) => setFormEdition(Number(e.target.value))}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm bg-white"
                         >
-                          <option value={1}>Edition 1 — O Essencial (9€)</option>
-                          <option value={2}>Edition 2 — Viver o Rio (14€)</option>
-                          <option value={3}>Edition 3 — Como um Local (19€)</option>
-                          <option value={4}>Edition 4 — Rio Completo (24€)</option>
+                          {[1, 2, 3, 4].map((ed) => (
+                            <option key={ed} value={ed}>
+                              {t('edicaoComPreco', {
+                                nome: tEdicoes(String(ed)),
+                                preco: fmtEur(EDITION_PRICES_EUR[ed]),
+                              })}
+                            </option>
+                          ))}
                         </select>
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Ablaufdatum (optional)
+                          {t('dataExpiracao')}
                         </label>
                         <input
                           type="date"
@@ -695,19 +693,19 @@ export default function AdminUsersCRUD() {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                         />
                         <p className="text-xs text-gray-400 mt-1">
-                          Leer = lebenslanger Zugang
+                          {t('dataExpiracaoHint')}
                         </p>
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Payment ID (optional)
+                          {t('paymentId')}
                         </label>
                         <input
                           type="text"
                           value={formPaymentId}
                           onChange={(e) => setFormPaymentId(e.target.value)}
-                          placeholder="z.B. Stripe pi_xxx oder PayPal TX-xxx"
+                          placeholder={t('paymentIdPlaceholder')}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm font-mono"
                         />
                       </div>
@@ -724,7 +722,7 @@ export default function AdminUsersCRUD() {
                   onClick={closeModal}
                   className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
                 >
-                  Abbrechen
+                  {tCommon('cancelar')}
                 </button>
                 <button
                   onClick={modalMode === 'create' ? handleCreate : handleUpdate}
@@ -732,10 +730,10 @@ export default function AdminUsersCRUD() {
                   className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   {actionLoading
-                    ? 'Laden...'
+                    ? tCommon('carregando')
                     : modalMode === 'create'
-                    ? 'Erstellen'
-                    : 'Speichern'}
+                    ? tCommon('criar')
+                    : tCommon('salvar')}
                 </button>
               </div>
             )}

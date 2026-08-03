@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
     MapPin,
     Phone,
@@ -30,59 +31,81 @@ type NavLink =
     | { label: string; href: string; subLinks: SubLink[]; subGroups?: never; directLinks?: never }
     | { label: string; href: string; subGroups: SubGroup[]; subLinks?: never; directLinks?: SubLink[] };
 
-const navLinks: NavLink[] = [
+/**
+ * O catálogo é lido por hook, então a lista precisa ser construída dentro do
+ * componente — daí ser função de `t` em vez de constante de módulo.
+ */
+function buildNavLinks(t: (key: string) => string): NavLink[] {
+    return [
     {
-        label: "Touren & Ausflüge",
+        label: t("tourenUndAusfluege"),
         href: "/touren",
         subLinks: [
-            { href: "/touren/klassiker", label: "🏔️ Klassiker Tour" },
-            { href: "/touren/natur-und-straende", label: "🌿 Natur & Strände" },
-            { href: "/touren/favela-tour", label: "🏘️ Favela Tour" },
-            { href: "/touren/kultur-und-geschichte", label: "🏛️ Kultur & Geschichte" },
-            { href: "/touren/by-night", label: "🌙 Rio by Night" },
-            { href: "/touren/karneval-tour", label: "🎉 Karneval Tour" },
-            { href: "/touren/regentage", label: "☔ Regentage in Rio" },
-            { href: "/touren/fussball", label: "⚽ Fußball Tour" },
-            { href: "/touren/sport-und-abenteuer", label: "🧗 Sport & Abenteuer" },
-            { href: "/touren/tagesausfluege", label: "🗺️ Tagesausflüge" },
-            { href: "/touren/individuell", label: "🎯 Individuelle Tour" },
+            { href: "/touren/klassiker", label: t("klassikerTour") },
+            { href: "/touren/natur-und-straende", label: t("naturUndStraende") },
+            { href: "/touren/favela-tour", label: t("favelaTour") },
+            { href: "/touren/kultur-und-geschichte", label: t("kulturUndGeschichte") },
+            { href: "/touren/by-night", label: t("rioByNight") },
+            { href: "/touren/karneval-tour", label: t("karnevalTour") },
+            { href: "/touren/regentage", label: t("regentageInRio") },
+            { href: "/touren/fussball", label: t("fussballTour") },
+            { href: "/touren/sport-und-abenteuer", label: t("sportUndAbenteuer") },
+            { href: "/touren/tagesausfluege", label: t("tagesausfluege") },
+            { href: "/touren/individuell", label: t("individuelleTour") },
         ],
     },
     {
-        label: "Rio-Guide",
+        label: t("rioGuide"),
         href: "/rio-guide",
         subGroups: [
             {
-                label: "Sehenswürdigkeiten",
+                label: t("sehenswuerdigkeiten"),
                 href: "/rio-guide/sehenswuerdigkeiten",
                 items: [
-                    { href: "/rio-guide/sehenswuerdigkeiten/christus-erloeser", label: "Christus-Erlöser" },
-                    { href: "/rio-guide/sehenswuerdigkeiten/zuckerhut", label: "Zuckerhut" },
-                    { href: "/rio-guide/sehenswuerdigkeiten/escadaria-selaron", label: "Escadaria Selarón" },
-                    { href: "/rio-guide/sehenswuerdigkeiten/rocinha", label: "Rocinha" },
-                    { href: "/rio-guide/sehenswuerdigkeiten/santa-marta", label: "Favela Santa Marta" },
+                    { href: "/rio-guide/sehenswuerdigkeiten/christus-erloeser", label: t("christusErloeser") },
+                    { href: "/rio-guide/sehenswuerdigkeiten/zuckerhut", label: t("zuckerhut") },
+                    { href: "/rio-guide/sehenswuerdigkeiten/escadaria-selaron", label: t("escadariaSelaron") },
+                    { href: "/rio-guide/sehenswuerdigkeiten/rocinha", label: t("rocinha") },
+                    { href: "/rio-guide/sehenswuerdigkeiten/santa-marta", label: t("santaMarta") },
+                    { href: "/rio-guide/sehenswuerdigkeiten/the-maze", label: t("theMaze") },
                 ],
                 allHref: "/rio-guide/sehenswuerdigkeiten",
-                allLabel: "Alle ansehen",
+                allLabel: t("alleAnsehen"),
             },
         ],
         directLinks: [
-            { href: "/ist-rio-gefaehrlich", label: "Sicherheit" },
+            { href: "/ist-rio-gefaehrlich", label: t("sicherheit") },
         ],
     },
-    { href: "/#ueber-uns", label: "Über Uns" },
-    { href: "/#bewertungen", label: "Bewertungen" },
-    { href: "/kontakt", label: "Kontakt" },
-];
+    { href: "/ueber-will", label: t("ueberUns") },
+    { href: "/#bewertungen", label: t("bewertungen") },
+    { href: "/kontakt", label: t("kontakt") },
+    ];
+}
 
 const NAVBAR_FALLBACK: Pick<ContactUrls, 'phone' | 'phoneHref' | 'instagramHref' | 'youtubeHref'> = {
-  phone: '+55 21 99056 4944',
-  phoneHref: 'tel:+5521990564944',
+  phone: '+55 21 97927-7472',
+  phoneHref: 'tel:+5521979277472',
   instagramHref: 'https://instagram.com/riofuerdeutsche',
   youtubeHref: 'https://youtube.com/@riofuerdeutsche',
 }
 
-export default function Navbar({ contact = NAVBAR_FALLBACK }: { contact?: Pick<ContactUrls, 'phone' | 'phoneHref' | 'instagramHref' | 'youtubeHref'> }) {
+export default function Navbar({ contact: contactProp }: { contact?: Pick<ContactUrls, 'phone' | 'phoneHref' | 'instagramHref' | 'youtubeHref'> }) {
+    const t = useTranslations('public.nav');
+    const navLinks = buildNavLinks(t);
+
+    // Merge per-field: use each DB value when present, otherwise the fallback.
+    // A default parameter only applies when `contact` is undefined, so an object
+    // with empty strings (DB miss) would otherwise defeat NAVBAR_FALLBACK entirely.
+    const contact: Pick<ContactUrls, 'phone' | 'phoneHref' | 'instagramHref' | 'youtubeHref'> = {
+        phone: contactProp?.phone?.trim() || NAVBAR_FALLBACK.phone,
+        phoneHref: contactProp?.phoneHref?.trim() && contactProp.phoneHref.trim() !== 'tel:'
+            ? contactProp.phoneHref
+            : NAVBAR_FALLBACK.phoneHref,
+        instagramHref: contactProp?.instagramHref?.trim() || NAVBAR_FALLBACK.instagramHref,
+        youtubeHref: contactProp?.youtubeHref?.trim() || NAVBAR_FALLBACK.youtubeHref,
+    };
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [mobileTourenOpen, setMobileTourenOpen] = useState(false);
     const [mobileGuideOpen, setMobileGuideOpen] = useState(false);
@@ -103,7 +126,7 @@ export default function Navbar({ contact = NAVBAR_FALLBACK }: { contact?: Pick<C
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <nav className="hidden lg:flex gap-8 items-center" aria-label="Hauptnavigation">
+                    <nav className="hidden lg:flex gap-8 items-center" aria-label={t('hauptnavigation')}>
                         {navLinks.map((link) => {
                             if (link.subLinks) {
                                 return (
@@ -223,7 +246,7 @@ export default function Navbar({ contact = NAVBAR_FALLBACK }: { contact?: Pick<C
                         <button
                             className="lg:hidden p-2 text-gray-700 hover:text-rio-green transition-colors relative z-[130]"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            aria-label="Menü öffnen"
+                            aria-label={t('menueOeffnen')}
                             aria-expanded={isMenuOpen}
                         >
                             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -237,10 +260,10 @@ export default function Navbar({ contact = NAVBAR_FALLBACK }: { contact?: Pick<C
                 className={`fixed inset-0 z-[110] lg:hidden bg-white transition-all duration-500 ease-in-out ${isMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
                 role="dialog"
                 aria-modal="true"
-                aria-label="Mobile Navigation"
+                aria-label={t('mobileNavigation')}
             >
                 <div className="flex flex-col h-full pt-24 pb-8 px-8 overflow-y-auto">
-                    <nav className="flex flex-col gap-8 items-center text-center py-10 w-full" aria-label="Mobile Navigation">
+                    <nav className="flex flex-col gap-8 items-center text-center py-10 w-full" aria-label={t('mobileNavigation')}>
                         {navLinks.map((link) => {
                             if (link.subLinks) {
                                 return (
@@ -256,7 +279,7 @@ export default function Navbar({ contact = NAVBAR_FALLBACK }: { contact?: Pick<C
                                             <button
                                                 className="p-2"
                                                 onClick={() => setMobileTourenOpen(!mobileTourenOpen)}
-                                                aria-label="Toggle Submenu"
+                                                aria-label={t('toggleSubmenu')}
                                             >
                                                 <ChevronDown className={`w-6 h-6 transition-transform duration-300 ${mobileTourenOpen ? "-rotate-180 text-rio-green" : ""}`} />
                                             </button>
@@ -287,7 +310,7 @@ export default function Navbar({ contact = NAVBAR_FALLBACK }: { contact?: Pick<C
                                             <button
                                                 className="p-2"
                                                 onClick={() => setMobileGuideOpen(!mobileGuideOpen)}
-                                                aria-label="Toggle Submenu"
+                                                aria-label={t('toggleSubmenu')}
                                             >
                                                 <ChevronDown className={`w-6 h-6 transition-transform duration-300 ${mobileGuideOpen ? "-rotate-180 text-rio-green" : ""}`} />
                                             </button>
@@ -302,7 +325,7 @@ export default function Navbar({ contact = NAVBAR_FALLBACK }: { contact?: Pick<C
                                                         <button
                                                             className="p-1"
                                                             onClick={() => setMobileGuideSehenOpen(!mobileGuideSehenOpen)}
-                                                            aria-label="Toggle Sehenswürdigkeiten"
+                                                            aria-label={t('toggleSehenswuerdigkeiten')}
                                                         >
                                                             <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${mobileGuideSehenOpen ? "-rotate-180 text-rio-green" : ""}`} />
                                                         </button>
@@ -364,7 +387,7 @@ export default function Navbar({ contact = NAVBAR_FALLBACK }: { contact?: Pick<C
                     </nav>
 
                     <div className="mt-auto pt-10 text-center border-t border-gray-100 pb-10">
-                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-4">Kontaktieren Sie uns</p>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-4">{t('kontaktierenSieUns')}</p>
                         <div className="flex flex-col items-center gap-4">
                             <a href={contact.phoneHref} className="flex items-center gap-3 text-gray-700 font-semibold text-xl">
                                 <Phone className="h-6 w-6 text-rio-green" />

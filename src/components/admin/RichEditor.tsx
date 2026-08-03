@@ -16,6 +16,7 @@ import Highlight from '@tiptap/extension-highlight'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import CharacterCount from '@tiptap/extension-character-count'
+import { useTranslations } from 'next-intl'
 
 interface RichEditorProps {
   content: any
@@ -23,6 +24,8 @@ interface RichEditorProps {
 }
 
 export default function RichEditor({ content, onChange }: RichEditorProps) {
+  const t = useTranslations('admin.editor')
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -37,7 +40,7 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Underline,
       Link.configure({ openOnClick: false }),
-      Placeholder.configure({ placeholder: 'Beginne hier zu schreiben...' }),
+      Placeholder.configure({ placeholder: t('placeholder') }),
       Highlight.configure({ multicolor: true }),
       TextStyle,
       Color,
@@ -54,19 +57,19 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
 
   // Função para adicionar imagem por URL
   const addImage = () => {
-    const url = window.prompt('Bild URL:')
+    const url = window.prompt(t('urlImagem'))
     if (url) editor.chain().focus().setImage({ src: url }).run()
   }
 
   // Função para adicionar vídeo do YouTube
   const addYoutube = () => {
-    const url = window.prompt('YouTube URL:')
+    const url = window.prompt(t('urlYoutube'))
     if (url) editor.chain().focus().setYoutubeVideo({ src: url }).run()
   }
 
   // Função para adicionar link
   const setLink = () => {
-    const url = window.prompt('URL:')
+    const url = window.prompt(t('url'))
     if (url) {
       editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
     } else {
@@ -94,10 +97,10 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
               editor.isActive('heading', { level: 3 }) ? '3' : 'p'
             }
           >
-            <option value="p">Absatz</option>
-            <option value="1">Überschrift 1</option>
-            <option value="2">Überschrift 2</option>
-            <option value="3">Überschrift 3</option>
+            <option value="p">{t('paragrafo')}</option>
+            <option value="1">{t('titulo1')}</option>
+            <option value="2">{t('titulo2')}</option>
+            <option value="3">{t('titulo3')}</option>
           </select>
         </div>
 
@@ -106,19 +109,19 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
         {/* Formatação básica */}
         <div className="toolbar-group">
           <button onClick={() => editor.chain().focus().toggleBold().run()}
-            className={editor.isActive('bold') ? 'active' : ''} title="Fett">
+            className={editor.isActive('bold') ? 'active' : ''} title={t('negrito')}>
             <strong>B</strong>
           </button>
           <button onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={editor.isActive('italic') ? 'active' : ''} title="Kursiv">
+            className={editor.isActive('italic') ? 'active' : ''} title={t('italico')}>
             <em>I</em>
           </button>
           <button onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className={editor.isActive('underline') ? 'active' : ''} title="Unterstrichen">
+            className={editor.isActive('underline') ? 'active' : ''} title={t('sublinhado')}>
             <u>U</u>
           </button>
           <button onClick={() => editor.chain().focus().toggleHighlight().run()}
-            className={editor.isActive('highlight') ? 'active' : ''} title="Markieren">
+            className={editor.isActive('highlight') ? 'active' : ''} title={t('marcar')}>
             🖊
           </button>
         </div>
@@ -128,15 +131,15 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
         {/* Alinhamento */}
         <div className="toolbar-group">
           <button onClick={() => editor.chain().focus().setTextAlign('left').run()}
-            className={editor.isActive({ textAlign: 'left' }) ? 'active' : ''} title="Links">
+            className={editor.isActive({ textAlign: 'left' }) ? 'active' : ''} title={t('esquerda')}>
             ◀
           </button>
           <button onClick={() => editor.chain().focus().setTextAlign('center').run()}
-            className={editor.isActive({ textAlign: 'center' }) ? 'active' : ''} title="Mitte">
+            className={editor.isActive({ textAlign: 'center' }) ? 'active' : ''} title={t('centro')}>
             ▬
           </button>
           <button onClick={() => editor.chain().focus().setTextAlign('right').run()}
-            className={editor.isActive({ textAlign: 'right' }) ? 'active' : ''} title="Rechts">
+            className={editor.isActive({ textAlign: 'right' }) ? 'active' : ''} title={t('direita')}>
             ▶
           </button>
         </div>
@@ -146,12 +149,12 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
         {/* Listas */}
         <div className="toolbar-group">
           <button onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={editor.isActive('bulletList') ? 'active' : ''} title="Liste">
-            • Liste
+            className={editor.isActive('bulletList') ? 'active' : ''} title={t('lista')}>
+            {t('listaAbrev')}
           </button>
           <button onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className={editor.isActive('orderedList') ? 'active' : ''} title="Nummerierte Liste">
-            1. Liste
+            className={editor.isActive('orderedList') ? 'active' : ''} title={t('listaNumerada')}>
+            {t('listaNumeradaAbrev')}
           </button>
         </div>
 
@@ -160,11 +163,11 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
         {/* Blocos especiais */}
         <div className="toolbar-group">
           <button onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            className={editor.isActive('blockquote') ? 'active' : ''} title="Zitat / Tipp-Box">
-            💬 Box
+            className={editor.isActive('blockquote') ? 'active' : ''} title={t('citacao')}>
+            {t('citacaoAbrev')}
           </button>
-          <button onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Trennlinie">
-            — Linie
+          <button onClick={() => editor.chain().focus().setHorizontalRule().run()} title={t('linhaDivisoria')}>
+            {t('linhaAbrev')}
           </button>
         </div>
 
@@ -173,14 +176,14 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
         {/* Tabela */}
         <div className="toolbar-group">
           <button onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-            title="Tabelle einfügen">
-            📊 Tabelle
+            title={t('inserirTabela')}>
+            {t('tabelaAbrev')}
           </button>
           {editor.isActive('table') && (
             <>
-              <button onClick={() => editor.chain().focus().addColumnAfter().run()}>+ Spalte</button>
-              <button onClick={() => editor.chain().focus().addRowAfter().run()}>+ Zeile</button>
-              <button onClick={() => editor.chain().focus().deleteTable().run()}>✕ Tabelle</button>
+              <button onClick={() => editor.chain().focus().addColumnAfter().run()}>{t('adicionarColuna')}</button>
+              <button onClick={() => editor.chain().focus().addRowAfter().run()}>{t('adicionarLinha')}</button>
+              <button onClick={() => editor.chain().focus().deleteTable().run()}>{t('removerTabela')}</button>
             </>
           )}
         </div>
@@ -189,11 +192,11 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
 
         {/* Mídia */}
         <div className="toolbar-group">
-          <button onClick={addImage} title="Bild einfügen">🖼 Bild</button>
-          <button onClick={addYoutube} title="YouTube Video einfügen">▶ YouTube</button>
+          <button onClick={addImage} title={t('inserirImagem')}>{t('imagemAbrev')}</button>
+          <button onClick={addYoutube} title={t('inserirYoutube')}>{t('youtubeAbrev')}</button>
           <button onClick={setLink}
-            className={editor.isActive('link') ? 'active' : ''} title="Link">
-            🔗 Link
+            className={editor.isActive('link') ? 'active' : ''} title={t('link')}>
+            {t('linkAbrev')}
           </button>
         </div>
 
@@ -201,13 +204,13 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
 
         {/* Undo/Redo */}
         <div className="toolbar-group">
-          <button onClick={() => editor.chain().focus().undo().run()} title="Rückgängig">↩</button>
-          <button onClick={() => editor.chain().focus().redo().run()} title="Wiederholen">↪</button>
+          <button onClick={() => editor.chain().focus().undo().run()} title={t('desfazer')}>↩</button>
+          <button onClick={() => editor.chain().focus().redo().run()} title={t('refazer')}>↪</button>
         </div>
 
         {/* Contador de caracteres */}
         <div className="toolbar-char-count">
-          {editor.storage.characterCount.characters()} Zeichen
+          {editor.storage.characterCount.characters()}{t('caracteres')}
         </div>
       </div>
 

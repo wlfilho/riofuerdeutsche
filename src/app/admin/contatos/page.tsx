@@ -1,7 +1,11 @@
+import { getAdminTranslations } from '@/i18n/admin';
 import { createClient } from '@/utils/supabase/server';
 import ContactsPageClient, { type ContactListItem } from './ContactsPageClient';
 
-export const metadata = { title: 'Contatos — Admin' };
+export async function generateMetadata() {
+  const t = await getAdminTranslations('admin.contatos');
+  return { title: t('metaTitle') };
+}
 
 export default async function ContatosPage() {
   const supabase = await createClient();

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type {
   ProposalService,
   ProposalServiceCategory,
@@ -17,13 +18,29 @@ type CostDraft = {
   base_price: number | '';
   currency: 'EUR' | 'BRL';
   price_type: 'fixed' | 'per_pax' | 'per_hour';
+  // true = cobrado na proposta; false = cliente paga no local (valor exibido).
+  include_in_price: boolean;
 };
 
-type FormState = {
+// Texto traduzível de um serviço, por idioma. É o que vai para
+// proposal_service_translations — as colunas antigas de proposal_services
+// (name/description/pdf_note) estão deprecated e não são mais escritas.
+type LocaleText = {
   name: string;
-  category: ProposalServiceCategory | '';
   description: string;
   pdf_note: string;
+};
+
+const EMPTY_LOCALE_TEXT: LocaleText = { name: '', description: '', pdf_note: '' };
+
+// Serviço como vem da API: além das colunas, o mapa locale → texto.
+type ServiceWithTranslations = ProposalService & {
+  translations?: Record<string, Partial<LocaleText> | undefined>;
+};
+
+// Campos NÃO traduzíveis. O texto por idioma vive em `texts`, à parte.
+type FormState = {
+  category: ProposalServiceCategory | '';
   notes: string;
   is_active: boolean;
   duration_hours: string;
@@ -34,28 +51,32 @@ type FormState = {
 };
 
 const EMPTY_FORM: FormState = {
-  name: '', category: '', description: '', pdf_note: '', notes: '',
+  category: '', notes: '',
   is_active: true, duration_hours: '', transfer_hours_to: '',
   transfer_hours_back: '', suggested_period: '', transport_type_id: '',
 };
 
+// Rótulo curto da aba/badge: 'pt-BR' → 'PT'.
+function localeLabel(locale: string): string {
+  return locale.split('-')[0].toUpperCase();
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CATEGORY_CONFIG: Record<ProposalServiceCategory, { label: string; cls: string }> = {
-  transfer: { label: 'Transfer', cls: 'bg-blue-100 text-blue-700' },
-  tour:     { label: 'Tour',     cls: 'bg-green-100 text-green-700' },
-  extra:    { label: 'Extra',    cls: 'bg-purple-100 text-purple-700' },
-  atração:  { label: 'Atração',  cls: 'bg-amber-100 text-amber-700' },
+// Só a aparência: os rótulos vêm de admin.atividades.categorias / .periodos.
+const CATEGORY_CLS: Record<ProposalServiceCategory, string> = {
+  transfer: 'bg-blue-100 text-blue-700',
+  tour:     'bg-green-100 text-green-700',
+  extra:    'bg-purple-100 text-purple-700',
+  atração:  'bg-amber-100 text-amber-700',
 };
 
-const PERIOD_CONFIG: Record<ProposalServicePeriod, { label: string; icon: string }> = {
-  morning:   { label: 'Manhã',       icon: '🌅' },
-  afternoon: { label: 'Tarde',       icon: '🌇' },
-  evening:   { label: 'Noite',       icon: '🌙' },
-  full_day:  { label: 'Dia inteiro', icon: '☀️' },
+const PERIOD_ICON: Record<ProposalServicePeriod, string> = {
+  morning:   '🌅',
+  afternoon: '🌇',
+  evening:   '🌙',
+  full_day:  '☀️',
 };
-
-const PRICE_TYPE_LABELS = { fixed: 'Fixo', per_pax: 'Por pessoa', per_hour: 'Por hora' };
 
 const INPUT_CLS =
   'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent';
@@ -88,11 +109,44 @@ function formatHours(h: number): string {
 // ─── CategoryBadge ────────────────────────────────────────────────────────────
 
 function CategoryBadge({ category }: { category: ProposalServiceCategory }) {
-  const cfg = CATEGORY_CONFIG[category] ?? { label: category, cls: 'bg-gray-100 text-gray-600' };
+  const tCat = useTranslations('admin.atividades.categorias');
+  const cls = CATEGORY_CLS[category] ?? 'bg-gray-100 text-gray-600';
   return (
-    <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${cfg.cls}`}>
-      {cfg.label}
+    <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${cls}`}>
+      {tCat.has(category) ? tCat(category) : category}
     </span>
+  );
+}
+
+// ─── CoverageBadges ───────────────────────────────────────────────────────────
+
+// "DE ✓ PT —": um locale conta como traduzido quando existe linha com name
+// não-vazio em proposal_service_translations.
+function CoverageBadges({
+  locales,
+  translations,
+}: {
+  locales: string[];
+  translations: Record<string, Partial<LocaleText> | undefined> | undefined;
+}) {
+  const t = useTranslations('admin.atividades');
+  return (
+    <div className="flex items-center gap-1.5">
+      {locales.map(locale => {
+        const done = Boolean(translations?.[locale]?.name?.trim());
+        return (
+          <span
+            key={locale}
+            title={done ? t('idiomaTraduzido', { idioma: locale }) : t('idiomaFaltando', { idioma: locale })}
+            className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[11px] font-semibold rounded ${
+              done ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-400'
+            }`}
+          >
+            {localeLabel(locale)} {done ? '✓' : '—'}
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
@@ -107,13 +161,15 @@ function CostRow({
   onChange: (updates: Partial<CostDraft>) => void;
   onRemove: () => void;
 }) {
+  const t = useTranslations('admin.atividades');
+  const tPropostas = useTranslations('admin.propostas');
   return (
-    <div className="grid grid-cols-[1fr_6rem_5rem_9rem_2rem] gap-2 items-center">
+    <div className="grid grid-cols-[1fr_6rem_5rem_9rem_auto_2rem] gap-2 items-center">
       <input
         type="text"
         value={cost.description}
         onChange={e => onChange({ description: e.target.value })}
-        placeholder="Guia Rocinha"
+        placeholder={t('guiaPlaceholder')}
         className={INPUT_CLS}
       />
       <input
@@ -138,10 +194,22 @@ function CostRow({
         onChange={e => onChange({ price_type: e.target.value as CostDraft['price_type'] })}
         className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
       >
-        <option value="fixed">Fixo</option>
-        <option value="per_pax">Por pessoa</option>
-        <option value="per_hour">Por hora</option>
+        <option value="fixed">{t('tiposPreco.fixed')}</option>
+        <option value="per_pax">{t('tiposPreco.per_pax')}</option>
+        <option value="per_hour">{t('tiposPreco.per_hour')}</option>
       </select>
+      <label
+        className="flex items-center gap-1 cursor-pointer select-none"
+        title={tPropostas('marcadoEntraPreco')}
+      >
+        <input
+          type="checkbox"
+          checked={cost.include_in_price}
+          onChange={e => onChange({ include_in_price: e.target.checked })}
+          className="rounded"
+        />
+        <span className="text-xs text-gray-500 whitespace-nowrap">{t('cobrar')}</span>
+      </label>
       <button
         onClick={onRemove}
         className="p-1.5 text-gray-300 hover:text-red-500 transition-colors rounded"
@@ -159,21 +227,22 @@ function CostRow({
 function ActivityModal({
   service,
   transportTypes,
+  locales,
   onClose,
   onSaved,
 }: {
-  service: ProposalService | null; // null = create mode
+  service: ServiceWithTranslations | null; // null = create mode
   transportTypes: ProposalTransportType[];
+  locales: string[];
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const t = useTranslations('admin.atividades');
+  const tCommon = useTranslations('admin.common');
   const [form, setForm] = useState<FormState>(() => {
     if (!service) return EMPTY_FORM;
     return {
-      name: service.name,
       category: service.category,
-      description: service.description ?? '',
-      pdf_note: service.pdf_note ?? '',
       notes: service.notes ?? '',
       is_active: service.is_active,
       duration_hours: hoursToTime(service.duration_hours),
@@ -184,6 +253,30 @@ function ActivityModal({
     };
   });
 
+  // Um rascunho por idioma suportado; a aba só troca qual deles está à vista.
+  const [texts, setTexts] = useState<Record<string, LocaleText>>(() => {
+    const out: Record<string, LocaleText> = {};
+    for (const locale of locales) {
+      const tr = service?.translations?.[locale];
+      out[locale] = {
+        name: tr?.name ?? '',
+        description: tr?.description ?? '',
+        pdf_note: tr?.pdf_note ?? '',
+      };
+    }
+    return out;
+  });
+
+  const [activeLocale, setActiveLocale] = useState(() => locales[0] ?? 'de');
+  const activeText = texts[activeLocale] ?? EMPTY_LOCALE_TEXT;
+
+  const setText = (field: keyof LocaleText) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setTexts(prev => ({
+        ...prev,
+        [activeLocale]: { ...(prev[activeLocale] ?? EMPTY_LOCALE_TEXT), [field]: e.target.value },
+      }));
+
   const [costs, setCosts] = useState<CostDraft[]>(() =>
     (service?.costs ?? []).map(c => ({
       _id: c.id,
@@ -191,6 +284,7 @@ function ActivityModal({
       base_price: c.base_price,
       currency: c.currency as CostDraft['currency'],
       price_type: c.price_type as CostDraft['price_type'],
+      include_in_price: c.include_in_price ?? true,
     }))
   );
 
@@ -205,12 +299,11 @@ function ActivityModal({
 
   const transportHint = useMemo(() => {
     if (!selectedTransport) return null;
-    if (selectedTransport.is_included) return 'Nenhum custo de transporte adicional — já está nos itens de custo.';
-    if (selectedTransport.is_manual) return 'Valor ajustado manualmente ao montar a proposta.';
-    if (selectedTransport.tiers.length > 0)
-      return `Custo calculado automaticamente por faixa de pessoas × (horas ida + horas volta).`;
-    return 'Sem custo de transporte.';
-  }, [selectedTransport]);
+    if (selectedTransport.is_included) return t('custoNaoAdicional');
+    if (selectedTransport.is_manual) return t('valorAjustadoManual');
+    if (selectedTransport.tiers.length > 0) return t('custoCalculadoAuto');
+    return t('semCustoTransporte');
+  }, [selectedTransport, t]);
 
   const totalHours = useMemo(() => {
     const to = timeToHours(form.transfer_hours_to) ?? 0;
@@ -222,7 +315,7 @@ function ActivityModal({
   const addCost = () =>
     setCosts(prev => [
       ...prev,
-      { _id: Math.random().toString(36).slice(2), description: '', base_price: '', currency: 'EUR', price_type: 'fixed' },
+      { _id: Math.random().toString(36).slice(2), description: '', base_price: '', currency: 'EUR', price_type: 'fixed', include_in_price: true },
     ]);
 
   const updateCost = (id: string, updates: Partial<CostDraft>) =>
@@ -233,16 +326,31 @@ function ActivityModal({
 
   const handleSave = async () => {
     setError(null);
-    if (!form.name.trim()) { setError('Título é obrigatório.'); return; }
-    if (!form.category) { setError('Categoria é obrigatória.'); return; }
+
+    // Pelo menos um idioma precisa de título — o resto o guia preenche depois.
+    // Nada é traduzido automaticamente: idioma em branco fica em branco.
+    const primaryLocale = locales[0];
+    if (!texts[primaryLocale]?.name.trim()) {
+      setError(t('tituloObrigatorioIdioma', { idioma: localeLabel(primaryLocale) }));
+      return;
+    }
+    if (!form.category) { setError(t('categoriaObrigatoria')); return; }
 
     setSaving(true);
     try {
+      const translations: Record<string, LocaleText> = {};
+      for (const locale of locales) {
+        const txt = texts[locale] ?? EMPTY_LOCALE_TEXT;
+        translations[locale] = {
+          name: txt.name.trim(),
+          description: txt.description.trim(),
+          pdf_note: txt.pdf_note.trim(),
+        };
+      }
+
       const payload = {
-        name: form.name.trim(),
+        translations,
         category: form.category,
-        description: form.description.trim() || null,
-        pdf_note: form.pdf_note.trim() || null,
         notes: form.notes.trim() || null,
         is_active: form.is_active,
         duration_hours: timeToHours(form.duration_hours),
@@ -255,6 +363,7 @@ function ActivityModal({
           base_price: Number(c.base_price) || 0,
           currency: c.currency,
           price_type: c.price_type,
+          include_in_price: c.include_in_price,
         })),
       };
 
@@ -269,11 +378,11 @@ function ActivityModal({
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? 'Fehler beim Speichern.'); return; }
+      if (!res.ok) { setError(data.error ?? tCommon('erroSalvar')); return; }
 
       onSaved();
     } catch {
-      setError('Netzwerkfehler.');
+      setError(tCommon('erroRede'));
     } finally {
       setSaving(false);
     }
@@ -287,7 +396,7 @@ function ActivityModal({
         {/* Modal header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">
           <h2 className="text-lg font-bold text-gray-900">
-            {service ? 'Atividade bearbeiten' : 'Nova Atividade'}
+            {service ? t('editarAtividade') : t('novaAtividadeTitulo')}
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
@@ -298,35 +407,27 @@ function ActivityModal({
           {/* ── Section 1: Informações Gerais */}
           <div>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">
-              Informações Gerais
+              {t('informacoesGerais')}
             </h3>
             <div className="space-y-4">
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Título <span className="text-red-500">*</span>
-                  </label>
-                  <input type="text" value={form.name} onChange={set('name')} className={INPUT_CLS} placeholder="Favela Tour Rocinha" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Categoria <span className="text-red-500">*</span>
-                  </label>
-                  <select value={form.category} onChange={set('category')} className={INPUT_CLS}>
-                    <option value="">Selecionar…</option>
-                    <option value="tour">Tour</option>
-                    <option value="transfer">Transfer</option>
-                    <option value="atração">Atração</option>
-                    <option value="extra">Extra</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('categoria')} <span className="text-red-500">*</span>
+                </label>
+                <select value={form.category} onChange={set('category')} className={INPUT_CLS}>
+                  <option value="">{t('selecionar')}</option>
+                  <option value="tour">{t('categorias.tour')}</option>
+                  <option value="transfer">{t('categorias.transfer')}</option>
+                  <option value="atração">{t('categorias.atração')}</option>
+                  <option value="extra">{t('categorias.extra')}</option>
+                </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de transporte</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('tipoTransporte')}</label>
                 <select value={form.transport_type_id} onChange={set('transport_type_id')} className={INPUT_CLS}>
-                  <option value="">Nenhum / não definido</option>
+                  <option value="">{t('nenhumNaoDefinido')}</option>
                   {transportTypes.map(t => (
                     <option key={t.id} value={t.id}>{t.name}</option>
                   ))}
@@ -337,19 +438,8 @@ function ActivityModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descrição curta</label>
-                <textarea value={form.description} onChange={set('description')} rows={2} className={`${INPUT_CLS} resize-none`} placeholder="Aparece no PDF da proposta." />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nota fixa para o PDF</label>
-                <textarea value={form.pdf_note} onChange={set('pdf_note')} rows={2} className={`${INPUT_CLS} resize-none`} placeholder="Texto que aparece sempre na proposta ao selecionar esta atividade" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Observação interna{' '}
-                  <span className="text-xs font-normal text-gray-400">(não aparece no PDF)</span>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('observacaoInterna')}{' '}
+                  <span className="text-xs font-normal text-gray-400">{t('naoApareceNoPdf')}</span>
                 </label>
                 <textarea value={form.notes} onChange={set('notes')} rows={2} className={`${INPUT_CLS} resize-none`} />
               </div>
@@ -362,42 +452,112 @@ function ActivityModal({
                 >
                   <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.is_active ? 'translate-x-4' : 'translate-x-0'}`} />
                 </button>
-                <span className="text-sm font-medium text-gray-700">Ativo</span>
+                <span className="text-sm font-medium text-gray-700">{tCommon('ativo')}</span>
               </label>
             </div>
           </div>
 
-          {/* ── Section 2: Tempo */}
+          {/* ── Section 2: Textos por idioma */}
           <div>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Tempo</h3>
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                {t('textosPorIdioma')}
+              </h3>
+              {/* Abas de idioma: trocam qual rascunho está à vista. Cada idioma
+                  é salvo separado — nada é traduzido automaticamente. */}
+              <div className="flex items-center gap-1 p-0.5 bg-gray-100 rounded-lg">
+                {locales.map(locale => {
+                  const isActive = locale === activeLocale;
+                  const filled = Boolean(texts[locale]?.name.trim());
+                  return (
+                    <button
+                      key={locale}
+                      type="button"
+                      onClick={() => setActiveLocale(locale)}
+                      className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
+                        isActive ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {localeLabel(locale)}
+                      <span className={filled ? 'text-green-600' : 'text-gray-300'}> {filled ? '✓' : '—'}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('tituloCampo')}{' '}
+                  {activeLocale === locales[0] && <span className="text-red-500">*</span>}
+                </label>
+                <input
+                  type="text"
+                  value={activeText.name}
+                  onChange={setText('name')}
+                  className={INPUT_CLS}
+                  placeholder={t('tituloPlaceholder')}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('descricaoCurta')}</label>
+                <textarea
+                  value={activeText.description}
+                  onChange={setText('description')}
+                  rows={2}
+                  className={`${INPUT_CLS} resize-none`}
+                  placeholder={t('descricaoCurtaPlaceholder')}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('notaFixaPdf')}</label>
+                <textarea
+                  value={activeText.pdf_note}
+                  onChange={setText('pdf_note')}
+                  rows={2}
+                  className={`${INPUT_CLS} resize-none`}
+                  placeholder={t('notaFixaPlaceholder')}
+                />
+              </div>
+
+              <p className="text-xs text-gray-400">{t('idiomaVazioDica')}</p>
+            </div>
+          </div>
+
+          {/* ── Section 3: Tempo */}
+          <div>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">{t('tempo')}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Duração</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('duracao')}</label>
                 <input type="time" value={form.duration_hours} onChange={set('duration_hours')} className={INPUT_CLS} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ida</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('ida')}</label>
                 <input type="time" value={form.transfer_hours_to} onChange={set('transfer_hours_to')} className={INPUT_CLS} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Volta</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('volta')}</label>
                 <input type="time" value={form.transfer_hours_back} onChange={set('transfer_hours_back')} className={INPUT_CLS} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Total estimado</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('totalEstimado')}</label>
                 <div className={`${INPUT_CLS} bg-gray-50 text-gray-700 font-semibold pointer-events-none`}>
-                  {totalHours > 0 ? formatHours(totalHours) : '—'}
+                  {totalHours > 0 ? formatHours(totalHours) : tCommon('vazio')}
                 </div>
               </div>
             </div>
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Período sugerido</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('periodoSugerido')}</label>
               <select value={form.suggested_period} onChange={set('suggested_period')} className={INPUT_CLS}>
-                <option value="">Não especificado</option>
-                <option value="morning">🌅 Manhã</option>
-                <option value="afternoon">🌇 Tarde</option>
-                <option value="evening">🌙 Noite</option>
-                <option value="full_day">☀️ Dia inteiro</option>
+                <option value="">{t('naoEspecificado')}</option>
+                <option value="morning">{PERIOD_ICON.morning} {t('periodos.morning')}</option>
+                <option value="afternoon">{PERIOD_ICON.afternoon} {t('periodos.afternoon')}</option>
+                <option value="evening">{PERIOD_ICON.evening} {t('periodos.evening')}</option>
+                <option value="full_day">{PERIOD_ICON.full_day} {t('periodos.full_day')}</option>
               </select>
             </div>
           </div>
@@ -405,26 +565,26 @@ function ActivityModal({
           {/* ── Section 3: Itens de Custo */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Itens de Custo</h3>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{t('itensCusto')}</h3>
               <button
                 onClick={addCost}
                 className="text-xs font-semibold text-green-600 hover:text-green-800 transition-colors"
               >
-                + Custo
+                {t('adicionarCusto')}
               </button>
             </div>
 
             {costs.length === 0 ? (
               <p className="text-sm text-gray-400 italic">
-                Sem custos adicionais — cada um paga na hora.
+                {t('semCustosAdicionais')}
               </p>
             ) : (
               <div className="space-y-2">
                 <div className="grid grid-cols-[1fr_6rem_5rem_9rem_2rem] gap-2 mb-1">
-                  <span className="text-xs text-gray-400">Descrição</span>
-                  <span className="text-xs text-gray-400">Valor</span>
-                  <span className="text-xs text-gray-400">Moeda</span>
-                  <span className="text-xs text-gray-400">Tipo</span>
+                  <span className="text-xs text-gray-400">{t('descricao')}</span>
+                  <span className="text-xs text-gray-400">{tCommon('valor')}</span>
+                  <span className="text-xs text-gray-400">{t('moeda')}</span>
+                  <span className="text-xs text-gray-400">{t('tipo')}</span>
                   <span />
                 </div>
                 {costs.map(cost => (
@@ -449,14 +609,14 @@ function ActivityModal({
         {/* Modal footer */}
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
           <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-            Abbrechen
+            {tCommon('cancelar')}
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
             className="px-5 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
           >
-            {saving ? 'Wird gespeichert…' : 'Salvar'}
+            {saving ? tCommon('salvando') : tCommon('salvar')}
           </button>
         </div>
       </div>
@@ -468,29 +628,39 @@ function ActivityModal({
 
 function DeleteModal({
   service,
+  locales,
   onCancel,
   onConfirm,
   loading,
 }: {
-  service: ProposalService;
+  service: ServiceWithTranslations;
+  locales: string[];
   onCancel: () => void;
   onConfirm: () => void;
   loading: boolean;
 }) {
+  const t = useTranslations('admin.atividades');
+  const tCommon = useTranslations('admin.common');
+  // Excluir o serviço leva junto as traduções (FK ON DELETE CASCADE).
+  const displayName =
+    locales.map(l => service.translations?.[l]?.name?.trim()).find(Boolean) ?? service.name;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-2">Atividade löschen?</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-2">{t('atividadeExcluir')}</h2>
         <p className="text-sm text-gray-600 mb-6">
-          Tem certeza? <strong>{service.name}</strong> será removida do catálogo.
+          {t.rich('temCerteza', {
+            nome: displayName,
+            strong: chunks => <strong>{chunks}</strong>,
+          })}
         </p>
         <div className="flex justify-end gap-3">
           <button onClick={onCancel} disabled={loading} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">
-            Abbrechen
+            {tCommon('cancelar')}
           </button>
           <button onClick={onConfirm} disabled={loading} className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50">
-            {loading ? 'Wird gelöscht…' : 'Löschen'}
+            {loading ? t('excluindo') : tCommon('excluir')}
           </button>
         </div>
       </div>
@@ -501,18 +671,22 @@ function DeleteModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AtividadesPage() {
-  const [services, setServices] = useState<ProposalService[]>([]);
+  const t = useTranslations('admin.atividades');
+  const tCommon = useTranslations('admin.common');
+  const tPropostas = useTranslations('admin.propostas');
+  const [services, setServices] = useState<ServiceWithTranslations[]>([]);
   const [transportTypes, setTransportTypes] = useState<ProposalTransportType[]>([]);
+  // Idiomas vêm de site_settings.supported_locales, nunca hardcoded aqui.
+  const [locales, setLocales] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [editTarget, setEditTarget] = useState<ProposalService | null | 'new'>('new' as never);
   const [modalOpen, setModalOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<ProposalService | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ServiceWithTranslations | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // editTarget = null → create; ProposalService → edit
-  const [modalService, setModalService] = useState<ProposalService | null>(null);
+  // null → create; ServiceWithTranslations → edit
+  const [modalService, setModalService] = useState<ServiceWithTranslations | null>(null);
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
@@ -523,25 +697,26 @@ export default function AtividadesPage() {
       ]);
       const sData = await sRes.json();
       const tData = await tRes.json();
-      if (!sRes.ok) { setError(sData.error ?? 'Fehler beim Laden.'); return; }
+      if (!sRes.ok) { setError(sData.error ?? t('erroCarregar')); return; }
       setServices(sData.services ?? []);
+      setLocales(sData.supportedLocales ?? []);
       if (tRes.ok) setTransportTypes(tData.transports ?? []);
     } catch {
-      setError('Netzwerkfehler.');
+      setError(tCommon('erroRede'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t, tCommon]);
 
   useEffect(() => { fetchServices(); }, [fetchServices]);
 
   const openCreate = () => { setModalService(null); setModalOpen(true); };
-  const openEdit = (s: ProposalService) => { setModalService(s); setModalOpen(true); };
+  const openEdit = (s: ServiceWithTranslations) => { setModalService(s); setModalOpen(true); };
   const closeModal = () => setModalOpen(false);
 
   const handleSaved = () => { closeModal(); fetchServices(); };
 
-  const handleToggle = async (service: ProposalService) => {
+  const handleToggle = async (service: ServiceWithTranslations) => {
     const newValue = !service.is_active;
     // Optimistic update
     setServices(prev => prev.map(s => s.id === service.id ? { ...s, is_active: newValue } : s));
@@ -562,38 +737,35 @@ export default function AtividadesPage() {
     setDeleteLoading(true);
     try {
       const res = await fetch(`/api/admin/proposals/services/${deleteTarget.id}`, { method: 'DELETE' });
-      if (!res.ok) { const d = await res.json(); alert(d.error ?? 'Fehler beim Löschen.'); return; }
+      if (!res.ok) { const d = await res.json(); alert(d.error ?? tCommon('erroDeletar')); return; }
       setServices(prev => prev.filter(s => s.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch {
-      alert('Netzwerkfehler.');
+      alert(tCommon('erroRede'));
     } finally {
       setDeleteLoading(false);
     }
   };
 
-  // Avoid unused state warning
-  void editTarget; void setEditTarget;
-
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
             <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
-              <Link href="/admin/propostas" className="hover:text-gray-700 transition-colors">Propostas</Link>
+              <Link href="/admin/propostas" className="hover:text-gray-700 transition-colors">{tPropostas('titulo')}</Link>
               <span>/</span>
-              <span className="text-gray-600">Atividades</span>
+              <span className="text-gray-600">{t('breadcrumb')}</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Atividades</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
           </div>
           <button
             onClick={openCreate}
             className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
           >
-            + Nova Atividade
+            {t('novaAtividade')}
           </button>
         </div>
 
@@ -607,21 +779,22 @@ export default function AtividadesPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Nome</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Categoria</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Transporte</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Duração total</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Período</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Custos</th>
-                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Ativo</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Ações</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('nome')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colIdiomas')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('categoria')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colTransporte')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colDuracaoTotal')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colPeriodo')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colCustos')}</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('ativo')}</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('acoes')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   [...Array(4)].map((_, i) => (
                     <tr key={i}>
-                      {[...Array(8)].map((_, j) => (
+                      {[...Array(9)].map((_, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-gray-100 rounded animate-pulse" style={{ width: j === 0 ? '60%' : '50%' }} />
                         </td>
@@ -630,40 +803,49 @@ export default function AtividadesPage() {
                   ))
                 ) : services.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-16 text-center">
-                      <p className="text-gray-400 text-sm mb-3">Nenhuma atividade cadastrada</p>
+                    <td colSpan={9} className="px-4 py-16 text-center">
+                      <p className="text-gray-400 text-sm mb-3">{t('nenhumaAtividade')}</p>
                       <button
                         onClick={openCreate}
                         className="inline-block px-4 py-2 text-sm font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                       >
-                        + Criar primeira atividade
+                        {t('criarPrimeira')}
                       </button>
                     </td>
                   </tr>
                 ) : (
                   services.map(s => {
                     const total = (s.transfer_hours_to ?? 0) + (s.duration_hours ?? 0) + (s.transfer_hours_back ?? 0);
-                    const period = s.suggested_period ? PERIOD_CONFIG[s.suggested_period] : null;
+                    const periodIcon = s.suggested_period ? PERIOD_ICON[s.suggested_period] : null;
                     const transportName = transportTypes.find(t => t.id === s.transport_type_id)?.name ?? null;
+                    // O nome exibido vem das traduções (primeiro idioma que tiver
+                    // texto), não da coluna deprecated proposal_services.name.
+                    const displayName =
+                      locales.map(l => s.translations?.[l]?.name?.trim()).find(Boolean) ?? s.name;
                     return (
                       <tr key={s.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium text-gray-900">{s.name}</td>
+                        <td className="px-4 py-3 font-medium text-gray-900">{displayName}</td>
+                        <td className="px-4 py-3">
+                          <CoverageBadges locales={locales} translations={s.translations} />
+                        </td>
                         <td className="px-4 py-3">
                           <CategoryBadge category={s.category} />
                         </td>
                         <td className="px-4 py-3 text-gray-600 text-sm">
-                          {transportName ?? <span className="text-gray-300">—</span>}
+                          {transportName ?? <span className="text-gray-300">{tCommon('vazio')}</span>}
                         </td>
                         <td className="px-4 py-3 text-gray-600 tabular-nums">
-                          {total > 0 ? formatHours(total) : '—'}
+                          {total > 0 ? formatHours(total) : tCommon('vazio')}
                         </td>
                         <td className="px-4 py-3 text-gray-600">
-                          {period ? `${period.icon} ${period.label}` : '—'}
+                          {periodIcon && s.suggested_period
+                            ? `${periodIcon} ${t(`periodos.${s.suggested_period}`)}`
+                            : tCommon('vazio')}
                         </td>
                         <td className="px-4 py-3 text-gray-500">
                           {s.costs.length === 0
-                            ? <span className="text-gray-300 text-xs">Sem custo</span>
-                            : <span className="text-xs">{s.costs.length} custo{s.costs.length !== 1 ? 's' : ''}</span>}
+                            ? <span className="text-gray-300 text-xs">{t('semCusto')}</span>
+                            : <span className="text-xs">{t('custos', { count: s.costs.length })}</span>}
                         </td>
                         <td className="px-4 py-3 text-center">
                           <button
@@ -677,7 +859,7 @@ export default function AtividadesPage() {
                           <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => openEdit(s)}
-                              title="Bearbeiten"
+                              title={tCommon('editar')}
                               className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -686,7 +868,7 @@ export default function AtividadesPage() {
                             </button>
                             <button
                               onClick={() => setDeleteTarget(s)}
-                              title="Löschen"
+                              title={tCommon('excluir')}
                               className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -705,10 +887,11 @@ export default function AtividadesPage() {
         </div>
       </div>
 
-      {modalOpen && (
+      {modalOpen && locales.length > 0 && (
         <ActivityModal
           service={modalService}
           transportTypes={transportTypes}
+          locales={locales}
           onClose={closeModal}
           onSaved={handleSaved}
         />
@@ -717,6 +900,7 @@ export default function AtividadesPage() {
       {deleteTarget && (
         <DeleteModal
           service={deleteTarget}
+          locales={locales}
           onCancel={() => setDeleteTarget(null)}
           onConfirm={handleDelete}
           loading={deleteLoading}

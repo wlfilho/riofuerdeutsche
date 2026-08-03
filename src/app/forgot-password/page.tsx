@@ -5,9 +5,11 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import AuthLayout from "@/components/AuthLayout";
 import { m, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Loader2, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 
 export default function ForgotPasswordPage() {
+    const t = useTranslations("public.auth");
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -27,10 +29,10 @@ export default function ForgotPasswordPage() {
 
             setMessage({
                 type: "success",
-                text: "Anweisungen zur Wiederherstellung wurden an deine E-Mail gesendet."
+                text: t("forgotPassword.erfolgreich")
             });
         } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : "Fehler bei der Anfrage.";
+            const errorMessage = error instanceof Error ? error.message : t("forgotPassword.fehler");
             setMessage({ type: "error", text: errorMessage });
         } finally {
             setLoading(false);
@@ -38,7 +40,7 @@ export default function ForgotPasswordPage() {
     };
 
     return (
-        <AuthLayout title="Passwort vergessen" subtitle="Wir senden dir einen Link zum Zurücksetzen">
+        <AuthLayout title={t("forgotPassword.titel")} subtitle={t("forgotPassword.untertitel")}>
             <form onSubmit={handleReset} className="space-y-6">
                 <AnimatePresence mode="wait">
                     {message && (
@@ -63,7 +65,7 @@ export default function ForgotPasswordPage() {
 
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        E-Mail
+                        {t("email")}
                     </label>
                     <input
                         id="email"
@@ -72,7 +74,7 @@ export default function ForgotPasswordPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-rio-green focus:border-rio-green sm:text-sm transition-all"
-                        placeholder="deine@email.de"
+                        placeholder={t("emailPlaceholder")}
                     />
                 </div>
 
@@ -84,10 +86,10 @@ export default function ForgotPasswordPage() {
                     {loading ? (
                         <>
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            Wird gesendet...
+                            {t("forgotPassword.wirdGesendet")}
                         </>
                     ) : (
-                        "Link senden"
+                        t("forgotPassword.linkSenden")
                     )}
                 </button>
 
@@ -97,7 +99,7 @@ export default function ForgotPasswordPage() {
                         className="inline-flex items-center text-sm font-bold text-gray-900 hover:text-rio-green transition-colors gap-1"
                     >
                         <ArrowLeft className="h-4 w-4" />
-                        Zurück zur Anmeldung
+                        {t("zurueckZurAnmeldung")}
                     </Link>
                 </div>
             </form>

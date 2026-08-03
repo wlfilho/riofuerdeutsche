@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 export type LeadsView = 'table' | 'kanban';
 
 type Props = {
@@ -8,6 +10,7 @@ type Props = {
 };
 
 export default function LeadViewToggle({ view, onChange }: Props) {
+  const t = useTranslations('admin.crm');
   return (
     <div className="inline-flex rounded-lg border border-gray-200 bg-white overflow-hidden">
       <button
@@ -22,7 +25,7 @@ export default function LeadViewToggle({ view, onChange }: Props) {
         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
         </svg>
-        Tabela
+        {t('tabela')}
       </button>
       <button
         onClick={() => onChange('kanban')}
@@ -36,7 +39,7 @@ export default function LeadViewToggle({ view, onChange }: Props) {
         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
           <path d="M2 4a1 1 0 011-1h3a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zM8 4a1 1 0 011-1h3a1 1 0 011 1v12a1 1 0 01-1 1H9a1 1 0 01-1-1V4zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
         </svg>
-        Kanban
+        {t('kanban')}
       </button>
     </div>
   );

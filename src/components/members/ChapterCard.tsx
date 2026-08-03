@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export interface Chapter {
   id: string;
@@ -21,6 +24,7 @@ interface ChapterCardProps {
 }
 
 export default function ChapterCard({ chapter, userPlan }: ChapterCardProps) {
+  const t = useTranslations("public.dashboard.kapitel");
   const isAccessible = chapter.is_free || userPlan === "premium";
 
   if (isAccessible) {
@@ -45,7 +49,7 @@ export default function ChapterCard({ chapter, userPlan }: ChapterCardProps) {
           <div className="mt-2 mb-4">
             <div className="flex justify-between items-center mb-1">
               <span className="text-[10px] text-gray-500 font-mono">
-                {chapter.progress.read} von {chapter.progress.total} Seiten gelesen
+                {t('seitenGelesen', { read: String(chapter.progress.read), total: String(chapter.progress.total) })}
               </span>
               <span className="text-[10px] font-bold text-[#22a262]">
                 {Math.round((chapter.progress.read / chapter.progress.total) * 100)}%
@@ -62,7 +66,7 @@ export default function ChapterCard({ chapter, userPlan }: ChapterCardProps) {
 
         <div className="mt-auto flex items-center justify-between pt-2">
           <span className="inline-block px-[8px] py-[3px] bg-[#e8f5e9] text-[#2e7d32] text-[10px] font-[700] rounded-[6px] uppercase tracking-[0.5px]">
-            {chapter.is_free ? "GRATIS" : "PREMIUM ✓"}
+            {chapter.is_free ? t("gratis") : t("premiumCheck")}
           </span>
           <span className="text-[#22a262] font-bold text-[16px] opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-4px] group-hover:translate-x-0 transition-transform">
             →
@@ -93,7 +97,7 @@ export default function ChapterCard({ chapter, userPlan }: ChapterCardProps) {
       </p>
       <div className="mt-auto opacity-40">
         <span className="inline-block px-[8px] py-[3px] bg-[#f5f5f5] text-[#aaa] text-[10px] font-[700] rounded-[6px]">
-          🔒 Premium
+          {t("premiumLocked")}
         </span>
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { saveEmailSignature } from '@/app/actions/email-signature'
 
 export default function EmailSignatureEditor({ initialValue }: { initialValue: string }) {
@@ -9,6 +10,8 @@ export default function EmailSignatureEditor({ initialValue }: { initialValue: s
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPreview, setShowPreview] = useState(false)
+  const t = useTranslations('admin.configuracoes')
+  const tCommon = useTranslations('admin.common')
 
   const handleSave = async () => {
     setSaving(true)
@@ -19,7 +22,7 @@ export default function EmailSignatureEditor({ initialValue }: { initialValue: s
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } else {
-      setError(result.error ?? 'Fehler beim Speichern.')
+      setError(result.error ?? tCommon('erroSalvar'))
     }
   }
 
@@ -27,18 +30,20 @@ export default function EmailSignatureEditor({ initialValue }: { initialValue: s
     <div className="bg-white border border-gray-200 rounded-xl p-6 mb-8">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h2 className="text-base font-semibold text-gray-900">E-Mail Assinatura</h2>
+          <h2 className="text-base font-semibold text-gray-900">{t('assinaturaTitulo')}</h2>
           <p className="text-sm text-gray-500 mt-0.5">
-            Wird automaticamente als{' '}
-            <code className="bg-gray-100 px-1 rounded text-xs font-mono">{'{{assinatura}}'}</code>{' '}
-            in alle Templates eingefügt. Akzeptiert HTML (Links, Farben, Zeilenumbrüche).
+            {t.rich('assinaturaDescricao', {
+              tag: () => (
+                <code className="bg-gray-100 px-1 rounded text-xs font-mono">{'{{assinatura}}'}</code>
+              ),
+            })}
           </p>
         </div>
         <button
           onClick={() => setShowPreview(!showPreview)}
           className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors shrink-0 ml-4"
         >
-          {showPreview ? 'Editor' : 'Vorschau'}
+          {showPreview ? t('editor') : t('previa')}
         </button>
       </div>
 
@@ -64,7 +69,7 @@ export default function EmailSignatureEditor({ initialValue }: { initialValue: s
           disabled={saving}
           className="bg-green-700 hover:bg-green-800 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
-          {saving ? 'Wird gespeichert…' : saved ? '✓ Gespeichert' : 'Assinatura speichern'}
+          {saving ? tCommon('salvando') : saved ? tCommon('salvoCheck') : tCommon('salvar')}
         </button>
         {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>

@@ -1,18 +1,23 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
+
 export type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'lost';
 
-const STATUS_MAP: Record<LeadStatus, { label: string; className: string }> = {
-  new: { label: 'Novo', className: 'bg-blue-100 text-blue-700' },
-  contacted: { label: 'Em Contato', className: 'bg-amber-100 text-amber-700' },
-  proposal_sent: { label: 'Proposta Enviada', className: 'bg-purple-100 text-purple-700' },
-  closed: { label: 'Fechado ✓', className: 'bg-green-100 text-green-700' },
-  lost: { label: 'Perdido', className: 'bg-red-100 text-red-700' },
+const STATUS_CLASS: Record<LeadStatus, string> = {
+  new: 'bg-blue-100 text-blue-700',
+  contacted: 'bg-amber-100 text-amber-700',
+  proposal_sent: 'bg-purple-100 text-purple-700',
+  closed: 'bg-green-100 text-green-700',
+  lost: 'bg-red-100 text-red-700',
 };
 
 export default function StatusBadge({ status }: { status: LeadStatus }) {
-  const { label, className } = STATUS_MAP[status] ?? STATUS_MAP.new;
+  const t = useTranslations('admin.status.lead');
+  const className = STATUS_CLASS[status] ?? STATUS_CLASS.new;
   return (
     <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${className}`}>
-      {label}
+      {t.has(status) ? t(status) : t('new')}
     </span>
   );
 }

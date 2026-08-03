@@ -5,6 +5,7 @@ import FramerMotionProvider from "@/components/FramerMotionProvider";
 import CookieBanner from "@/components/CookieBanner";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { Analytics } from "@vercel/analytics/next";
+import { NextIntlClientProvider } from "next-intl";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -79,15 +80,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // `lang` stays static: the public site is German-only and reading the
+  // resolved locale here would opt every page into dynamic rendering.
   return (
     <html lang="de" className={`${inter.variable} scroll-smooth`}>
       <body
         className="antialiased font-sans text-gray-900 bg-gray-50"
       >
-        <FramerMotionProvider>
-          {children}
-          <CookieBanner />
-        </FramerMotionProvider>
+        <NextIntlClientProvider>
+          <FramerMotionProvider>
+            {children}
+            <CookieBanner />
+          </FramerMotionProvider>
+        </NextIntlClientProvider>
         <GoogleAnalytics />
         <Analytics />
       </body>

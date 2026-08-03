@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { ProposalTransportType } from '@/lib/proposals';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -12,7 +13,8 @@ type TierDraft = {
   _id: string;
   min_pax: number | '';
   max_pax: number | '' | null;  // null = sem limite
-  price_per_hour: number | '';
+  car_daily_rate: number | '';        // diária fixa do veículo
+  driver_price_per_hour: number | ''; // motorista terceirizado, por hora
   currency: 'BRL' | 'EUR';
   editing: boolean;
 };
@@ -41,7 +43,8 @@ function tiersFromTransport(t: ProposalTransportType): TierDraft[] {
       _id: tier.id,
       min_pax: tier.min_pax,
       max_pax: tier.max_pax,
-      price_per_hour: tier.price_per_hour,
+      car_daily_rate: tier.car_daily_rate,
+      driver_price_per_hour: tier.driver_price_per_hour,
       currency: tier.currency,
       editing: false,
     }));
@@ -49,11 +52,12 @@ function tiersFromTransport(t: ProposalTransportType): TierDraft[] {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const TYPE_BADGE: Record<CostMode, { label: string; cls: string }> = {
-  auto:     { label: 'Por faixas', cls: 'bg-green-100 text-green-700' },
-  manual:   { label: 'Manual',     cls: 'bg-amber-100 text-amber-700' },
-  included: { label: 'Incluso',    cls: 'bg-blue-100 text-blue-700' },
-  free:     { label: 'Sem custo',  cls: 'bg-gray-100 text-gray-500' },
+// Só a aparência; o rótulo vem de admin.transportes.tipos.
+const TYPE_BADGE_CLS: Record<CostMode, string> = {
+  auto:     'bg-green-100 text-green-700',
+  manual:   'bg-amber-100 text-amber-700',
+  included: 'bg-blue-100 text-blue-700',
+  free:     'bg-gray-100 text-gray-500',
 };
 
 const INPUT_CLS =
@@ -62,16 +66,27 @@ const INPUT_CLS =
 function newTierDraft(): TierDraft {
   return {
     _id: Math.random().toString(36).slice(2),
-    min_pax: '', max_pax: '', price_per_hour: '', currency: 'BRL', editing: true,
+    min_pax: '', max_pax: '', car_daily_rate: '', driver_price_per_hour: '', currency: 'BRL', editing: true,
   };
 }
 
-function validateTiers(tiers: TierDraft[]): string | null {
+// Retorna a CHAVE do erro em admin.transportes (ou null): a tradução acontece
+// no componente, que é quem tem o translator.
+type TierErrorKey =
+  | 'minPaxInvalido'
+  | 'maxPaxInvalido'
+  | 'diariaInvalida'
+  | 'precoHoraInvalido'
+  | 'faixasSobrepoem';
+
+function validateTiers(tiers: TierDraft[]): TierErrorKey | null {
   for (const t of tiers) {
-    if (t.min_pax === '' || Number(t.min_pax) < 1) return 'Mínimo de pax inválido em uma faixa.';
+    if (t.min_pax === '' || Number(t.min_pax) < 1) return 'minPaxInvalido';
     if (t.max_pax !== null && (t.max_pax === '' || Number(t.max_pax) < Number(t.min_pax)))
-      return 'Máximo de pax deve ser ≥ mínimo.';
-    if (t.price_per_hour === '' || Number(t.price_per_hour) <= 0) return 'Preço/hora inválido em uma faixa.';
+      return 'maxPaxInvalido';
+    // 0 é permitido: as faixas podem ficar com placeholder até os valores reais serem definidos.
+    if (t.car_daily_rate === '' || Number(t.car_daily_rate) < 0) return 'diariaInvalida';
+    if (t.driver_price_per_hour === '' || Number(t.driver_price_per_hour) < 0) return 'precoHoraInvalido';
   }
   const ranges = tiers.map(t => ({
     min: Number(t.min_pax),
@@ -80,7 +95,7 @@ function validateTiers(tiers: TierDraft[]): string | null {
   for (let i = 0; i < ranges.length; i++) {
     for (let j = i + 1; j < ranges.length; j++) {
       if (ranges[i].min <= ranges[j].max && ranges[j].min <= ranges[i].max)
-        return 'Faixas se sobrepõem. Corrija os intervalos antes de salvar.';
+        return 'faixasSobrepoem';
     }
   }
   return null;
@@ -109,6 +124,8 @@ function TiersSection({
   tiers: TierDraft[];
   onChange: (tiers: TierDraft[]) => void;
 }) {
+  const t = useTranslations('admin.transportes');
+  const tCommon = useTranslations('admin.common');
   const update = (id: string, patch: Partial<TierDraft>) =>
     onChange(tiers.map(t => t._id === id ? { ...t, ...patch } : t));
   const remove = (id: string) => onChange(tiers.filter(t => t._id !== id));
@@ -122,19 +139,19 @@ function TiersSection({
     <div>
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Faixas de preço por nº de pessoas
+          {t('faixasPorPessoas')}
         </span>
         <button
           type="button"
           onClick={add}
           className="text-xs font-semibold text-green-600 hover:text-green-800 transition-colors"
         >
-          + Nova faixa
+          {t('novaFaixa')}
         </button>
       </div>
 
       {tiers.length === 0 && (
-        <p className="text-sm text-gray-400 italic mb-2">Nenhuma faixa. Clique em "+ Nova faixa" para começar.</p>
+        <p className="text-sm text-gray-400 italic mb-2">{t('nenhumaFaixa')}</p>
       )}
 
       <div className="space-y-2">
@@ -145,7 +162,7 @@ function TiersSection({
               <div className={`${rowCls} bg-gray-50 rounded-lg p-2`}>
                 {/* Min pax */}
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-500 whitespace-nowrap">De</span>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">{t('de')}</span>
                   <input
                     type="number"
                     min="1"
@@ -157,7 +174,7 @@ function TiersSection({
                 </div>
                 {/* Max pax */}
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-gray-500 whitespace-nowrap">até</span>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">{t('ateLabel')}</span>
                   <input
                     type="number"
                     min="1"
@@ -177,8 +194,8 @@ function TiersSection({
                     <span className="text-xs text-gray-500">∞</span>
                   </label>
                 </div>
-                {/* Price */}
-                <div className="flex items-center gap-1.5">
+                {/* Prices: car daily rate + driver hourly rate */}
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <select
                     value={tier.currency}
                     onChange={e => update(tier._id, { currency: e.target.value as 'BRL' | 'EUR' })}
@@ -189,14 +206,32 @@ function TiersSection({
                   </select>
                   <input
                     type="number"
-                    min="0.01"
+                    min="0"
                     step="0.01"
-                    value={tier.price_per_hour}
-                    onChange={e => update(tier._id, { price_per_hour: parseFloat(e.target.value) || '' })}
-                    className="w-24 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
-                    placeholder="0,00"
+                    value={tier.car_daily_rate}
+                    onChange={e => {
+                      const v = parseFloat(e.target.value);
+                      update(tier._id, { car_daily_rate: Number.isNaN(v) ? '' : v });
+                    }}
+                    title={t('diariaCarro')}
+                    className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+                    placeholder={t('diariaPlaceholder')}
                   />
-                  <span className="text-xs text-gray-500">/h</span>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">{t('carroDia')}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={tier.driver_price_per_hour}
+                    onChange={e => {
+                      const v = parseFloat(e.target.value);
+                      update(tier._id, { driver_price_per_hour: Number.isNaN(v) ? '' : v });
+                    }}
+                    title={t('motoristaHora')}
+                    className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+                    placeholder={t('motoristaPlaceholder')}
+                  />
+                  <span className="text-xs text-gray-500 whitespace-nowrap">{t('motoristaH')}</span>
                 </div>
                 {/* Save btn */}
                 <button
@@ -225,7 +260,9 @@ function TiersSection({
                   {' '}pax
                   <span className="mx-2 text-gray-300">·</span>
                   <span className="text-gray-600">
-                    {tier.currency === 'EUR' ? '€' : 'R$'}{Number(tier.price_per_hour).toFixed(0)}/h
+                    {tier.currency === 'EUR' ? '€' : 'R$'}{Number(tier.car_daily_rate).toFixed(0)}{t('diariaCarroLabel')}
+                    {' + '}
+                    {tier.currency === 'EUR' ? '€' : 'R$'}{Number(tier.driver_price_per_hour).toFixed(0)}{t('hMotorista')}
                   </span>
                 </span>
                 <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -234,7 +271,7 @@ function TiersSection({
                     onClick={() => update(tier._id, { editing: true })}
                     className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
                   >
-                    Editar
+                    {tCommon('editar')}
                   </button>
                   <button
                     type="button"
@@ -252,9 +289,11 @@ function TiersSection({
 
       {gaps.length > 0 && (
         <div className="mt-2 p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-700">
-          ⚠️ Atenção: {gaps.length === 1
-            ? `o número ${gaps[0]} não está coberto por nenhuma faixa.`
-            : `os números ${gaps.slice(0, 5).join(', ')}${gaps.length > 5 ? '…' : ''} não estão cobertos por nenhuma faixa.`}
+          {gaps.length === 1
+            ? t('avisoNaoCoberto', { numero: gaps[0] })
+            : t('avisoNaoCobertos', {
+                numeros: `${gaps.slice(0, 5).join(', ')}${gaps.length > 5 ? '…' : ''}`,
+              })}
         </div>
       )}
     </div>
@@ -272,6 +311,8 @@ function TransportModal({
   onSave: (transportPayload: Partial<ProposalTransportType>, tiers: TierDraft[]) => Promise<void>;
   onClose: () => void;
 }) {
+  const t = useTranslations('admin.transportes');
+  const tCommon = useTranslations('admin.common');
   const [form, setForm] = useState<FormState>(
     initial
       ? { name: initial.name, cost_mode: modeFromTransport(initial), is_active: initial.is_active }
@@ -285,12 +326,12 @@ function TransportModal({
 
   const handleSave = async () => {
     setError(null);
-    if (!form.name.trim()) { setError('Nome é obrigatório.'); return; }
+    if (!form.name.trim()) { setError(tCommon('nomeObrigatorio')); return; }
 
     if (form.cost_mode === 'auto') {
       const tierError = validateTiers(tiers);
-      if (tierError) { setError(tierError); return; }
-      if (tiers.length === 0) { setError('Adicione ao menos uma faixa de preço.'); return; }
+      if (tierError) { setError(t(tierError)); return; }
+      if (tiers.length === 0) { setError(t('adicioneUmaFaixa')); return; }
     }
 
     const payload: Partial<ProposalTransportType> = {
@@ -304,7 +345,7 @@ function TransportModal({
     try {
       await onSave(payload, form.cost_mode === 'auto' ? tiers : []);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao salvar.');
+      setError(e instanceof Error ? e.message : tCommon('erroSalvar'));
     } finally {
       setSaving(false);
     }
@@ -317,7 +358,7 @@ function TransportModal({
 
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <h3 className="text-base font-bold text-gray-900">
-            {initial ? 'Editar Transporte' : 'Novo Tipo de Transporte'}
+            {initial ? t('editarTransporte') : t('novoTipoTransporte')}
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
@@ -330,31 +371,31 @@ function TransportModal({
           {/* Nome */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nome <span className="text-red-500">*</span>
+              {tCommon('nome')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={form.name}
               onChange={e => set({ name: e.target.value })}
               className={INPUT_CLS}
-              placeholder="Ex: Carro particular"
+              placeholder={t('nomePlaceholder')}
             />
           </div>
 
           {/* Tipo de custo */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tipo de custo <span className="text-red-500">*</span>
+              {t('tipoCusto')} <span className="text-red-500">*</span>
             </label>
             <select
               value={form.cost_mode}
               onChange={e => set({ cost_mode: e.target.value as CostMode })}
               className={INPUT_CLS}
             >
-              <option value="auto">Por faixas (preço por nº de pessoas)</option>
-              <option value="manual">Manual (ex: Uber)</option>
-              <option value="included">Incluso no pacote</option>
-              <option value="free">Sem custo</option>
+              <option value="auto">{t('custoPorFaixas')}</option>
+              <option value="manual">{t('custoManual')}</option>
+              <option value="included">{t('custoIncluso')}</option>
+              <option value="free">{t('custoSemCusto')}</option>
             </select>
           </div>
 
@@ -380,20 +421,20 @@ function TransportModal({
                 }`}
               />
             </button>
-            <span className="text-sm text-gray-700">Ativo</span>
+            <span className="text-sm text-gray-700">{tCommon('ativo')}</span>
           </div>
         </div>
 
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
           <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">
-            Cancelar
+            {tCommon('cancelar')}
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
             className="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
           >
-            {saving ? 'Salvando…' : 'Salvar'}
+            {saving ? tCommon('salvando') : tCommon('salvar')}
           </button>
         </div>
       </div>
@@ -414,27 +455,35 @@ function DeleteModal({
   onConfirm: () => Promise<void>;
   onClose: () => void;
 }) {
+  const t = useTranslations('admin.transportes');
+  const tCommon = useTranslations('admin.common');
   const [deleting, setDeleting] = useState(false);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
-        <h3 className="text-base font-bold text-gray-900">Deletar transporte?</h3>
+        <h3 className="text-base font-bold text-gray-900">{t('deletarTransporte')}</h3>
 
         {usageCount > 0 ? (
           <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
-            Este transporte está sendo usado por <strong>{usageCount}</strong> atividade{usageCount !== 1 ? 's' : ''}. Remova a associação antes de deletar.
+            {t.rich('transporteEmUso', {
+              count: usageCount,
+              strong: chunks => <strong>{chunks}</strong>,
+            })}
           </p>
         ) : (
           <p className="text-sm text-gray-600">
-            Tem certeza que deseja deletar <strong>{transport.name}</strong>? Esta ação não pode ser desfeita.
+            {t.rich('confirmarDeletar', {
+              nome: transport.name,
+              strong: chunks => <strong>{chunks}</strong>,
+            })}
           </p>
         )}
 
         <div className="flex justify-end gap-3 pt-2">
           <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">
-            Cancelar
+            {tCommon('cancelar')}
           </button>
           {usageCount === 0 && (
             <button
@@ -442,7 +491,7 @@ function DeleteModal({
               disabled={deleting}
               className="px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
             >
-              {deleting ? 'Deletando…' : 'Deletar'}
+              {deleting ? tCommon('deletando') : tCommon('deletar')}
             </button>
           )}
         </div>
@@ -454,6 +503,9 @@ function DeleteModal({
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function TransportesPage() {
+  const t = useTranslations('admin.transportes');
+  const tCommon = useTranslations('admin.common');
+  const tPropostas = useTranslations('admin.propostas');
   const [transports, setTransports] = useState<ProposalTransportType[]>([]);
   const [usageCounts, setUsageCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -493,13 +545,14 @@ export default function TransportesPage() {
         tiers: tiers.map(t => ({
           min_pax: Number(t.min_pax),
           max_pax: t.max_pax === null ? null : Number(t.max_pax),
-          price_per_hour: Number(t.price_per_hour),
+          car_daily_rate: Number(t.car_daily_rate),
+          driver_price_per_hour: Number(t.driver_price_per_hour),
           currency: t.currency,
         })),
       }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error ?? 'Erro ao criar.');
+    if (!res.ok) throw new Error(data.error ?? t('erroCriar'));
     setModalOpen(false);
     await load();
   };
@@ -514,13 +567,14 @@ export default function TransportesPage() {
         tiers: tiers.map(t => ({
           min_pax: Number(t.min_pax),
           max_pax: t.max_pax === null ? null : Number(t.max_pax),
-          price_per_hour: Number(t.price_per_hour),
+          car_daily_rate: Number(t.car_daily_rate),
+          driver_price_per_hour: Number(t.driver_price_per_hour),
           currency: t.currency,
         })),
       }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error ?? 'Erro ao salvar.');
+    if (!res.ok) throw new Error(data.error ?? tCommon('erroSalvar'));
     setEditing(null);
     await load();
   };
@@ -549,83 +603,83 @@ export default function TransportesPage() {
     const res = await fetch(`/api/admin/proposals/transports/${deleting.id}`, { method: 'DELETE' });
     if (!res.ok) {
       const data = await res.json();
-      throw new Error(data.error ?? 'Erro ao deletar.');
+      throw new Error(data.error ?? tCommon('erroDeletar'));
     }
     setDeleting(null);
     await load();
   };
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-4xl space-y-6">
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Link href="/admin/propostas" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
-              Propostas
+              {tPropostas('titulo')}
             </Link>
             <span className="text-gray-300">/</span>
-            <h1 className="text-2xl font-bold text-gray-900">Transportes</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('titulo')}</h1>
           </div>
           <button
             onClick={() => setModalOpen(true)}
             className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
           >
-            + Novo Tipo
+            {t('novoTipo')}
           </button>
         </div>
 
         {/* Table */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           {loading ? (
-            <div className="py-16 text-center text-sm text-gray-400">Carregando…</div>
+            <div className="py-16 text-center text-sm text-gray-400">{tCommon('carregando')}</div>
           ) : transports.length === 0 ? (
             <div className="py-16 text-center">
               <p className="text-3xl mb-3">🚗</p>
-              <p className="text-sm text-gray-400">Nenhum tipo de transporte cadastrado.</p>
+              <p className="text-sm text-gray-400">{t('nenhumTipo')}</p>
               <button
                 onClick={() => setModalOpen(true)}
                 className="mt-4 text-sm text-green-600 hover:underline"
               >
-                Criar o primeiro
+                {t('criarPrimeiro')}
               </button>
             </div>
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Nome</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Faixas</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tipo</th>
-                  <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Ativo</th>
-                  <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Ações</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{tCommon('nome')}</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('colFaixas')}</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('colTipo')}</th>
+                  <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{tCommon('ativo')}</th>
+                  <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{tCommon('acoes')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {transports.map(t => {
-                  const mode = modeFromTransport(t);
-                  const badge = TYPE_BADGE[mode];
+                {transports.map(transport => {
+                  const mode = modeFromTransport(transport);
                   return (
-                    <tr key={t.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-3 font-medium text-gray-800">{t.name}</td>
+                    <tr key={transport.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-3 font-medium text-gray-800">{transport.name}</td>
                       <td className="px-5 py-3">
-                        {t.is_included || t.is_manual ? (
-                          <span className="text-gray-400 text-xs">—</span>
-                        ) : t.tiers.length === 0 ? (
+                        {transport.is_included || transport.is_manual ? (
+                          <span className="text-gray-400 text-xs">{tCommon('vazio')}</span>
+                        ) : transport.tiers.length === 0 ? (
                           <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-700">
-                            Sem faixas
+                            {t('semFaixas')}
                           </span>
                         ) : (
                           <div className="flex flex-col gap-0.5">
-                            {[...t.tiers]
+                            {[...transport.tiers]
                               .sort((a, b) => a.sort_order - b.sort_order)
                               .map(tier => {
                                 const sym = tier.currency === 'EUR' ? '€' : 'R$';
                                 const maxLabel = tier.max_pax === null ? '∞' : tier.max_pax;
                                 return (
                                   <span key={tier.id} className="text-xs text-gray-600 tabular-nums">
-                                    {tier.min_pax}–{maxLabel} pax · {sym}{tier.price_per_hour}/h
+                                    {tier.min_pax}–{maxLabel}{t('paxSep')}{sym}{tier.car_daily_rate}{t('diariaMais')}{sym}{tier.driver_price_per_hour}{t('hMotorista')}
                                   </span>
                                 );
                               })}
@@ -633,21 +687,21 @@ export default function TransportesPage() {
                         )}
                       </td>
                       <td className="px-5 py-3">
-                        <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${badge.cls}`}>
-                          {badge.label}
+                        <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${TYPE_BADGE_CLS[mode]}`}>
+                          {t(`tipos.${mode}`)}
                         </span>
                       </td>
                       <td className="px-5 py-3 text-center">
                         <button
-                          onClick={() => handleToggle(t)}
-                          disabled={togglingId === t.id}
+                          onClick={() => handleToggle(transport)}
+                          disabled={togglingId === transport.id}
                           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none disabled:opacity-50 ${
-                            t.is_active ? 'bg-green-500' : 'bg-gray-200'
+                            transport.is_active ? 'bg-green-500' : 'bg-gray-200'
                           }`}
                         >
                           <span
                             className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${
-                              t.is_active ? 'translate-x-4' : 'translate-x-0'
+                              transport.is_active ? 'translate-x-4' : 'translate-x-0'
                             }`}
                           />
                         </button>
@@ -655,16 +709,16 @@ export default function TransportesPage() {
                       <td className="px-5 py-3 text-right">
                         <div className="flex items-center justify-end gap-3">
                           <button
-                            onClick={() => setEditing(t)}
+                            onClick={() => setEditing(transport)}
                             className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
                           >
-                            Editar
+                            {tCommon('editar')}
                           </button>
                           <button
-                            onClick={() => setDeleting(t)}
+                            onClick={() => setDeleting(transport)}
                             className="text-xs text-gray-400 hover:text-red-600 transition-colors"
                           >
-                            Deletar
+                            {tCommon('deletar')}
                           </button>
                         </div>
                       </td>
@@ -673,6 +727,7 @@ export default function TransportesPage() {
                 })}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>

@@ -2,6 +2,8 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { fmtDate, fmtDateTime, fmtEur } from '@/lib/adminFormat';
 
 interface Client {
   id: string;
@@ -28,42 +30,27 @@ interface EmailLog {
   resend_id: string | null;
 }
 
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString('de-DE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-}
-
-function formatDateTime(date: string) {
-  return new Date(date).toLocaleString('de-DE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
 function StatusBadge({ status }: { status: Client['status'] }) {
+  const tStatus = useTranslations('admin.status.client');
+  const label = tStatus.has(status) ? tStatus(status) : status;
+
   if (status === 'active') {
     return (
       <span className="inline-block px-2.5 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-700">
-        Aktiv
+        {label}
       </span>
     );
   }
   if (status === 'completed') {
     return (
       <span className="inline-block px-2.5 py-0.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">
-        Abgeschlossen
+        {label}
       </span>
     );
   }
   return (
     <span className="inline-block px-2.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700">
-      Storniert
+      {label}
     </span>
   );
 }
@@ -105,6 +92,8 @@ function EmailCard({
   clientId: string;
   onUpdated: (updated: EmailLog) => void;
 }) {
+  const t = useTranslations('admin.clientes');
+  const tCommon = useTranslations('admin.common');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
 
@@ -119,7 +108,7 @@ function EmailCard({
       });
       const data = await res.json();
       if (!res.ok) {
-        setSendError(data.error ?? 'Fehler beim Senden.');
+        setSendError(data.error ?? t('erroEnviar'));
       } else {
         onUpdated({
           ...log,
@@ -130,7 +119,7 @@ function EmailCard({
         });
       }
     } catch {
-      setSendError('Netzwerkfehler.');
+      setSendError(tCommon('erroRede'));
     } finally {
       setSending(false);
     }
@@ -147,7 +136,7 @@ function EmailCard({
       });
       const data = await res.json();
       if (!res.ok) {
-        setSendError(data.error ?? 'Fehler beim Senden.');
+        setSendError(data.error ?? t('erroEnviar'));
       } else {
         onUpdated({
           ...log,
@@ -159,7 +148,7 @@ function EmailCard({
         });
       }
     } catch {
-      setSendError('Netzwerkfehler.');
+      setSendError(tCommon('erroRede'));
     } finally {
       setSending(false);
     }
@@ -178,11 +167,11 @@ function EmailCard({
           </p>
 
           <p className="mt-1 text-sm text-gray-500">
-            {log.status === 'not_sent' && 'Noch nicht gesendet'}
-            {log.status === 'pending' && log.scheduled_date && `Geplant für ${formatDate(log.scheduled_date)}`}
-            {log.status === 'sent' && log.sent_at && `Gesendet am ${formatDateTime(log.sent_at)} Uhr`}
-            {log.status === 'error' && `Fehler: ${log.error_message ?? 'Unbekannter Fehler'}`}
-            {log.status === 'skipped' && 'Übersprungen (Datum bereits vergangen)'}
+            {log.status === 'not_sent' && t('naoEnviado')}
+            {log.status === 'pending' && log.scheduled_date && t('agendadoPara', { data: fmtDate(log.scheduled_date) })}
+            {log.status === 'sent' && log.sent_at && t('enviadoEm', { data: fmtDateTime(log.sent_at) })}
+            {log.status === 'error' && t('erroPrefixo', { mensagem: log.error_message ?? tCommon('erroDesconhecido') })}
+            {log.status === 'skipped' && t('ignoradoData')}
           </p>
 
           {sendError && (
@@ -196,7 +185,7 @@ function EmailCard({
             disabled={sending}
             className="shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-green-50 text-green-700 hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {sending ? 'Wird gesendet...' : 'Jetzt senden'}
+            {sending ? tCommon('enviando') : t('enviarAgora')}
           </button>
         )}
 
@@ -210,7 +199,7 @@ function EmailCard({
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            {sending ? 'Wird gesendet...' : 'Erneut senden'}
+            {sending ? tCommon('enviando') : t('reenviar')}
           </button>
         )}
       </div>
@@ -233,6 +222,8 @@ export default function ClienteDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const t = useTranslations('admin.clientes');
+  const tCommon = useTranslations('admin.common');
 
   const [client, setClient] = useState<Client | null>(null);
   const [emails, setEmails] = useState<EmailLog[]>([]);
@@ -247,12 +238,12 @@ export default function ClienteDetailPage({
           setClient(data.client);
           setEmails(data.emails ?? []);
         } else {
-          setError(data.error ?? 'Fehler beim Laden.');
+          setError(data.error ?? tCommon('erroCarregar'));
         }
       })
-      .catch(() => setError('Netzwerkfehler.'))
+      .catch(() => setError(tCommon('erroRede')))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, tCommon]);
 
   const handleEmailUpdated = (updated: EmailLog) => {
     setEmails(prev => prev.map(e => (e.template_slug === updated.template_slug ? updated : e)));
@@ -262,16 +253,16 @@ export default function ClienteDetailPage({
   const posTourEmails = emails.filter(e => e.phase === 'pos_tour');
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-2xl">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
           <Link href="/admin/clientes" className="hover:text-gray-600 transition-colors">
-            Clientes
+            {t('titulo')}
           </Link>
           <span>→</span>
           <span className="text-gray-600 truncate">
-            {loading ? '...' : (client?.name ?? 'Nicht gefunden')}
+            {loading ? '...' : (client?.name ?? t('naoEncontrado'))}
           </span>
         </div>
 
@@ -305,7 +296,7 @@ export default function ClienteDetailPage({
           <>
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">{client.name}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{client.name}</h1>
               <StatusBadge status={client.status} />
             </div>
 
@@ -313,7 +304,7 @@ export default function ClienteDetailPage({
             <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
               <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                 <div>
-                  <p className="text-xs text-gray-400 mb-0.5">E-Mail</p>
+                  <p className="text-xs text-gray-400 mb-0.5">{tCommon('email')}</p>
                   <a
                     href={`mailto:${client.email}`}
                     className="text-sm font-medium text-green-700 hover:underline"
@@ -322,41 +313,41 @@ export default function ClienteDetailPage({
                   </a>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 mb-0.5">Ankunft</p>
+                  <p className="text-xs text-gray-400 mb-0.5">{t('chegada')}</p>
                   <p className="text-sm font-medium text-gray-900">
-                    {formatDate(client.arrival_date)}
+                    {fmtDate(client.arrival_date)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 mb-0.5">Abreise</p>
+                  <p className="text-xs text-gray-400 mb-0.5">{t('saida')}</p>
                   <p className="text-sm font-medium text-gray-900">
-                    {formatDate(client.departure_date)}
+                    {fmtDate(client.departure_date)}
                   </p>
                 </div>
                 {client.tour_details && (
                   <div className="col-span-2">
-                    <p className="text-xs text-gray-400 mb-0.5">Tour-Details</p>
+                    <p className="text-xs text-gray-400 mb-0.5">{t('detalhes')}</p>
                     <p className="text-sm text-gray-700">{client.tour_details}</p>
                   </div>
                 )}
                 {client.total_amount != null && (
                   <>
                     <div>
-                      <p className="text-xs text-gray-400 mb-0.5">Gesamtbetrag</p>
+                      <p className="text-xs text-gray-400 mb-0.5">{t('valorTotalLabel')}</p>
                       <p className="text-sm font-medium text-gray-900">
-                        {client.total_amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                        {fmtEur(client.total_amount)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400 mb-0.5">Anzahlung</p>
+                      <p className="text-xs text-gray-400 mb-0.5">{t('sinal')}</p>
                       <p className="text-sm font-medium text-gray-900">
-                        {(client.deposit_amount ?? 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                        {fmtEur(client.deposit_amount ?? 0)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400 mb-0.5">Restbetrag</p>
+                      <p className="text-xs text-gray-400 mb-0.5">{t('saldoRestante')}</p>
                       <p className="text-sm font-medium text-gray-900">
-                        {(client.total_amount - (client.deposit_amount ?? 0)).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                        {fmtEur(client.total_amount - (client.deposit_amount ?? 0))}
                       </p>
                     </div>
                   </>
@@ -367,12 +358,12 @@ export default function ClienteDetailPage({
             {/* Email timeline */}
             <div>
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                E-Mail Sequenz
+                {t('sequenciaEmails')}
               </h2>
-              
+
               {preTourEmails.length > 0 && (
                 <>
-                  <PhaseDivider label="Vor der Reise" />
+                  <PhaseDivider label={t('antesViagem')} />
                   <div className="space-y-3">
                     {preTourEmails.map(log => (
                       <EmailCard
@@ -388,7 +379,7 @@ export default function ClienteDetailPage({
 
               {posTourEmails.length > 0 && (
                 <>
-                  <PhaseDivider label="Nach der Reise" />
+                  <PhaseDivider label={t('depoisViagem')} />
                   <div className="space-y-3">
                     {posTourEmails.map(log => (
                       <EmailCard

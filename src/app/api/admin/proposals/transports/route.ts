@@ -66,11 +66,12 @@ export async function POST(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   if (Array.isArray(tiers) && tiers.length > 0) {
-    const tierRows = tiers.map((t: { min_pax: number; max_pax: number | null; price_per_hour: number; currency: string }, i: number) => ({
+    const tierRows = tiers.map((t: { min_pax: number; max_pax: number | null; car_daily_rate: number; driver_price_per_hour: number; currency: string }, i: number) => ({
       transport_type_id: transport.id,
       min_pax: t.min_pax,
       max_pax: t.max_pax ?? null,
-      price_per_hour: t.price_per_hour,
+      car_daily_rate: t.car_daily_rate,
+      driver_price_per_hour: t.driver_price_per_hour,
       currency: t.currency,
       sort_order: i * 10,
     }));

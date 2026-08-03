@@ -6,9 +6,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AuthLayout from "@/components/AuthLayout";
 import { m, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function SignupPage() {
+    const t = useTranslations("public.auth");
     const router = useRouter();
     const [firstName, setFirstName] = useState("");
     const [email, setEmail] = useState("");
@@ -38,14 +40,14 @@ export default function SignupPage() {
 
             setMessage({
                 type: "success",
-                text: "Konto erfolgreich erstellt! Willkommen im Rio-Guide."
+                text: t("signup.erfolgreich")
             });
 
             setTimeout(() => {
                 router.push('/dashboard');
             }, 1500);
         } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : "Fehler bei der Kontoerstellung.";
+            const errorMessage = error instanceof Error ? error.message : t("signup.fehler");
             setMessage({ type: "error", text: errorMessage });
         } finally {
             setLoading(false);
@@ -53,7 +55,7 @@ export default function SignupPage() {
     };
 
     return (
-        <AuthLayout title="Konto erstellen" subtitle="In wenigen Sekunden dabei sein">
+        <AuthLayout title={t("signup.titel")} subtitle={t("signup.untertitel")}>
             <form onSubmit={handleSignup} className="space-y-6">
                 <AnimatePresence mode="wait">
                     {message && (
@@ -78,7 +80,7 @@ export default function SignupPage() {
 
                 <div>
                     <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                        Vorname
+                        {t("vorname")}
                     </label>
                     <input
                         id="firstName"
@@ -87,13 +89,13 @@ export default function SignupPage() {
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-rio-green focus:border-rio-green sm:text-sm transition-all"
-                        placeholder="z.B. Sarah"
+                        placeholder={t("vornamePlaceholder")}
                     />
                 </div>
 
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        E-Mail
+                        {t("email")}
                     </label>
                     <input
                         id="email"
@@ -102,13 +104,13 @@ export default function SignupPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-rio-green focus:border-rio-green sm:text-sm transition-all"
-                        placeholder="deine@email.de"
+                        placeholder={t("emailPlaceholder")}
                     />
                 </div>
 
                 <div>
                     <label htmlFor="password" title="password" className="block text-sm font-medium text-gray-700">
-                        Passwort
+                        {t("passwort")}
                     </label>
                     <input
                         id="password"
@@ -117,7 +119,7 @@ export default function SignupPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-rio-green focus:border-rio-green sm:text-sm transition-all"
-                        placeholder="••••••••"
+                        placeholder={t("passwortPlaceholder")}
                     />
                 </div>
 
@@ -129,20 +131,20 @@ export default function SignupPage() {
                     {loading ? (
                         <>
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            Konto wird erstellt...
+                            {t("signup.kontoWirdErstellt")}
                         </>
                     ) : (
-                        "Registrieren"
+                        t("registrieren")
                     )}
                 </button>
 
                 <div className="text-center text-sm pt-2">
-                    <span className="text-gray-500">Bereits ein Konto? </span>
+                    <span className="text-gray-500">{t("signup.bereitsEinKonto")}</span>
                     <Link
                         href="/login"
                         className="font-bold text-gray-900 hover:text-rio-green transition-colors"
                     >
-                        Anmelden
+                        {t("anmelden")}
                     </Link>
                 </div>
             </form>

@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { applyShortcodes } from '@/types/email-templates'
+import { formatEuro } from '@/lib/email-templates/utils'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -32,8 +33,7 @@ function formatDate(dateStr: string): string {
 }
 
 function formatCurrency(value: number | null): string {
-  if (value === null) return '0,00 €'
-  return value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+  return formatEuro(value)
 }
 
 export async function POST(

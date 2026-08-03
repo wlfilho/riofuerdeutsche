@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 type FormData = {
   name: string;
@@ -46,6 +47,9 @@ export default function LeadManualSheet() {
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
+  const tSource = useTranslations('admin.status.source');
 
   const set =
     (field: keyof FormData) =>
@@ -63,9 +67,9 @@ export default function LeadManualSheet() {
     e.preventDefault();
     setError(null);
 
-    if (!form.name.trim()) { setError('Nome é obrigatório.'); return; }
-    if (!form.email.trim()) { setError('E-mail é obrigatório.'); return; }
-    if (!form.pax || Number(form.pax) < 1) { setError('PAX deve ser pelo menos 1.'); return; }
+    if (!form.name.trim()) { setError(t('nomeObrigatorio')); return; }
+    if (!form.email.trim()) { setError(t('emailObrigatorio')); return; }
+    if (!form.pax || Number(form.pax) < 1) { setError(t('paxMinimo')); return; }
 
     setLoading(true);
     try {
@@ -85,15 +89,15 @@ export default function LeadManualSheet() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? 'Erro ao salvar lead.');
+        setError(data.error ?? t('erroSalvarLead'));
         return;
       }
 
       handleClose();
-      setToast('Lead criado ✓');
+      setToast(t('leadCriado'));
       router.refresh();
     } catch {
-      setError('Erro de rede. Tente novamente.');
+      setError(tCommon('erroRede'));
     } finally {
       setLoading(false);
     }
@@ -105,7 +109,7 @@ export default function LeadManualSheet() {
         onClick={() => setOpen(true)}
         className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
       >
-        + Lead Manual
+        {t('leadManualBotao')}
       </button>
 
       {/* Overlay + Sheet */}
@@ -116,7 +120,7 @@ export default function LeadManualSheet() {
           <div className="relative ml-auto w-full max-w-md bg-white h-full shadow-2xl flex flex-col overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">Novo Lead Manual</h2>
+              <h2 className="text-lg font-bold text-gray-900">{t('novoLeadManual')}</h2>
               <button
                 onClick={handleClose}
                 className="text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none"
@@ -130,7 +134,7 @@ export default function LeadManualSheet() {
               <div className="px-6 py-5 space-y-4 flex-1">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nome <span className="text-red-500">*</span>
+                    {tCommon('nome')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -144,7 +148,7 @@ export default function LeadManualSheet() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    E-mail <span className="text-red-500">*</span>
+                    {tCommon('email')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="email"
@@ -157,7 +161,7 @@ export default function LeadManualSheet() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{tCommon('whatsapp')}</label>
                   <input
                     type="text"
                     value={form.phone}
@@ -170,7 +174,7 @@ export default function LeadManualSheet() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    PAX <span className="text-red-500">*</span>
+                    {tCommon('pax')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -184,7 +188,7 @@ export default function LeadManualSheet() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Origem <span className="text-red-500">*</span>
+                    {tCommon('origem')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={form.source}
@@ -192,29 +196,29 @@ export default function LeadManualSheet() {
                     disabled={loading}
                     className={INPUT_CLS}
                   >
-                    <option value="email">E-Mail</option>
-                    <option value="whatsapp">WhatsApp</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="referral">Indicação</option>
-                    <option value="other">Outro</option>
+                    <option value="email">{tSource('email')}</option>
+                    <option value="whatsapp">{tSource('whatsapp')}</option>
+                    <option value="instagram">{tSource('instagram')}</option>
+                    <option value="referral">{tSource('referral')}</option>
+                    <option value="other">{tSource('other')}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Anotação</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('anotacao')}</label>
                   <textarea
                     value={form.notes}
                     onChange={set('notes')}
                     rows={3}
                     disabled={loading}
                     className={`${INPUT_CLS} resize-none`}
-                    placeholder="Observações internas..."
+                    placeholder={t('observacoesInternas')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Conversa no Claude <span className="text-gray-400 font-normal">(opcional)</span>
+                    {t('conversaClaude')} <span className="text-gray-400 font-normal">{t('opcional')}</span>
                   </label>
                   <input
                     type="url"
@@ -241,14 +245,14 @@ export default function LeadManualSheet() {
                   disabled={loading}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
                 >
-                  Cancelar
+                  {tCommon('cancelar')}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-5 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Salvando...' : 'Salvar Lead'}
+                  {loading ? tCommon('salvando') : t('salvarLead')}
                 </button>
               </div>
             </form>

@@ -12,8 +12,10 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core';
+import { useTranslations } from 'next-intl';
 import KanbanColumn, { KANBAN_COLUMNS } from './KanbanColumn';
 import { KanbanCardContent } from './KanbanCard';
+import TourDateKanbanFlow, { type KanbanStatusChange } from '@/components/admin/TourDateKanbanFlow';
 import type { Lead, LeadStatus } from '../page';
 
 function Toast({ message, onDone }: { message: string; onDone: () => void }) {
@@ -32,7 +34,10 @@ export default function LeadsKanban({ allLeads }: { allLeads: Lead[] }) {
   const [leads, setLeads] = useState<Lead[]>(allLeads);
   const [activeLead, setActiveLead] = useState<Lead | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [tourFlow, setTourFlow] = useState<KanbanStatusChange | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
+  const t = useTranslations('admin.crm');
+  const tCommon = useTranslations('admin.common');
 
   const searchParams = useSearchParams();
 
@@ -83,11 +88,19 @@ export default function LeadsKanban({ allLeads }: { allLeads: Lead[] }) {
       if (!res.ok) {
         const data = await res.json();
         setLeads(prev);
-        setToast(`Erro: ${data.error ?? 'Falha ao atualizar status'}`);
+        setToast(tCommon('erroPrefixo', { mensagem: data.error ?? t('falhaAtualizarStatus') }));
+      } else {
+        setTourFlow({
+          leadId: lead.id,
+          leadName: lead.name,
+          pax: lead.pax ?? null,
+          oldStatus: lead.status,
+          newStatus,
+        });
       }
     } catch {
       setLeads(prev);
-      setToast('Erro de rede. Tente novamente.');
+      setToast(tCommon('erroRede'));
     }
   };
 
@@ -117,6 +130,8 @@ export default function LeadsKanban({ allLeads }: { allLeads: Lead[] }) {
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      <TourDateKanbanFlow change={tourFlow} onClose={() => setTourFlow(null)} />
 
       {toast && <Toast message={toast} onDone={clearToast} />}
     </>

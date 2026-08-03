@@ -1,4 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
+import { getServicesWithTranslations } from '@/lib/services-i18n';
+import { syncTourDatesWithLeadStatus } from '@/lib/tourDates';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
 
 export type ProposalServiceCategory = 'transfer' | 'tour' | 'extra' | 'atração';
 export type ProposalServiceCostCurrency = 'EUR' | 'BRL';
@@ -6,6 +9,9 @@ export type ProposalServiceCostType = 'fixed' | 'per_pax' | 'per_hour';
 export type ProposalServicePeriod = 'morning' | 'afternoon' | 'evening' | 'full_day';
 export type ProposalStatus = 'draft' | 'sent' | 'accepted' | 'rejected';
 export type ProposalTreatment = 'Sie' | 'du-ihr';
+// O que o cliente vê de preços no PDF/WhatsApp: só o total final, ou também o
+// subtotal por dia. Preço por atividade nunca é exibido ao cliente.
+export type ProposalPriceDisplay = 'total' | 'per_day';
 
 export interface ProposalServiceCost {
   id: string;
@@ -14,6 +20,9 @@ export interface ProposalServiceCost {
   base_price: number;
   currency: ProposalServiceCostCurrency;
   price_type: ProposalServiceCostType;
+  // Default da atividade: true = cobrado na proposta; false = cliente paga no
+  // local (o valor ainda é exibido na proposta). Ajustável por proposta.
+  include_in_price: boolean;
   sort_order: number;
 }
 
@@ -22,7 +31,10 @@ export interface ProposalTransportTier {
   transport_type_id: string;
   min_pax: number;
   max_pax: number | null;
-  price_per_hour: number;
+  // Diária fixa do veículo, cobrada uma vez por dia de tour em que ele é usado.
+  car_daily_rate: number;
+  // Motorista terceirizado, cobrado pelas horas de deslocamento do dia.
+  driver_price_per_hour: number;
   currency: 'EUR' | 'BRL';
   sort_order: number;
 }
@@ -41,58 +53,41 @@ export interface ProposalTransportType {
 export interface ProposalService {
   id: string;
   slug: string;
-  name: string;
   category: ProposalServiceCategory;
-  description: string | null;
   duration_hours: number | null;
   transfer_hours_to: number | null;
   transfer_hours_back: number | null;
   suggested_period: ProposalServicePeriod | null;
-  pdf_note: string | null;
   notes: string | null;
   is_active: boolean;
   sort_order: number;
   transport_type_id: string | null;
   transport_type: ProposalTransportType | null;
   costs: ProposalServiceCost[];
-}
-
-export function getTransportTierForPax(
-  transportType: ProposalTransportType,
-  pax: number,
-): ProposalTransportTier | null {
-  return transportType.tiers.find(
-    t => pax >= t.min_pax && (t.max_pax === null || pax <= t.max_pax),
-  ) ?? null;
-}
-
-export function calcTransportCost(
-  service: ProposalService,
-  pax: number,
-  _exchangeRate: number,
-): { description: string; base_price: number; currency: 'EUR' | 'BRL'; price_type: 'fixed' } | null {
-  const t = service.transport_type;
-  if (!t || t.is_included || t.slug === 'a-pe') return null;
-  if (t.is_manual) return null;
-
-  const tier = getTransportTierForPax(t, pax);
-  if (!tier) return null;
-
-  const hours = (service.transfer_hours_to ?? 0) + (service.transfer_hours_back ?? 0);
-  if (hours === 0) return null;
-
-  return {
-    description: `${t.name} (${hours}h)`,
-    base_price: tier.price_per_hour * hours,
-    currency: tier.currency,
-    price_type: 'fixed',
-  };
+  // ── Texto ──────────────────────────────────────────────────────────────────
+  // Vem de proposal_service_translations (ver src/lib/services-i18n.ts), NÃO
+  // das colunas homônimas de proposal_services, que estão DEPRECATED.
+  name: string;
+  description: string | null;
+  pdf_note: string | null;
+  // Idioma de onde o texto realmente veio + flag de fallback, para o builder
+  // sinalizar ao admin que aquele serviço não tem tradução no idioma pedido.
+  // Opcionais: só o Proposal Builder (getProposalServices) os preenche; o CRUD
+  // do catálogo trabalha com o mapa de traduções inteiro.
+  resolved_locale?: string;
+  is_fallback?: boolean;
 }
 
 export interface ProposalItem {
+  // 'day_transport' marca a linha sintética de carro + motorista de um dia;
+  // ausente/'activity' para atividades normais.
+  kind?: 'activity' | 'day_transport';
   day: string;
   service_slug: string;
   service_name: string;
+  // Descrição curta da atividade (proposal_services.description), congelada na
+  // proposta — aparece embaixo do nome no link público e no PDF.
+  service_description?: string | null;
   duration_hours: number | null;
   transfer_hours_to: number | null;
   transfer_hours_back: number | null;
@@ -101,15 +96,39 @@ export interface ProposalItem {
     base_price: number;
     currency: ProposalServiceCostCurrency;
     price_type: ProposalServiceCostType;
+    // false = cliente paga no local (fora do total, exibido como "Vor Ort zu
+    // zahlen"). Ausência (propostas antigas) = true.
+    included?: boolean;
     total_eur: number;
   }>;
   total_eur: number;
+  // Snapshot: a atividade usa veículo próprio (transporte por faixa)?
+  uses_vehicle?: boolean;
+  // Só em itens 'day_transport': horas de deslocamento cobradas do motorista.
+  transport_hours?: number;
+  // Só em itens 'day_transport': toggles do dia congelados na proposta.
+  // Ausência (propostas antigas) equivale a ambos ligados.
+  uses_driver?: boolean;
+  uses_rental_car?: boolean;
+  // Só em 'day_transport': tarifas congeladas usadas no cálculo (default da
+  // faixa ou customizadas na proposta), na moeda transport_currency.
+  car_daily_rate?: number | null;
+  driver_price_per_hour?: number | null;
+  transport_currency?: 'BRL' | 'EUR';
+  // Custo embutido no honorário do guia: existe pro Will (aparece nas linhas
+  // de `costs` como referência interna), mas NÃO soma no total do cliente —
+  // o total_eur da linha carrega só a parte cobrada por fora.
+  car_cost_included?: boolean;
+  driver_cost_included?: boolean;
   note: string;
 }
 
 export interface Proposal {
   id: string;
   client_name: string;
+  // Rótulo interno (ex.: "Plano chuva") pra diferenciar propostas do mesmo
+  // cliente no admin; nunca aparece pro cliente.
+  internal_label: string | null;
   client_email: string | null;
   client_phone: string | null;
   pax: number;
@@ -120,6 +139,17 @@ export interface Proposal {
   total_amount: number | null;
   exchange_rate: number | null;
   guide_rate: number | null;
+  price_display: ProposalPriceDisplay;
+  // Anzahlung (sinal em EUR) pedido pra reservar; null/0 = proposta sem sinal.
+  deposit_amount: number | null;
+  // "Angebot gültig bis" (ISO date); null = sem prazo de validade.
+  valid_until: string | null;
+  // Idioma do texto que o cliente recebe. Hoje sempre 'de' (não há seletor por
+  // proposta); existe para o Proposal Builder resolver o catálogo no idioma
+  // certo quando a seleção por proposta chegar.
+  locale?: string | null;
+  // Token do link público /angebot/[token] enviado ao cliente.
+  public_token: string;
   status: ProposalStatus;
   internal_notes: string | null;
   pdf_url: string | null;
@@ -129,6 +159,7 @@ export interface Proposal {
 
 export interface ProposalFormData {
   client_name: string;
+  internal_label: string | null;
   client_email: string;
   client_phone: string;
   pax: number;
@@ -139,6 +170,38 @@ export interface ProposalFormData {
   items: ProposalItem[];
   exchange_rate: number;
   guide_rate: number;
+  price_display: ProposalPriceDisplay;
+  deposit_amount: number | null;
+  valid_until: string | null;
+}
+
+// Dados bancários do bloco "Buchung & Anzahlung" (site_settings, linha única).
+export interface DepositBankInfo {
+  account_holder: string;
+  iban: string;
+  bic: string;
+  bank_name: string;
+}
+
+// site_settings tem RLS restrito ao admin; a página pública /angebot precisa
+// dos dados bancários, então a leitura usa a service role — só no servidor.
+export async function getDepositBankInfo(): Promise<DepositBankInfo> {
+  const admin = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+  const { data } = await admin
+    .from('site_settings')
+    .select('bank_account_holder, bank_iban, bank_bic, bank_name')
+    .eq('key', 'email_assinatura')
+    .single();
+
+  return {
+    account_holder: data?.bank_account_holder ?? '',
+    iban: data?.bank_iban ?? '',
+    bic: data?.bank_bic ?? '',
+    bank_name: data?.bank_name ?? '',
+  };
 }
 
 export async function getTransportTypes(): Promise<ProposalTransportType[]> {
@@ -153,20 +216,61 @@ export async function getTransportTypes(): Promise<ProposalTransportType[]> {
   return (data ?? []) as ProposalTransportType[];
 }
 
-export async function getProposalServices(): Promise<ProposalService[]> {
+// Idioma padrão de uma proposta enquanto não existe seleção por proposta:
+// proposals.locale já existe no banco com default 'de'.
+export const DEFAULT_PROPOSAL_LOCALE = 'de';
+
+/**
+ * Catálogo de serviços do Proposal Builder já resolvido em um idioma.
+ *
+ * A parte NÃO-textual (custos, horas, transporte, categoria, ordenação) vem de
+ * proposal_services; o texto (name/description/pdf_note) vem exclusivamente de
+ * proposal_service_translations, via getServicesWithTranslations — as colunas
+ * de texto de proposal_services estão DEPRECATED e não são mais lidas.
+ *
+ * Serviço ativo sem nenhuma tradução fica de fora (não há o que exibir), que é
+ * o mesmo critério de getServicesWithTranslations.
+ */
+export async function getProposalServices(
+  locale: string = DEFAULT_PROPOSAL_LOCALE,
+): Promise<ProposalService[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('proposal_services')
-    .select(`
-      *,
-      costs:proposal_service_costs(*),
-      transport_type:proposal_transport_types(*, tiers:proposal_transport_tiers(*))
-    `)
-    .eq('is_active', true)
-    .order('sort_order');
+  const [{ data, error }, translations] = await Promise.all([
+    supabase
+      .from('proposal_services')
+      .select(`
+        id, slug, category, notes, is_active, sort_order,
+        duration_hours, transfer_hours_to, transfer_hours_back,
+        suggested_period, transport_type_id,
+        costs:proposal_service_costs(*),
+        transport_type:proposal_transport_types(*, tiers:proposal_transport_tiers(*))
+      `)
+      .eq('is_active', true)
+      .order('sort_order'),
+    getServicesWithTranslations(locale),
+  ]);
 
   if (error) throw new Error(error.message);
-  return (data ?? []) as ProposalService[];
+
+  const textById = new Map(translations.map((t) => [t.id, t]));
+
+  return (data ?? []).flatMap((row) => {
+    const text = textById.get(row.id);
+    if (!text) return [];
+    return [
+      {
+        ...(row as unknown as Omit<
+          ProposalService,
+          'name' | 'description' | 'pdf_note' | 'resolved_locale' | 'is_fallback'
+        >),
+        name: text.name,
+        description: text.description,
+        pdf_note: text.pdfNote,
+        resolved_locale: text.resolvedLocale,
+        is_fallback: text.isFallback,
+      },
+    ];
+  });
 }
 
 export async function getProposals(): Promise<Proposal[]> {
@@ -192,6 +296,27 @@ export async function getProposalById(id: string): Promise<Proposal | null> {
     if (error.code === 'PGRST116') return null;
     throw new Error(error.message);
   }
+  return data as Proposal;
+}
+
+// Página pública /angebot/[token]: proposals tem RLS restrito ao admin, então
+// a busca por token usa a service role — só roda no servidor.
+export async function getProposalByPublicToken(token: string): Promise<Proposal | null> {
+  // Evita erro de cast do Postgres em tokens que nem são UUID.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)) {
+    return null;
+  }
+  const admin = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+  const { data, error } = await admin
+    .from('proposals')
+    .select('*')
+    .eq('public_token', token)
+    .single();
+
+  if (error) return null;
   return data as Proposal;
 }
 
@@ -227,6 +352,56 @@ export async function createProposal(formData: ProposalFormData): Promise<Propos
   return data as Proposal;
 }
 
+// Cria uma nova proposta (rascunho) a partir de uma existente — caso típico:
+// o cliente pede um itinerário alternativo (ex.: plano B pra dia de chuva).
+// A cópia não herda id, public_token (o DB gera um novo), pdf_url nem status.
+// A marca de cópia vai no rótulo interno; client_name fica intacto porque é o
+// título da proposta que o cliente vê.
+export async function duplicateProposal(id: string): Promise<Proposal> {
+  const original = await getProposalById(id);
+  if (!original) throw new Error('Proposta não encontrada.');
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('proposals')
+    .insert({
+      client_name: original.client_name,
+      internal_label: original.internal_label
+        ? `${original.internal_label} (Kopie)`
+        : 'Kopie',
+      client_email: original.client_email,
+      client_phone: original.client_phone,
+      pax: original.pax,
+      arrival_date: original.arrival_date,
+      departure_date: original.departure_date,
+      treatment: original.treatment,
+      items: original.items,
+      total_amount: original.total_amount,
+      exchange_rate: original.exchange_rate,
+      guide_rate: original.guide_rate,
+      price_display: original.price_display,
+      deposit_amount: original.deposit_amount,
+      valid_until: original.valid_until,
+      internal_notes: original.internal_notes,
+      status: 'draft' satisfies ProposalStatus,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data as Proposal;
+}
+
+// O status da proposta comanda o funil do lead vinculado no CRM
+// (price_leads.proposal_id): uma mudança aqui move o card do kanban junto,
+// pra não ter que contar a mesma história em duas telas.
+const LEAD_STATUS_BY_PROPOSAL_STATUS: Record<ProposalStatus, string> = {
+  draft: 'contacted',
+  sent: 'proposal_sent',
+  accepted: 'closed',
+  rejected: 'lost',
+};
+
 export async function updateProposalStatus(id: string, status: ProposalStatus): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase
@@ -235,6 +410,27 @@ export async function updateProposalStatus(id: string, status: ProposalStatus): 
     .eq('id', id);
 
   if (error) throw new Error(error.message);
+
+  // Sincroniza o lead vinculado (best-effort: proposta sem lead é normal, e
+  // uma falha aqui não deve derrubar a troca de status da proposta).
+  const leadStatus = LEAD_STATUS_BY_PROPOSAL_STATUS[status];
+  const { data: syncedLeads, error: leadError } = await supabase
+    .from('price_leads')
+    .update({ status: leadStatus })
+    .eq('proposal_id', id)
+    .select('id');
+
+  if (leadError) {
+    console.error('[updateProposalStatus] failed to sync linked lead:', leadError.message);
+    return;
+  }
+
+  for (const lead of syncedLeads ?? []) {
+    const syncError = await syncTourDatesWithLeadStatus(supabase, lead.id, leadStatus);
+    if (syncError) {
+      console.error('[updateProposalStatus] failed to sync tour_dates:', syncError);
+    }
+  }
 }
 
 export async function deleteProposal(id: string): Promise<void> {

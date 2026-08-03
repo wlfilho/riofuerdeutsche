@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 const INPUT_CLS =
   'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400';
 
 export default function NovoClientePage() {
   const router = useRouter();
+  const t = useTranslations('admin.clientes');
+  const tCommon = useTranslations('admin.common');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -26,13 +29,13 @@ export default function NovoClientePage() {
 
   const validate = () => {
     if (!name.trim() || !email.trim() || !arrivalDate || !departureDate) {
-      return 'Bitte alle Pflichtfelder ausfüllen.';
+      return t('preenchaObrigatorios');
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return 'Bitte eine gültige E-Mail-Adresse eingeben.';
+      return t('emailInvalido');
     }
     if (new Date(departureDate) < new Date(arrivalDate)) {
-      return 'Das Abreisedatum muss nach dem Ankunftsdatum liegen.';
+      return t('dataSaidaPosterior');
     }
     return null;
   };
@@ -69,31 +72,31 @@ export default function NovoClientePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error ?? 'Fehler beim Speichern.');
+        setError(data.error ?? tCommon('erroSalvar'));
         return;
       }
 
       router.push(`/admin/clientes/${data.client.id}`);
     } catch {
-      setError('Netzwerkfehler. Bitte versuche es erneut.');
+      setError(tCommon('erroRede'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-xl">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
           <Link href="/admin/clientes" className="hover:text-gray-600 transition-colors">
-            Kunden
+            {t('titulo')}
           </Link>
           <span>→</span>
-          <span className="text-gray-600">Neuer Kunde</span>
+          <span className="text-gray-600">{t('novoClienteTitulo')}</span>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Neuen Kunden anlegen</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">{t('cadastrarNovo')}</h1>
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
@@ -101,13 +104,13 @@ export default function NovoClientePage() {
             {/* Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name des Touristen <span className="text-red-500">*</span>
+                {t('nomeTurista')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="z.B. Maria Müller"
+                placeholder={t('nomePlaceholder')}
                 disabled={loading}
                 className={INPUT_CLS}
               />
@@ -116,13 +119,13 @@ export default function NovoClientePage() {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                E-Mail-Adresse <span className="text-red-500">*</span>
+                {tCommon('email')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="name@example.com"
+                placeholder={t('emailPlaceholder')}
                 disabled={loading}
                 className={INPUT_CLS}
               />
@@ -132,20 +135,20 @@ export default function NovoClientePage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Telefon / WhatsApp
+                  {t('telefoneWhatsapp')}
                 </label>
                 <input
                   type="text"
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
-                  placeholder="+49 170 000 0000"
+                  placeholder={t('telefonePlaceholder')}
                   disabled={loading}
                   className={INPUT_CLS}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Anzahl Personen (Pax)
+                  {t('numeroPessoas')}
                 </label>
                 <input
                   type="number"
@@ -162,7 +165,7 @@ export default function NovoClientePage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ankunftsdatum <span className="text-red-500">*</span>
+                  {t('dataChegada')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -174,7 +177,7 @@ export default function NovoClientePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Abreisedatum <span className="text-red-500">*</span>
+                  {t('dataSaida')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -190,13 +193,13 @@ export default function NovoClientePage() {
             {/* Tour Details */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Details der Tour
+                {t('detalhesTour')}
               </label>
               <textarea
                 value={tourDetails}
                 onChange={e => setTourDetails(e.target.value)}
                 rows={3}
-                placeholder="z.B. Flughafen-Transfer, Klassiker Tour, Favela Tour Rocinha, Maracanã-Spiel"
+                placeholder={t('detalhesTourPlaceholder')}
                 disabled={loading}
                 className={`${INPUT_CLS} resize-none`}
               />
@@ -206,7 +209,7 @@ export default function NovoClientePage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gesamtbetrag (€)
+                  {t('valorTotal')}
                 </label>
                 <input
                   type="number"
@@ -221,7 +224,7 @@ export default function NovoClientePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Anzahlung erhalten (€)
+                  {t('sinalRecebido')}
                 </label>
                 <input
                   type="number"
@@ -239,14 +242,14 @@ export default function NovoClientePage() {
             {/* Internal Notes */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Interne Notizen{' '}
-                <span className="text-xs text-gray-400">(nur für dich sichtbar)</span>
+                {t('notasInternas')}{' '}
+                <span className="text-xs text-gray-400">{t('apenasVisivelVoce')}</span>
               </label>
               <textarea
                 value={internalNotes}
                 onChange={e => setInternalNotes(e.target.value)}
                 rows={3}
-                placeholder="Notizen, die nicht an den Kunden weitergeleitet werden"
+                placeholder={t('notasPlaceholder')}
                 disabled={loading}
                 className={`${INPUT_CLS} resize-none`}
               />
@@ -264,19 +267,19 @@ export default function NovoClientePage() {
               href="/admin/clientes"
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
-              Abbrechen
+              {tCommon('cancelar')}
             </Link>
             <button
               type="submit"
               disabled={loading}
               className="px-5 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Wird gespeichert...' : 'Kunden anlegen & E-Mail senden'}
+              {loading ? tCommon('salvando') : t('cadastrarEnviarEmail')}
             </button>
           </div>
 
           <p className="mt-3 text-xs text-gray-400">
-            Nach dem Speichern wird automatisch die Bestätigungs-E-Mail an den Touristen gesendet.
+            {t('emailAutomatico')}
           </p>
         </form>
       </div>

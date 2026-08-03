@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Star, ChevronDown, ChevronUp } from 'lucide-react';
+import { useLocale } from 'next-intl';
 
 export interface Review {
     id: string;
@@ -24,11 +25,14 @@ interface ReviewCardProps {
 
 export default function ReviewCard({ review, onOpenPhotos }: ReviewCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const locale = useLocale();
     const date = new Date(review.created_at);
-    const formattedDate = date.toLocaleDateString('de-DE', {
+    // "März 2026": formato mês+ano não é coberto por format.ts, então o Intl
+    // fica aqui — mas com o locale do contexto, não fixo.
+    const formattedDate = new Intl.DateTimeFormat(locale, {
         month: 'long',
         year: 'numeric'
-    });
+    }).format(date);
 
     const isLongText = review.body.length > 300;
     const displayText = isExpanded ? review.body : review.body.slice(0, 300);

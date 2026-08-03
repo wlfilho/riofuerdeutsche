@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import ReviewFormInline from '@/app/bewertung-schreiben/ReviewFormInline';
@@ -9,6 +10,7 @@ import ReviewFormInline from '@/app/bewertung-schreiben/ReviewFormInline';
 type Step = 'nps' | 'bewertung' | 'done';
 
 function NpsFormContent() {
+    const t = useTranslations('public.nps');
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
 
@@ -78,7 +80,7 @@ function NpsFormContent() {
             }
         } catch (err) {
             console.error('Error submitting NPS:', err);
-            alert('Ups! Etwas ist schief gelaufen. Bitte versuche es später noch einmal.');
+            alert(t('submitError'));
         } finally {
             setIsSubmitting(false);
         }
@@ -88,7 +90,7 @@ function NpsFormContent() {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
                 <Loader2 className="w-10 h-10 animate-spin text-yellow-500 mb-4" />
-                <p className="text-gray-500 font-medium">Einen Moment bitte...</p>
+                <p className="text-gray-500 font-medium">{t('loading')}</p>
             </div>
         );
     }
@@ -101,13 +103,13 @@ function NpsFormContent() {
                         🤔
                     </div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">
-                        Link nicht gültig
+                        {t('invalidTokenTitle')}
                     </h2>
                     <p className="text-gray-500 text-sm leading-relaxed">
-                        Dieser Link wurde bereits verwendet oder existiert nicht. Wenn du Fragen hast, melde dich bitte bei Will.
+                        {t('invalidTokenText')}
                     </p>
                     <Link href="/" className="mt-8 inline-block text-sm font-bold text-yellow-600 hover:text-yellow-700 underline decoration-yellow-400">
-                        Zurück zur Startseite
+                        {t('backHome')}
                     </Link>
                 </div>
             </div>
@@ -124,7 +126,7 @@ function NpsFormContent() {
                                 <CheckCircle2 className="w-10 h-10 text-green-600" />
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                                Vielen Dank, {nickname}!
+                                {t('thanksTitle', { name: nickname })}
                             </h2>
                             <p className="text-gray-600 leading-relaxed max-w-sm mx-auto">
                                 Deine Bewertung wurde erfolgreich eingereicht. Wir freuen uns riesig über dein Feedback!
@@ -136,7 +138,7 @@ function NpsFormContent() {
                                 😊
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                                Vielen Dank, {nickname}!
+                                {t('thanksTitle', { name: nickname })}
                             </h2>
                             <p className="text-gray-600 leading-relaxed max-w-sm mx-auto">
                                 Schön, dass es dir gefallen hat! Dein Feedback hilft mir,
@@ -150,7 +152,7 @@ function NpsFormContent() {
                                 🙏
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
-                                Vielen Dank für dein ehrliches Feedback, {nickname}!
+                                {t('thanksHonestTitle', { name: nickname })}
                             </h2>
                             <p className="text-gray-600 leading-relaxed max-w-sm mx-auto">
                                 Deine Rückmeldung ist wertvoll und hilft mir, meine Touren
@@ -159,7 +161,7 @@ function NpsFormContent() {
                         </>
                     )}
                     <Link href="/" className="mt-8 inline-block text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">
-                        Zurück zur Startseite
+                        {t('backHome')}
                     </Link>
                 </div>
             </div>
@@ -175,20 +177,20 @@ function NpsFormContent() {
                         <div className="p-8 md:p-10">
                             <div className="text-center mb-10">
                                 <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest mb-2">
-                                    Feedback-Formular
+                                    {t('formLabel')}
                                 </p>
                                 {nickname ? (
                                     <div className="flex justify-center mb-4">
                                         <div className="px-4 py-1.5 bg-gray-50 rounded-full border border-gray-100 text-[11px] font-bold text-gray-400">
-                                            Hallo {nickname}!
+                                            {t('hello', { name: nickname })}
                                         </div>
                                     </div>
                                 ) : null}
                                 <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">
-                                    Wie war deine Tour mit Will?
+                                    {t('title')}
                                 </h1>
                                 <p className="text-gray-500 text-sm mt-3">
-                                    3 kurze Fragen — dauert weniger als eine Minute.
+                                    {t('subtitle')}
                                 </p>
                             </div>
 
@@ -197,13 +199,13 @@ function NpsFormContent() {
                                 {!token && (
                                     <div className="space-y-2">
                                         <label className="block text-sm font-bold text-gray-800">
-                                            Dein Name <span className="text-red-500">*</span>
+                                            {t('nameLabel')} <span className="text-red-500">*</span>
                                         </label>
                                         <input
                                             type="text"
                                             value={nickname}
                                             onChange={e => setNickname(e.target.value)}
-                                            placeholder="z.B. Klaus"
+                                            placeholder={t('namePlaceholder')}
                                             className="w-full border border-gray-100 bg-gray-50/30 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all"
                                         />
                                     </div>
@@ -212,8 +214,7 @@ function NpsFormContent() {
                                 {/* NPS score */}
                                 <div className="space-y-4">
                                     <label className="block text-sm font-bold text-gray-800 leading-snug">
-                                        Wie wahrscheinlich ist es, dass du Will als Guide
-                                        an Freunde oder Familie weiterempfiehlst?
+                                        {t('scoreLabel')}
                                         <span className="text-red-500 ml-1">*</span>
                                     </label>
                                     <div className="grid grid-cols-6 sm:grid-cols-11 gap-2">
@@ -234,39 +235,39 @@ function NpsFormContent() {
                                         ))}
                                     </div>
                                     <div className="flex justify-between items-center px-1">
-                                        <span className="text-[10px] font-bold text-gray-300 uppercase tracking-wider">Gar nicht wahrscheinlich</span>
-                                        <span className="text-[10px] font-bold text-gray-300 uppercase tracking-wider">Sehr wahrscheinlich</span>
+                                        <span className="text-[10px] font-bold text-gray-300 uppercase tracking-wider">{t('scoreMin')}</span>
+                                        <span className="text-[10px] font-bold text-gray-300 uppercase tracking-wider">{t('scoreMax')}</span>
                                     </div>
                                 </div>
 
                                 {/* Best part */}
                                 <div className="space-y-2">
                                     <label className="block text-sm font-bold text-gray-800">
-                                        Was hat dir an der Tour am besten gefallen?
+                                        {t('bestPartLabel')}
                                         <span className="text-red-500 ml-1">*</span>
                                     </label>
                                     <textarea
                                         value={bestPart}
                                         onChange={e => setBestPart(e.target.value)}
                                         rows={4}
-                                        placeholder="z.B. die persönlichen Tipps, die Atmosphäre, die Orte..."
+                                        placeholder={t('bestPartPlaceholder')}
                                         className="w-full border border-gray-100 bg-gray-50/30 rounded-2xl px-4 py-3 text-sm
                                             focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all resize-none leading-relaxed"
                                     />
-                                    <p className="text-[10px] text-gray-400 text-right">Erzähl es uns in deinen eigenen Worten.</p>
+                                    <p className="text-[10px] text-gray-400 text-right">{t('bestPartHint')}</p>
                                 </div>
 
                                 {/* Improvement */}
                                 <div className="space-y-2">
                                     <label className="block text-sm font-bold text-gray-800">
-                                        Gibt es etwas, das wir beim nächsten Mal besser machen könnten?
-                                        <span className="text-gray-400 font-normal ml-1">(optional)</span>
+                                        {t('improvementLabel')}
+                                        <span className="text-gray-400 font-normal ml-1">{t('improvementOptional')}</span>
                                     </label>
                                     <textarea
                                         value={improvement}
                                         onChange={e => setImprovement(e.target.value)}
                                         rows={3}
-                                        placeholder="Dein Feedback hilft uns, noch besser zu werden."
+                                        placeholder={t('improvementPlaceholder')}
                                         className="w-full border border-gray-100 bg-gray-50/30 rounded-2xl px-4 py-3 text-sm
                                             focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all resize-none leading-relaxed"
                                     />
@@ -279,14 +280,14 @@ function NpsFormContent() {
                                             <div className="w-7 h-7 rounded-full bg-yellow-400 flex items-center justify-center">
                                                 <span className="text-xs font-black text-black">1</span>
                                             </div>
-                                            <span className="text-xs font-bold text-gray-500">Feedback</span>
+                                            <span className="text-xs font-bold text-gray-500">{t('stepFeedback')}</span>
                                         </div>
                                         <div className="flex-1 h-0.5 bg-yellow-300 rounded-full" />
                                         <div className="flex items-center gap-2 shrink-0">
                                             <div className="w-7 h-7 rounded-full bg-white border-2 border-yellow-400 flex items-center justify-center">
                                                 <span className="text-xs font-black text-yellow-500">2</span>
                                             </div>
-                                            <span className="text-xs font-bold text-gray-500">Bewertung</span>
+                                            <span className="text-xs font-bold text-gray-500">{t('stepReview')}</span>
                                         </div>
                                     </div>
                                 )}
@@ -299,11 +300,11 @@ function NpsFormContent() {
                                         disabled:text-gray-400 text-gray-900 font-bold rounded-2xl transition-all shadow-sm hover:shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"
                                 >
                                     {isSubmitting ? (
-                                        <><Loader2 className="w-5 h-5 animate-spin" />Wird gesendet...</>
+                                        <><Loader2 className="w-5 h-5 animate-spin" />{t('submitting')}</>
                                     ) : score !== null && score >= 9 ? (
-                                        'Weiter zur Bewertung →'
+                                        t('continueToReview')
                                     ) : (
-                                        'Feedback absenden'
+                                        t('submit')
                                     )}
                                 </button>
                             </div>
@@ -314,13 +315,13 @@ function NpsFormContent() {
                         <>
                             <div className="px-8 md:px-10 pt-8 md:pt-10 text-center">
                                 <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest mb-2">
-                                    Schritt 2 von 2
+                                    {t('step2Label')}
                                 </p>
                                 <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-2">
-                                    Deine Erfahrung teilen
+                                    {t('step2Title')}
                                 </h2>
                                 <p className="text-gray-500 text-sm">
-                                    Schreib eine kurze Bewertung — dein Feedback hilft anderen deutschen Reisenden.
+                                    {t('step2Subtitle')}
                                 </p>
                             </div>
                             <ReviewFormInline
@@ -335,7 +336,7 @@ function NpsFormContent() {
                 </div>
 
                 <div className="mt-12 text-center text-gray-300 text-xs font-bold uppercase tracking-widest">
-                    &copy; Rio für Deutsche &mdash; Rio de Janeiro Experte
+                    {t('footer')}
                 </div>
             </div>
         </div>

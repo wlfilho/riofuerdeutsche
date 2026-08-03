@@ -6,13 +6,27 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthLayout from "@/components/AuthLayout";
 import { m, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
+/**
+ * `code` existe para que a decisão de mostrar o botão de reenvio não dependa do
+ * texto renderizado. Antes o componente fazia `text.includes("nicht bestätigt")`,
+ * o que quebra assim que a string sai do código para o catálogo (ou muda de
+ * idioma). Quem cria a mensagem marca o caso; a UI só olha o marcador.
+ */
+type AuthMessage = {
+    type: "success" | "error";
+    text: string;
+    code?: "email_not_confirmed";
+};
+
 export default function LoginPage() {
+    const t = useTranslations("public.auth");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+    const [message, setMessage] = useState<AuthMessage | null>(null);
     const router = useRouter();
     const supabase = createClient();
 
@@ -31,13 +45,14 @@ export default function LoginPage() {
                 if (error.message.includes("Email not confirmed")) {
                     setMessage({
                         type: "error",
-                        text: "Deine E-Mail wurde noch nicht bestätigt. Bitte überprüfe deinen Posteingang oder klicke unten, um den Link erneut zu senden."
+                        text: t("login.emailNichtBestaetigt"),
+                        code: "email_not_confirmed",
                     });
                 } else {
                     throw error;
                 }
             } else {
-                setMessage({ type: "success", text: "Login erfolgreich! Leite weiter..." });
+                setMessage({ type: "success", text: t("login.erfolgreich") });
 
                 const user = data.user;
                 if (user) {
@@ -71,7 +86,7 @@ export default function LoginPage() {
                 }
             }
         } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : "Fehler bei der Anmeldung.";
+            const errorMessage = error instanceof Error ? error.message : t("login.fehler");
             setMessage({ type: "error", text: errorMessage });
         } finally {
             setLoading(false);
@@ -80,7 +95,7 @@ export default function LoginPage() {
 
     const handleResendEmail = async () => {
         if (!email) {
-            setMessage({ type: "error", text: "Bitte gib zuerst deine E-Mail ein." });
+            setMessage({ type: "error", text: t("login.bitteEmailEingeben") });
             return;
         }
         setLoading(true);
@@ -92,12 +107,12 @@ export default function LoginPage() {
         if (error) {
             setMessage({ type: "error", text: error.message });
         } else {
-            setMessage({ type: "success", text: "Bestätigungs-E-Mail gesendet!" });
+            setMessage({ type: "success", text: t("login.bestaetigungsEmailGesendet") });
         }
     };
 
     return (
-        <AuthLayout title="Willkommen zurück" subtitle="Melde dich an, um fortzufahren">
+        <AuthLayout title={t("login.titel")} subtitle={t("login.untertitel")}>
             <form onSubmit={handleLogin} className="space-y-6">
                 <AnimatePresence mode="wait">
                     {message && (
@@ -120,13 +135,13 @@ export default function LoginPage() {
                                 )}
                                 <span>{message.text}</span>
                             </div>
-                            {message.type === "error" && message.text.includes("nicht bestätigt") && (
+                            {message.type === "error" && message.code === "email_not_confirmed" && (
                                 <button
                                     type="button"
                                     onClick={handleResendEmail}
                                     className="text-xs font-semibold text-rio-green underline underline-offset-2 hover:text-rio-green-light block mx-auto py-1"
                                 >
-                                    Bestätigungslink erneut senden
+                                    {t("login.bestaetigungslinkErneutSenden")}
                                 </button>
                             )}
                         </m.div>
@@ -135,7 +150,7 @@ export default function LoginPage() {
 
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        E-Mail
+                        {t("email")}
                     </label>
                     <input
                         id="email"
@@ -144,13 +159,13 @@ export default function LoginPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-rio-green focus:border-rio-green sm:text-sm transition-all"
-                        placeholder="deine@email.de"
+                        placeholder={t("emailPlaceholder")}
                     />
                 </div>
 
                 <div>
                     <label htmlFor="password" title="password" className="block text-sm font-medium text-gray-700">
-                        Passwort
+                        {t("passwort")}
                     </label>
                     <input
                         id="password"
@@ -159,7 +174,7 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-rio-green focus:border-rio-green sm:text-sm transition-all"
-                        placeholder="••••••••"
+                        placeholder={t("passwortPlaceholder")}
                     />
                 </div>
 
@@ -169,7 +184,7 @@ export default function LoginPage() {
                             href="/forgot-password"
                             className="font-medium text-gray-600 hover:text-rio-green transition-colors"
                         >
-                            Passwort vergessen?
+                            {t("login.passwortVergessen")}
                         </Link>
                     </div>
                 </div>
@@ -182,20 +197,20 @@ export default function LoginPage() {
                     {loading ? (
                         <>
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            Anmelden...
+                            {t("anmeldenLoading")}
                         </>
                     ) : (
-                        "Anmelden"
+                        t("anmelden")
                     )}
                 </button>
 
                 <div className="text-center text-sm pt-2">
-                    <span className="text-gray-500">Noch kein Konto? </span>
+                    <span className="text-gray-500">{t("login.nochKeinKonto")}</span>
                     <Link
                         href="/signup"
                         className="font-bold text-gray-900 hover:text-rio-green transition-colors"
                     >
-                        Registrieren
+                        {t("registrieren")}
                     </Link>
                 </div>
             </form>

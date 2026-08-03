@@ -67,7 +67,7 @@ export default async function IndividuelleTourPage() {
 
                                 <div className="pt-6">
                                     <a
-                                        href="https://wa.me/5521990564944?text=Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?"
+                                        href={`${whatsappHref}?text=Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
@@ -200,7 +200,7 @@ export default async function IndividuelleTourPage() {
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a
-                                    href="https://wa.me/5521990564944?text=Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?"
+                                    href={`${whatsappHref}?text=Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"

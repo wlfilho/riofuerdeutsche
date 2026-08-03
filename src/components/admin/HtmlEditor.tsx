@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface HtmlEditorProps {
   value: string;
@@ -29,20 +30,25 @@ const SNIPPETS: Record<SnippetKey, string> = {
   BLOCKQUOTE: '<blockquote>Zitat oder Tipp</blockquote>\n',
 };
 
-const TOOLBAR_BUTTONS: { key: SnippetKey; label: string; title: string }[] = [
-  { key: 'H2', label: 'H2', title: 'Überschrift 2 einfügen' },
-  { key: 'H3', label: 'H3', title: 'Überschrift 3 einfügen' },
-  { key: 'P', label: 'P', title: 'Absatz einfügen' },
-  { key: 'UL', label: 'UL', title: 'Liste einfügen' },
-  { key: 'BLOCKQUOTE', label: '❝', title: 'Blockzitat einfügen' },
-  { key: 'TABLE', label: 'Tabelle', title: 'Tabelle einfügen' },
-  { key: 'IMG', label: 'IMG', title: 'Bild einfügen' },
-  { key: 'YT', label: 'YT', title: 'YouTube-Embed einfügen' },
+// `titleKey` aponta para admin.editor.* — o array é de módulo e não pode usar
+// hooks, então a tradução acontece no render.
+const TOOLBAR_BUTTONS: { key: SnippetKey; label: string; titleKey: string }[] = [
+  { key: 'H2', label: 'H2', titleKey: 'inserirTitulo2' },
+  { key: 'H3', label: 'H3', titleKey: 'inserirTitulo3' },
+  { key: 'P', label: 'P', titleKey: 'inserirParagrafo' },
+  { key: 'UL', label: 'UL', titleKey: 'inserirLista' },
+  { key: 'BLOCKQUOTE', label: '❝', titleKey: 'inserirCitacao' },
+  { key: 'TABLE', label: 'Tabela', titleKey: 'inserirTabela' },
+  { key: 'IMG', label: 'IMG', titleKey: 'inserirImagem' },
+  { key: 'YT', label: 'YT', titleKey: 'inserirYoutube' },
 ];
 
 export default function HtmlEditor({ value, onChange }: HtmlEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const t = useTranslations('admin.editor');
+  const tConfig = useTranslations('admin.configuracoes');
+  const tGuide = useTranslations('admin.guide');
 
   const insertSnippet = (snippet: string) => {
     const textarea = textareaRef.current;
@@ -72,7 +78,7 @@ export default function HtmlEditor({ value, onChange }: HtmlEditorProps) {
           <button
             key={btn.key}
             type="button"
-            title={btn.title}
+            title={t(btn.titleKey)}
             onClick={() => insertSnippet(SNIPPETS[btn.key])}
             className="px-2.5 py-1 text-xs font-mono font-semibold bg-white border border-gray-200 rounded hover:bg-gray-100 hover:border-gray-300 transition-colors text-gray-700 cursor-pointer"
           >
@@ -85,7 +91,7 @@ export default function HtmlEditor({ value, onChange }: HtmlEditorProps) {
           onClick={() => setShowPreview(true)}
           className="px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors cursor-pointer"
         >
-          👁 Vorschau
+          👁 {tConfig('previa')}
         </button>
       </div>
 
@@ -121,7 +127,7 @@ export default function HtmlEditor({ value, onChange }: HtmlEditorProps) {
               <X size={18} className="text-gray-500" />
             </button>
 
-            <p className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-4">Vorschau — guide-content</p>
+            <p className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-4">{tConfig('previa')} — guide-content</p>
 
             {value.trim() ? (
               <div
@@ -129,7 +135,7 @@ export default function HtmlEditor({ value, onChange }: HtmlEditorProps) {
                 dangerouslySetInnerHTML={{ __html: value }}
               />
             ) : (
-              <p className="text-gray-400 italic">Noch kein Inhalt.</p>
+              <p className="text-gray-400 italic">{tGuide('semConteudo')}</p>
             )}
           </div>
         </div>

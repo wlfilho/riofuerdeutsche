@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface Client {
   id: string;
@@ -35,17 +36,19 @@ type FormData = {
   internal_notes: string;
 };
 
+const STATUS_CLS: Record<Client['status'], string> = {
+  active: 'bg-green-100 text-green-700',
+  pending: 'bg-amber-100 text-amber-700',
+  completed: 'bg-blue-100 text-blue-700',
+  cancelled: 'bg-gray-100 text-gray-500',
+};
+
 function StatusBadge({ status }: { status: Client['status'] }) {
-  const map: Record<Client['status'], { label: string; className: string }> = {
-    active: { label: 'Aktiv', className: 'bg-green-100 text-green-700' },
-    pending: { label: 'Ausstehend', className: 'bg-amber-100 text-amber-700' },
-    completed: { label: 'Abgeschlossen', className: 'bg-blue-100 text-blue-700' },
-    cancelled: { label: 'Storniert', className: 'bg-gray-100 text-gray-500' },
-  };
-  const { label, className } = map[status] ?? map.active;
+  const tStatus = useTranslations('admin.status.client');
+  const className = STATUS_CLS[status] ?? STATUS_CLS.active;
   return (
     <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${className}`}>
-      {label}
+      {tStatus.has(status) ? tStatus(status) : status}
     </span>
   );
 }
@@ -116,6 +119,9 @@ function EditModal({
   onClose: () => void;
   onSaved: (updated: Client) => void;
 }) {
+  const t = useTranslations('admin.clientes');
+  const tCommon = useTranslations('admin.common');
+  const tStatus = useTranslations('admin.status.client');
   const [form, setForm] = useState<FormData>(clientToForm(client));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -128,11 +134,11 @@ function EditModal({
     setError(null);
 
     if (!form.name.trim() || !form.email.trim() || !form.arrival_date || !form.departure_date) {
-      setError('Bitte alle Pflichtfelder ausfüllen.');
+      setError(t('preenchaObrigatorios'));
       return;
     }
     if (new Date(form.departure_date) < new Date(form.arrival_date)) {
-      setError('Das Abreisedatum muss nach dem Ankunftsdatum liegen.');
+      setError(t('dataSaidaPosterior'));
       return;
     }
 
@@ -158,13 +164,13 @@ function EditModal({
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? 'Fehler beim Speichern.');
+        setError(data.error ?? tCommon('erroSalvar'));
         return;
       }
 
       onSaved({ ...client, ...data.client });
     } catch {
-      setError('Netzwerkfehler. Bitte versuche es erneut.');
+      setError(tCommon('erroRede'));
     } finally {
       setLoading(false);
     }
@@ -175,7 +181,7 @@ function EditModal({
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900">Kunde bearbeiten</h2>
+          <h2 className="text-lg font-bold text-gray-900">{t('editarCliente')}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none"
@@ -191,15 +197,15 @@ function EditModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name <span className="text-red-500">*</span>
+                  {tCommon('nome')} <span className="text-red-500">*</span>
                 </label>
-                <input type="text" value={form.name} onChange={set('name')} disabled={loading} className={INPUT_CLS} placeholder="Maria Müller" />
+                <input type="text" value={form.name} onChange={set('name')} disabled={loading} className={INPUT_CLS} placeholder={t('nomePlaceholder')} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  E-Mail <span className="text-red-500">*</span>
+                  {tCommon('email')} <span className="text-red-500">*</span>
                 </label>
-                <input type="email" value={form.email} onChange={set('email')} disabled={loading} className={INPUT_CLS} placeholder="name@example.com" />
+                <input type="email" value={form.email} onChange={set('email')} disabled={loading} className={INPUT_CLS} placeholder={t('emailPlaceholder')} />
               </div>
             </div>
 
@@ -207,13 +213,13 @@ function EditModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Telefon / WhatsApp
+                  {t('telefoneWhatsapp')}
                 </label>
-                <input type="text" value={form.phone} onChange={set('phone')} disabled={loading} className={INPUT_CLS} placeholder="+49 170 000 0000" />
+                <input type="text" value={form.phone} onChange={set('phone')} disabled={loading} className={INPUT_CLS} placeholder={t('telefonePlaceholder')} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Anzahl Personen (Pax)
+                  {t('numeroPessoas')}
                 </label>
                 <input type="number" min="1" value={form.pax} onChange={set('pax')} disabled={loading} className={INPUT_CLS} />
               </div>
@@ -223,13 +229,13 @@ function EditModal({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ankunftsdatum <span className="text-red-500">*</span>
+                  {t('dataChegada')} <span className="text-red-500">*</span>
                 </label>
                 <input type="date" value={form.arrival_date} onChange={set('arrival_date')} disabled={loading} className={INPUT_CLS} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Abreisedatum <span className="text-red-500">*</span>
+                  {t('dataSaida')} <span className="text-red-500">*</span>
                 </label>
                 <input type="date" value={form.departure_date} onChange={set('departure_date')} min={form.arrival_date || undefined} disabled={loading} className={INPUT_CLS} />
               </div>
@@ -237,36 +243,36 @@ function EditModal({
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{tCommon('status')}</label>
               <select value={form.status} onChange={set('status')} disabled={loading} className={INPUT_CLS}>
-                <option value="active">Aktiv</option>
-                <option value="pending">Ausstehend</option>
-                <option value="completed">Abgeschlossen</option>
-                <option value="cancelled">Storniert</option>
+                <option value="active">{tStatus('active')}</option>
+                <option value="pending">{tStatus('pending')}</option>
+                <option value="completed">{tStatus('completed')}</option>
+                <option value="cancelled">{tStatus('cancelled')}</option>
               </select>
             </div>
 
             {/* Amounts */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Gesamtbetrag (€)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('valorTotal')}</label>
                 <input type="number" min="0" step="0.01" value={form.total_amount} onChange={set('total_amount')} placeholder="0.00" disabled={loading} className={INPUT_CLS} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Anzahlung erhalten (€)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('sinalRecebido')}</label>
                 <input type="number" min="0" step="0.01" value={form.deposit_amount} onChange={set('deposit_amount')} placeholder="0.00" disabled={loading} className={INPUT_CLS} />
               </div>
             </div>
 
             {/* Tour Details */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Details der Tour</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('detalhesTour')}</label>
               <textarea
                 value={form.tour_details}
                 onChange={set('tour_details')}
                 rows={3}
                 disabled={loading}
-                placeholder="z.B. Flughafen-Transfer, Klassiker Tour, Favela Tour Rocinha"
+                placeholder={t('detalhesTourPlaceholder')}
                 className={`${INPUT_CLS} resize-none`}
               />
             </div>
@@ -274,14 +280,14 @@ function EditModal({
             {/* Internal Notes */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Interne Notizen <span className="text-xs text-gray-400">(nur für dich sichtbar)</span>
+                {t('notasInternas')} <span className="text-xs text-gray-400">{t('apenasVisivelVoce')}</span>
               </label>
               <textarea
                 value={form.internal_notes}
                 onChange={set('internal_notes')}
                 rows={3}
                 disabled={loading}
-                placeholder="Notizen, die nicht an den Kunden weitergeleitet werden"
+                placeholder={t('notasPlaceholder')}
                 className={`${INPUT_CLS} resize-none`}
               />
             </div>
@@ -299,14 +305,14 @@ function EditModal({
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
-              Abbrechen
+              {tCommon('cancelar')}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-5 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Wird gespeichert...' : 'Speichern'}
+              {loading ? tCommon('salvando') : tCommon('salvar')}
             </button>
           </div>
         </form>
@@ -316,6 +322,8 @@ function EditModal({
 }
 
 export default function ClientesPage() {
+  const t = useTranslations('admin.clientes');
+  const tCommon = useTranslations('admin.common');
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -329,52 +337,50 @@ export default function ClientesPage() {
       .then(res => res.json())
       .then(data => {
         if (data.clients) setClients(data.clients);
-        else setError(data.error ?? 'Fehler beim Laden.');
+        else setError(data.error ?? tCommon('erroCarregar'));
       })
-      .catch(() => setError('Netzwerkfehler.'))
+      .catch(() => setError(tCommon('erroRede')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [tCommon]);
 
   const handleSaved = (updated: Client) => {
     setClients(prev => prev.map(c => (c.id === updated.id ? { ...c, ...updated } : c)));
     setEditClient(null);
-    setToast('Kunde gespeichert ✓');
+    setToast(t('clienteSalvo'));
   };
 
   const handleDelete = async (client: Client) => {
-    const confirmed = window.confirm(
-      `Kunden "${client.name}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`
-    );
+    const confirmed = window.confirm(t('confirmarExcluirLongo', { nome: client.name }));
     if (!confirmed) return;
 
     try {
       const res = await fetch(`/api/admin/clients/${client.id}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error ?? 'Fehler beim Löschen.');
+        alert(data.error ?? t('erroExcluir'));
         return;
       }
       setClients(prev => prev.filter(c => c.id !== client.id));
-      setToast('Kunde gelöscht');
+      setToast(t('clienteExcluido'));
     } catch {
-      alert('Netzwerkfehler.');
+      alert(tCommon('erroRede'));
     }
   };
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Kunden</h1>
-            <p className="text-gray-500 mt-1">Touristen mit aktiver Buchung</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
+            <p className="text-gray-500 mt-1">{t('subtitulo')}</p>
           </div>
           <Link
             href="/admin/clientes/novo"
             className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
           >
-            + Neuer Kunde
+            {t('novoCliente')}
           </Link>
         </div>
 
@@ -389,11 +395,11 @@ export default function ClientesPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Name</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">E-Mail</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Pax</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Aktionen</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('nome')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('email')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('pax')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('status')}</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('acoes')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -406,12 +412,12 @@ export default function ClientesPage() {
                 ) : clients.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-4 py-16 text-center">
-                      <p className="text-gray-400 text-sm mb-3">Noch keine Kunden</p>
+                      <p className="text-gray-400 text-sm mb-3">{t('nenhumCliente')}</p>
                       <Link
                         href="/admin/clientes/novo"
                         className="inline-block px-4 py-2 text-sm font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                       >
-                        + Ersten Kunden anlegen
+                        {t('criarPrimeiro')}
                       </Link>
                     </td>
                   </tr>
@@ -430,11 +436,11 @@ export default function ClientesPage() {
                             href={`/admin/clientes/${client.id}`}
                             className="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
                           >
-                            Details
+                            {t('detalhesLink')}
                           </Link>
                           <button
                             onClick={() => setEditClient(client)}
-                            title="Bearbeiten"
+                            title={t('editarTitle')}
                             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -443,7 +449,7 @@ export default function ClientesPage() {
                           </button>
                           <button
                             onClick={() => handleDelete(client)}
-                            title="Löschen"
+                            title={t('excluirTitle')}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { MapPin, Instagram, Youtube, Mail, Send } from "lucide-react";
 import type { ContactUrls } from "@/lib/settings";
 
@@ -16,11 +17,11 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 );
 
 const FALLBACK: ContactUrls = {
-  phone: '+55 21 99056-4944',
-  phoneHref: 'tel:+5521990564944',
-  whatsappHref: 'https://wa.me/5521990564944',
-  email: 'lantelmew@gmail.com',
-  emailHref: 'mailto:lantelmew@gmail.com',
+  phone: '+55 21 97927-7472',
+  phoneHref: 'tel:+5521979277472',
+  whatsappHref: 'https://wa.me/5521979277472',
+  email: 'riofuerdeutsche@gmail.com',
+  emailHref: 'mailto:riofuerdeutsche@gmail.com',
   instagramHref: 'https://instagram.com/riofuerdeutsche',
   youtubeHref: 'https://youtube.com/@riofuerdeutsche',
   facebookHref: '',
@@ -30,6 +31,8 @@ const FALLBACK: ContactUrls = {
 }
 
 export default function Footer({ contact = FALLBACK }: { contact?: ContactUrls }) {
+    const t = useTranslations('public.footer');
+
     return (
         <footer className="bg-gray-900 text-gray-400 py-12">
             <div className="max-w-7xl mx-auto px-5 lg:px-8">
@@ -39,7 +42,7 @@ export default function Footer({ contact = FALLBACK }: { contact?: ContactUrls }
                             <MapPin className="h-6 w-6 text-rio-yellow" />
                             <span>Rio<span className="text-rio-blue">FürDeutsche</span></span>
                         </Link>
-                        <p className="text-sm mb-3">Dein deutschsprachiger Insider Guide in der wunderbaren Stadt Rio de Janeiro.</p>
+                        <p className="text-sm mb-3">{t('tagline')}</p>
                         <p className="text-sm mb-6 text-gray-500">RioFürDeutsche bietet deutschsprachige Reiseleitung, Citytouren und Ausflüge in Rio de Janeiro — geführt von einem echten Carioca, der fließend Deutsch spricht.</p>
                         <div className="flex items-center gap-3">
                             {contact.instagramHref && (
@@ -98,17 +101,17 @@ export default function Footer({ contact = FALLBACK }: { contact?: ContactUrls }
                         </div>
                     </div>
                     <div>
-                        <h3 className="text-white font-bold mb-4">Quick Links</h3>
+                        <h3 className="text-white font-bold mb-4">{t('quickLinks')}</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/touren" className="hover:text-white transition-colors">Touren und Ausflüge</Link></li>
-                            <li><Link href="/#ueber-uns" className="hover:text-white transition-colors">Über Uns</Link></li>
-                            <li><Link href="/rio-guide/sehenswuerdigkeiten" className="hover:text-white transition-colors">Rio-Guide</Link></li>
-                            <li><Link href="/rio-guide/sehenswuerdigkeiten/christus-erloeser" className="hover:text-white transition-colors">Christus-Erlöser</Link></li>
-                            <li><Link href="/kontakt" className="hover:text-white transition-colors">Kontakt</Link></li>
+                            <li><Link href="/touren" className="hover:text-white transition-colors">{t('tourenUndAusfluege')}</Link></li>
+                            <li><Link href="/ueber-will" className="hover:text-white transition-colors">{t('ueberUns')}</Link></li>
+                            <li><Link href="/rio-guide/sehenswuerdigkeiten" className="hover:text-white transition-colors">{t('rioGuide')}</Link></li>
+                            <li><Link href="/rio-guide/sehenswuerdigkeiten/christus-erloeser" className="hover:text-white transition-colors">{t('christusErloeser')}</Link></li>
+                            <li><Link href="/kontakt" className="hover:text-white transition-colors">{t('kontakt')}</Link></li>
                         </ul>
                     </div>
                     <div>
-                        <h3 className="text-white font-bold mb-4">Kontakt</h3>
+                        <h3 className="text-white font-bold mb-4">{t('kontakt')}</h3>
                         <ul className="space-y-2 text-sm">
                             {contact.whatsappHref && (
                             <li className="flex items-center gap-2">
@@ -122,20 +125,22 @@ export default function Footer({ contact = FALLBACK }: { contact?: ContactUrls }
                                 <a href={contact.emailHref} className="hover:text-white transition-colors">{contact.email}</a>
                             </li>
                             )}
-                            <li className="pt-2 text-rio-yellow">Dein Buddy in Rio!</li>
+                            <li className="pt-2 text-rio-yellow">{t('deinBuddyInRio')}</li>
                         </ul>
                     </div>
                 </div>
                 <div className="flex flex-col md:flex-row justify-between items-center text-xs">
-                    <p>&copy; {new Date().getFullYear()} Rio für Deutsche. Alle Rechte vorbehalten.</p>
+                    {/* year vai como string: em ICU um número seria formatado com
+                        separador de milhar (2.026), mudando o texto renderizado. */}
+                    <p>{t('copyright', { year: String(new Date().getFullYear()) })}</p>
                     <div className="flex gap-4 mt-4 md:mt-0">
-                        <Link href="/impressum" className="hover:text-white transition-colors">Impressum</Link>
-                        <Link href="/datenschutz" className="hover:text-white transition-colors">Datenschutz</Link>
+                        <Link href="/impressum" className="hover:text-white transition-colors">{t('impressum')}</Link>
+                        <Link href="/datenschutz" className="hover:text-white transition-colors">{t('datenschutz')}</Link>
                         <button
                             onClick={() => window.dispatchEvent(new Event('cookie_consent_reset'))}
                             className="hover:text-white transition-colors cursor-pointer"
                         >
-                            Cookie-Einstellungen
+                            {t('cookieEinstellungen')}
                         </button>
                     </div>
                 </div>
