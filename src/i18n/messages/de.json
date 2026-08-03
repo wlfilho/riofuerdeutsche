@@ -79,6 +79,8 @@
       "dayLabel": "Tag {n}",
       "perPersonDay": "pro Person und Tag",
       "totalPriceLabel": "Gesamtpreis",
+      "subtotalLabel": "Zwischensumme",
+      "discountLabel": "Rabatt",
       "depositCta": "🔒 Wunschtermine für {amount} sichern",
       "whatsappCta": "Jetzt Termine sichern",
       "validUntil": "⏳ Angebot gültig bis {date}",

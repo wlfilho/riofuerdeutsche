@@ -213,8 +213,17 @@ export default async function ProposalPage({
       hours: Math.ceil(calcDayHours(activities)),
     };
   });
-  const grandTotal =
-    proposal.total_amount ?? proposal.items.reduce((sum, i) => sum + i.total_eur, 0);
+  const calculatedSum = proposal.items.reduce((sum, i) => sum + i.total_eur, 0);
+  // total_amount já é o que o cliente paga (preço final manual, quando o Will
+  // definiu um). Com discount_visible, a diferença pro calculado vira uma
+  // linha de Rabatt explícita — só quando é desconto de verdade; acréscimo
+  // nunca é anunciado.
+  const grandTotal = proposal.total_amount ?? calculatedSum;
+  const discount =
+    proposal.discount_visible && proposal.total_override_amount != null
+      ? calculatedSum - grandTotal
+      : 0;
+  const showDiscount = discount > 0.005;
 
   // Reframing: mesmo valor na menor unidade honesta (pessoa × dia). Só faz
   // sentido quando há mais de uma unidade.
@@ -410,6 +419,21 @@ export default async function ProposalPage({
                     <dd className="font-medium text-gray-800 tabular-nums">{fmt.money(total)}</dd>
                   </div>
                 ))}
+              </dl>
+            </div>
+          )}
+
+          {showDiscount && (
+            <div className="px-6 pb-4">
+              <dl className={`divide-y divide-gray-100 ${showDayPrices ? '' : 'border-y border-gray-100'}`}>
+                <div className="flex items-center justify-between py-2.5 text-sm">
+                  <dt className="text-gray-600">{t('subtotalLabel')}</dt>
+                  <dd className="font-medium text-gray-800 tabular-nums">{fmt.money(calculatedSum)}</dd>
+                </div>
+                <div className="flex items-center justify-between py-2.5 text-sm">
+                  <dt className="font-semibold text-green-700">{t('discountLabel')}</dt>
+                  <dd className="font-semibold text-green-700 tabular-nums">−{fmt.money(discount)}</dd>
+                </div>
               </dl>
             </div>
           )}

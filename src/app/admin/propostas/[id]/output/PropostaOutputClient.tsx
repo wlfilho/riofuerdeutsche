@@ -129,6 +129,16 @@ function collectOnsiteCosts(items: Proposal['items']): OnsiteCost[] {
   return out;
 }
 
+// Desconto anunciável: só existe quando o Will definiu preço final manual COM
+// a opção "mostrar Rabatt" — e só quando é desconto de verdade (acréscimo
+// nunca vira linha na proposta). subtotal = soma calculada dos itens.
+function proposalDiscount(proposal: Proposal): { subtotal: number; discount: number } | null {
+  if (!proposal.discount_visible || proposal.total_override_amount == null) return null;
+  const subtotal = proposal.items.reduce((sum, i) => sum + i.total_eur, 0);
+  const discount = subtotal - (proposal.total_amount ?? subtotal);
+  return discount > 0.005 ? { subtotal, discount } : null;
+}
+
 function formatOnsiteCost(c: OnsiteCost, exchangeRate: number | null): string {
   const sym = c.currency === 'EUR' ? '€' : 'R$';
   const val = c.base_price % 1 === 0
@@ -194,6 +204,11 @@ function generateWhatsAppText(proposal: Proposal): string {
   const perPersonDay = priceUnits > 1 && total > 0 ? total / priceUnits : null;
 
   lines.push('');
+  const rabatt = proposalDiscount(proposal);
+  if (rabatt) {
+    lines.push(`🧾 Zwischensumme: ${formatEur(rabatt.subtotal)}`);
+    lines.push(`🎁 Rabatt: -${formatEur(rabatt.discount)}`);
+  }
   lines.push(`💰 Gesamtpreis: ${formatEur(total)}`);
   if (perPersonDay) {
     lines.push(
@@ -396,6 +411,22 @@ async function downloadPDF(proposal: Proposal, bank: DepositBankInfo): Promise<v
     doc.setLineWidth(0.2);
     doc.line(mL, y + 1, pageW - mR, y + 1);
     y += 3;
+  }
+
+  // Zwischensumme + Rabatt antes do total, quando o desconto é anunciável.
+  const pdfRabatt = proposalDiscount(proposal);
+  if (pdfRabatt) {
+    y += 2;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(DARK);
+    doc.text('Zwischensumme', COL.prog + 2, y + 5);
+    doc.text(formatEur(pdfRabatt.subtotal), COL.priceR - 2, y + 5, { align: 'right' });
+    y += 6;
+    doc.setTextColor(GREEN);
+    doc.text('Rabatt', COL.prog + 2, y + 5);
+    doc.text(`-${formatEur(pdfRabatt.discount)}`, COL.priceR - 2, y + 5, { align: 'right' });
+    y += 4;
   }
 
   // Total row
@@ -858,7 +889,38 @@ export default function PropostaOutputClient({
                 );
               })}
               <tfoot>
-                <tr className="border-t-2 border-gray-200 bg-gray-50">
+                {/* Com preço final manual, o admin vê o subtotal calculado e o
+                    ajuste — inclusive quando o desconto é invisível pro cliente. */}
+                {initial.total_override_amount != null && (() => {
+                  const subtotal = initial.items.reduce((sum, i) => sum + i.total_eur, 0);
+                  const diff = subtotal - (initial.total_amount ?? subtotal);
+                  return (
+                    <>
+                      <tr className="border-t-2 border-gray-200 bg-gray-50">
+                        <td className="px-6 pt-3 pb-1 text-xs text-gray-500" colSpan={2}>
+                          {t('subtotalCalculado')}
+                        </td>
+                        <td className="px-6 pt-3 pb-1 text-right text-xs text-gray-500 tabular-nums">
+                          {fmtEur(subtotal)}
+                        </td>
+                      </tr>
+                      <tr className="bg-gray-50">
+                        <td className="px-6 py-1 text-xs" colSpan={2}>
+                          <span className={diff >= 0 ? 'text-green-700' : 'text-amber-600'}>
+                            {diff >= 0 ? t('descontoLabel') : t('acrescimoLabel')}
+                          </span>
+                          <span className="ml-2 text-gray-400">
+                            {initial.discount_visible ? t('rabattVisivelBadge') : t('rabattInvisivelBadge')}
+                          </span>
+                        </td>
+                        <td className={`px-6 py-1 text-right text-xs tabular-nums ${diff >= 0 ? 'text-green-700' : 'text-amber-600'}`}>
+                          {diff >= 0 ? '−' : '+'}{fmtEur(Math.abs(diff))}
+                        </td>
+                      </tr>
+                    </>
+                  );
+                })()}
+                <tr className={`bg-gray-50 ${initial.total_override_amount != null ? '' : 'border-t-2 border-gray-200'}`}>
                   <td className="px-6 py-4">
                     <span className="text-sm font-semibold text-gray-600">{t('valorTotal')}</span>
                     <span className="ml-3 text-xs text-gray-400 tabular-nums">
