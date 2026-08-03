@@ -6,7 +6,9 @@ import { ChevronRight, MapPin, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Sehenswürdigkeiten Rio de Janeiro — Tipps vom Carioca auf Deutsch | Rio für Deutsche",
+    title: {
+        absolute: "Sehenswürdigkeiten Rio de Janeiro, Tipps vom Carioca auf Deutsch | Rio für Deutsche",
+    },
     description:
         "Die besten Sehenswürdigkeiten in Rio de Janeiro — Christus Erlöser, Zuckerhut, Escadaria Selarón und mehr. Insider-Tipps vom lokalen Guide, auf Deutsch.",
     alternates: {
@@ -45,9 +47,23 @@ const sehenswuerdigkeiten = [
     {
         name: "Rocinha",
         badge: "Favela-Tour",
-        tagline: "Die größte Favela Brasiliens — und ein Ort, den du nicht aus dem Taxi sehen solltest.",
+        tagline: "Die größte Favela Brasiliens, und ein Ort, den du nicht aus dem Taxi sehen solltest.",
         href: "/rio-guide/sehenswuerdigkeiten/rocinha",
         emoji: "🏘️",
+    },
+    {
+        name: "Favela Santa Marta",
+        badge: "Botafogo",
+        tagline: "Die erste befriedete Favela Rios, Michael Jackson Video und atemberaubende Aussicht.",
+        href: "/rio-guide/sehenswuerdigkeiten/santa-marta",
+        emoji: "🎤",
+    },
+    {
+        name: "The Maze",
+        badge: "Versteckt",
+        tagline: "Bob Nadkarnis Kulturzentrum in Tavares Bastos, mit Blick auf die ganze Guanabara-Bucht.",
+        href: "/rio-guide/sehenswuerdigkeiten/the-maze",
+        emoji: "🎷",
     },
 ];
 

@@ -6,9 +6,12 @@ import FadeIn from "@/components/FadeIn";
 import AndereTouren from "@/components/AndereTouren";
 import { ChevronRight, Home, ArrowRight, Phone } from "lucide-react";
 import type { Metadata } from "next";
+import Faq from "@/components/Faq";
 
 export const metadata: Metadata = {
-    title: "Escadaria Selarón Rio de Janeiro — Tipps, Geschichte & Insider-Wissen | Rio für Deutsche",
+    title: {
+        absolute: "Escadaria Selarón Rio de Janeiro: Lapa Treppe & Geschichte | Rio für Deutsche",
+    },
     description:
         "Die berühmte Fliesentreppe zwischen Lapa und Santa Teresa — kostenlos, farbenprächtig und voller Geschichte. Alles, was du als deutscher Tourist wissen musst, erklärt von einem Carioca.",
     openGraph: {
@@ -49,12 +52,49 @@ const jsonLd = {
     knowsAbout: ["Escadaria Selarón", "Jorge Selarón", "Lapa", "Santa Teresa", "Rio de Janeiro"],
 };
 
+const faqItems = [
+    {
+        q: "Kostet die Escadaria Selarón Eintritt?",
+        a: "Nein, der Besuch ist kostenlos. Die Treppe liegt öffentlich zwischen Lapa und Santa Teresa und ist jederzeit zugänglich.",
+    },
+    {
+        q: "Wann sollte man die Selarón besuchen?",
+        a: "Vor 9 Uhr morgens oder ab 17 Uhr nachmittags. Dann sind die Reisegruppen weg, das Licht ist gut für Fotos und die Stimmung ist entspannt. Zwischen 11 und 15 Uhr kommen die Touristenbusse.",
+    },
+    {
+        q: "Ist die Escadaria Selarón sicher?",
+        a: "Tagsüber ja. Die Treppe liegt am Rand von Lapa, einem Viertel, das abends Charme hat, aber auch Aufmerksamkeit verlangt. Abends empfiehlt sich der Besuch mit Will oder in einer Gruppe.",
+    },
+    {
+        q: "Wer war Jorge Selarón?",
+        a: "Ein chilenischer Künstler, der 1983 nach Rio kam und ab 1990 über 23 Jahre die Treppe vor seinem Haus mit über 2.000 Fliesen aus mehr als 60 Ländern bedeckte. Hinter dem Werk steckt eine bewegende persönliche Geschichte.",
+    },
+    {
+        q: "Gibt es deutsche Fliesen auf der Treppe?",
+        a: "Ja. Unter den Fliesen aus aller Welt finden sich auch Motive aus München, Heidelberg und Berlin, die Selarón von Besuchern geschenkt bekam. Wer genau hinschaut, entdeckt sie.",
+    },
+];
+
+const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+};
+
 export default function EscadariaSelaronPage() {
     return (
         <>
         <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
             <Navbar />
@@ -618,6 +658,24 @@ export default function EscadariaSelaronPage() {
                     </div>
                 </section>
 
+                {/* ── FAQ ─────────────────────────────────────────── */}
+                <section className="py-20 lg:py-24 bg-white border-t border-gray-100">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up" className="mb-10">
+                            <div className="max-w-[800px] mx-auto">
+                                <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                                    Häufige Fragen zur Escadaria Selarón
+                                </h2>
+                            </div>
+                        </FadeIn>
+                        <FadeIn direction="up">
+                            <div className="max-w-[800px] mx-auto">
+                                <Faq items={faqItems} />
+                            </div>
+                        </FadeIn>
+                    </div>
+                </section>
+
                 {/* ── SECÇÃO 7 — CTA Final ─────────────────────────── */}
                 <section className="py-24 relative overflow-hidden bg-[#0d1f15] border-t-4 border-rio-yellow">
                     <div className="absolute inset-0 bg-[url('/images/rio-background.webp')] bg-cover bg-center mix-blend-overlay opacity-10" />
@@ -627,7 +685,7 @@ export default function EscadariaSelaronPage() {
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6 leading-tight">
                                 Die Escadaria Selarón{" "}
                                 <br className="hidden sm:block" />
-                                <span className="text-rio-yellow">mit Will erleben</span>
+                                <span className="text-rio-yellow">mit deutschsprachigem Reiseführer entdecken</span>
                             </h2>
                             <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
                                 Ich erzähle dir die Geschichte, die kein Reiseführer kennt — und bringe dich

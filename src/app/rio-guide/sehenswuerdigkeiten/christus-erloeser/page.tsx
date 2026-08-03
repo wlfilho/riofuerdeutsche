@@ -5,9 +5,12 @@ import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
 import AndereTouren from "@/components/AndereTouren";
 import { ChevronRight, Home, ArrowRight, Phone } from "lucide-react";
+import Faq from "@/components/Faq";
 
 export const metadata = {
-    title: "Christus Erlöser Rio de Janeiro — Tipps, Eintritt & Anfahrt | Rio für Deutsche",
+    title: {
+        absolute: "Christus Erlöser & Corcovado Rio de Janeiro: Tickets & Tipps | Rio für Deutsche",
+    },
     description:
         "Alles über den Christus Erlöser in Rio: Eintritt, beste Reisezeit, Geheimtipps vom Carioca. Redeemer statue rio de janeiro — so besuchst du ihn richtig. Auf Deutsch, mit lokalem Wissen.",
     alternates: {
@@ -47,12 +50,49 @@ const jsonLd = {
     knowsAbout: ["Christus Erlöser", "Cristo Redentor", "Corcovado", "Rio de Janeiro", "Weltwunder"],
 };
 
+const faqItems = [
+    {
+        q: "Was kostet der Eintritt zum Christus Erlöser?",
+        a: "Der Eintritt liegt bei rund 17 € (R$ 90 bis 100), je nach Saison und Transportmittel zum Gipfel. Mit Will ist der Privattransfer inklusive, du kümmerst dich um nichts.",
+    },
+    {
+        q: "Wann ist die beste Zeit für einen Besuch?",
+        a: "Früh morgens, am besten vor 9 Uhr, bevor die Reisebusse kommen. Für klare Sicht sind die Wintermonate Juni bis August am besten, dann gibt es weniger Wolken auf dem Corcovado.",
+    },
+    {
+        q: "Wie kommt man zum Christus Erlöser hinauf?",
+        a: "Es gibt die Zahnradbahn, offizielle Vans und einen Wanderweg durch den Tijuca-Wald. Mit Will fährst du bequem im Privattransfer, ohne Warteschlange am Ticketschalter.",
+    },
+    {
+        q: "Sieht man bei Nebel überhaupt etwas?",
+        a: "Bei dichtem Nebel leider kaum. Der Gipfel liegt auf 710 Metern und ist oft in Wolken. Wills Tipp: morgens aus dem Fenster schauen. Wer den Christus von der Stadt aus sieht, hat freie Sicht.",
+    },
+    {
+        q: "Lohnt sich ein Guide für den Christus Erlöser?",
+        a: "Wenn du die Geschichte verstehen und den Stress mit Tickets und Transport vermeiden willst, ja. Auf Deutsch erklärt, mit Lokalwissen, wird aus dem Pflichtprogramm ein echtes Erlebnis.",
+    },
+];
+
+const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+};
+
 export default function ChristusErloeserPage() {
     return (
         <>
         <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
             <Navbar />
@@ -676,6 +716,24 @@ export default function ChristusErloeserPage() {
                     </div>
                 </section>
 
+                {/* ── FAQ ─────────────────────────────────────────── */}
+                <section className="py-20 lg:py-24 bg-white border-t border-gray-100">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                        <FadeIn direction="up" className="mb-10">
+                            <div className="max-w-[800px] mx-auto">
+                                <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                                    Häufige Fragen zum Christus Erlöser
+                                </h2>
+                            </div>
+                        </FadeIn>
+                        <FadeIn direction="up">
+                            <div className="max-w-[800px] mx-auto">
+                                <Faq items={faqItems} />
+                            </div>
+                        </FadeIn>
+                    </div>
+                </section>
+
                 {/* ── SECÇÃO 8 — CTA Final ─────────────────────────── */}
                 <section className="py-24 relative overflow-hidden bg-[#0d1f15] border-t-4 border-rio-yellow">
                     <div className="absolute inset-0 bg-[url('/images/rio-background.webp')] bg-cover bg-center mix-blend-overlay opacity-10" />
@@ -685,7 +743,7 @@ export default function ChristusErloeserPage() {
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6 leading-tight">
                                 Den Christus Erlöser{" "}
                                 <br className="hidden sm:block" />
-                                <span className="text-rio-yellow">mit Will besuchen</span>
+                                <span className="text-rio-yellow">mit deutschsprachigem Guide besuchen</span>
                             </h2>
                             <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
                                 Als Carioca zeige ich dir nicht nur die Aussicht —{" "}

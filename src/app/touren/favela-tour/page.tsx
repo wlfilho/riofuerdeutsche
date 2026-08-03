@@ -42,6 +42,7 @@ const favelaExperiences = [
         time: "~2 Stunden",
         effort: "Leicht",
         image: "/images/the-maze.webp",
+        link: "/rio-guide/sehenswuerdigkeiten/the-maze",
         desc: "The Maze ist einer der außergewöhnlichsten Orte in ganz Rio de Janeiro. Auf dem Morro Tavares Bastos im Stadtteil Catete hat der ehemalige BBC-Korrespondent Bob Nadkarni über vier Jahrzehnte ein labyrintisches Kulturzentrum geschaffen — mit Kunstgalerie, Bar und Hostel in einem. Die Wände sind mit handgefertigten Mosaiken internationaler Künstler geschmückt, und die Dachterrasse bietet einen der spektakulärsten Ausblicke der Stadt über die Guanabara-Bucht und den Zuckerhut.",
         tip: "The Maze ist am besten mit einem lokalen Guide zu erleben. Man erreicht den Morro Tavares Bastos mit kleinen VW-Vans ab der Rua Bento Lisboa im Catete — ich begleite dich den ganzen Weg und erzähle dir die faszinierende Geschichte dieses Ortes und seiner Gemeinschaft."
     },
@@ -50,6 +51,7 @@ const favelaExperiences = [
         time: "~2 Stunden",
         effort: "Leicht",
         image: "/images/rio-favela.webp",
+        link: "/rio-guide/sehenswuerdigkeiten/santa-marta",
         desc: "Favela Santa Marta ist eine der geschichtsträchtigsten Favelas Rio de Janeiros — und weltberühmt als Drehort von Michael Jacksons Musikvideo \"They Don't Care About Us\" (1996). Mit rund 8.000 Einwohnern liegt sie auf einem steilen Hügel in Botafogo und bietet von oben einen atemberaubenden Blick auf den Cristo Redentor, die Lagoa und die Bucht von Botafogo. Als erste offiziell befriedete (pacificada) Favela Rios gilt sie als Vorbild für die gesamte Stadt — und ist ideal für deine erste Favela-Erfahrung.",
         tip: "Die lebensgroße Michael-Jackson-Statue auf dem Platz, wo das berühmte Video gedreht wurde, ist ein beliebter Fotospot. Nimm den Teleférico (Seilbahn) — er ist kostenlos und ersetzt die steilen Stufen mit einem Panoramablick über Rio.",
         badge: "Botafogo"
@@ -136,11 +138,11 @@ export default async function FavelaTourPage() {
                                         Meine Favela Tour ist kein „Armuts-Tourismus". Es geht darum, die Realität der Menschen zu verstehen, lokale Künstler und Unternehmer kennenzulernen und die unglaubliche Aussicht zu genießen, die viele dieser Viertel bieten. Als gebürtiger Carioca kenne ich die Gemeinschaften persönlich und führe die gesamte Tour auf Deutsch — das ist der entscheidende Unterschied zu den üblichen Angeboten. Ich sorge dafür, dass dein Besuch <Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">sicher</Link> und respektvoll abläuft.
                                     </p>
                                     <p>
-                                        Wer schon von <Link href="/rio-guide/sehenswuerdigkeiten/rocinha" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela Rocinha</Link> gehört hat — ja, sie ist die größte Favela Rio de Janeiros und absolut beeindruckend. Für deinen ersten Besuch empfehle ich dir aber Favela Santa Marta in Botafogo: überschaubar, lebendig und mit einem atemberaubenden Ausblick vom Teleférico (Seilbahn). Santa Marta war die erste offiziell „befriedete" Favela Rios und wurde weltberühmt durch Michael Jacksons Musikvideo „They Don't Care About Us" (1996). Sie ist der perfekte Einstieg für eine authentische und sichere Favela-Erfahrung in Rio de Janeiro.
+                                        Wer schon von <Link href="/rio-guide/sehenswuerdigkeiten/rocinha" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela Rocinha</Link> gehört hat — ja, sie ist die größte Favela Rio de Janeiros und absolut beeindruckend. Für deinen ersten Besuch empfehle ich dir aber <Link href="/rio-guide/sehenswuerdigkeiten/santa-marta" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela Santa Marta besuchen</Link> in Botafogo: überschaubar, lebendig und mit einem atemberaubenden Ausblick vom Teleférico (Seilbahn). Santa Marta war die erste offiziell „befriedete" Favela Rios und wurde weltberühmt durch Michael Jacksons Musikvideo „They Don't Care About Us" (1996). Sie ist der perfekte Einstieg für eine authentische und sichere Favela-Erfahrung in Rio de Janeiro.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Ob das legendäre The Maze, die beeindruckende Rocinha oder das authentische Santa Marta — schreib mir einfach und ich plane eine Favela Tour, die dir echte Einblicke gibt, ohne dabei die Würde der Bewohner zu vergessen.
+                                    Ob das legendäre <Link href="/rio-guide/sehenswuerdigkeiten/the-maze" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">The Maze entdecken</Link>, die beeindruckende <Link href="/rio-guide/sehenswuerdigkeiten/rocinha" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Rocinha mit Guide</Link> oder das authentische Santa Marta — schreib mir einfach und ich plane eine Favela Tour, die dir echte Einblicke gibt, ohne dabei die Würde der Bewohner zu vergessen.
                                 </p>
                             </div>
                         </FadeIn>
