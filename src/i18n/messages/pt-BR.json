@@ -487,6 +487,8 @@
       "removerDia": "Remover dia",
       "adicionarDia": "+ Adicionar dia",
       "resumoPrecos": "Resumo de preços",
+      "precoManualTitle": "Clique para definir um preço manual deste tour",
+      "restaurarPrecoCalculado": "Voltar ao preço calculado",
       "traducaoFallback": "fallback: {idioma}",
       "traducaoFallbackTitulo": "Sem tradução no idioma da proposta — texto exibido em outro idioma. Traduza em Atividades.",
       "transporteDia": {
@@ -512,7 +514,9 @@
       "grupoComCriancas": "{count, plural, one {Grupo com # criança (não conta no preço).} other {Grupo com # crianças (não contam no preço).}}",
       "honorarioGuiaResumo": "Honorário guia",
       "horasVezesTaxa": "{horas}h × {taxa} EUR/h",
-      "marcadoEntraPreco": "Marcado: entra no preço da proposta. Desmarcado: cliente paga no local (valor exibido na proposta)."
+      "marcadoEntraPreco": "Marcado: entra no preço da proposta. Desmarcado: cliente paga no local (valor exibido na proposta).",
+      "remarcarDia": "Remarcar dia",
+      "diaJaExiste": "Já existe um dia em {data} nesta proposta. Escolha outra data ou mova os serviços manualmente."
     },
     "atividades": {
       "breadcrumb": "Atividades",
@@ -700,7 +704,9 @@
       "proposta": "Proposta",
       "numeroPessoas": "Nº de pessoas",
       "removerDia": "Remover dia",
-      "adicionarDataTourBotao": "Adicionar data de tour"
+      "adicionarDataTourBotao": "Adicionar data de tour",
+      "datasDeTour": "Datas de tour",
+      "leadSemDatasTour": "Nenhuma data de tour para este lead."
     },
     "avaliacoes": {
       "metaTitle": "Avaliações — Admin",

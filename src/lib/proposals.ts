@@ -102,6 +102,10 @@ export interface ProposalItem {
     total_eur: number;
   }>;
   total_eur: number;
+  // Preço manual do tour digitado na proposta, por cima do calculado. Quando
+  // presente, total_eur já é este valor; guardar separado permite a edição
+  // re-hidratar o override em vez de recalcular por cima dele.
+  price_override_eur?: number | null;
   // Snapshot: a atividade usa veículo próprio (transporte por faixa)?
   uses_vehicle?: boolean;
   // Só em itens 'day_transport': horas de deslocamento cobradas do motorista.
