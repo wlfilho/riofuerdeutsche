@@ -1476,6 +1476,11 @@ export default function NovaPropostaForm({
     try {
       const cleanItems = activeDays.flatMap(day => {
         const dayItems = summaryItems.filter(i => i.day === day);
+        // Dia sem atividades fica fora da proposta salva: gravar só a linha
+        // sintética de transporte criaria um dia-fantasma que o editor não
+        // reconstrói (a hidratação parte das atividades) e que a página
+        // pública exibiria como dia de tour vazio.
+        if (dayItems.length === 0) return [];
         const dayTotals = applyPriceOverrides(
           dayItems,
           calcDayItemTotals(dayItems, pax, exchangeRate, guideRate),
