@@ -779,6 +779,8 @@ function DayBlock({
   onMoveItem,
   onDropItem,
   onRemoveDay,
+  onChangeDay,
+  conflictDate,
 }: {
   day: string;
   items: EditableItem[];
@@ -801,6 +803,8 @@ function DayBlock({
   onMoveItem: (id: string, direction: -1 | 1) => void;
   onDropItem: (draggedId: string, targetDay: string, targetItemId?: string) => void;
   onRemoveDay: () => void;
+  onChangeDay: (date: string) => void;
+  conflictDate: string | null;
 }) {
   const t = useTranslations('admin.propostas');
   const [pickerFor, setPickerFor] = useState<InsertPosition | null>(null);
@@ -820,7 +824,23 @@ function DayBlock({
       <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-semibold text-gray-800">{formatDayHeader(day)}</p>
+            {/* A data é editável no lugar: remarcar um dia preserva o roteiro. */}
+            <label className="group inline-flex items-center gap-1.5 cursor-pointer">
+              <span className="text-sm font-semibold text-gray-800">{formatDayHeader(day)}</span>
+              <input
+                type="date"
+                value={day}
+                onChange={e => onChangeDay(e.target.value)}
+                title={t('remarcarDia')}
+                aria-label={t('remarcarDia')}
+                className="w-4 h-4 opacity-40 group-hover:opacity-100 focus:opacity-100 cursor-pointer transition-opacity"
+              />
+            </label>
+            {conflictDate && (
+              <p className="text-xs text-red-600 font-medium mt-1">
+                {t('diaJaExiste', { data: formatDayHeader(conflictDate) })}
+              </p>
+            )}
             {items.length > 0 && (
               <p className="text-xs text-gray-400 mt-0.5">
                 {t('servicos', { count: items.length })} · {fmtEur(dayTotal)}
@@ -1042,6 +1062,9 @@ export default function NovaPropostaForm({
   );
   const [showDayPicker, setShowDayPicker] = useState(false);
   const [dayInput, setDayInput] = useState('');
+  // Remarcação recusada por data já ocupada: `from` diz em qual bloco mostrar o
+  // aviso, `to` é a data recusada.
+  const [dayConflict, setDayConflict] = useState<{ from: string; to: string } | null>(null);
   const [dayStartTimes, setDayStartTimes] = useState<Record<string, string>>({});
   const [dayEndTimes, setDayEndTimes] = useState<Record<string, string>>({});
   // Dias sem entrada usam o default (ambos ligados) — cenário atual do Will.
@@ -1182,6 +1205,7 @@ export default function NovaPropostaForm({
   }, []);
 
   const handleRemoveDay = useCallback((date: string) => {
+    setDayConflict(prev => (prev?.from === date || prev?.to === date ? null : prev));
     setActiveDays(prev => prev.filter(d => d !== date));
     setItems(prev => prev.filter(i => i.day !== date));
     setDayToggles(prev => {
@@ -1189,6 +1213,29 @@ export default function NovaPropostaForm({
       return rest;
     });
   }, []);
+
+  // Remarcar um dia: o itinerário, os horários e os toggles de transporte
+  // acompanham a nova data. Mover pra uma data que já está na proposta é
+  // bloqueado — fundir dois roteiros silenciosamente perderia trabalho; pra
+  // juntar dois dias o caminho é arrastar os itens (drag-and-drop entre dias).
+  const handleChangeDay = useCallback((from: string, to: string) => {
+    if (!to || to === from) return;
+    if (activeDays.includes(to)) {
+      setDayConflict({ from, to });
+      return;
+    }
+    setDayConflict(null);
+    setActiveDays(prev => prev.map(d => (d === from ? to : d)).sort());
+    setItems(prev => prev.map(i => (i.day === from ? { ...i, day: to } : i)));
+    const remapKey = <T,>(prev: Record<string, T>): Record<string, T> => {
+      if (!(from in prev)) return prev;
+      const { [from]: moved, ...rest } = prev;
+      return { ...rest, [to]: moved };
+    };
+    setDayToggles(remapKey);
+    setDayStartTimes(remapKey);
+    setDayEndTimes(remapKey);
+  }, [activeDays]);
 
   // ─── Item handlers ────────────────────────────────────────────────────────────
 
@@ -1802,6 +1849,8 @@ export default function NovaPropostaForm({
                 onMoveItem={handleMoveItem}
                 onDropItem={handleDropItem}
                 onRemoveDay={() => handleRemoveDay(day)}
+                onChangeDay={date => handleChangeDay(day, date)}
+                conflictDate={dayConflict?.from === day ? dayConflict.to : null}
               />
             ))}
 
