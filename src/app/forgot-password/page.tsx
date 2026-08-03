@@ -31,9 +31,9 @@ export default function ForgotPasswordPage() {
                 type: "success",
                 text: t("forgotPassword.erfolgreich")
             });
-        } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : t("forgotPassword.fehler");
-            setMessage({ type: "error", text: errorMessage });
+        } catch {
+            // O error.message do Supabase vem em inglês; numa UI alemã isso vaza.
+            setMessage({ type: "error", text: t("forgotPassword.fehler") });
         } finally {
             setLoading(false);
         }

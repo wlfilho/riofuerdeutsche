@@ -58,6 +58,8 @@ type EditableItem = {
   // A atividade usa veículo próprio (transporte por faixa)? Entra no custo
   // de transporte do dia (diária do carro + motorista por hora).
   uses_vehicle: boolean;
+  // Preço manual do tour (EUR), por cima do calculado; null = segue o cálculo.
+  price_override_eur: number | null;
   note: string;
 };
 
@@ -204,6 +206,12 @@ function calcDayItemTotals(
     const ratio = dayRawHours > 0 ? rawHours[idx] / dayRawHours : 1 / dayItems.length;
     return ceiledGuideFee * ratio + calcItemAdditionalCosts(item, pax, exchangeRate);
   });
+}
+
+// Preço manual por tour: substitui o valor calculado daquele item; os demais
+// itens do dia mantêm sua fatia do honorário normalmente.
+function applyPriceOverrides(dayItems: EditableItem[], calculated: number[]): number[] {
+  return calculated.map((v, idx) => dayItems[idx].price_override_eur ?? v);
 }
 
 function calcItemTotalEur(
@@ -787,6 +795,8 @@ function DayBlock({
   onMoveItem,
   onDropItem,
   onRemoveDay,
+  onChangeDay,
+  conflictDate,
 }: {
   day: string;
   items: EditableItem[];
@@ -809,6 +819,8 @@ function DayBlock({
   onMoveItem: (id: string, direction: -1 | 1) => void;
   onDropItem: (draggedId: string, targetDay: string, targetItemId?: string) => void;
   onRemoveDay: () => void;
+  onChangeDay: (date: string) => void;
+  conflictDate: string | null;
 }) {
   const t = useTranslations('admin.propostas');
   const [pickerFor, setPickerFor] = useState<InsertPosition | null>(null);
@@ -816,7 +828,8 @@ function DayBlock({
   const transport = calcDayTransport(items, transportRates, exchangeRate, toggles);
   const { chargeableEur, embeddedEur } = splitTransportCost(transport, embed);
   const dayTotal =
-    calcDayItemTotals(items, pax, exchangeRate, guideRate).reduce((s, v) => s + v, 0)
+    applyPriceOverrides(items, calcDayItemTotals(items, pax, exchangeRate, guideRate))
+      .reduce((s, v) => s + v, 0)
     + chargeableEur;
   const dayHours = calcDayHours(items);
   const overloaded = dayHours > maxHoursPerDay;
@@ -828,7 +841,23 @@ function DayBlock({
       <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-semibold text-gray-800">{formatDayHeader(day)}</p>
+            {/* A data é editável no lugar: remarcar um dia preserva o roteiro. */}
+            <label className="group inline-flex items-center gap-1.5 cursor-pointer">
+              <span className="text-sm font-semibold text-gray-800">{formatDayHeader(day)}</span>
+              <input
+                type="date"
+                value={day}
+                onChange={e => onChangeDay(e.target.value)}
+                title={t('remarcarDia')}
+                aria-label={t('remarcarDia')}
+                className="w-4 h-4 opacity-40 group-hover:opacity-100 focus:opacity-100 cursor-pointer transition-opacity"
+              />
+            </label>
+            {conflictDate && (
+              <p className="text-xs text-red-600 font-medium mt-1">
+                {t('diaJaExiste', { data: formatDayHeader(conflictDate) })}
+              </p>
+            )}
             {items.length > 0 && (
               <p className="text-xs text-gray-400 mt-0.5">
                 {t('servicos', { count: items.length })} · {fmtEur(dayTotal)}
@@ -946,6 +975,88 @@ function DayBlock({
   );
 }
 
+// Preço de um tour no resumo: clicar no valor abre um input pra digitar um
+// preço manual por cima do calculado. Com override ativo, o calculado aparece
+// riscado ao lado e o ↺ volta ao cálculo. Digitar o próprio valor calculado
+// (ou apagar) também remove o override.
+function TourPriceCell({
+  calculated,
+  override,
+  onChange,
+}: {
+  calculated: number;
+  override: number | null;
+  onChange: (value: number | null) => void;
+}) {
+  const t = useTranslations('admin.propostas');
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+
+  const startEdit = () => {
+    setDraft(String(Math.round((override ?? calculated) * 100) / 100));
+    setEditing(true);
+  };
+
+  const commit = () => {
+    setEditing(false);
+    const trimmed = draft.trim();
+    if (trimmed === '') { onChange(null); return; }
+    const value = parseFloat(trimmed.replace(',', '.'));
+    if (!isFinite(value) || value < 0) return;
+    onChange(Math.abs(value - calculated) < 0.005 ? null : value);
+  };
+
+  if (editing) {
+    return (
+      <span className="flex items-center gap-1 ml-4 shrink-0">
+        <span className="text-xs text-gray-400">€</span>
+        <input
+          type="number"
+          min={0}
+          step="0.01"
+          autoFocus
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={e => {
+            if (e.key === 'Enter') commit();
+            if (e.key === 'Escape') setEditing(false);
+          }}
+          className="w-24 px-2 py-1 border border-amber-400 rounded-md text-sm text-right tabular-nums bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+        />
+      </span>
+    );
+  }
+
+  return (
+    <span className="flex items-center gap-2 ml-4 shrink-0">
+      {override !== null && (
+        <>
+          <span className="text-xs text-gray-400 line-through tabular-nums">
+            {fmtEur(calculated)}
+          </span>
+          <button
+            onClick={() => onChange(null)}
+            title={t('restaurarPrecoCalculado')}
+            className="text-xs text-gray-400 hover:text-green-700 transition-colors"
+          >
+            ↺
+          </button>
+        </>
+      )}
+      <button
+        onClick={startEdit}
+        title={t('precoManualTitle')}
+        className={`tabular-nums font-medium hover:underline decoration-dotted underline-offset-2 transition-colors ${
+          override !== null ? 'text-amber-600' : 'text-gray-700 hover:text-amber-600'
+        }`}
+      >
+        {fmtEur(override ?? calculated)}
+      </button>
+    </span>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function NovaPropostaForm({
@@ -1030,6 +1141,7 @@ export default function NovaPropostaForm({
           included: c.included ?? true,
         })),
         uses_vehicle: item.uses_vehicle ?? (service ? serviceUsesVehicle(service) : false),
+        price_override_eur: item.price_override_eur ?? null,
         note: item.note,
       };
     });
@@ -1067,6 +1179,9 @@ export default function NovaPropostaForm({
   );
   const [showDayPicker, setShowDayPicker] = useState(false);
   const [dayInput, setDayInput] = useState('');
+  // Remarcação recusada por data já ocupada: `from` diz em qual bloco mostrar o
+  // aviso, `to` é a data recusada.
+  const [dayConflict, setDayConflict] = useState<{ from: string; to: string } | null>(null);
   const [dayStartTimes, setDayStartTimes] = useState<Record<string, string>>({});
   const [dayEndTimes, setDayEndTimes] = useState<Record<string, string>>({});
   // Dias sem entrada usam o default (ambos ligados) — cenário atual do Will.
@@ -1193,7 +1308,8 @@ export default function NovaPropostaForm({
   const grandTotal = useMemo(
     () => activeDays.reduce((total, day) => {
       const dayItems = items.filter(i => i.day === day);
-      const itemsTotal = calcDayItemTotals(dayItems, pax, exchangeRate, guideRate).reduce((s, v) => s + v, 0);
+      const itemsTotal = applyPriceOverrides(dayItems, calcDayItemTotals(dayItems, pax, exchangeRate, guideRate))
+        .reduce((s, v) => s + v, 0);
       const transport = calcDayTransport(dayItems, transportRates, exchangeRate, getDayToggles(day));
       return total + itemsTotal + splitTransportCost(transport, embedFlags).chargeableEur;
     }, 0),
@@ -1209,6 +1325,7 @@ export default function NovaPropostaForm({
   }, []);
 
   const handleRemoveDay = useCallback((date: string) => {
+    setDayConflict(prev => (prev?.from === date || prev?.to === date ? null : prev));
     setActiveDays(prev => prev.filter(d => d !== date));
     setItems(prev => prev.filter(i => i.day !== date));
     setDayToggles(prev => {
@@ -1216,6 +1333,29 @@ export default function NovaPropostaForm({
       return rest;
     });
   }, []);
+
+  // Remarcar um dia: o itinerário, os horários e os toggles de transporte
+  // acompanham a nova data. Mover pra uma data que já está na proposta é
+  // bloqueado — fundir dois roteiros silenciosamente perderia trabalho; pra
+  // juntar dois dias o caminho é arrastar os itens (drag-and-drop entre dias).
+  const handleChangeDay = useCallback((from: string, to: string) => {
+    if (!to || to === from) return;
+    if (activeDays.includes(to)) {
+      setDayConflict({ from, to });
+      return;
+    }
+    setDayConflict(null);
+    setActiveDays(prev => prev.map(d => (d === from ? to : d)).sort());
+    setItems(prev => prev.map(i => (i.day === from ? { ...i, day: to } : i)));
+    const remapKey = <T,>(prev: Record<string, T>): Record<string, T> => {
+      if (!(from in prev)) return prev;
+      const { [from]: moved, ...rest } = prev;
+      return { ...rest, [to]: moved };
+    };
+    setDayToggles(remapKey);
+    setDayStartTimes(remapKey);
+    setDayEndTimes(remapKey);
+  }, [activeDays]);
 
   // ─── Item handlers ────────────────────────────────────────────────────────────
 
@@ -1267,6 +1407,7 @@ export default function NovaPropostaForm({
         included: c.include_in_price ?? true,
       })),
       uses_vehicle: serviceUsesVehicle(service),
+      price_override_eur: null,
       note: '',
     };
     setItems(prev => {
@@ -1373,7 +1514,15 @@ export default function NovaPropostaForm({
     try {
       const cleanItems = activeDays.flatMap(day => {
         const dayItems = summaryItems.filter(i => i.day === day);
-        const dayTotals = calcDayItemTotals(dayItems, pax, exchangeRate, guideRate);
+        // Dia sem atividades fica fora da proposta salva: gravar só a linha
+        // sintética de transporte criaria um dia-fantasma que o editor não
+        // reconstrói (a hidratação parte das atividades) e que a página
+        // pública exibiria como dia de tour vazio.
+        if (dayItems.length === 0) return [];
+        const dayTotals = applyPriceOverrides(
+          dayItems,
+          calcDayItemTotals(dayItems, pax, exchangeRate, guideRate),
+        );
 
         const toggles = getDayToggles(day);
         const transport = calcDayTransport(dayItems, transportRates, exchangeRate, toggles);
@@ -1878,6 +2027,8 @@ export default function NovaPropostaForm({
                 onMoveItem={handleMoveItem}
                 onDropItem={handleDropItem}
                 onRemoveDay={() => handleRemoveDay(day)}
+                onChangeDay={date => handleChangeDay(day, date)}
+                conflictDate={dayConflict?.from === day ? dayConflict.to : null}
               />
             ))}
 
@@ -1941,9 +2092,11 @@ export default function NovaPropostaForm({
                         )}
                       </span>
                     </div>
-                    <span className="tabular-nums text-gray-700 font-medium ml-4 shrink-0">
-                      {fmtEur(dayTotals[idx])}
-                    </span>
+                    <TourPriceCell
+                      calculated={dayTotals[idx]}
+                      override={item.price_override_eur}
+                      onChange={v => handleUpdateItem(item._id, { price_override_eur: v })}
+                    />
                   </div>
                 ));
                 if (transport.status === 'ok' && (chargeableEur > 0 || embeddedEur > 0)) {

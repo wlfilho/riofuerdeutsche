@@ -392,6 +392,22 @@
         "wirdGesendet": "Wird gesendet...",
         "erfolgreich": "Anweisungen zur Wiederherstellung wurden an deine E-Mail gesendet.",
         "fehler": "Fehler bei der Anfrage."
+      },
+      "updatePassword": {
+        "titel": "Neues Passwort",
+        "untertitel": "Wähle ein neues Passwort für dein Konto",
+        "neuesPasswort": "Neues Passwort",
+        "passwortBestaetigen": "Passwort bestätigen",
+        "hinweis": "Mindestens {min} Zeichen.",
+        "speichern": "Passwort speichern",
+        "wirdGespeichert": "Wird gespeichert...",
+        "erfolgreich": "Passwort erfolgreich geändert! Leite weiter...",
+        "fehler": "Das Passwort konnte nicht geändert werden. Bitte versuche es erneut.",
+        "zuKurz": "Das Passwort muss mindestens {min} Zeichen lang sein.",
+        "stimmenNichtUeberein": "Die Passwörter stimmen nicht überein.",
+        "linkAbgelaufen": "Dieser Link ist abgelaufen oder wurde bereits verwendet.",
+        "linkAbgelaufenUntertitel": "Der Wiederherstellungslink ist nicht mehr gültig",
+        "neuenLinkAnfordern": "Neuen Link anfordern"
       }
     },
     "dashboard": {

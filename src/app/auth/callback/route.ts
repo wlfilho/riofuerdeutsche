@@ -52,6 +52,12 @@ export async function GET(request: Request) {
         }
     }
 
+    // Link de recuperação expirado/já usado: manda de volta ao pedido de novo link,
+    // que é a única ação útil ali — o /login não teria o que oferecer.
+    if (next === "/update-password") {
+        return NextResponse.redirect(`${origin}/update-password?error=expired`);
+    }
+
     // return the user to an error page with instructions
     return NextResponse.redirect(`${origin}/login?error=auth_error`);
 }

@@ -197,7 +197,12 @@ export default async function ProposalPage({
   const onsiteCosts = collectOnsiteCosts(proposal.items);
 
   // O cliente nunca vê preço por atividade nem linha de transporte.
-  const sortedDays = [...new Set(proposal.items.map(i => i.day))].sort();
+  // Dias contam a partir das atividades: propostas antigas podem carregar uma
+  // linha day_transport órfã (custo 0) de um dia esvaziado no editor, que não
+  // deve virar dia de tour aqui.
+  const sortedDays = [...new Set(
+    proposal.items.filter(i => i.kind !== 'day_transport').map(i => i.day),
+  )].sort();
   const dayData = sortedDays.map(day => {
     const dayItems = proposal.items.filter(i => i.day === day);
     const activities = dayItems.filter((i: ProposalItem) => i.kind !== 'day_transport');
