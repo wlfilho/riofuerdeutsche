@@ -5,11 +5,8 @@ import { proposalMetadata } from '@/components/proposal/metadata';
 export const dynamic = 'force-dynamic';
 
 /**
- * Rota LEGADA do link público da proposta.
- *
- * Continua existindo sem redirect: os links já enviados aos clientes apontam
- * para cá e não podem quebrar. Não há locale na URL, então o idioma sai de
- * proposals.locale — que é o mesmo comportamento de antes.
+ * Rota neutra, sem locale na URL: o idioma sai de proposals.locale.
+ * Renderiza exatamente o mesmo componente que /angebot/[token].
  */
 
 export async function generateMetadata({
@@ -21,7 +18,7 @@ export async function generateMetadata({
   return proposalMetadata(token);
 }
 
-export default async function AngebotPage({
+export default async function NeutralProposalPage({
   params,
 }: {
   params: Promise<{ token: string }>;
