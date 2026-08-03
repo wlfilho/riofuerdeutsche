@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -975,84 +975,86 @@ function DayBlock({
   );
 }
 
-// Preço de um tour no resumo: clicar no valor abre um input pra digitar um
-// preço manual por cima do calculado. Com override ativo, o calculado aparece
-// riscado ao lado e o ↺ volta ao cálculo. Digitar o próprio valor calculado
-// (ou apagar) também remove o override.
-function TourPriceCell({
+// Preço editável no resumo: um input sempre visível — a caixinha comunica
+// sozinha que o valor aceita edição. Fora de foco mostra o valor formatado
+// (vírgula); ao focar vira número editável. Digitar o próprio calculado (ou
+// apagar) remove o override; com override ativo o input fica âmbar, com o
+// calculado riscado ao lado e ↺ pra restaurar.
+function PriceInput({
   calculated,
   override,
   onChange,
+  emphasis = false,
 }: {
   calculated: number;
   override: number | null;
   onChange: (value: number | null) => void;
+  // true no Valor total: input maior, valor em destaque.
+  emphasis?: boolean;
 }) {
   const t = useTranslations('admin.propostas');
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState('');
+  // null = repouso (exibe formatado); string = texto cru enquanto digita.
+  const [draft, setDraft] = useState<string | null>(null);
+  // Escape dispara blur com o draft antigo ainda no closure — o ref garante
+  // que o cancelamento vença o commit do blur.
+  const cancelled = useRef(false);
 
-  const startEdit = () => {
-    setDraft(String(Math.round((override ?? calculated) * 100) / 100));
-    setEditing(true);
-  };
+  const effective = override ?? calculated;
+  const display = draft ?? fmtEur(effective).replace('€', '').trim();
 
   const commit = () => {
-    setEditing(false);
+    if (cancelled.current) { cancelled.current = false; setDraft(null); return; }
+    if (draft === null) return;
     const trimmed = draft.trim();
+    setDraft(null);
     if (trimmed === '') { onChange(null); return; }
-    const value = parseFloat(trimmed.replace(',', '.'));
+    const value = parseFloat(trimmed.replace(/\./g, '').replace(',', '.'));
     if (!isFinite(value) || value < 0) return;
     onChange(Math.abs(value - calculated) < 0.005 ? null : value);
   };
-
-  if (editing) {
-    return (
-      <span className="flex items-center gap-1 ml-4 shrink-0">
-        <span className="text-xs text-gray-400">€</span>
-        <input
-          type="number"
-          min={0}
-          step="0.01"
-          autoFocus
-          value={draft}
-          onChange={e => setDraft(e.target.value)}
-          onBlur={commit}
-          onKeyDown={e => {
-            if (e.key === 'Enter') commit();
-            if (e.key === 'Escape') setEditing(false);
-          }}
-          className="w-24 px-2 py-1 border border-amber-400 rounded-md text-sm text-right tabular-nums bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-        />
-      </span>
-    );
-  }
 
   return (
     <span className="flex items-center gap-2 ml-4 shrink-0">
       {override !== null && (
         <>
-          <span className="text-xs text-gray-400 line-through tabular-nums">
+          <span className="text-xs text-gray-400 line-through tabular-nums whitespace-nowrap">
             {fmtEur(calculated)}
           </span>
           <button
             onClick={() => onChange(null)}
             title={t('restaurarPrecoCalculado')}
-            className="text-xs text-gray-400 hover:text-green-700 transition-colors"
+            className="text-sm text-gray-400 hover:text-green-700 transition-colors"
           >
             ↺
           </button>
         </>
       )}
-      <button
-        onClick={startEdit}
-        title={t('precoManualTitle')}
-        className={`tabular-nums font-medium hover:underline decoration-dotted underline-offset-2 transition-colors ${
-          override !== null ? 'text-amber-600' : 'text-gray-700 hover:text-amber-600'
-        }`}
-      >
-        {fmtEur(override ?? calculated)}
-      </button>
+      <span className={`inline-flex items-center gap-1 border rounded-md bg-white px-2 focus-within:ring-2 focus-within:border-transparent ${
+        override !== null
+          ? 'border-amber-400 focus-within:ring-amber-400'
+          : 'border-gray-300 focus-within:ring-green-500'
+      } ${emphasis ? 'py-1.5' : 'py-1'}`}>
+        <span className={`text-gray-400 ${emphasis ? 'text-sm' : 'text-xs'}`}>€</span>
+        <input
+          type="text"
+          inputMode="decimal"
+          value={display}
+          title={t('precoManualTitle')}
+          onFocus={e => {
+            setDraft(String(Math.round(effective * 100) / 100).replace('.', ','));
+            e.target.select();
+          }}
+          onChange={e => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={e => {
+            if (e.key === 'Enter') e.currentTarget.blur();
+            if (e.key === 'Escape') { cancelled.current = true; e.currentTarget.blur(); }
+          }}
+          className={`text-right tabular-nums bg-transparent focus:outline-none ${
+            emphasis ? 'w-28 text-lg font-bold' : 'w-20 text-sm font-medium'
+          } ${override !== null ? 'text-amber-600' : emphasis ? 'text-green-600' : 'text-gray-700'}`}
+        />
+      </span>
     </span>
   );
 }
@@ -1205,6 +1207,16 @@ export default function NovaPropostaForm({
   const [depositAmount, setDepositAmount] = useState<number | null>(
     initialData?.deposit_amount ?? null,
   );
+  // Preço final manual da proposta, por cima da soma calculada (que já inclui
+  // os overrides por tour); null = total segue o cálculo.
+  const [totalOverride, setTotalOverride] = useState<number | null>(
+    initialData?.total_override_amount ?? null,
+  );
+  // Com preço final manual: true = cliente vê Zwischensumme + Rabatt + total;
+  // false = só o preço final, desconto invisível.
+  const [showRabatt, setShowRabatt] = useState<boolean>(
+    initialData?.discount_visible ?? false,
+  );
   // "Angebot gültig bis": default +14 dias em proposta nova; vazio = sem prazo.
   const [validUntil, setValidUntil] = useState<string>(
     initialData
@@ -1257,13 +1269,15 @@ export default function NovaPropostaForm({
       locale, currency,
       exchangeRate, guideRate, internalNotes, items, activeDays, dayStartTimes,
       dayEndTimes, dayToggles, carRateOverride, driverRateOverride, embedCar,
-      embedDriver, priceDisplay, depositAmount, validUntil,
+      embedDriver, priceDisplay, depositAmount, validUntil, totalOverride,
+      showRabatt,
     }),
     [clientName, internalLabel, clientEmail, clientPhone, pax, treatment,
      locale, currency,
      exchangeRate, guideRate, internalNotes, items, activeDays, dayStartTimes,
      dayEndTimes, dayToggles, carRateOverride, driverRateOverride, embedCar,
-     embedDriver, priceDisplay, depositAmount, validUntil],
+     embedDriver, priceDisplay, depositAmount, validUntil, totalOverride,
+     showRabatt],
   );
   const pristineSnapshot = useMemo(() => formSnapshot, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -1620,6 +1634,8 @@ export default function NovaPropostaForm({
           exchange_rate: exchangeRate,
           guide_rate: guideRate,
           price_display: priceDisplay,
+          total_override_amount: totalOverride,
+          discount_visible: totalOverride !== null && showRabatt,
           deposit_amount: depositAmount,
           valid_until: validUntil || null,
         }),
@@ -2092,7 +2108,7 @@ export default function NovaPropostaForm({
                         )}
                       </span>
                     </div>
-                    <TourPriceCell
+                    <PriceInput
                       calculated={dayTotals[idx]}
                       override={item.price_override_eur}
                       onChange={v => handleUpdateItem(item._id, { price_override_eur: v })}
@@ -2128,10 +2144,40 @@ export default function NovaPropostaForm({
             </div>
             <div className="mt-4 pt-4 border-t-2 border-gray-200 flex items-center justify-between">
               <span className="font-semibold text-gray-600">{t('valorTotal')}</span>
-              <span className="text-2xl font-bold text-green-600 tabular-nums">
-                {fmtEur(grandTotal)}
-              </span>
+              <PriceInput
+                calculated={grandTotal}
+                override={totalOverride}
+                onChange={setTotalOverride}
+                emphasis
+              />
             </div>
+            {totalOverride !== null && (
+              <div className="mt-3 flex items-start justify-between gap-4">
+                <label className="flex items-start gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={showRabatt}
+                    onChange={e => setShowRabatt(e.target.checked)}
+                    className="rounded mt-0.5"
+                  />
+                  <span className="text-xs text-gray-600">
+                    {t('mostrarRabatt')}
+                    <span className="block text-gray-400">
+                      {showRabatt
+                        ? t('rabattVisivelHint', {
+                            valor: fmtEur(Math.abs(grandTotal - totalOverride)),
+                          })
+                        : t('rabattInvisivelHint')}
+                    </span>
+                  </span>
+                </label>
+                {totalOverride > grandTotal && showRabatt && (
+                  <span className="text-xs text-amber-600 font-medium shrink-0">
+                    {t('acrescimoAviso')}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
 

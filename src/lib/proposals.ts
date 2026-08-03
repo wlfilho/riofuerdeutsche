@@ -142,7 +142,14 @@ export interface Proposal {
   departure_date: string | null;
   treatment: ProposalTreatment;
   items: ProposalItem[];
+  // O que o cliente paga: soma dos items, ou total_override_amount quando o
+  // Will fecha um valor negociado por cima do cálculo.
   total_amount: number | null;
+  // Preço final manual; null = total segue a soma calculada dos items.
+  total_override_amount: number | null;
+  // Com override: true = cliente vê Zwischensumme + linha de Rabatt + total;
+  // false = só o preço final, sem menção ao desconto.
+  discount_visible: boolean;
   exchange_rate: number | null;
   guide_rate: number | null;
   price_display: ProposalPriceDisplay;
@@ -179,6 +186,8 @@ export interface ProposalFormData {
   currency: ProposalCurrency;
   internal_notes: string;
   items: ProposalItem[];
+  total_override_amount: number | null;
+  discount_visible: boolean;
   exchange_rate: number;
   guide_rate: number;
   price_display: ProposalPriceDisplay;
@@ -335,7 +344,11 @@ export async function getProposalByPublicToken(token: string): Promise<Proposal 
 
 export async function updateProposal(id: string, formData: ProposalFormData): Promise<Proposal> {
   const supabase = await createClient();
-  const total_amount = formData.items.reduce((sum, item) => sum + item.total_eur, 0);
+  // total_amount é sempre o que o cliente paga: o preço final manual, quando
+  // definido, vence a soma calculada — assim lista, PDF, WhatsApp e página
+  // pública leem uma coluna só, sem conhecer a regra.
+  const total_amount = formData.total_override_amount
+    ?? formData.items.reduce((sum, item) => sum + item.total_eur, 0);
   const { data, error } = await supabase
     .from('proposals')
     .update({ ...formData, total_amount })
@@ -349,7 +362,8 @@ export async function updateProposal(id: string, formData: ProposalFormData): Pr
 export async function createProposal(formData: ProposalFormData): Promise<Proposal> {
   const supabase = await createClient();
 
-  const total_amount = formData.items.reduce((sum, item) => sum + item.total_eur, 0);
+  const total_amount = formData.total_override_amount
+    ?? formData.items.reduce((sum, item) => sum + item.total_eur, 0);
 
   const { data, error } = await supabase
     .from('proposals')
@@ -392,6 +406,8 @@ export async function duplicateProposal(id: string): Promise<Proposal> {
       currency: original.currency ?? DEFAULT_PROPOSAL_CURRENCY,
       items: original.items,
       total_amount: original.total_amount,
+      total_override_amount: original.total_override_amount,
+      discount_visible: original.discount_visible,
       exchange_rate: original.exchange_rate,
       guide_rate: original.guide_rate,
       price_display: original.price_display,
