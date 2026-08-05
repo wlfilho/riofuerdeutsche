@@ -47,6 +47,11 @@ export default function ProposalTracker({ token, locale }: { token: string; loca
     if (document.referrer.includes(`${location.origin}/admin`)) return;
 
     let disabled = false;
+    // A resposta do 'open' decide se a sessão é de admin (disabled). Até ela
+    // chegar, nada é enviado: eventos disparados no carregamento (seções já
+    // visíveis) esperam na fila — senão sessão de admin vazaria eventos soltos.
+    let ready = false;
+    const queue: Array<[string, Record<string, unknown>]> = [];
     const sessionId = uuid();
     const visitorId = getVisitorId();
 
@@ -56,6 +61,12 @@ export default function ProposalTracker({ token, locale }: { token: string; loca
       useBeacon = false,
     ) => {
       if (disabled) return;
+      if (!ready && eventType !== 'open') {
+        // Página fechada antes da resposta do open (visita sub-segundo): a
+        // fila morre sem flush, de propósito — não há leitura pra medir.
+        queue.push([eventType, metadata]);
+        return;
+      }
       const payload = JSON.stringify({
         token,
         event_type: eventType,
@@ -177,10 +188,22 @@ export default function ProposalTracker({ token, locale }: { token: string; loca
       .then(data => {
         if (data?.disabled) {
           disabled = true;
+          queue.length = 0;
           teardown();
+          return;
+        }
+        ready = true;
+        for (const [type, metadata] of queue.splice(0)) {
+          send(type as 'ping' | 'section' | 'click', metadata);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        // open falhou (rede): não trava a sessão — solta a fila mesmo assim.
+        ready = true;
+        for (const [type, metadata] of queue.splice(0)) {
+          send(type as 'ping' | 'section' | 'click', metadata);
+        }
+      });
 
     document.addEventListener('visibilitychange', onVisibility);
     document.addEventListener('click', onClick, true);
