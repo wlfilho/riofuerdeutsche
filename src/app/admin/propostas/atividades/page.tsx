@@ -61,6 +61,16 @@ function localeLabel(locale: string): string {
   return locale.split('-')[0].toUpperCase();
 }
 
+// Nome exibido: primeiro idioma com tradução; fallback na coluna deprecated.
+function getDisplayName(service: ServiceWithTranslations, locales: string[]): string {
+  return locales.map(l => service.translations?.[l]?.name?.trim()).find(Boolean) ?? service.name;
+}
+
+// Busca insensível a acentos e caixa ("atracao" acha "Atração").
+function normalizeSearch(s: string): string {
+  return s.toLocaleLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 // Só a aparência: os rótulos vêm de admin.atividades.categorias / .periodos.
@@ -290,6 +300,33 @@ function ActivityModal({
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
+
+  // Gera a descrição curta via IA a partir do título da aba ativa, no idioma
+  // da aba. Só substitui o campo do idioma ativo — os outros ficam intactos.
+  const handleGenerateDescription = async () => {
+    const title = activeText.name.trim();
+    if (!title || generatingDesc) return;
+    setGeneratingDesc(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/admin/ai/activity-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, category: form.category || null, locale: activeLocale }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? t('erroGerarDescricao')); return; }
+      setTexts(prev => ({
+        ...prev,
+        [activeLocale]: { ...(prev[activeLocale] ?? EMPTY_LOCALE_TEXT), description: data.description },
+      }));
+    } catch {
+      setError(tCommon('erroRede'));
+    } finally {
+      setGeneratingDesc(false);
+    }
+  };
 
   const set = (field: keyof FormState) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -503,13 +540,35 @@ function ActivityModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('descricaoCurta')}</label>
-                <textarea
-                  value={activeText.description}
-                  onChange={setText('description')}
-                  rows={2}
-                  className={`${INPUT_CLS} resize-none`}
-                  placeholder={t('descricaoCurtaPlaceholder')}
-                />
+                <div className="relative">
+                  <textarea
+                    value={activeText.description}
+                    onChange={setText('description')}
+                    rows={2}
+                    className={`${INPUT_CLS} resize-none ${activeText.name.trim() ? 'pr-10' : ''}`}
+                    placeholder={t('descricaoCurtaPlaceholder')}
+                  />
+                  {activeText.name.trim() && (
+                    <button
+                      type="button"
+                      onClick={handleGenerateDescription}
+                      disabled={generatingDesc}
+                      title={t('gerarDescricaoIa')}
+                      className="absolute top-2 right-2 p-1.5 text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      {generatingDesc ? (
+                        <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm6 0a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0111 2z" />
+                        </svg>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -642,8 +701,7 @@ function DeleteModal({
   const t = useTranslations('admin.atividades');
   const tCommon = useTranslations('admin.common');
   // Excluir o serviço leva junto as traduções (FK ON DELETE CASCADE).
-  const displayName =
-    locales.map(l => service.translations?.[l]?.name?.trim()).find(Boolean) ?? service.name;
+  const displayName = getDisplayName(service, locales);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
@@ -684,6 +742,35 @@ export default function AtividadesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ServiceWithTranslations | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Barra de filtros: busca por nome (qualquer idioma), categoria e direção
+  // alfabética. Só afeta a exibição — `services` continua como veio da API.
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<ProposalServiceCategory | ''>('');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+
+  const visibleServices = useMemo(() => {
+    const query = normalizeSearch(search.trim());
+    const filtered = services.filter(s => {
+      if (categoryFilter && s.category !== categoryFilter) return false;
+      if (!query) return true;
+      // Procura no nome exibido e em todas as traduções, pra achar a
+      // atividade mesmo buscando no idioma que não é o primeiro.
+      const haystacks = [
+        getDisplayName(s, locales),
+        ...locales.map(l => s.translations?.[l]?.name ?? ''),
+      ];
+      return haystacks.some(h => normalizeSearch(h).includes(query));
+    });
+    return [...filtered].sort((a, b) => {
+      const cmp = getDisplayName(a, locales).localeCompare(
+        getDisplayName(b, locales), 'pt-BR', { sensitivity: 'base' }
+      );
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [services, locales, search, categoryFilter, sortDir]);
+
+  const hasActiveFilters = search.trim() !== '' || categoryFilter !== '';
 
   // null → create; ServiceWithTranslations → edit
   const [modalService, setModalService] = useState<ServiceWithTranslations | null>(null);
@@ -773,6 +860,72 @@ export default function AtividadesPage() {
           <div className="mb-4 p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200">{error}</div>
         )}
 
+        {/* Filter / sort bar */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <div className="relative flex-1 min-w-[220px] max-w-sm">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={t('buscarPlaceholder')}
+              className="w-full pl-9 pr-8 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                title={t('limparBusca')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-gray-400 hover:text-gray-600 rounded"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          <select
+            value={categoryFilter}
+            onChange={e => setCategoryFilter(e.target.value as ProposalServiceCategory | '')}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">{t('todasCategorias')}</option>
+            <option value="tour">{t('categoriasPlural.tour')}</option>
+            <option value="transfer">{t('categoriasPlural.transfer')}</option>
+            <option value="atração">{t('categoriasPlural.atração')}</option>
+            <option value="extra">{t('categoriasPlural.extra')}</option>
+          </select>
+
+          <button
+            onClick={() => setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'))}
+            title={t('ordemAlfabetica')}
+            className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+          >
+            {sortDir === 'asc' ? 'A–Z' : 'Z–A'}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`h-3.5 w-3.5 text-gray-400 transition-transform ${sortDir === 'desc' ? 'rotate-180' : ''}`}
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path fillRule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          </button>
+
+          {!loading && hasActiveFilters && (
+            <span className="text-xs text-gray-400">
+              {t('resultadosFiltro', { count: visibleServices.length, total: services.length })}
+            </span>
+          )}
+        </div>
+
         {/* Table */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
@@ -813,15 +966,24 @@ export default function AtividadesPage() {
                       </button>
                     </td>
                   </tr>
+                ) : visibleServices.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-16 text-center">
+                      <p className="text-gray-400 text-sm mb-3">{t('nenhumResultado')}</p>
+                      <button
+                        onClick={() => { setSearch(''); setCategoryFilter(''); }}
+                        className="text-sm font-semibold text-green-600 hover:text-green-800 transition-colors"
+                      >
+                        {t('limparFiltros')}
+                      </button>
+                    </td>
+                  </tr>
                 ) : (
-                  services.map(s => {
+                  visibleServices.map(s => {
                     const total = (s.transfer_hours_to ?? 0) + (s.duration_hours ?? 0) + (s.transfer_hours_back ?? 0);
                     const periodIcon = s.suggested_period ? PERIOD_ICON[s.suggested_period] : null;
                     const transportName = transportTypes.find(t => t.id === s.transport_type_id)?.name ?? null;
-                    // O nome exibido vem das traduções (primeiro idioma que tiver
-                    // texto), não da coluna deprecated proposal_services.name.
-                    const displayName =
-                      locales.map(l => s.translations?.[l]?.name?.trim()).find(Boolean) ?? s.name;
+                    const displayName = getDisplayName(s, locales);
                     return (
                       <tr key={s.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 font-medium text-gray-900">{displayName}</td>
