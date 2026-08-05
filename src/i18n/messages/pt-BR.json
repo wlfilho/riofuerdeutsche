@@ -1179,6 +1179,15 @@
     }
   },
   "public": {
+    "cta": {
+      "cookieBanner": {
+        "ariaLabel": "Configurações de cookies",
+        "nurNotwendige": "Apenas necessários",
+        "alleAkzeptieren": "Aceitar todos",
+        "mehrErfahren": "Saiba mais",
+        "text": "Usamos cookies para melhorar sua experiência e coletar estatísticas de uso anônimas."
+      }
+    },
     "angebot": {
       "metaTitle": "Sua proposta — Rio für Deutsche",
       "metaDescription": "Proposta personalizada de passeios no Rio de Janeiro.",
