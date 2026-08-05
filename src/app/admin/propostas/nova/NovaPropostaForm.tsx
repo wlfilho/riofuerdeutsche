@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { Fragment, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -311,6 +311,14 @@ function formatHoursShort(hours: number): string {
   return `${h}h${m.toString().padStart(2, '0')}`;
 }
 
+// Passo de 15min do ajuste de duração no itinerário. Valores fora da grade
+// (ex.: 1.334h vindos do catálogo) primeiro encaixam no quarto de hora na
+// direção do clique, para o stepper não perpetuar quebrados.
+function stepQuarterHour(hours: number, dir: 1 | -1): number {
+  const snapped = dir === 1 ? Math.floor(hours * 4) / 4 : Math.ceil(hours * 4) / 4;
+  return Math.max(0, snapped + dir * 0.25);
+}
+
 // Builds the visual day schedule. Transfers between two activities are merged
 // into a single block of (back + to) / 2 hours so the timeline total matches
 // calcDayHours (and therefore the priced guide hours).
@@ -375,63 +383,169 @@ function FallbackBadge({ service }: { service: ProposalService }) {
   );
 }
 
-// ─── ServicePickerModal ───────────────────────────────────────────────────────
+// ─── ServicePickerPanel ───────────────────────────────────────────────────────
 
-function ServicePickerModal({
+// Minúsculas e sem acentos, para a busca tolerar "selaron" → "Selarón".
+function normalizeSearch(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+// Seletor de atividades inline: expande dentro do card do dia (sem overlay),
+// com busca, chips de categoria e adição múltipla — o painel permanece aberto
+// entre uma adição e outra, e o item aparece na grade do dia na hora.
+function ServicePickerPanel({
   services,
+  open,
   onAdd,
   onClose,
 }: {
   services: ProposalService[];
+  open: boolean;
   onAdd: (service: ProposalService) => void;
   onClose: () => void;
 }) {
   const t = useTranslations('admin.propostas');
   const tCat = useTranslations('admin.atividades.categoriasPlural');
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState<'all' | (typeof CATEGORIES)[number]['key']>('all');
+  const [addedCount, setAddedCount] = useState(0);
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // Zera o contador a cada abertura (ajuste durante o render, sem effect).
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) setAddedCount(0);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    // O "+" do meio do dia pode estar longe do painel — garante que ele
+    // apareça na viewport ao abrir.
+    panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    // Autofoco só em telas largas: no celular abriria o teclado sobre a lista.
+    if (window.matchMedia('(min-width: 640px)').matches) {
+      searchRef.current?.focus({ preventScroll: true });
+    }
+  }, [open]);
+
+  const q = normalizeSearch(query.trim());
+  const visible = services.filter(
+    s => (category === 'all' || s.category === category)
+      && (!q || normalizeSearch(s.name).includes(q)),
+  );
+
+  const handleAdd = (s: ProposalService) => {
+    onAdd(s);
+    setAddedCount(c => c + 1);
+    setJustAddedId(s.id);
+    window.setTimeout(() => setJustAddedId(prev => (prev === s.id ? null : prev)), 900);
+  };
+
+  const chipCls = (on: boolean) =>
+    `shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+      on
+        ? 'bg-green-600 border-green-600 text-white'
+        : 'bg-white border-gray-200 text-gray-600 hover:border-green-300'
+    }`;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-          <h3 className="text-base font-bold text-gray-900">{t('adicionarServico')}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">
-            ✕
-          </button>
-        </div>
-        <div className="overflow-y-auto p-4 space-y-5">
-          {CATEGORIES.map(({ key, icon }) => {
-            const list = services.filter(s => s.category === key);
-            if (!list.length) return null;
-            return (
-              <div key={key}>
-                <p className="text-xs font-semibold text-gray-400 uppercase mb-2 tracking-wide">
+    // `inert` quando fechado: o colapso via grid-rows deixa o conteúdo no DOM,
+    // e sem isso Tab entraria em inputs invisíveis.
+    <div
+      inert={!open}
+      className={`grid transition-[grid-template-rows] duration-300 ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+    >
+      <div className="overflow-hidden">
+        <div
+          ref={panelRef}
+          className="mt-2 bg-white border border-gray-200 rounded-lg"
+          onKeyDown={e => { if (e.key === 'Escape') onClose(); }}
+        >
+          <div className="p-3 pb-0">
+            <input
+              ref={searchRef}
+              type="search"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder={t('buscarAtividade')}
+              className={INPUT_CLS}
+            />
+            <div className="flex gap-1.5 overflow-x-auto py-2.5">
+              <button onClick={() => setCategory('all')} className={chipCls(category === 'all')}>
+                {t('todasCategorias')}
+              </button>
+              {CATEGORIES.map(({ key, icon }) => (
+                <button key={key} onClick={() => setCategory(key)} className={chipCls(category === key)}>
                   {icon} {tCat(key)}
-                </p>
-                <div className="space-y-0.5">
-                  {list.map(s => (
-                    <button
-                      key={s.id}
-                      onClick={() => { onAdd(s); onClose(); }}
-                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm hover:bg-green-50 transition-colors text-left group"
-                    >
-                      <span className="font-medium text-gray-800 group-hover:text-green-800 truncate">
-                        {s.name}
-                        <FallbackBadge service={s} />
-                      </span>
-                      <div className="flex items-center gap-2 ml-4 shrink-0 text-xs text-gray-400">
-                        <span className="tabular-nums">{formatServiceHours(s)}</span>
-                        <span className="text-gray-200">·</span>
-                        <span>{formatCostSummary(s.costs)}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-          {services.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-6">{t('nenhumServicoDisponivel')}</p>
-          )}
+                </button>
+              ))}
+            </div>
+            <div className="max-h-64 overflow-y-auto grid sm:grid-cols-2 gap-x-2 content-start pb-2">
+              {CATEGORIES.map(({ key, icon }) => {
+                const list = visible.filter(s => s.category === key);
+                if (!list.length) return null;
+                return (
+                  <Fragment key={key}>
+                    {category === 'all' && !q && (
+                      <p className="col-span-full text-xs font-semibold text-gray-400 uppercase tracking-wide mt-2 mb-1 first:mt-0">
+                        {icon} {tCat(key)}
+                      </p>
+                    )}
+                    {list.map(s => (
+                      <button
+                        key={s.id}
+                        onClick={() => handleAdd(s)}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-left group transition-colors ${
+                          justAddedId === s.id ? 'bg-green-100' : 'hover:bg-green-50'
+                        }`}
+                      >
+                        <span className="font-medium text-gray-800 group-hover:text-green-800 truncate">
+                          {s.name}
+                          <FallbackBadge service={s} />
+                        </span>
+                        <span className="flex items-center gap-2 ml-3 shrink-0 text-xs text-gray-400">
+                          <span className="tabular-nums">{formatServiceHours(s)}</span>
+                          <span className="text-gray-200">·</span>
+                          <span>{formatCostSummary(s.costs)}</span>
+                          <span
+                            className={`w-5 h-5 flex items-center justify-center rounded-full text-sm font-bold ${
+                              justAddedId === s.id ? 'bg-green-600 text-white' : 'bg-green-50 text-green-600'
+                            }`}
+                          >
+                            {justAddedId === s.id ? '✓' : '+'}
+                          </span>
+                        </span>
+                      </button>
+                    ))}
+                  </Fragment>
+                );
+              })}
+              {services.length === 0 && (
+                <p className="col-span-full text-sm text-gray-400 text-center py-6">{t('nenhumServicoDisponivel')}</p>
+              )}
+              {services.length > 0 && visible.length === 0 && (
+                <p className="col-span-full text-sm text-gray-400 text-center py-6">{t('nenhumaAtividadeEncontrada')}</p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center justify-between border-t border-gray-100 px-3 py-2">
+            {addedCount > 0 ? (
+              <span className="text-xs font-medium text-green-700">
+                {t('itensAdicionadosCount', { count: addedCount })}
+              </span>
+            ) : (
+              <span className="text-xs text-gray-400">{t('cliqueParaAdicionar')}</span>
+            )}
+            <button
+              onClick={onClose}
+              className="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              {t('fecharPainel')}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -455,6 +569,7 @@ function DayScheduleGrid({
   onMoveItem,
   onRequestAdd,
   onDropItem,
+  getCatalogDuration,
 }: {
   segments: DaySegment[];
   startTime: string;
@@ -468,6 +583,8 @@ function DayScheduleGrid({
   onMoveItem: (id: string, direction: -1 | 1) => void;
   onRequestAdd: (position: InsertPosition) => void;
   onDropItem: (draggedId: string, targetItemId?: string) => void;
+  // Duração cadastrada no catálogo (undefined = serviço não existe mais lá).
+  getCatalogDuration: (slug: string) => number | null | undefined;
 }) {
   const t = useTranslations('admin.propostas');
   const tCommon = useTranslations('admin.common');
@@ -624,6 +741,49 @@ function DayScheduleGrid({
                     </button>
                   </div>
                 </div>
+
+                {(() => {
+                  const catalog = getCatalogDuration(item.service_slug);
+                  const current = item.duration_hours ?? 0;
+                  const overridden = catalog !== undefined && (catalog ?? 0) !== current;
+                  return (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-500">{t('duracao')}</span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => onUpdateItem(item._id, { duration_hours: stepQuarterHour(current, -1) })}
+                          disabled={current <= 0}
+                          title={t('duracaoMenos15')}
+                          className="w-5 h-5 flex items-center justify-center rounded-full border border-gray-300 text-gray-500 text-sm leading-none hover:border-green-400 hover:text-green-600 transition-colors disabled:opacity-30 disabled:hover:border-gray-300 disabled:hover:text-gray-500"
+                        >
+                          −
+                        </button>
+                        <span
+                          title={overridden ? t('duracaoAjustada', { valor: formatHoursShort(catalog ?? 0) }) : undefined}
+                          className={`tabular-nums font-medium min-w-[2.75rem] text-center ${overridden ? 'text-amber-600' : 'text-gray-700'}`}
+                        >
+                          {formatHoursShort(current)}
+                        </span>
+                        <button
+                          onClick={() => onUpdateItem(item._id, { duration_hours: stepQuarterHour(current, 1) })}
+                          title={t('duracaoMais15')}
+                          className="w-5 h-5 flex items-center justify-center rounded-full border border-gray-300 text-gray-500 text-sm leading-none hover:border-green-400 hover:text-green-600 transition-colors"
+                        >
+                          +
+                        </button>
+                        {overridden && (
+                          <button
+                            onClick={() => onUpdateItem(item._id, { duration_hours: catalog })}
+                            title={t('restaurarDuracao', { valor: formatHoursShort(catalog ?? 0) })}
+                            className="ml-0.5 px-1.5 py-0.5 rounded text-[11px] font-medium text-amber-600 hover:bg-amber-50 transition-colors"
+                          >
+                            ↺ {formatHoursShort(catalog ?? 0)}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 <div className="space-y-1">
                   {guideHours > 0 && (
@@ -813,7 +973,7 @@ function DayBlock({
   onChangeToggles: (patch: Partial<DayToggles>) => void;
   onChangeStartTime: (t: string) => void;
   onChangeEndTime: (t: string) => void;
-  onAddItem: (day: string, service: ProposalService, position?: InsertPosition) => void;
+  onAddItem: (day: string, service: ProposalService, position?: InsertPosition) => string;
   onUpdateItem: (id: string, updates: Partial<EditableItem>) => void;
   onRemoveItem: (id: string) => void;
   onMoveItem: (id: string, direction: -1 | 1) => void;
@@ -824,6 +984,15 @@ function DayBlock({
 }) {
   const t = useTranslations('admin.propostas');
   const [pickerFor, setPickerFor] = useState<InsertPosition | null>(null);
+
+  // Multi-add com o painel aberto: em inserções posicionais ('start' ou
+  // before/after via "+" do meio do dia), a âncora avança para o item
+  // recém-criado — adições seguidas entram em sequência, não invertidas.
+  const handlePickerAdd = (service: ProposalService) => {
+    const position = pickerFor ?? 'end';
+    const newId = onAddItem(day, service, position);
+    if (position !== 'end') setPickerFor({ after: newId });
+  };
 
   const transport = calcDayTransport(items, transportRates, exchangeRate, toggles);
   const { chargeableEur, embeddedEur } = splitTransportCost(transport, embed);
@@ -940,11 +1109,21 @@ function DayBlock({
           </div>
         </div>
         <button
-          onClick={() => setPickerFor('end')}
-          className="mt-2 w-full px-3 py-1.5 text-xs font-semibold bg-white border border-dashed border-gray-300 text-gray-500 rounded-lg hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-colors"
+          onClick={() => setPickerFor(prev => (prev ? null : 'end'))}
+          className={`mt-2 w-full px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${
+            pickerFor
+              ? 'bg-green-50 border-green-400 text-green-700'
+              : 'bg-white border-dashed border-gray-300 text-gray-500 hover:bg-green-50 hover:border-green-400 hover:text-green-700'
+          }`}
         >
           {t('adicionarServicoBotao')}
         </button>
+        <ServicePickerPanel
+          services={services}
+          open={pickerFor !== null}
+          onAdd={handlePickerAdd}
+          onClose={() => setPickerFor(null)}
+        />
       </div>
 
       <div className="p-4">
@@ -961,16 +1140,10 @@ function DayBlock({
           onMoveItem={onMoveItem}
           onRequestAdd={setPickerFor}
           onDropItem={(draggedId, targetItemId) => onDropItem(draggedId, day, targetItemId)}
+          getCatalogDuration={slug => services.find(s => s.slug === slug)?.duration_hours}
         />
       </div>
 
-      {pickerFor && (
-        <ServicePickerModal
-          services={services}
-          onAdd={s => onAddItem(day, s, pickerFor)}
-          onClose={() => setPickerFor(null)}
-        />
-      )}
     </div>
   );
 }
@@ -1403,7 +1576,9 @@ export default function NovaPropostaForm({
     setItems(prev => prev.map(i => ({ ...i, service_description: null })));
   }, []);
 
-  const handleAddItem = useCallback((day: string, service: ProposalService, position: InsertPosition = 'end') => {
+  // Devolve o _id do item criado — o painel usa como âncora para a próxima
+  // inserção posicional.
+  const handleAddItem = useCallback((day: string, service: ProposalService, position: InsertPosition = 'end'): string => {
     const newItem: EditableItem = {
       _id: Math.random().toString(36).slice(2),
       day,
@@ -1443,6 +1618,7 @@ export default function NovaPropostaForm({
       }
       return [...prev, newItem];
     });
+    return newItem._id;
   }, []);
 
   // Drag & drop: moves an item before the target item (same or another day),
