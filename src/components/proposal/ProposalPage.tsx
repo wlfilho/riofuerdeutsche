@@ -252,8 +252,11 @@ export default async function ProposalPage({
   const aboutText = tt('aboutText');
 
   const heroChips = [
+    // Tour de um dia só: data única, sem o range degenerado "28.10. – 28.10.".
     proposal.arrival_date && proposal.departure_date
-      ? `📅 ${fmt.shortDate(proposal.arrival_date)} – ${fmt.date(proposal.departure_date)}`
+      ? `📅 ${proposal.arrival_date === proposal.departure_date
+          ? fmt.date(proposal.arrival_date)
+          : `${fmt.shortDate(proposal.arrival_date)} – ${fmt.date(proposal.departure_date)}`}`
       : null,
     `👥 ${proposal.pax} ${proposal.pax === 1 ? t('person') : t('persons')}`,
     `🗓 ${sortedDays.length} ${sortedDays.length === 1 ? t('tourDay') : t('tourDays')}`,
@@ -299,11 +302,11 @@ export default async function ProposalPage({
         <div className="pt-12">
         <div className="relative bg-white rounded-2xl border border-gray-200 shadow-sm px-6 pt-14 pb-6 sm:px-7 sm:pb-7">
           <Image
-            src="/images/rio-will.webp"
+            src="/android-chrome-512x512.png"
             alt={t('avatarAlt')}
             width={112}
             height={112}
-            className="absolute -top-11 left-1/2 -translate-x-1/2 w-[88px] h-[88px] rounded-full object-cover object-[50%_62%] ring-4 ring-white shadow-lg"
+            className="absolute -top-11 left-1/2 -translate-x-1/2 w-[88px] h-[88px] rounded-full object-cover bg-white ring-4 ring-white shadow-lg"
           />
           <p className="text-[15px] text-gray-800 leading-relaxed text-center max-w-md mx-auto">
             {t('greeting', { name: firstName })}
