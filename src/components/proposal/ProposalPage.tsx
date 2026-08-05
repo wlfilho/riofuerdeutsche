@@ -252,8 +252,11 @@ export default async function ProposalPage({
   const aboutText = tt('aboutText');
 
   const heroChips = [
+    // Tour de um dia só: data única, sem o range degenerado "28.10. – 28.10.".
     proposal.arrival_date && proposal.departure_date
-      ? `📅 ${fmt.shortDate(proposal.arrival_date)} – ${fmt.date(proposal.departure_date)}`
+      ? `📅 ${proposal.arrival_date === proposal.departure_date
+          ? fmt.date(proposal.arrival_date)
+          : `${fmt.shortDate(proposal.arrival_date)} – ${fmt.date(proposal.departure_date)}`}`
       : null,
     `👥 ${proposal.pax} ${proposal.pax === 1 ? t('person') : t('persons')}`,
     `🗓 ${sortedDays.length} ${sortedDays.length === 1 ? t('tourDay') : t('tourDays')}`,
