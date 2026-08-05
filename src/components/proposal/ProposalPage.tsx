@@ -7,6 +7,7 @@ import { formatCurrency, formatDate as formatDateIntl } from '@/lib/format';
 import { proposalCurrency, resolveProposalLocale } from './locale';
 import CopyButton from './CopyButton';
 import ShareButtons from './ShareButtons';
+import ProposalTracker from './ProposalTracker';
 
 /**
  * Página pública da proposta, compartilhada por três rotas:
@@ -265,6 +266,7 @@ export default async function ProposalPage({
 
   return (
     <NextIntlClientProvider locale={locale} messages={clientMessages}>
+    <ProposalTracker token={proposal.public_token} locale={locale} />
     <div className="min-h-screen bg-gray-100 py-6 px-4 sm:py-10">
       <div className="max-w-2xl mx-auto space-y-5">
 
@@ -317,7 +319,7 @@ export default async function ProposalPage({
 
         {/* ── Übersicht ── */}
         {sortedDays.length > 1 && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div data-track-section="overview" className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-6 pt-6 pb-4">
               <SectionTitle>{tt('overviewTitle')}</SectionTitle>
             </div>
@@ -345,7 +347,7 @@ export default async function ProposalPage({
         )}
 
         {/* ── Programm (detalhe por dia) ── */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div data-track-section="program" className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 pt-6 pb-2">
             <SectionTitle>{t('detailProgramTitle')}</SectionTitle>
           </div>
@@ -438,7 +440,7 @@ export default async function ProposalPage({
             </div>
           )}
 
-          <div className="bg-green-50 px-6 py-6 border-t border-green-100 text-center">
+          <div data-track-section="price" className="bg-green-50 px-6 py-6 border-t border-green-100 text-center">
             {/* Unidade menor em destaque; o total segue logo abaixo, sempre visível */}
             {perPersonDayLabel ? (
               <>
@@ -488,6 +490,7 @@ export default async function ProposalPage({
               {deposit > 0 && bank ? (
                 <a
                   href="#anzahlung"
+                  data-track-click="deposit_cta"
                   className="inline-block w-full sm:w-auto px-8 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
                 >
                   {t('depositCta', { amount: fmt.money(deposit) })}
@@ -497,6 +500,7 @@ export default async function ProposalPage({
                   href="https://wa.me/5521990564944"
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-track-click="whatsapp_cta"
                   className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-8 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
                 >
                   <WhatsAppIcon className="w-5 h-5" />
@@ -560,7 +564,7 @@ export default async function ProposalPage({
 
         {/* ── Buchung & Anzahlung ── */}
         {deposit > 0 && bank && (
-          <div id="anzahlung" className="bg-white rounded-2xl border border-gray-200 border-l-4 border-l-green-600 shadow-sm p-6 sm:p-7 scroll-mt-6">
+          <div id="anzahlung" data-track-section="bank" className="bg-white rounded-2xl border border-gray-200 border-l-4 border-l-green-600 shadow-sm p-6 sm:p-7 scroll-mt-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <SectionTitle>{t('bookingTitle')}</SectionTitle>
               <span className="px-3 py-1 rounded-full bg-green-600 text-white text-sm font-bold tabular-nums">
@@ -576,12 +580,12 @@ export default async function ProposalPage({
             <dl className="mt-4 rounded-xl bg-gray-50 border border-gray-100 divide-y divide-gray-200/70 text-sm">
               {(
                 [
-                  [t('bankAccountHolder'), bank.account_holder, false],
-                  [t('bankIban'), bank.iban, true],
-                  [t('bankBic'), bank.bic, true],
-                  [t('bankName'), bank.bank_name, false],
-                ] as Array<[string, string, boolean]>
-              ).filter(([, v]) => v).map(([label, value, mono]) => (
+                  [t('bankAccountHolder'), bank.account_holder, false, 'copy_holder'],
+                  [t('bankIban'), bank.iban, true, 'copy_iban'],
+                  [t('bankBic'), bank.bic, true, 'copy_bic'],
+                  [t('bankName'), bank.bank_name, false, 'copy_bank_name'],
+                ] as Array<[string, string, boolean, string]>
+              ).filter(([, v]) => v).map(([label, value, mono, trackId]) => (
                 <div key={label} className="flex flex-wrap items-center gap-x-4 gap-y-0.5 px-4 py-2">
                   <dt className="w-28 shrink-0 text-xs font-semibold text-gray-400 uppercase tracking-wide">
                     {label}
@@ -590,7 +594,7 @@ export default async function ProposalPage({
                     <span className={`text-gray-800 ${mono ? 'font-mono text-[13px] font-medium break-all' : 'font-medium break-words'}`}>
                       {value}
                     </span>
-                    <CopyButton value={value} label={label} />
+                    <CopyButton value={value} label={label} trackId={trackId} />
                   </dd>
                 </div>
               ))}
@@ -605,7 +609,7 @@ export default async function ProposalPage({
         )}
 
         {/* ── Kontakt ── */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-7 text-center">
+        <div data-track-section="contact" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-7 text-center">
           <SectionTitle>{t('contactTitle')}</SectionTitle>
           <p className="mt-3 text-sm text-gray-700 leading-relaxed max-w-md mx-auto">
             {tt('contactText')}
@@ -615,6 +619,7 @@ export default async function ProposalPage({
               href="https://wa.me/5521990564944"
               target="_blank"
               rel="noopener noreferrer"
+              data-track-click="whatsapp_contact"
               className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
             >
               <WhatsAppIcon className="w-5 h-5" />
@@ -622,6 +627,7 @@ export default async function ProposalPage({
             </a>
             <a
               href="mailto:riofuerdeutsche@gmail.com"
+              data-track-click="email_contact"
               className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
             >
               {t('replyEmail')}
@@ -636,7 +642,7 @@ export default async function ProposalPage({
         </div>
 
         {/* ── Compartilhar (cliente → parceiros de viagem) ── */}
-        <div className="pt-2">
+        <div data-track-section="share" className="pt-2">
           <ShareButtons url={`https://riofuerdeutsche.de/angebot/${proposal.public_token}`} />
         </div>
 

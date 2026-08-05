@@ -6,7 +6,16 @@ import { useTranslations } from 'next-intl';
 // Botão de copiar dos dados bancários da Anzahlung: ícone discreto ao lado do
 // valor + toast animado confirmando a cópia. Copia o valor com espaços
 // normalizados (IBAN colável direto no app do banco).
-export default function CopyButton({ value, label }: { value: string; label: string }) {
+// trackId marca o clique pro ProposalTracker (delegação por data-track-click).
+export default function CopyButton({
+  value,
+  label,
+  trackId,
+}: {
+  value: string;
+  label: string;
+  trackId?: string;
+}) {
   const t = useTranslations('public.angebot.copy');
   const [copied, setCopied] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
@@ -36,6 +45,7 @@ export default function CopyButton({ value, label }: { value: string; label: str
     <>
       <button
         onClick={handleCopy}
+        data-track-click={trackId}
         title={t('action', { label })}
         aria-label={t('action', { label })}
         className={`inline-flex items-center justify-center w-6 h-6 rounded-md transition-colors shrink-0 ${

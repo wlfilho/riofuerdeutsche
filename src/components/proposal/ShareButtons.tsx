@@ -51,6 +51,7 @@ export default function ShareButtons({ url }: { url: string }) {
           href={`https://wa.me/?text=${encodeURIComponent(url)}`}
           target="_blank"
           rel="noopener noreferrer"
+          data-track-click="share_whatsapp"
           title={t('whatsapp')}
           aria-label={t('whatsapp')}
           className={`${btnCls} bg-[#25D366]`}
@@ -66,6 +67,7 @@ export default function ShareButtons({ url }: { url: string }) {
           href={`https://telegram.me/share/url?url=${encodeURIComponent(url)}`}
           target="_blank"
           rel="noopener noreferrer"
+          data-track-click="share_telegram"
           title={t('telegram')}
           aria-label={t('telegram')}
           className={`${btnCls} bg-[#229ED9]`}
@@ -78,6 +80,7 @@ export default function ShareButtons({ url }: { url: string }) {
         {/* E-Mail */}
         <a
           href={`mailto:?subject=${encodeURIComponent(t('emailSubject'))}&body=${encodeURIComponent(url)}`}
+          data-track-click="share_email"
           title={t('email')}
           aria-label={t('email')}
           className={`${btnCls} bg-gray-500`}
@@ -91,6 +94,7 @@ export default function ShareButtons({ url }: { url: string }) {
         {/* Link kopieren */}
         <button
           onClick={handleCopy}
+          data-track-click="share_copy"
           title={t('copyLink')}
           aria-label={t('copyLink')}
           className={`${btnCls} bg-gray-700`}
@@ -105,6 +109,7 @@ export default function ShareButtons({ url }: { url: string }) {
         {canNativeShare && (
           <button
             onClick={handleNativeShare}
+            data-track-click="share_native"
             title={t('native')}
             aria-label={t('native')}
             className={`${btnCls} bg-green-600`}
