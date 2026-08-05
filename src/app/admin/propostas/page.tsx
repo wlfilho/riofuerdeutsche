@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getAdminTranslations } from '@/i18n/admin';
 import { getProposals } from '@/lib/proposals';
+import { getProposalAnalyticsSummaries } from '@/lib/proposalAnalytics';
 import { createClient } from '@/utils/supabase/server';
 import PropostasListClient from './PropostasListClient';
 import AnfrageLinkButton from './AnfrageLinkButton';
@@ -77,8 +78,9 @@ async function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
 export default async function PropostasPage() {
   const t = await getAdminTranslations('admin.propostas');
   const supabase = await createClient();
-  const [proposals, { data: pendingLeads }] = await Promise.all([
+  const [proposals, analytics, { data: pendingLeads }] = await Promise.all([
     getProposals(),
+    getProposalAnalyticsSummaries(),
     // Leads still in the pre-proposal pipeline; leads moved to lost/closed in
     // the CRM (or already linked to a proposal) drop out of this strip.
     supabase
@@ -107,7 +109,7 @@ export default async function PropostasPage() {
 
         <PendingLeadsStrip leads={(pendingLeads ?? []) as PendingLead[]} />
 
-        <PropostasListClient initialProposals={proposals} />
+        <PropostasListClient initialProposals={proposals} analytics={analytics} />
       </div>
     </div>
   );

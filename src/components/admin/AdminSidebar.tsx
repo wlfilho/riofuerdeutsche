@@ -53,6 +53,7 @@ const navItems: NavItem[] = [
     href: '/admin/propostas',
     icon: '📋',
     children: [
+      { labelKey: 'analytics',   href: '/admin/propostas/analytics' },
       { labelKey: 'atividades',  href: '/admin/propostas/atividades' },
       { labelKey: 'transportes', href: '/admin/propostas/transportes' },
     ],

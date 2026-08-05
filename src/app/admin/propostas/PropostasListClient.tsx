@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { fmtEur } from '@/lib/adminFormat';
 import type { Proposal, ProposalStatus } from '@/lib/proposals';
+import type { ProposalAnalyticsSummary } from '@/lib/proposalAnalytics';
 
 
 // ─── Formatação do texto ALEMÃO enviado ao cliente ────────────────────────────
@@ -149,7 +150,42 @@ function DeleteModal({
   );
 }
 
-export default function PropostasListClient({ initialProposals }: { initialProposals: Proposal[] }) {
+// Badge de leitura na lista: aberturas + visitantes distintos (>1 ≈ o link
+// circulou além do destinatário) e a última visualização. Clica → estatísticas.
+function ViewsBadge({ proposalId, summary }: { proposalId: string; summary?: ProposalAnalyticsSummary }) {
+  const t = useTranslations('admin.propostas');
+  if (!summary || summary.sessions === 0) {
+    return <span className="text-gray-300">—</span>;
+  }
+  const lastView = summary.last_view_at
+    ? new Date(summary.last_view_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+    : null;
+  return (
+    <Link
+      href={`/admin/propostas/${proposalId}/estatisticas`}
+      title={t('verEstatisticas')}
+      className="group inline-block"
+    >
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-700 tabular-nums group-hover:bg-blue-100 transition-colors">
+        👁 {summary.sessions}
+        {summary.unique_visitors > 1 && (
+          <span className="font-normal text-blue-500">· {t('nPessoas', { count: summary.unique_visitors })}</span>
+        )}
+      </span>
+      {lastView && (
+        <span className="block mt-0.5 text-[11px] text-gray-400 tabular-nums">{lastView}</span>
+      )}
+    </Link>
+  );
+}
+
+export default function PropostasListClient({
+  initialProposals,
+  analytics = {},
+}: {
+  initialProposals: Proposal[];
+  analytics?: Record<string, ProposalAnalyticsSummary>;
+}) {
   const t = useTranslations('admin.propostas');
   const tCommon = useTranslations('admin.common');
   const router = useRouter();
@@ -239,6 +275,7 @@ export default function PropostasListClient({ initialProposals }: { initialPropo
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colDiasTour')}</th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('total')}</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('status')}</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colVisualizacoes')}</th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('acoes')}</th>
               </tr>
             </thead>
@@ -281,7 +318,21 @@ export default function PropostasListClient({ initialProposals }: { initialPropo
                     <StatusBadge status={p.status} />
                   </td>
                   <td className="px-4 py-3">
+                    <ViewsBadge proposalId={p.id} summary={analytics[p.id]} />
+                  </td>
+                  <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
+                      {/* Estatísticas de leitura */}
+                      <Link
+                        href={`/admin/propostas/${p.id}/estatisticas`}
+                        title={t('verEstatisticas')}
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                        </svg>
+                      </Link>
+
                       {/* Ver proposta */}
                       <Link
                         href={`/admin/propostas/${p.id}/output`}
