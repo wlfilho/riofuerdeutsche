@@ -290,6 +290,33 @@ function ActivityModal({
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
+
+  // Gera a descrição curta via IA a partir do título da aba ativa, no idioma
+  // da aba. Só substitui o campo do idioma ativo — os outros ficam intactos.
+  const handleGenerateDescription = async () => {
+    const title = activeText.name.trim();
+    if (!title || generatingDesc) return;
+    setGeneratingDesc(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/admin/ai/activity-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, category: form.category || null, locale: activeLocale }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? t('erroGerarDescricao')); return; }
+      setTexts(prev => ({
+        ...prev,
+        [activeLocale]: { ...(prev[activeLocale] ?? EMPTY_LOCALE_TEXT), description: data.description },
+      }));
+    } catch {
+      setError(tCommon('erroRede'));
+    } finally {
+      setGeneratingDesc(false);
+    }
+  };
 
   const set = (field: keyof FormState) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -503,13 +530,35 @@ function ActivityModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('descricaoCurta')}</label>
-                <textarea
-                  value={activeText.description}
-                  onChange={setText('description')}
-                  rows={2}
-                  className={`${INPUT_CLS} resize-none`}
-                  placeholder={t('descricaoCurtaPlaceholder')}
-                />
+                <div className="relative">
+                  <textarea
+                    value={activeText.description}
+                    onChange={setText('description')}
+                    rows={2}
+                    className={`${INPUT_CLS} resize-none ${activeText.name.trim() ? 'pr-10' : ''}`}
+                    placeholder={t('descricaoCurtaPlaceholder')}
+                  />
+                  {activeText.name.trim() && (
+                    <button
+                      type="button"
+                      onClick={handleGenerateDescription}
+                      disabled={generatingDesc}
+                      title={t('gerarDescricaoIa')}
+                      className="absolute top-2 right-2 p-1.5 text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      {generatingDesc ? (
+                        <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm6 0a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0111 2z" />
+                        </svg>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div>
