@@ -41,13 +41,15 @@ export async function proposalMetadata(
       siteName: 'Rio für Deutsche',
       // Trocar a arte = trocar o nome do arquivo (ou anexar ?v=N): os apps de
       // mensagem cacheiam o preview pela URL da imagem.
-      images: [{ url: '/og/og-propostas.webp', width: 1280, height: 670 }],
+      // JPEG, não WebP: o crawler do WhatsApp/Facebook não renderiza WebP
+      // em og:image e o card sairia sem imagem justamente no canal principal.
+      images: [{ url: '/og/og-propostas.jpg', width: 1280, height: 670 }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/og/og-propostas.webp'],
+      images: ['/og/og-propostas.jpg'],
     },
   };
 }
