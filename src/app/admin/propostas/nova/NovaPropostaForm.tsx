@@ -11,6 +11,7 @@ import type {
   ProposalCurrency,
   ProposalPriceDisplay,
   ProposalService,
+  ProposalServiceGroup,
   ProposalTransportType,
   ProposalTreatment,
 } from '@/lib/proposals';
@@ -256,6 +257,15 @@ function formatServiceHours(s: ProposalService): string {
   return total > 0 ? `${total}h total` : '—';
 }
 
+// Horas decimais → "6h50" (o somatório de um grupo raramente é redondo).
+function formatGroupHours(hours: number): string {
+  const totalMin = Math.round(hours * 60);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h === 0) return `${m}min`;
+  return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, '0')}`;
+}
+
 function calcDayHours(items: EditableItem[]): number {
   if (items.length === 0) return 0;
 
@@ -390,18 +400,32 @@ function normalizeSearch(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
+// Grupo do catálogo já resolvido contra o catálogo do idioma da proposta:
+// membros inativos ou sem tradução ficam de fora, e grupo que ficou vazio nem
+// chega ao picker.
+type ResolvedServiceGroup = {
+  id: string;
+  name: string;
+  services: ProposalService[];
+};
+
 // Seletor de atividades inline: expande dentro do card do dia (sem overlay),
 // com busca, chips de categoria e adição múltipla — o painel permanece aberto
 // entre uma adição e outra, e o item aparece na grade do dia na hora.
+// Grupos aparecem no topo: um clique adiciona todas as atividades do grupo.
 function ServicePickerPanel({
   services,
+  groups,
   open,
   onAdd,
+  onAddGroup,
   onClose,
 }: {
   services: ProposalService[];
+  groups: ResolvedServiceGroup[];
   open: boolean;
   onAdd: (service: ProposalService) => void;
+  onAddGroup: (services: ProposalService[]) => void;
   onClose: () => void;
 }) {
   const t = useTranslations('admin.propostas');
@@ -436,12 +460,24 @@ function ServicePickerPanel({
     s => (category === 'all' || s.category === category)
       && (!q || normalizeSearch(s.name).includes(q)),
   );
+  // Grupos só na visão "todas": com um chip de categoria ativo, o admin está
+  // garimpando atividade individual. A busca também acha pelo nome do grupo.
+  const visibleGroups = category === 'all'
+    ? groups.filter(g => !q || normalizeSearch(g.name).includes(q))
+    : [];
 
   const handleAdd = (s: ProposalService) => {
     onAdd(s);
     setAddedCount(c => c + 1);
     setJustAddedId(s.id);
     window.setTimeout(() => setJustAddedId(prev => (prev === s.id ? null : prev)), 900);
+  };
+
+  const handleAddGroup = (g: ResolvedServiceGroup) => {
+    onAddGroup(g.services);
+    setAddedCount(c => c + g.services.length);
+    setJustAddedId(g.id);
+    window.setTimeout(() => setJustAddedId(prev => (prev === g.id ? null : prev)), 900);
   };
 
   const chipCls = (on: boolean) =>
@@ -484,6 +520,51 @@ function ServicePickerPanel({
               ))}
             </div>
             <div className="max-h-64 overflow-y-auto grid sm:grid-cols-2 gap-x-2 content-start pb-2">
+              {visibleGroups.length > 0 && (
+                <>
+                  {!q && (
+                    <p className="col-span-full text-xs font-semibold text-gray-400 uppercase tracking-wide mt-2 mb-1 first:mt-0">
+                      📦 {t('gruposSecao')}
+                    </p>
+                  )}
+                  {visibleGroups.map(g => {
+                    const hours = g.services.reduce(
+                      (sum, s) => sum + (s.transfer_hours_to ?? 0) + (s.duration_hours ?? 0) + (s.transfer_hours_back ?? 0),
+                      0,
+                    );
+                    return (
+                      <button
+                        key={g.id}
+                        onClick={() => handleAddGroup(g)}
+                        title={t('grupoAdicionaTodas')}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-left group transition-colors ${
+                          justAddedId === g.id ? 'bg-green-100' : 'hover:bg-green-50'
+                        }`}
+                      >
+                        <span className="font-medium text-gray-800 group-hover:text-green-800 truncate">
+                          {g.name}
+                        </span>
+                        <span className="flex items-center gap-2 ml-3 shrink-0 text-xs text-gray-400">
+                          <span>{t('grupoAtividadesCount', { count: g.services.length })}</span>
+                          {hours > 0 && (
+                            <>
+                              <span className="text-gray-200">·</span>
+                              <span className="tabular-nums">{formatGroupHours(hours)}</span>
+                            </>
+                          )}
+                          <span
+                            className={`w-5 h-5 flex items-center justify-center rounded-full text-sm font-bold ${
+                              justAddedId === g.id ? 'bg-green-600 text-white' : 'bg-green-50 text-green-600'
+                            }`}
+                          >
+                            {justAddedId === g.id ? '✓' : '+'}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </>
+              )}
               {CATEGORIES.map(({ key, icon }) => {
                 const list = visible.filter(s => s.category === key);
                 if (!list.length) return null;
@@ -937,6 +1018,7 @@ function DayBlock({
   day,
   items,
   services,
+  groups,
   pax,
   exchangeRate,
   guideRate,
@@ -961,6 +1043,7 @@ function DayBlock({
   day: string;
   items: EditableItem[];
   services: ProposalService[];
+  groups: ResolvedServiceGroup[];
   pax: number;
   exchangeRate: number;
   guideRate: number;
@@ -992,6 +1075,18 @@ function DayBlock({
     const position = pickerFor ?? 'end';
     const newId = onAddItem(day, service, position);
     if (position !== 'end') setPickerFor({ after: newId });
+  };
+
+  // Grupo: adiciona os membros um a um, na ordem do grupo. Em inserções
+  // posicionais, a âncora avança a cada item — o bloco entra em sequência a
+  // partir do ponto clicado, e a próxima adição continua depois dele.
+  const handlePickerAddGroup = (groupServices: ProposalService[]) => {
+    let position: InsertPosition = pickerFor ?? 'end';
+    for (const service of groupServices) {
+      const newId = onAddItem(day, service, position);
+      if (position !== 'end') position = { after: newId };
+    }
+    if (position !== 'end') setPickerFor(position);
   };
 
   const transport = calcDayTransport(items, transportRates, exchangeRate, toggles);
@@ -1120,8 +1215,10 @@ function DayBlock({
         </button>
         <ServicePickerPanel
           services={services}
+          groups={groups}
           open={pickerFor !== null}
           onAdd={handlePickerAdd}
+          onAddGroup={handlePickerAddGroup}
           onClose={() => setPickerFor(null)}
         />
       </div>
@@ -1236,6 +1333,7 @@ function PriceInput({
 
 export default function NovaPropostaForm({
   services,
+  serviceGroups = [],
   transportTypes,
   defaultGuideRate,
   defaultExchangeRate,
@@ -1248,6 +1346,9 @@ export default function NovaPropostaForm({
   initialLead,
 }: {
   services: ProposalService[];
+  // Grupos de atividades (atalhos de montagem): opcional porque só os builders
+  // os carregam — quem reusa o form sem grupos não precisa saber deles.
+  serviceGroups?: ProposalServiceGroup[];
   transportTypes: ProposalTransportType[];
   defaultGuideRate: number;
   defaultExchangeRate: number;
@@ -1267,6 +1368,19 @@ export default function NovaPropostaForm({
   const tTransportes = useTranslations('admin.transportes');
   const router = useRouter();
   const isEditing = !!proposalId;
+
+  // Grupos resolvidos contra o catálogo do idioma da proposta: membro inativo
+  // ou sem tradução sai; grupo que ficar sem nenhum membro nem aparece.
+  const resolvedGroups = useMemo<ResolvedServiceGroup[]>(() => {
+    const byId = new Map(services.map(s => [s.id, s]));
+    return serviceGroups
+      .map(g => ({
+        id: g.id,
+        name: g.name,
+        services: g.service_ids.map(id => byId.get(id)).filter(Boolean) as ProposalService[],
+      }))
+      .filter(g => g.services.length > 0);
+  }, [serviceGroups, services]);
 
   // Faixas de veículo (carro + motorista) do tipo de transporte "por faixas".
   const vehicleTiers = useMemo(() => {
@@ -2201,6 +2315,7 @@ export default function NovaPropostaForm({
                 day={day}
                 items={items.filter(i => i.day === day)}
                 services={services}
+                groups={resolvedGroups}
                 pax={pax}
                 exchangeRate={exchangeRate}
                 guideRate={guideRate}

@@ -9,6 +9,7 @@ import type {
   ProposalServicePeriod,
   ProposalTransportType,
 } from '@/lib/proposals';
+import GroupsSection, { type GroupServiceOption } from './GroupsSection';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -772,6 +773,20 @@ export default function AtividadesPage() {
 
   const hasActiveFilters = search.trim() !== '' || categoryFilter !== '';
 
+  // Catálogo enxuto para o gerenciador de grupos: nome de exibição já
+  // resolvido e duração total somada — o componente não conhece traduções.
+  const groupServiceOptions = useMemo<GroupServiceOption[]>(
+    () =>
+      services.map(s => ({
+        id: s.id,
+        name: getDisplayName(s, locales),
+        category: s.category,
+        totalHours: (s.transfer_hours_to ?? 0) + (s.duration_hours ?? 0) + (s.transfer_hours_back ?? 0),
+        isActive: s.is_active,
+      })),
+    [services, locales],
+  );
+
   // null → create; ServiceWithTranslations → edit
   const [modalService, setModalService] = useState<ServiceWithTranslations | null>(null);
 
@@ -1047,6 +1062,8 @@ export default function AtividadesPage() {
             </table>
           </div>
         </div>
+
+        {!loading && <GroupsSection services={groupServiceOptions} />}
       </div>
 
       {modalOpen && locales.length > 0 && (

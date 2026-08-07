@@ -80,6 +80,18 @@ export interface ProposalService {
   is_fallback?: boolean;
 }
 
+// Grupo de atividades: atalho de montagem do builder. Clicar num grupo expande
+// suas atividades como itens individuais no dia — a proposta salva nunca
+// referencia o grupo. Interno do admin, por isso o nome não é traduzido.
+export interface ProposalServiceGroup {
+  id: string;
+  name: string;
+  is_active: boolean;
+  sort_order: number;
+  // Ids de proposal_services, já na ordem definida no grupo.
+  service_ids: string[];
+}
+
 export interface ProposalItem {
   // 'day_transport' marca a linha sintética de carro + motorista de um dia;
   // ausente/'activity' para atividades normais.
@@ -293,6 +305,30 @@ export async function getProposalServices(
       },
     ];
   });
+}
+
+// Grupos ativos para o picker do builder. Membros que apontem para serviço
+// inativo/sem tradução são filtrados depois, no cliente, contra o catálogo
+// resolvido — aqui vão só os ids na ordem do grupo.
+export async function getProposalServiceGroups(): Promise<ProposalServiceGroup[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('proposal_service_groups')
+    .select('id, name, is_active, sort_order, items:proposal_service_group_items(service_id, sort_order)')
+    .eq('is_active', true)
+    .order('sort_order');
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    is_active: row.is_active,
+    sort_order: row.sort_order,
+    service_ids: [...(row.items ?? [])]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((i) => i.service_id),
+  }));
 }
 
 export async function getProposals(): Promise<Proposal[]> {

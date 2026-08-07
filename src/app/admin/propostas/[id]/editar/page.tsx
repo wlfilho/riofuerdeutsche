@@ -2,6 +2,7 @@ import {
   DEFAULT_PROPOSAL_CURRENCY,
   DEFAULT_PROPOSAL_LOCALE,
   getProposalById,
+  getProposalServiceGroups,
   getProposalServices,
   getTransportTypes,
 } from '@/lib/proposals';
@@ -24,8 +25,9 @@ export default async function EditarPropostaPage({
   // preenchida caem no padrão. O catálogo é resolvido nesse mesmo idioma.
   const proposalLocale = proposal.locale ?? DEFAULT_PROPOSAL_LOCALE;
 
-  const [services, transportTypes, settings, supportedLocales] = await Promise.all([
+  const [services, serviceGroups, transportTypes, settings, supportedLocales] = await Promise.all([
     getProposalServices(proposalLocale),
+    getProposalServiceGroups(),
     getTransportTypes(),
     getSettings(),
     getSupportedLocales(),
@@ -41,6 +43,7 @@ export default async function EditarPropostaPage({
   return (
     <NovaPropostaForm
       services={services}
+      serviceGroups={serviceGroups}
       transportTypes={transportTypes}
       defaultGuideRate={settings.guide_rate_eur}
       defaultExchangeRate={settings.default_exchange_rate}
