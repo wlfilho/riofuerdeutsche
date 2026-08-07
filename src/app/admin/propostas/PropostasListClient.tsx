@@ -9,21 +9,6 @@ import type { Proposal, ProposalStatus } from '@/lib/proposals';
 import type { ProposalAnalyticsSummary } from '@/lib/proposalAnalytics';
 
 
-// ─── Formatação do texto ALEMÃO enviado ao cliente ────────────────────────────
-// Estes dois helpers alimentam buildWhatsAppText(); não usar na UI do admin
-// (que formata via @/lib/adminFormat).
-
-function formatDate(iso: string | null): string {
-  if (!iso) return '—';
-  const [y, m, d] = iso.split('-');
-  return `${d}.${m}.${y}`;
-}
-
-function formatEur(amount: number | null): string {
-  if (amount === null) return '—';
-  return `€${amount.toFixed(2).replace('.', ',')}`;
-}
-
 // Dias de tour reais da proposta (únicos, ordenados), extraídos dos itens —
 // chegada/partida são só derivações (primeiro/último dia) e não interessam.
 function getTourDays(p: Proposal): string[] {
@@ -36,43 +21,12 @@ function formatShortDay(iso: string): string {
   return `${d}/${m}`;
 }
 
-function buildWhatsAppText(p: Proposal): string {
-  const greeting = p.treatment === 'Sie' ? `Guten Tag, ${p.client_name}!` : `Hallo, ${p.client_name}!`;
-  const lines: string[] = [greeting, ''];
-
-  // Ankunft/Abreise seriam informação errada pro cliente: são só o primeiro e
-  // o último dia de tour. O que importa são os Tourtage.
-  const tourDays = getTourDays(p);
-  if (tourDays.length > 0) {
-    lines.push(`📅 Tourtage: ${tourDays.map(formatDate).join(', ')}`);
-  }
-  lines.push(`👥 Personen: ${p.pax}`);
-  lines.push('');
-
-  // Linhas 'day_transport' são contabilidade interna (carro/motorista do dia):
-  // ficam fora do que o cliente lê, igual à página pública e ao PDF. Elas nunca
-  // deveriam ter aparecido aqui — o service_name delas hoje é um identificador
-  // sem idioma, não um texto para o cliente.
-  const activities = p.items.filter(i => i.kind !== 'day_transport');
-  if (activities.length > 0) {
-    lines.push('🗓 Ihr Programm:');
-    for (const item of activities) {
-      const date = formatDate(item.day);
-      const price = `€${item.total_eur.toFixed(2).replace('.', ',')}`;
-      lines.push(`• ${date} – ${item.service_name} (${price})`);
-      if (item.note) lines.push(`  ↳ ${item.note}`);
-    }
-    lines.push('');
-  }
-
-  if (p.total_amount !== null) {
-    lines.push(`💰 Gesamtbetrag: ${formatEur(p.total_amount)}`);
-    lines.push('');
-  }
-
-  lines.push('Beste Grüße,\nRio für Deutsche');
-
-  return lines.join('\n');
+// Link público enviado ao cliente — mesmo formato de PropostaOutputClient
+// (domínio canônico, rota neutra /{locale}/p/{token}). O 'de' é inline porque
+// importar o default de @/lib/proposals arrastaria o client Supabase de
+// servidor para o bundle do browser.
+function publicProposalUrl(p: Proposal): string {
+  return `https://riofuerdeutsche.de/${p.locale || 'de'}/p/${p.public_token}`;
 }
 
 // Só a aparência: o rótulo vem de admin.status.proposal e o valor (draft/sent/
@@ -238,11 +192,10 @@ export default function PropostasListClient({
     }
   };
 
-  const handleCopyWhatsApp = async (p: Proposal) => {
-    const text = buildWhatsAppText(p);
+  const handleCopyLink = async (p: Proposal) => {
     try {
-      await navigator.clipboard.writeText(text);
-      setToast(t('textoWhatsappCopiado'));
+      await navigator.clipboard.writeText(publicProposalUrl(p));
+      setToast(t('linkCopiado'));
     } catch {
       alert(t('erroCopiar'));
     }
@@ -375,14 +328,14 @@ export default function PropostasListClient({
                         )}
                       </button>
 
-                      {/* Copiar WhatsApp */}
+                      {/* Copiar link público da proposta */}
                       <button
-                        onClick={() => handleCopyWhatsApp(p)}
-                        title={t('copiarTextoWhatsapp')}
+                        onClick={() => handleCopyLink(p)}
+                        title={t('copiarLinkProposta')}
                         className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" />
                         </svg>
                       </button>
 

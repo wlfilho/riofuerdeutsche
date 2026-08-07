@@ -463,13 +463,11 @@
       "erroExcluir": "Erro ao excluir.",
       "erroDuplicar": "Erro ao duplicar.",
       "propostaDuplicada": "Proposta duplicada ✓",
-      "textoWhatsappCopiado": "Texto do WhatsApp copiado ✓",
       "erroCopiar": "Falha ao copiar. Copie manualmente.",
       "erroRede": "Erro de rede.",
       "visualizarProposta": "Visualizar proposta",
       "editarPropostaTitle": "Editar proposta",
       "duplicarProposta": "Duplicar proposta",
-      "copiarTextoWhatsapp": "Copiar texto do WhatsApp",
       "copiarLinkVia": "Copiar link para enviar via:",
       "copieLink": "Copie o link:",
       "linkCopiado": "✓ Link copiado",
@@ -605,7 +603,8 @@
       "diaJaExiste": "Já existe um dia em {data} nesta proposta. Escolha outra data ou mova os serviços manualmente.",
       "gruposSecao": "Grupos",
       "grupoAdicionaTodas": "Adiciona todas as atividades do grupo ao dia",
-      "grupoAtividadesCount": "{count, plural, one {# atividade} other {# atividades}}"
+      "grupoAtividadesCount": "{count, plural, one {# atividade} other {# atividades}}",
+      "copiarLinkProposta": "Copiar link da proposta"
     },
     "atividades": {
       "breadcrumb": "Atividades",
