@@ -13,9 +13,20 @@ import { createClient } from '@/utils/supabase/server';
  * cookie é checada e, sendo admin, a resposta pede pro tracker se desligar
  * ({ disabled: true }) e nada é gravado. Os demais eventos não repetem a
  * checagem — sem 'open' gravado, o tracker nem chega a mandá-los.
+ *
+ * Robôs e IAs (link colado num agente que navega com headless browser) também
+ * não contam: user-agent de automação é rejeitado em TODOS os eventos, antes
+ * de qualquer acesso ao banco (BOT_UA_RE abaixo).
  */
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Robôs que executam JS (IA navegando o link, headless browsers, crawlers) não
+// são leitores da proposta: user-agent de automação é descartado antes do banco.
+// Previews de link (WhatsApp/Telegram) não rodam JS e nunca chegam aqui, então
+// não entram no padrão — "WhatsApp" também aparece no UA do browser in-app real.
+const BOT_UA_RE =
+  /headless|bot\b|crawl|spider|scrape|python|curl|wget|axios|node-fetch|java\/|phantom|puppeteer|playwright|selenium|webdriver|lighthouse|anthropic|claude|openai|gpt|perplexity/i;
 const EVENT_TYPES = ['open', 'ping', 'section', 'click'] as const;
 const SECTIONS = ['overview', 'program', 'price', 'bank', 'contact', 'share'] as const;
 const CLICK_TARGET_RE = /^[a-z0-9_]{1,40}$/;
@@ -103,6 +114,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 
+  // Sem user-agent = não é browser real; com padrão de automação = robô/IA.
+  const userAgent = str(request.headers.get('user-agent'), 300);
+  if (!userAgent || BOT_UA_RE.test(userAgent)) {
+    return NextResponse.json({ ok: true, disabled: true });
+  }
+
   if (type === 'open' && (await isAdminRequest())) {
     return NextResponse.json({ ok: true, disabled: true });
   }
@@ -127,7 +144,7 @@ export async function POST(request: NextRequest) {
     visitor_id: visitorId,
     event_type: type,
     metadata,
-    user_agent: str(request.headers.get('user-agent'), 300),
+    user_agent: userAgent,
     referrer: type === 'open' ? str(body.referrer, 300) : null,
     locale: str(body.locale, 10),
   });
