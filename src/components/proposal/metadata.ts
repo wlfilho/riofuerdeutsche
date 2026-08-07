@@ -39,15 +39,15 @@ export async function proposalMetadata(
       title,
       description,
       siteName: 'Rio für Deutsche',
-      // ?v= força os apps de mensagem a rebuscarem quando a imagem muda —
-      // eles cacheiam o preview pela URL. Incrementar a cada troca de arte.
-      images: [{ url: '/og/proposal.jpg?v=2', width: 1024, height: 541 }],
+      // Trocar a arte = trocar o nome do arquivo (ou anexar ?v=N): os apps de
+      // mensagem cacheiam o preview pela URL da imagem.
+      images: [{ url: '/og/og-propostas.webp', width: 1280, height: 670 }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/og/proposal.jpg?v=2'],
+      images: ['/og/og-propostas.webp'],
     },
   };
 }
