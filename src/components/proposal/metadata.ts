@@ -22,9 +22,30 @@ export async function proposalMetadata(
     : (urlLocale ?? 'de');
 
   const t = await getTranslations({ locale, namespace: 'public.angebot' });
+  // Com nome do cliente o title fica pessoal — e é o que o preview do WhatsApp
+  // mostra ao enviar o link. Token inválido/nome vazio: título genérico.
+  // `absolute` porque a marca já está na mensagem; sem isso o template do
+  // layout raiz ("%s | Rio für Deutsche") duplicaria o sufixo.
+  const name = proposal?.client_name?.trim();
+  const title = name ? t('metaTitleNamed', { name }) : t('metaTitle');
+  const description = t('metaDescription');
   return {
-    title: t('metaTitle'),
-    description: t('metaDescription'),
+    title: { absolute: title },
+    description,
     robots: { index: false, follow: false },
+    // Preview do link no WhatsApp: title personalizado + arte da marca.
+    // A URL relativa vira absoluta via metadataBase do layout raiz.
+    openGraph: {
+      title,
+      description,
+      siteName: 'Rio für Deutsche',
+      images: [{ url: '/og/proposal.jpg', width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/og/proposal.jpg'],
+    },
   };
 }

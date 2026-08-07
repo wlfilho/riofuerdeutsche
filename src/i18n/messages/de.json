@@ -52,6 +52,7 @@
     },
     "angebot": {
       "metaTitle": "Ihr Angebot — Rio für Deutsche",
+      "metaTitleNamed": "Angebot für {name} — Rio für Deutsche",
       "metaDescription": "Persönliches Tour-Angebot für Rio de Janeiro.",
       "brand": "Rio für Deutsche",
       "headerTitle": "Angebot für {name}",
