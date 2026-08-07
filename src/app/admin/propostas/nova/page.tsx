@@ -1,4 +1,9 @@
-import { DEFAULT_PROPOSAL_LOCALE, getProposalServices, getTransportTypes } from '@/lib/proposals';
+import {
+  DEFAULT_PROPOSAL_LOCALE,
+  getProposalServiceGroups,
+  getProposalServices,
+  getTransportTypes,
+} from '@/lib/proposals';
 import { getDefaultClientLocale, getSupportedLocales } from '@/lib/services-i18n';
 import { getSettings } from '@/lib/settings';
 import { createClient } from '@/utils/supabase/server';
@@ -54,8 +59,9 @@ export default async function NovaPropostaPage({
 
   // O catálogo já vem resolvido no idioma pré-selecionado; trocar o idioma no
   // builder recarrega a página para que os textos acompanhem.
-  const [services, transportTypes, settings] = await Promise.all([
+  const [services, serviceGroups, transportTypes, settings] = await Promise.all([
     getProposalServices(initialLocale),
+    getProposalServiceGroups(),
     getTransportTypes(),
     getSettings(),
   ]);
@@ -74,6 +80,7 @@ export default async function NovaPropostaPage({
   return (
     <NovaPropostaForm
       services={services}
+      serviceGroups={serviceGroups}
       transportTypes={transportTypes}
       defaultGuideRate={settings.guide_rate_eur}
       defaultExchangeRate={settings.default_exchange_rate}

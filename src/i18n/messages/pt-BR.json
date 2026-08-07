@@ -602,7 +602,10 @@
       "horasVezesTaxa": "{horas}h × {taxa} EUR/h",
       "marcadoEntraPreco": "Marcado: entra no preço da proposta. Desmarcado: cliente paga no local (valor exibido na proposta).",
       "remarcarDia": "Remarcar dia",
-      "diaJaExiste": "Já existe um dia em {data} nesta proposta. Escolha outra data ou mova os serviços manualmente."
+      "diaJaExiste": "Já existe um dia em {data} nesta proposta. Escolha outra data ou mova os serviços manualmente.",
+      "gruposSecao": "Grupos",
+      "grupoAdicionaTodas": "Adiciona todas as atividades do grupo ao dia",
+      "grupoAtividadesCount": "{count, plural, one {# atividade} other {# atividades}}"
     },
     "atividades": {
       "breadcrumb": "Atividades",
@@ -693,6 +696,30 @@
         "fixed": "Fixo",
         "per_pax": "Por pessoa",
         "per_hour": "Por hora"
+      },
+      "grupos": {
+        "titulo": "Grupos de atividades",
+        "hint": "Um grupo pré-monta um roteiro: no builder de propostas, um clique adiciona todas as atividades do grupo ao dia de uma vez.",
+        "novoGrupo": "Novo grupo",
+        "novoGrupoTitulo": "Novo grupo",
+        "editarGrupo": "Editar grupo",
+        "nenhumGrupo": "Nenhum grupo criado ainda.",
+        "criarPrimeiro": "Criar primeiro grupo",
+        "nomeCampo": "Nome",
+        "nomePlaceholder": "Ex.: Tour clássico Zona Sul",
+        "nomeObrigatorio": "Dê um nome ao grupo.",
+        "atividadesDoGrupo": "Atividades do grupo",
+        "atividadesCount": "{count, plural, one {# atividade} other {# atividades}}",
+        "semAtividades": "Adicione pelo menos uma atividade ao grupo.",
+        "semAtividadesDica": "Nenhuma atividade ainda — adicione pela lista abaixo.",
+        "adicionarAtividades": "Adicionar atividades",
+        "buscarAtividade": "Buscar atividade…",
+        "nenhumaEncontrada": "Nenhuma atividade encontrada.",
+        "atividadeInativa": "inativa",
+        "moverCima": "Mover para cima",
+        "moverBaixo": "Mover para baixo",
+        "excluirGrupo": "Excluir grupo",
+        "temCertezaGrupo": "Tem certeza? <strong>{nome}</strong> será excluído. Propostas existentes não são afetadas."
       }
     },
     "transportes": {
