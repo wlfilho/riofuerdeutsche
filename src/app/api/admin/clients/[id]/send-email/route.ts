@@ -1,8 +1,14 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { applyShortcodes } from '@/types/email-templates'
-import { formatEuro } from '@/lib/email-templates/utils'
+import {
+  formatEmailCurrency,
+  formatEmailDate,
+  formatTourDetailsHtml,
+  getEmailTemplate,
+  getRecipientLocale,
+  renderTemplate,
+} from '@/lib/email/render'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -16,24 +22,6 @@ async function verifyAdmin() {
     .eq('id', user.id)
     .single()
   return { authorized: profile?.role === 'admin', supabase }
-}
-
-function formatTourDetails(raw: string): string {
-  if (!raw) return ''
-  const lines = raw.split(/•|\n/).map(l => l.trim()).filter(l => l.length > 0)
-  if (lines.length === 0) return raw
-  return lines.map(line => `<span style="display:block;padding:3px 0;font-weight:normal;">• ${line}</span>`).join('')
-}
-
-function formatDate(dateStr: string): string {
-  if (!dateStr) return ''
-  const [year, month, day] = dateStr.split('-')
-  if (!day) return dateStr
-  return `${day}.${month}.${year}`
-}
-
-function formatCurrency(value: number | null): string {
-  return formatEuro(value)
 }
 
 export async function POST(
@@ -50,18 +38,7 @@ export async function POST(
     return NextResponse.json({ error: 'template_slug é obrigatório.' }, { status: 400 })
   }
 
-  // 1. Buscar template
-  const { data: template, error: templateError } = await supabase
-    .from('email_templates')
-    .select('subject, html_body, name')
-    .eq('slug', template_slug)
-    .single()
-
-  if (templateError || !template) {
-    return NextResponse.json({ error: 'Template não encontrado.' }, { status: 404 })
-  }
-
-  // 2. Buscar cliente
+  // 1. Buscar cliente (antes do template: o locale dele decide a variante)
   const { data: client, error: clientError } = await supabase
     .from('tour_clients')
     .select('*')
@@ -70,6 +47,14 @@ export async function POST(
 
   if (clientError || !client) {
     return NextResponse.json({ error: 'Cliente não encontrado.' }, { status: 404 })
+  }
+
+  // 2. Resolver template por (slug, locale) com cascata
+  const locale = await getRecipientLocale(client.email)
+  const template = await getEmailTemplate(template_slug, locale)
+
+  if (!template) {
+    return NextResponse.json({ error: 'Template não encontrado.' }, { status: 404 })
   }
 
   // 3. Buscar assinatura
@@ -83,16 +68,16 @@ export async function POST(
   const replacements = {
     nome: client.name,
     email: client.email,
-    data_chegada: formatDate(client.arrival_date),
-    data_saida: formatDate(client.departure_date),
-    tour: formatTourDetails(client.tour_details ?? ''),
-    betrag_total: formatCurrency(client.total_amount),
-    anzahlung: formatCurrency(client.deposit_amount),
+    data_chegada: formatEmailDate(client.arrival_date, locale),
+    data_saida: formatEmailDate(client.departure_date, locale),
+    tour: formatTourDetailsHtml(client.tour_details ?? ''),
+    betrag_total: formatEmailCurrency(client.total_amount, locale),
+    anzahlung: formatEmailCurrency(client.deposit_amount, locale),
     assinatura: sigData?.value ?? 'Viele Grüße aus Rio,',
   }
 
-  const subject = applyShortcodes(template.subject, replacements)
-  const html = applyShortcodes(template.html_body, replacements)
+  const subject = renderTemplate(template.subject, replacements)
+  const html = renderTemplate(template.html_body, replacements)
 
   // 5. Enviar via Resend
   let resendId: string | null = null
@@ -118,12 +103,20 @@ export async function POST(
     errorMessage = err.message || String(err)
   }
 
-  // 6. Inserir no log
+  // 6. Fase da sequência quando o slug pertence a ela (envio manual avulso fica sem fase)
+  const { data: def } = await supabase
+    .from('email_sequence_definition')
+    .select('phase')
+    .eq('template_slug', template_slug)
+    .maybeSingle()
+
+  // 7. Inserir no log
   const { data: log, error: logError } = await supabase
     .from('email_sequence_log')
     .insert({
       client_id: clientId,
       template_slug: template_slug,
+      phase: def?.phase ?? null,
       email_name: template.name,
       status,
       sent_at: status === 'sent' ? new Date().toISOString() : null,

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import { sendTourEmail, TourClient } from '@/lib/email-templates'
+import { EMAIL_NUMBER_TO_SLUG, EMAIL_SEQUENCE, type SequenceEmailNumber } from '@/lib/tour-email-scheduler'
+import { sendTourSequenceEmail, type TourSequenceClient } from '@/lib/email/sendTourSequenceEmail'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,6 +28,8 @@ export async function GET(request: Request) {
         arrival_date,
         departure_date,
         tour_details,
+        total_amount,
+        deposit_amount,
         status
       )
     `)
@@ -50,26 +53,40 @@ export async function GET(request: Request) {
       arrival_date: string
       departure_date: string
       tour_details: string | null
+      total_amount: number | null
+      deposit_amount: number | null
       status: string
     }
 
-    const client: TourClient = {
+    const client: TourSequenceClient = {
       name: clientData.name,
       email: clientData.email,
       arrival_date: clientData.arrival_date,
       departure_date: clientData.departure_date,
       tour_details: clientData.tour_details ?? undefined,
+      total_amount: clientData.total_amount ?? null,
+      deposit_amount: clientData.deposit_amount ?? null,
     }
 
-    const emailNum = log.email_number as 1 | 2 | 3 | 4
-    const result = await sendTourEmail(emailNum, client)
+    const emailNum = log.email_number as SequenceEmailNumber
+    const result = await sendTourSequenceEmail(emailNum, log.client_id, client)
+
+    // Identidade do template gravada em todo caminho de envio — logs antigos
+    // por número puro são o que o backfill teve que consertar.
+    const templateSlug = EMAIL_NUMBER_TO_SLUG[emailNum] ?? null
+    const phase = EMAIL_SEQUENCE.find((e) => e.number === emailNum)?.phase ?? null
 
     if ('error' in result) {
       errors++
       console.error(`[cron] Fehler bei E-Mail #${emailNum} für ${client.email}:`, result.error)
       await supabaseAdmin
         .from('email_sequence_log')
-        .update({ status: 'error', error_message: result.error })
+        .update({
+          status: 'error',
+          error_message: result.error,
+          template_slug: templateSlug,
+          phase,
+        })
         .eq('id', log.id)
     } else {
       sent++
@@ -81,6 +98,8 @@ export async function GET(request: Request) {
           sent_at: new Date().toISOString(),
           resend_id: result.id,
           error_message: null,
+          template_slug: templateSlug,
+          phase,
         })
         .eq('id', log.id)
     }

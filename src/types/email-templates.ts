@@ -1,6 +1,9 @@
+import { renderTemplate } from '@/lib/email/render'
+
 export type EmailTemplate = {
   id: string
   slug: string
+  locale: string
   name: string
   subject: string
   html_body: string
@@ -30,16 +33,9 @@ export const SHORTCODES: { key: ShortcodeKey; label: string; example: string }[]
   { key: 'assinatura', label: 'Assinatura', example: '<p>Bis bald in Rio!<br>Will</p>' },
 ]
 
-export function applyShortcodes(
-  html: string,
-  data: Partial<Record<ShortcodeKey, string>>
-): string {
-  return html.replace(/\{\{(\w+)\}\}/g, (_, key) => data[key as ShortcodeKey] ?? `{{${key}}}`)
-}
-
 export function applyExampleShortcodes(html: string): string {
   const exampleData = Object.fromEntries(
     SHORTCODES.map(({ key, example }) => [key, example])
   ) as Record<ShortcodeKey, string>
-  return applyShortcodes(html, exampleData)
+  return renderTemplate(html, exampleData)
 }

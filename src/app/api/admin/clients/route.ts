@@ -98,6 +98,8 @@ export async function POST(request: NextRequest) {
     client_id: client.id,
     email_number: item.number,
     email_name: item.name,
+    template_slug: item.slug,
+    phase: item.phase,
     scheduled_date: item.date.toISOString().split('T')[0],
     status: item.status,
   }))

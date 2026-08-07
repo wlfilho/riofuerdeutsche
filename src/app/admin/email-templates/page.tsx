@@ -1,14 +1,16 @@
 import { getAdminTranslations } from '@/i18n/admin'
 import { getEmailTemplates } from '@/app/actions/email-templates'
 import { getEmailSignature } from '@/app/actions/email-signature'
+import { getSupportedLocales } from '@/lib/services-i18n'
 import EmailTemplateList from '@/components/admin/EmailTemplateList'
 import EmailSignatureEditor from '@/components/admin/EmailSignatureEditor'
 
 export default async function EmailTemplatesPage() {
   const t = await getAdminTranslations('admin.emailTemplates')
-  const [templates, signature] = await Promise.all([
+  const [templates, signature, supportedLocales] = await Promise.all([
     getEmailTemplates(),
     getEmailSignature(),
+    getSupportedLocales(),
   ])
 
   return (
@@ -22,7 +24,7 @@ export default async function EmailTemplatesPage() {
 
       <h2 className="text-base font-semibold text-gray-700 mb-4">{t('templates')}</h2>
 
-      <EmailTemplateList initialTemplates={templates} />
+      <EmailTemplateList initialTemplates={templates} supportedLocales={supportedLocales} />
 
       <hr className="border-gray-100 my-10" />
 

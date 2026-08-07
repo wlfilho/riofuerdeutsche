@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { adminWhatsAppNumbers, sendWhatsAppText } from '@/lib/uazapi';
-import { EMAIL_LOCALE } from '@/lib/email-templates/utils';
+import { DEFAULT_EMAIL_LOCALE as EMAIL_LOCALE } from '@/lib/email/render';
 
 const VALID_SOURCES = ['whatsapp', 'email', 'instagram'] as const;
 
