@@ -17,8 +17,14 @@ import { useEffect } from 'react';
  * repetidas — visitantes distintos ≈ link compartilhado) e session_id por
  * carregamento de página.
  *
- * Não rastreia: admin logado (a API responde disabled:true no open) e
- * navegação vinda do próprio /admin (referrer da mesma origem).
+ * Não rastreia:
+ *   - admin logado (a API responde disabled:true no open);
+ *   - navegação vinda do próprio /admin (referrer da mesma origem);
+ *   - navegador automatizado (navigator.webdriver — IA abrindo o link; a API
+ *     ainda barra por user-agent como segunda camada);
+ *   - aparelho marcado com ?notrack=1: abrir o link uma vez com esse parâmetro
+ *     grava a marca em localStorage e nenhuma visita futura no aparelho conta
+ *     (pro celular do Will, onde não há sessão de admin).
  */
 
 const PING_INTERVAL_MS = 20_000;
@@ -45,6 +51,19 @@ export default function ProposalTracker({ token, locale }: { token: string; loca
   useEffect(() => {
     // Will abrindo o link a partir do admin: não conta como visualização.
     if (document.referrer.includes(`${location.origin}/admin`)) return;
+
+    // IA/robô navegando o link com browser automatizado: não conta.
+    if (navigator.webdriver) return;
+
+    // Aparelho marcado como do Will (?notrack=1 uma vez, marca persistente).
+    try {
+      if (new URLSearchParams(location.search).get('notrack') === '1') {
+        localStorage.setItem('rfd_no_track', '1');
+      }
+      if (localStorage.getItem('rfd_no_track') === '1') return;
+    } catch {
+      // storage bloqueado: segue rastreando normalmente
+    }
 
     let disabled = false;
     // A resposta do 'open' decide se a sessão é de admin (disabled). Até ela
