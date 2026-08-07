@@ -39,13 +39,15 @@ export async function proposalMetadata(
       title,
       description,
       siteName: 'Rio für Deutsche',
-      images: [{ url: '/og/proposal.jpg', width: 1200, height: 630 }],
+      // ?v= força os apps de mensagem a rebuscarem quando a imagem muda —
+      // eles cacheiam o preview pela URL. Incrementar a cada troca de arte.
+      images: [{ url: '/og/proposal.jpg?v=2', width: 1024, height: 541 }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/og/proposal.jpg'],
+      images: ['/og/proposal.jpg?v=2'],
     },
   };
 }
