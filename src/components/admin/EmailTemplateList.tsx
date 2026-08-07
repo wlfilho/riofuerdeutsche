@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Send, Loader2 } from 'lucide-react'
+import { Send, Loader2, Plus } from 'lucide-react'
 import {
   DndContext,
   closestCenter,
@@ -20,7 +21,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { EmailTemplate } from '@/types/email-templates'
-import { updateEmailTemplatesOrder } from '@/app/actions/email-templates'
+import { updateEmailTemplatesOrder, duplicateEmailTemplate } from '@/app/actions/email-templates'
 import { fmtDateTime } from '@/lib/adminFormat'
 
 // Valores gravados na coluna `category` do banco — o casamento é feito contra
@@ -42,13 +43,26 @@ const CATEGORY_COLORS: Record<Category, { bg: string; text: string; border: stri
   'Sistema':   { bg: 'bg-gray-50',   text: 'text-gray-600',   border: 'border-gray-200'  },
 }
 
-function SortableTemplateCard({ template }: { template: EmailTemplate }) {
+/** Rótulo curto do locale nos chips/badges: 'pt-BR' → 'PT', 'de' → 'DE'. */
+function localeShort(locale: string): string {
+  return locale.split('-')[0].toUpperCase()
+}
+
+function SortableTemplateCard({
+  template,
+  missingLocales,
+}: {
+  template: EmailTemplate
+  missingLocales: string[]
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: template.id,
   })
+  const router = useRouter()
   const t = useTranslations('admin.emailTemplates')
   const tCommon = useTranslations('admin.common')
   const [sending, setSending] = useState(false)
+  const [duplicating, setDuplicating] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
   const handleTestSend = async () => {
@@ -58,7 +72,7 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
       const res = await fetch('/api/email-templates/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: template.slug }),
+        body: JSON.stringify({ slug: template.slug, locale: template.locale }),
       })
       const data = await res.json()
       if (data.success) {
@@ -71,6 +85,25 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
       alert(tCommon('erroPrefixo', { mensagem: err.message }))
     } finally {
       setSending(false)
+    }
+  }
+
+  const handleDuplicate = async (toLocale: string) => {
+    setDuplicating(toLocale)
+    setToast(null)
+    try {
+      const result = await duplicateEmailTemplate(template.slug, template.locale, toLocale)
+      if (result.success) {
+        setToast(t('varianteCriada', { locale: localeShort(toLocale) }))
+        setTimeout(() => setToast(null), 3000)
+        router.refresh()
+      } else {
+        alert(tCommon('erroPrefixo', { mensagem: result.error ?? '' }))
+      }
+    } catch (err: any) {
+      alert(tCommon('erroPrefixo', { mensagem: err.message }))
+    } finally {
+      setDuplicating(null)
     }
   }
 
@@ -110,6 +143,25 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
           <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded font-mono shrink-0">
             {template.slug}
           </span>
+          <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded font-semibold shrink-0">
+            {localeShort(template.locale)} ✓
+          </span>
+          {missingLocales.map((locale) => (
+            <button
+              key={locale}
+              onClick={() => handleDuplicate(locale)}
+              disabled={duplicating !== null}
+              title={t('criarVariante', { locale: localeShort(locale) })}
+              className="text-xs bg-white text-gray-400 border border-dashed border-gray-300 px-1.5 py-0.5 rounded font-semibold shrink-0 hover:text-green-700 hover:border-green-400 transition-colors disabled:opacity-50 inline-flex items-center gap-0.5"
+            >
+              {duplicating === locale ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Plus className="w-3 h-3" />
+              )}
+              {localeShort(locale)}
+            </button>
+          ))}
         </div>
         <p className="text-xs text-gray-500 truncate">
           <span className="font-medium text-gray-600">{t('assuntoPrefixo')}</span> {template.subject}
@@ -146,7 +198,7 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
           )}
         </div>
         <Link
-          href={`/admin/email-templates/${template.slug}`}
+          href={`/admin/email-templates/${template.slug}?locale=${template.locale}`}
           className="bg-green-700 hover:bg-green-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           {tCommon('editar')}
@@ -156,18 +208,43 @@ function SortableTemplateCard({ template }: { template: EmailTemplate }) {
   )
 }
 
-export default function EmailTemplateList({ initialTemplates }: { initialTemplates: EmailTemplate[] }) {
+export default function EmailTemplateList({
+  initialTemplates,
+  supportedLocales,
+}: {
+  initialTemplates: EmailTemplate[]
+  supportedLocales: string[]
+}) {
   const t = useTranslations('admin.emailTemplates')
   const tCategorias = useTranslations('admin.emailTemplates.categorias')
   const [templates, setTemplates] = useState(initialTemplates)
+  const [localeFilter, setLocaleFilter] = useState<string>('all')
   const [saving, setSaving] = useState(false)
+
+  // router.refresh() após duplicar variante manda a lista nova via props; sem
+  // isto o estado local (necessário pro drag-and-drop otimista) ficaria velho.
+  useEffect(() => {
+    setTemplates(initialTemplates)
+  }, [initialTemplates])
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
+  // Cobertura por slug — alimenta os badges de variante em falta de cada card.
+  const localesBySlug = new Map<string, Set<string>>()
+  for (const tpl of templates) {
+    if (!localesBySlug.has(tpl.slug)) localesBySlug.set(tpl.slug, new Set())
+    localesBySlug.get(tpl.slug)!.add(tpl.locale)
+  }
+  const missingLocalesFor = (slug: string) =>
+    supportedLocales.filter((locale) => !localesBySlug.get(slug)?.has(locale))
+
+  const visibleTemplates =
+    localeFilter === 'all' ? templates : templates.filter((tpl) => tpl.locale === localeFilter)
+
   const templatesByCategory = (category: string) =>
-    templates
+    visibleTemplates
       .filter((tpl) => tpl.category === category)
-      .sort((a, b) => a.sort_order - b.sort_order)
+      .sort((a, b) => a.sort_order - b.sort_order || a.locale.localeCompare(b.locale))
 
   const handleDragEnd = async (event: DragEndEvent, category: string) => {
     const { active, over } = event
@@ -194,9 +271,26 @@ export default function EmailTemplateList({ initialTemplates }: { initialTemplat
 
   return (
     <div className="space-y-8">
-      {saving && (
-        <p className="text-xs text-gray-400 text-right">{t('salvandoOrdem')}</p>
-      )}
+      <div className="flex items-center justify-between gap-3">
+        <label className="flex items-center gap-2 text-sm text-gray-600">
+          {t('idioma')}
+          <select
+            value={localeFilter}
+            onChange={(e) => setLocaleFilter(e.target.value)}
+            className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="all">{t('todosIdiomas')}</option>
+            {supportedLocales.map((locale) => (
+              <option key={locale} value={locale}>
+                {localeShort(locale)}
+              </option>
+            ))}
+          </select>
+        </label>
+        {saving && (
+          <p className="text-xs text-gray-400 text-right">{t('salvandoOrdem')}</p>
+        )}
+      </div>
 
       {CATEGORIES.map((category) => {
         const items = templatesByCategory(category)
@@ -227,7 +321,11 @@ export default function EmailTemplateList({ initialTemplates }: { initialTemplat
               >
                 <div className="space-y-3">
                   {items.map((template) => (
-                    <SortableTemplateCard key={template.id} template={template} />
+                    <SortableTemplateCard
+                      key={template.id}
+                      template={template}
+                      missingLocales={missingLocalesFor(template.slug)}
+                    />
                   ))}
                 </div>
               </SortableContext>

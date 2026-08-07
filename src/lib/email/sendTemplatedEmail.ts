@@ -1,6 +1,7 @@
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
-import { ShortcodeKey, applyShortcodes } from '@/types/email-templates'
+import { ShortcodeKey } from '@/types/email-templates'
+import { getEmailTemplate, getRecipientLocale, renderTemplate } from './render'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -9,6 +10,8 @@ type SendTemplatedEmailParams = {
   to: string
   data: Partial<Record<ShortcodeKey, string>>
   subjectOverride?: string
+  /** Locale do destinatário; sem ele, resolve por `contacts.locale` do `to`. */
+  locale?: string
 }
 
 export async function sendTemplatedEmail({
@@ -16,21 +19,22 @@ export async function sendTemplatedEmail({
   to,
   data,
   subjectOverride,
+  locale,
 }: SendTemplatedEmailParams): Promise<{ success: boolean; error?: string; id?: string }> {
   try {
-    const supabase = await createClient()
+    const resolvedLocale = locale ?? (await getRecipientLocale(to))
+    const template = await getEmailTemplate(slug, resolvedLocale)
 
-    const { data: template, error: dbError } = await supabase
-      .from('email_templates')
-      .select('subject, html_body')
-      .eq('slug', slug)
-      .single()
-
-    if (dbError || !template) {
+    if (!template) {
       return { success: false, error: `Template "${slug}" não encontrado.` }
     }
 
-    // Buscar assinatura global e injetar se não foi fornecida manualmente
+    // Assinatura global via service role: este caminho também roda sem sessão
+    // (cron), onde a RLS admin-only de site_settings derrubaria a leitura.
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
     const { data: sigData } = await supabase
       .from('site_settings')
       .select('value')
@@ -42,8 +46,8 @@ export async function sendTemplatedEmail({
       ...data, // data do caller sobrescreve se precisar de assinatura customizada
     }
 
-    const subject = applyShortcodes(subjectOverride ?? template.subject, dataWithSignature)
-    const html = applyShortcodes(template.html_body, dataWithSignature)
+    const subject = renderTemplate(subjectOverride ?? template.subject, dataWithSignature)
+    const html = renderTemplate(template.html_body, dataWithSignature)
 
     const { data: resendData, error: sendError } = await resend.emails.send({
       from: 'Will · Rio für Deutsche <will@riofuerdeutsche.de>',

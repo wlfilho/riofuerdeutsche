@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@/utils/supabase/server'
 import { getEmailTemplateBySlug } from '@/app/actions/email-templates'
+import { renderTemplate } from '@/lib/email/render'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -23,13 +24,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { slug, htmlBody, subject } = await request.json()
+    const { slug, htmlBody, subject, locale } = await request.json()
 
     let finalHtml = htmlBody
     let finalSubject = subject
 
     if (slug && (!htmlBody || !subject)) {
-      const template = await getEmailTemplateBySlug(slug)
+      const template = await getEmailTemplateBySlug(slug, locale)
       if (!template) {
         return NextResponse.json({ success: false, error: 'Template not found' }, { status: 404 })
       }
@@ -52,10 +53,7 @@ export async function POST(request: Request) {
       assinatura: 'Viele Grüße aus Rio,',
     }
 
-    let replacedHtml = finalHtml
-    for (const [key, value] of Object.entries(testData)) {
-      replacedHtml = replacedHtml.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value)
-    }
+    const replacedHtml = renderTemplate(finalHtml, testData)
 
     const emailSubject = `[TEST] ${finalSubject}`
 

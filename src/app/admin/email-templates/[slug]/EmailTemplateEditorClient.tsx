@@ -134,7 +134,7 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
   const handleSave = async () => {
     setSaving(true)
     setError(null)
-    const result = await saveEmailTemplate(template.slug, subject, htmlBody)
+    const result = await saveEmailTemplate(template.slug, template.locale, subject, htmlBody)
     setSaving(false)
     if (result.success) {
       setSaved(true)
@@ -181,7 +181,7 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
       const res = await fetch('/api/email-templates/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: template.slug, subject, htmlBody }),
+        body: JSON.stringify({ slug: template.slug, locale: template.locale, subject, htmlBody }),
       })
       const data = await res.json()
       if (data.success) {
@@ -207,6 +207,9 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
         <span className="text-gray-300">/</span>
         <h1 className="text-xl font-bold text-gray-900">{template.name}</h1>
         <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-mono">{template.slug}</span>
+        <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
+          {template.locale.split('-')[0].toUpperCase()}
+        </span>
         {template.category && (
           <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
             {template.category}

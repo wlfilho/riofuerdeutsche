@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@/utils/supabase/server'
-import { getEmailTemplateBySlug } from '@/app/actions/email-templates'
-import { formatEuro } from '@/lib/email-templates/utils'
+import {
+  formatEmailCurrency,
+  formatEmailDate,
+  getEmailTemplate,
+  getRecipientLocale,
+  renderTemplate,
+} from '@/lib/email/render'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -40,12 +45,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Cliente não encontrado.' }, { status: 404 })
     }
 
-    // Resolver template
+    const locale = await getRecipientLocale(client.email)
+
+    // Resolver template — o editor pode mandar conteúdo não salvo (htmlBody/subject)
     let finalHtml = htmlBody
     let finalSubject = subject
 
     if (slug && (!htmlBody || !subject)) {
-      const template = await getEmailTemplateBySlug(slug)
+      const template = await getEmailTemplate(slug, locale)
       if (!template) {
         return NextResponse.json({ error: 'Template not found.' }, { status: 404 })
       }
@@ -57,37 +64,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Conteúdo do template em falta.' }, { status: 400 })
     }
 
-    // Formatar datas e valores
-    const formatDate = (iso: string) => {
-      if (!iso) return ''
-      const [y, m, d] = iso.split('-')
-      return `${d}.${m}.${y}`
-    }
-
     // null/undefined continuam virando string vazia (não "0,00 €"), como antes.
     const formatAmount = (val: number | null) => {
       if (val === null || val === undefined) return ''
-      return formatEuro(val)
+      return formatEmailCurrency(val, locale)
     }
 
     const shortcodeData: Record<string, string> = {
       nome: client.name,
       email: client.email,
       tour: client.tour_details ?? '',
-      data_chegada: formatDate(client.arrival_date),
-      data_saida: formatDate(client.departure_date),
+      data_chegada: formatEmailDate(client.arrival_date, locale),
+      data_saida: formatEmailDate(client.departure_date, locale),
       anzahlung: formatAmount(client.deposit_amount),
       betrag_total: formatAmount(client.total_amount),
       assinatura: 'Viele Grüße aus Rio,',
     }
 
-    let replacedHtml = finalHtml
-    let replacedSubject = finalSubject
-    for (const [key, value] of Object.entries(shortcodeData)) {
-      const re = new RegExp(`\\{\\{${key}\\}\\}`, 'g')
-      replacedHtml = replacedHtml.replace(re, value)
-      replacedSubject = replacedSubject.replace(re, value)
-    }
+    const replacedHtml = renderTemplate(finalHtml, shortcodeData)
+    const replacedSubject = renderTemplate(finalSubject, shortcodeData)
 
     const { error } = await resend.emails.send({
       from: 'Rio für Deutsche <noreply@riofuerdeutsche.de>',

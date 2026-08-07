@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { sendTourEmail } from '@/lib/email-templates'
-import { sendConfirmationEmail } from '@/lib/email/sendConfirmationEmail'
+import { EMAIL_NUMBER_TO_SLUG, EMAIL_SEQUENCE, type SequenceEmailNumber } from '@/lib/tour-email-scheduler'
+import { sendTourSequenceEmail } from '@/lib/email/sendTourSequenceEmail'
 
 async function verifyAdmin() {
   const supabase = await createClient()
@@ -53,37 +53,22 @@ export async function POST(
 
   if (clientError) return NextResponse.json({ error: clientError.message }, { status: 500 })
 
-  // Enviar via template
-  let resendId: string | null = null
-  let sendError: string | null = null
+  // Enviar via template resolvido do banco por (slug, locale do destinatário)
+  const emailNum = log.email_number as SequenceEmailNumber
+  const result = await sendTourSequenceEmail(emailNum, log.client_id, {
+    name: client.name,
+    email: client.email,
+    arrival_date: client.arrival_date,
+    departure_date: client.departure_date,
+    tour_details: client.tour_details ?? undefined,
+    total_amount: client.total_amount ?? null,
+    deposit_amount: client.deposit_amount ?? null,
+  })
 
-  const emailNum = log.email_number as 1 | 2 | 3 | 4
-  
-  if (emailNum === 1) {
-    try {
-      const result = await sendConfirmationEmail(log.client_id)
-      resendId = result.id || null
-    } catch (error: any) {
-      sendError = error.message
-    }
-  } else {
-    const result = await sendTourEmail(emailNum, {
-      name: client.name,
-      email: client.email,
-      arrival_date: client.arrival_date,
-      departure_date: client.departure_date,
-      tour_details: client.tour_details ?? undefined,
-      total_amount: client.total_amount ?? null,
-      deposit_amount: client.deposit_amount ?? null,
-    })
-    if ('error' in result) {
-      sendError = result.error
-    } else {
-      resendId = result.id || null
-    }
-  }
+  const sendError = 'error' in result ? result.error : null
+  const resendId = 'id' in result ? result.id || null : null
 
-  // Atualizar o log
+  // Atualizar o log — sempre gravando a identidade do template
   const { error: updateError } = await supabase
     .from('email_sequence_log')
     .update({
@@ -91,6 +76,8 @@ export async function POST(
       sent_at: sendError ? null : new Date().toISOString(),
       resend_id: resendId,
       error_message: sendError,
+      template_slug: EMAIL_NUMBER_TO_SLUG[emailNum] ?? log.template_slug,
+      phase: EMAIL_SEQUENCE.find((e) => e.number === emailNum)?.phase ?? log.phase,
     })
     .eq('id', email_log_id)
 
