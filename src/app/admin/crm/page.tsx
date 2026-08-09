@@ -26,6 +26,8 @@ export interface CrmLead {
   proposal_id: string | null;
   requested_days: string[] | null;
   notes: string | null;
+  campaign: string | null;
+  campaign_data: unknown;
   created_at: string;
   updated_at: string;
 }

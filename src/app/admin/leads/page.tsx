@@ -26,6 +26,8 @@ export interface Lead {
   proposal_id: string | null;
   notes: string | null;
   claude_chat_url: string | null;
+  campaign: string | null;
+  campaign_data: unknown;
   created_at: string;
   updated_at: string;
 }
@@ -33,7 +35,7 @@ export interface Lead {
 export default async function LeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; source?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; source?: string; campaign?: string; q?: string }>;
 }) {
   const params = await searchParams;
   const t = await getAdminTranslations('admin.crm');
@@ -58,6 +60,11 @@ export default async function LeadsPage({
   let filtered = allLeads;
   if (params.status) filtered = filtered.filter(l => l.status === params.status);
   if (params.source) filtered = filtered.filter(l => l.source === params.source);
+  if (params.campaign) {
+    filtered = filtered.filter(l =>
+      params.campaign === 'none' ? !l.campaign : l.campaign === params.campaign
+    );
+  }
   if (params.q) {
     const q = params.q.toLowerCase();
     filtered = filtered.filter(
@@ -108,6 +115,7 @@ export default async function LeadsPage({
           filteredLeads={filtered}
           currentStatus={params.status}
           currentSource={params.source}
+          currentCampaign={params.campaign}
           currentQ={params.q}
         />
       </div>

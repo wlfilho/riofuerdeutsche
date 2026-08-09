@@ -5,6 +5,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { useTranslations } from 'next-intl';
 import SourceBadge from './SourceBadge';
+import CampaignBadge from './CampaignBadge';
 import { fmtDate } from '@/lib/adminFormat';
 import type { Lead } from '../page';
 
@@ -27,7 +28,10 @@ export function KanbanCardContent({ lead, isDragging = false }: { lead: Lead; is
         >
           {lead.name}
         </Link>
-        <SourceBadge source={lead.source} />
+        <div className="flex flex-col items-end gap-1">
+          <SourceBadge source={lead.source} />
+          <CampaignBadge campaign={lead.campaign} />
+        </div>
       </div>
 
       {/* Email */}

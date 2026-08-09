@@ -14,6 +14,7 @@ type Props = {
   filteredLeads: Lead[];
   currentStatus?: string;
   currentSource?: string;
+  currentCampaign?: string;
   currentQ?: string;
 };
 
@@ -22,6 +23,7 @@ export default function LeadsViewWrapper({
   filteredLeads,
   currentStatus,
   currentSource,
+  currentCampaign,
   currentQ,
 }: Props) {
   const [view, setView] = useState<LeadsView>('table');
@@ -45,6 +47,7 @@ export default function LeadsViewWrapper({
           <LeadFilters
             currentStatus={currentStatus}
             currentSource={currentSource}
+            currentCampaign={currentCampaign}
             currentQ={currentQ}
             hideStatus={view === 'kanban'}
           />

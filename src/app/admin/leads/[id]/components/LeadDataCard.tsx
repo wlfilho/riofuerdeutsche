@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import SourceBadge from '../../components/SourceBadge';
+import CampaignBadge from '../../components/CampaignBadge';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
 import type { Lead } from '../../page';
 
@@ -119,6 +120,12 @@ export default function LeadDataCard({ lead }: { lead: Lead }) {
         <Row label={tCommon('origem')}>
           <SourceBadge source={lead.source} />
         </Row>
+
+        {lead.campaign && (
+          <Row label={t('campanha')}>
+            <CampaignBadge campaign={lead.campaign} />
+          </Row>
+        )}
 
         <Row label={t('criadoEm')}>{fmtDate(lead.created_at)}</Row>
 

@@ -3,10 +3,12 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useTransition, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { CAMPAIGN_LIST } from '@/lib/campaigns';
 
 type Props = {
   currentStatus?: string;
   currentSource?: string;
+  currentCampaign?: string;
   currentQ?: string;
   hideStatus?: boolean;
 };
@@ -18,7 +20,13 @@ const SOURCE_VALUES = ['calculator', 'email', 'whatsapp', 'instagram', 'referral
 const SELECT_CLS =
   'px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent';
 
-export default function LeadFilters({ currentStatus = '', currentSource = '', currentQ = '', hideStatus = false }: Props) {
+export default function LeadFilters({
+  currentStatus = '',
+  currentSource = '',
+  currentCampaign = '',
+  currentQ = '',
+  hideStatus = false,
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -52,7 +60,7 @@ export default function LeadFilters({ currentStatus = '', currentSource = '', cu
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);
 
-  const hasFilters = (!hideStatus && currentStatus) || currentSource || currentQ;
+  const hasFilters = (!hideStatus && currentStatus) || currentSource || currentCampaign || currentQ;
 
   return (
     <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -107,6 +115,21 @@ export default function LeadFilters({ currentStatus = '', currentSource = '', cu
             {tSource(value)}
           </option>
         ))}
+      </select>
+
+      {/* Campanha */}
+      <select
+        value={currentCampaign}
+        onChange={e => push({ campaign: e.target.value })}
+        className={SELECT_CLS}
+      >
+        <option value="">{t('todasCampanhas')}</option>
+        {CAMPAIGN_LIST.map(campaign => (
+          <option key={campaign.slug} value={campaign.slug}>
+            {campaign.label}
+          </option>
+        ))}
+        <option value="none">{t('semCampanha')}</option>
       </select>
 
       {/* Clear filters */}

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import StatusBadge from './StatusBadge';
 import SourceBadge from './SourceBadge';
+import CampaignBadge from './CampaignBadge';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
 import type { Lead } from '../page';
 
@@ -184,7 +185,10 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
 
                   {/* Origem */}
                   <td className="px-4 py-3">
-                    <SourceBadge source={lead.source} />
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <SourceBadge source={lead.source} />
+                      <CampaignBadge campaign={lead.campaign} />
+                    </div>
                   </td>
 
                   {/* Status */}
