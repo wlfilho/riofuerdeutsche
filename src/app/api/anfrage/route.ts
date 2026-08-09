@@ -62,10 +62,6 @@ function buildCampaignData(campaign: Campaign, body: Record<string, unknown>): C
   const interests = campaign.interests.filter(id => rawInterests.includes(id));
   const childrenAges =
     typeof body.childrenAges === 'string' ? body.childrenAges.trim().slice(0, 100) : '';
-  const preferredDay =
-    typeof body.preferredDay === 'string' && campaign.fixedDays.includes(body.preferredDay)
-      ? body.preferredDay
-      : '';
   const phoneCountry = PHONE_COUNTRY_CODES.includes(body.phoneCountry as PhoneCountry)
     ? (body.phoneCountry as PhoneCountry)
     : undefined;
@@ -73,7 +69,6 @@ function buildCampaignData(campaign: Campaign, body: Record<string, unknown>): C
   return {
     ...(interests.length > 0 && { interests }),
     ...(childrenAges && { children_ages: childrenAges }),
-    ...(preferredDay && { preferred_day: preferredDay }),
     ...(phoneCountry && { phone_country: phoneCountry }),
     consent_at: new Date().toISOString(),
   };
@@ -222,7 +217,6 @@ export async function POST(request: NextRequest) {
   // mensagens que realmente importam.
   if (campaign && !isReturning) {
     try {
-      const germanDays = campaign.fixedDays.map(formatGermanDay).join(' und ');
       const paxLabelDe =
         `${pax} ${pax === 1 ? 'Erwachsener' : 'Erwachsene'}` +
         (children > 0 ? ` + ${children} ${children === 1 ? 'Kind' : 'Kinder'}` : '');
@@ -234,9 +228,7 @@ export async function POST(request: NextRequest) {
         data: {
           nome: name.trim().split(' ')[0],
           email,
-          hafentage: campaignData?.preferred_day
-            ? formatGermanDay(campaignData.preferred_day)
-            : germanDays,
+          termin: campaign.fixedDays.map(formatGermanDay).join(' und '),
           pax: paxLabelDe,
           interessen:
             (campaignData?.interests ?? []).map(interestLabelDe).join(', ') || '—',
@@ -268,7 +260,6 @@ export async function POST(request: NextRequest) {
         <p>
           <strong>Campanha:</strong> ${escapeHtml(campaign.label)}<br/>
           <strong>Interesses:</strong> ${interestLabels.length > 0 ? escapeHtml(interestLabels.join(', ')) : '—'}<br/>
-          <strong>Dia preferido:</strong> ${campaignData?.preferred_day ? formatGermanDay(campaignData.preferred_day) : 'indiferente'}<br/>
           <strong>Idade das crianças:</strong> ${escapeHtml(campaignData?.children_ages ?? '') || '—'}<br/>
           <strong>Telefone (país):</strong> ${phoneCountry ? escapeHtml(PHONE_COUNTRY_LABELS[phoneCountry]) : '—'}
         </p>
@@ -319,7 +310,6 @@ export async function POST(request: NextRequest) {
       : `🔔 *Nova Anfrage: ${name}*`;
     const campaignBlock = campaign
       ? `🎯 Interesses: ${interestLabels.length > 0 ? interestLabels.join(', ') : '—'}\n` +
-        `📆 Dia preferido: ${campaignData?.preferred_day ? formatGermanDay(campaignData.preferred_day) : 'indiferente'}\n` +
         (campaignData?.children_ages ? `🧒 Idades: ${campaignData.children_ages}\n` : '') +
         (outsideDach ? `⚠️ Telefone fora de DE/AT/CH\n` : '')
       : '';

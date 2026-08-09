@@ -1,6 +1,6 @@
 import { getAdminTranslations } from '@/i18n/admin';
 import { getCampaign, parseCampaignData, PHONE_COUNTRY_LABELS } from '@/lib/campaigns';
-import { fmtDate, fmtDateTime } from '@/lib/adminFormat';
+import { fmtDateTime } from '@/lib/adminFormat';
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -51,10 +51,6 @@ export default async function LeadCampaignCard({
           ) : (
             <span className="text-gray-400 text-xs">—</span>
           )}
-        </Row>
-
-        <Row label={t('diaPreferido')}>
-          {data.preferred_day ? fmtDate(data.preferred_day) : t('diaIndiferente')}
         </Row>
 
         {data.children_ages && (
