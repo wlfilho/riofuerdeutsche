@@ -21,6 +21,10 @@ export type ShortcodeKey =
   | 'anzahlung'
   | 'betrag_total'
   | 'assinatura'
+  // Campanhas de tour em grupo (ver src/lib/campaigns.ts)
+  | 'termin'
+  | 'pax'
+  | 'interessen'
 
 export const SHORTCODES: { key: ShortcodeKey; label: string; example: string }[] = [
   { key: 'nome', label: 'Name des Kunden', example: 'Carsten Padrok' },
@@ -31,6 +35,9 @@ export const SHORTCODES: { key: ShortcodeKey; label: string; example: string }[]
   { key: 'anzahlung', label: 'Anzahlung', example: '150€' },
   { key: 'betrag_total', label: 'Gesamtbetrag', example: '600€' },
   { key: 'assinatura', label: 'Assinatura', example: '<p>Bis bald in Rio!<br>Will</p>' },
+  { key: 'termin', label: 'Termin (Gruppentour)', example: 'Samstag, 26. und Sonntag, 27. Februar 2028' },
+  { key: 'pax', label: 'Personen (Gruppentour)', example: '2 Erwachsene + 1 Kind' },
+  { key: 'interessen', label: 'Interessen (Gruppentour)', example: 'Sambódromo, Zuckerhut & Christusstatue' },
 ]
 
 export function applyExampleShortcodes(html: string): string {

@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import LeadHeader from './components/LeadHeader';
 import LeadDataCard from './components/LeadDataCard';
 import LeadActivities from './components/LeadActivities';
+import LeadCampaignCard from './components/LeadCampaignCard';
 import LeadTourDates from './components/LeadTourDates';
 import LeadStatusCard from './components/LeadStatusCard';
 import LeadContactTimeline from './components/LeadContactTimeline';
@@ -74,6 +75,7 @@ export default async function LeadDetailPage({
           {/* Main column */}
           <div className="lg:col-span-2 space-y-6">
             <LeadDataCard lead={lead} />
+            <LeadCampaignCard campaign={lead.campaign} campaignData={lead.campaign_data} />
             <LeadTourDates
               leadId={lead.id}
               leadName={lead.name}
