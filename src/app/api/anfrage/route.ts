@@ -3,6 +3,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { adminWhatsAppNumbers, sendWhatsAppText } from '@/lib/uazapi';
 import { DEFAULT_EMAIL_LOCALE as EMAIL_LOCALE } from '@/lib/email/render';
+import { sendTemplatedEmail } from '@/lib/email/sendTemplatedEmail';
+import deMessages from '@/i18n/messages/de.json';
+import {
+  getCampaign,
+  PHONE_COUNTRY_CODES,
+  PHONE_COUNTRY_LABELS,
+  type Campaign,
+  type CampaignData,
+  type PhoneCountry,
+} from '@/lib/campaigns';
 
 const VALID_SOURCES = ['whatsapp', 'email', 'instagram'] as const;
 
@@ -35,6 +45,40 @@ function formatGermanDay(iso: string): string {
   }).format(new Date(iso + 'T12:00:00Z'));
 }
 
+/**
+ * Rótulo alemão de um interesse, lido do mesmo catálogo que o formulário usa —
+ * o cliente recebe no e-mail exatamente o texto que marcou na tela, e não há
+ * uma segunda cópia das frases para sair do ar com a primeira.
+ */
+function interestLabelDe(id: string): string {
+  const catalog = (deMessages as { public: { anfrageAida: Record<string, string> } })
+    .public.anfrageAida;
+  return catalog[`interest${id.charAt(0).toUpperCase()}${id.slice(1)}`] ?? id;
+}
+
+/** Interesses e idades só existem no formulário de campanha. */
+function buildCampaignData(campaign: Campaign, body: Record<string, unknown>): CampaignData {
+  const rawInterests = Array.isArray(body.interests) ? body.interests : [];
+  const interests = campaign.interests.filter(id => rawInterests.includes(id));
+  const childrenAges =
+    typeof body.childrenAges === 'string' ? body.childrenAges.trim().slice(0, 100) : '';
+  const preferredDay =
+    typeof body.preferredDay === 'string' && campaign.fixedDays.includes(body.preferredDay)
+      ? body.preferredDay
+      : '';
+  const phoneCountry = PHONE_COUNTRY_CODES.includes(body.phoneCountry as PhoneCountry)
+    ? (body.phoneCountry as PhoneCountry)
+    : undefined;
+
+  return {
+    ...(interests.length > 0 && { interests }),
+    ...(childrenAges && { children_ages: childrenAges }),
+    ...(preferredDay && { preferred_day: preferredDay }),
+    ...(phoneCountry && { phone_country: phoneCountry }),
+    consent_at: new Date().toISOString(),
+  };
+}
+
 export async function POST(request: NextRequest) {
   let body: Record<string, unknown>;
   try {
@@ -48,6 +92,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
+  const campaign = getCampaign(body.campaign);
   const name = typeof body.name === 'string' ? body.name.trim().slice(0, 200) : '';
   const email = typeof body.email === 'string' ? body.email.trim().slice(0, 200) : '';
   const phone = typeof body.phone === 'string' ? body.phone.trim().slice(0, 50) : '';
@@ -70,10 +115,23 @@ export async function POST(request: NextRequest) {
   if (!Number.isInteger(children) || children < 0 || children > 99) {
     return NextResponse.json({ error: 'Bitte gib eine gültige Anzahl an Kindern an.' }, { status: 400 });
   }
-  const days = [...new Set(rawDays.filter(isIsoDate))].sort();
-  if (days.length === 0 || days.length > 30) {
-    return NextResponse.json({ error: 'Bitte wähle mindestens einen Wunschtag aus.' }, { status: 400 });
+
+  // Numa campanha as datas vêm da escala do navio, não do cliente. E como os
+  // dados ficam guardados até o programa estar pronto, o opt-in é obrigatório.
+  let days: string[];
+  if (campaign) {
+    if (body.consent !== true) {
+      return NextResponse.json({ error: 'Bitte bestätige die Einwilligung.' }, { status: 400 });
+    }
+    days = campaign.fixedDays;
+  } else {
+    days = [...new Set(rawDays.filter(isIsoDate))].sort();
+    if (days.length === 0 || days.length > 30) {
+      return NextResponse.json({ error: 'Bitte wähle mindestens einen Wunschtag aus.' }, { status: 400 });
+    }
   }
+
+  const campaignData = campaign ? buildCampaignData(campaign, body) : null;
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -93,25 +151,106 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Etwas ist schiefgelaufen. Bitte versuche es später erneut.' }, { status: 500 });
   }
 
-  const { data: lead, error: leadError } = await supabase
-    .from('price_leads')
-    .insert({
-      name,
-      email,
-      phone: phone || null,
-      pax,
-      children,
-      days: days.length,
-      requested_days: days,
-      source,
-      status: 'new',
-      contact_id: contact.id,
-    })
-    .select('id')
-    .single();
+  const leadFields = {
+    name,
+    email,
+    phone: phone || null,
+    pax,
+    children,
+    days: days.length,
+    requested_days: days,
+    source,
+    contact_id: contact.id,
+    campaign: campaign?.slug ?? null,
+    campaign_data: campaignData,
+  };
 
-  if (leadError) {
-    return NextResponse.json({ error: 'Etwas ist schiefgelaufen. Bitte versuche es später erneut.' }, { status: 500 });
+  // Numa campanha o mesmo interessado costuma reenviar o formulário (mudou o
+  // número de pessoas, achou que não tinha ido). Um lead por pessoa mantém a
+  // lista de divulgação limpa; fora de campanha, cada Anfrage é uma nova.
+  let leadId: string | null = null;
+  if (campaign) {
+    const { data: existing } = await supabase
+      .from('price_leads')
+      .select('id')
+      .eq('email', email)
+      .eq('campaign', campaign.slug)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    leadId = existing?.[0]?.id ?? null;
+  }
+
+  const isReturning = leadId !== null;
+
+  if (leadId) {
+    const { error: updateError } = await supabase
+      .from('price_leads')
+      .update({ ...leadFields, updated_at: new Date().toISOString() })
+      .eq('id', leadId);
+    if (updateError) {
+      return NextResponse.json({ error: 'Etwas ist schiefgelaufen. Bitte versuche es später erneut.' }, { status: 500 });
+    }
+  } else {
+    const { data: lead, error: leadError } = await supabase
+      .from('price_leads')
+      .insert({ ...leadFields, status: 'new' })
+      .select('id')
+      .single();
+    if (leadError) {
+      return NextResponse.json({ error: 'Etwas ist schiefgelaufen. Bitte versuche es später erneut.' }, { status: 500 });
+    }
+    leadId = lead.id;
+  }
+
+  const paxLabel = `${pax} pax${children > 0 ? ` + ${children} criança${children !== 1 ? 's' : ''}` : ''}`;
+  const interestLabels = (campaignData?.interests ?? []).map(
+    id => campaign!.interestLabels[id] ?? id,
+  );
+  // Telefone fora de DE/AT/CH é sinal de negócio, não detalhe de formulário:
+  // significa interesse vindo de fora do público que a campanha assume.
+  const phoneCountry = campaignData?.phone_country;
+  const outsideDach = phoneCountry === 'other';
+  const leadUrl = `https://riofuerdeutsche.de/admin/leads/${leadId}`;
+  const propostaUrl = `https://riofuerdeutsche.de/admin/propostas/nova?lead_id=${leadId}`;
+
+  // Confirmação para o próprio inscrito. Só no primeiro envio: quem reenvia o
+  // formulário está corrigindo dados, não pedindo outro e-mail.
+  //
+  // Vale por si só num tour que é daqui a dois anos: a pessoa fica com o
+  // registro do que pediu, o bounce revela na hora endereço que não existe, e
+  // o convite a responder cria histórico com o provedor dela antes das
+  // mensagens que realmente importam.
+  if (campaign && !isReturning) {
+    try {
+      const germanDays = campaign.fixedDays.map(formatGermanDay).join(' und ');
+      const paxLabelDe =
+        `${pax} ${pax === 1 ? 'Erwachsener' : 'Erwachsene'}` +
+        (children > 0 ? ` + ${children} ${children === 1 ? 'Kind' : 'Kinder'}` : '');
+
+      const sent = await sendTemplatedEmail({
+        slug: 'anfrage_aida_bestaetigung',
+        to: email,
+        locale: EMAIL_LOCALE,
+        data: {
+          nome: name.trim().split(' ')[0],
+          email,
+          hafentage: campaignData?.preferred_day
+            ? formatGermanDay(campaignData.preferred_day)
+            : germanDays,
+          pax: paxLabelDe,
+          interessen:
+            (campaignData?.interests ?? []).map(interestLabelDe).join(', ') || '—',
+        },
+      });
+
+      // sendTemplatedEmail devolve o erro em vez de lançar: sem este log, uma
+      // falha de envio ficaria invisível nos logs da Vercel.
+      if (!sent.success) {
+        console.error('[anfrage] confirmação não enviada:', email, sent.error);
+      }
+    } catch (err) {
+      console.error('[anfrage] confirmação falhou:', email, err);
+    }
   }
 
   // Best-effort admin notification; the lead is saved either way.
@@ -124,13 +263,32 @@ export async function POST(request: NextRequest) {
     const to = settings?.business_email || 'will@riofuerdeutsche.de';
 
     const daysHtml = days.map(d => `<li>${formatGermanDay(d)}</li>`).join('');
+    const campaignHtml = campaign
+      ? `
+        <p>
+          <strong>Campanha:</strong> ${escapeHtml(campaign.label)}<br/>
+          <strong>Interesses:</strong> ${interestLabels.length > 0 ? escapeHtml(interestLabels.join(', ')) : '—'}<br/>
+          <strong>Dia preferido:</strong> ${campaignData?.preferred_day ? formatGermanDay(campaignData.preferred_day) : 'indiferente'}<br/>
+          <strong>Idade das crianças:</strong> ${escapeHtml(campaignData?.children_ages ?? '') || '—'}<br/>
+          <strong>Telefone (país):</strong> ${phoneCountry ? escapeHtml(PHONE_COUNTRY_LABELS[phoneCountry]) : '—'}
+        </p>
+        ${outsideDach
+          ? `<p style="padding:12px;border-radius:8px;background:#fef3c7;color:#78350f">
+              ⚠️ <strong>Este lead informou um telefone fora de DE/AT/CH.</strong>
+              Vale conferir se o tour em grupo em alemão faz sentido para ele.
+            </p>`
+          : ''}`
+      : '';
+
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: 'Rio für Deutsche <will@riofuerdeutsche.de>',
       to,
-      subject: `🔔 Nova solicitação de tour: ${name} (${pax} pax${children > 0 ? ` + ${children} criança${children !== 1 ? 's' : ''}` : ''}, ${days.length} dia${days.length !== 1 ? 's' : ''})`,
+      subject: campaign
+        ? `🚢 ${campaign.label}: ${name} (${paxLabel})${outsideDach ? ' ⚠️ fora do DACH' : ''}`
+        : `🔔 Nova solicitação de tour: ${name} (${paxLabel}, ${days.length} dia${days.length !== 1 ? 's' : ''})`,
       html: `
-        <h2>Nova solicitação pelo formulário Anfrage</h2>
+        <h2>${campaign ? `Novo interessado — ${escapeHtml(campaign.label)}` : 'Nova solicitação pelo formulário Anfrage'}</h2>
         <p>
           <strong>Nome:</strong> ${escapeHtml(name)}<br/>
           <strong>E-Mail:</strong> ${escapeHtml(email)}<br/>
@@ -139,11 +297,13 @@ export async function POST(request: NextRequest) {
           <strong>Crianças:</strong> ${children}<br/>
           <strong>Origem:</strong> ${source}
         </p>
+        ${campaignHtml}
         <p><strong>Dias desejados:</strong></p>
         <ul>${daysHtml}</ul>
         <p>
-          <a href="https://riofuerdeutsche.de/admin/propostas/nova?lead_id=${lead.id}">Criar proposta agora</a> ·
-          <a href="https://riofuerdeutsche.de/admin/crm">Abrir CRM</a>
+          ${campaign
+            ? `<a href="${leadUrl}">Abrir lead</a> · <a href="https://riofuerdeutsche.de/admin/leads?campaign=${campaign.slug}">Ver toda a campanha</a>`
+            : `<a href="${propostaUrl}">Criar proposta agora</a> · <a href="https://riofuerdeutsche.de/admin/crm">Abrir CRM</a>`}
         </p>
       `,
     });
@@ -154,14 +314,24 @@ export async function POST(request: NextRequest) {
   // Best-effort WhatsApp notification via uazapi, independent of the email above.
   try {
     const daysList = days.map(d => `• ${formatGermanDay(d)}`).join('\n');
+    const header = campaign
+      ? `🚢 *${campaign.label}: ${name}*`
+      : `🔔 *Nova Anfrage: ${name}*`;
+    const campaignBlock = campaign
+      ? `🎯 Interesses: ${interestLabels.length > 0 ? interestLabels.join(', ') : '—'}\n` +
+        `📆 Dia preferido: ${campaignData?.preferred_day ? formatGermanDay(campaignData.preferred_day) : 'indiferente'}\n` +
+        (campaignData?.children_ages ? `🧒 Idades: ${campaignData.children_ages}\n` : '') +
+        (outsideDach ? `⚠️ Telefone fora de DE/AT/CH\n` : '')
+      : '';
     const text =
-      `🔔 *Nova Anfrage: ${name}*\n\n` +
+      `${header}\n\n` +
       `👥 ${pax} adulto(s)${children > 0 ? ` + ${children} criança(s)` : ''}\n` +
       `📧 ${email}\n` +
       `📱 ${phone || '—'}\n` +
-      `🏷️ Origem: ${source}\n\n` +
-      `📅 Dias desejados:\n${daysList}\n\n` +
-      `👉 https://riofuerdeutsche.de/admin/propostas/nova?lead_id=${lead.id}`;
+      `🏷️ Origem: ${source}\n` +
+      campaignBlock +
+      `\n📅 Dias:\n${daysList}\n\n` +
+      `👉 ${campaign ? leadUrl : propostaUrl}`;
     await Promise.allSettled(
       adminWhatsAppNumbers().map(n => sendWhatsAppText(n, text)),
     );
