@@ -35,7 +35,7 @@ export const SHORTCODES: { key: ShortcodeKey; label: string; example: string }[]
   { key: 'anzahlung', label: 'Anzahlung', example: '150€' },
   { key: 'betrag_total', label: 'Gesamtbetrag', example: '600€' },
   { key: 'assinatura', label: 'Assinatura', example: '<p>Bis bald in Rio!<br>Will</p>' },
-  { key: 'termin', label: 'Termin (Gruppentour)', example: 'Sonntag, 27. Februar 2028' },
+  { key: 'termin', label: 'Termin (Gruppentour)', example: 'Samstag, 26. und Sonntag, 27. Februar 2028' },
   { key: 'pax', label: 'Personen (Gruppentour)', example: '2 Erwachsene + 1 Kind' },
   { key: 'interessen', label: 'Interessen (Gruppentour)', example: 'Sambódromo, Zuckerhut & Christusstatue' },
 ]

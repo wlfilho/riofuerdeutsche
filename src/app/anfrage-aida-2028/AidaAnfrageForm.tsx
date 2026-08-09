@@ -281,6 +281,7 @@ export default function AidaAnfrageForm({
   const [pax, setPax] = useState(2);
   const [children, setChildren] = useState(0);
   const [childrenAges, setChildrenAges] = useState('');
+  const [preferredDay, setPreferredDay] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
   const [consent, setConsent] = useState(false);
   const [website, setWebsite] = useState(''); // honeypot
@@ -348,6 +349,7 @@ export default function AidaAnfrageForm({
           pax,
           children,
           childrenAges: children > 0 ? childrenAges : '',
+          preferredDay,
           interests,
           consent,
           source,
@@ -654,6 +656,27 @@ export default function AidaAnfrageForm({
                 />
               </Field>
             )}
+          </Section>
+
+          <Section title={t('preferredDayLabel')} hint={t('preferredDayHint')}>
+            <fieldset className="space-y-2.5">
+              <legend className="sr-only">{t('preferredDayLabel')}</legend>
+              {[
+                { value: '', label: t('preferredDayAny') },
+                { value: CAMPAIGN.fixedDays[0], label: t('preferredDay0') },
+                { value: CAMPAIGN.fixedDays[1], label: t('preferredDay1') },
+              ].map(option => (
+                <OptionTile
+                  key={option.value || 'any'}
+                  type="radio"
+                  name="preferredDay"
+                  checked={preferredDay === option.value}
+                  onChange={() => setPreferredDay(option.value)}
+                >
+                  {option.label}
+                </OptionTile>
+              ))}
+            </fieldset>
           </Section>
 
           <Section title={t('interestsLabel')} hint={t('interestsHint')}>

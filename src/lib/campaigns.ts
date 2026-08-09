@@ -16,7 +16,7 @@ export interface Campaign {
   slug: CampaignSlug;
   /** Rótulo interno, usado no admin e nas notificações. */
   label: string;
-  /** Data(s) do tour, definidas pelo guia — o lead não escolhe. */
+  /** Datas do tour, definidas pela escala do navio — o lead não escolhe. */
   fixedDays: string[];
   /** Ids das opções de interesse; o rótulo alemão vem do catálogo i18n. */
   interests: string[];
@@ -28,8 +28,7 @@ export const CAMPAIGNS: Record<CampaignSlug, Campaign> = {
   'aida-karneval-2028': {
     slug: 'aida-karneval-2028',
     label: 'AIDA Karneval 2028',
-    // Carnavalsonntag: é a noite do desfile no Sambódromo e o navio está no Rio.
-    fixedDays: ['2028-02-27'],
+    fixedDays: ['2028-02-26', '2028-02-27'],
     interests: ['sambodromo', 'klassiker', 'blocos', 'strand', 'favela', 'offen'],
     interestLabels: {
       sambodromo: 'Sambódromo (desfile)',
@@ -86,6 +85,7 @@ export const PHONE_COUNTRY_LABELS: Record<PhoneCountry, string> = {
 export interface CampaignData {
   interests?: string[];
   children_ages?: string;
+  preferred_day?: string;
   phone_country?: PhoneCountry;
   consent_at?: string;
 }
