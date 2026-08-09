@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { adminWhatsAppNumbers, sendWhatsAppText } from '@/lib/uazapi';
 import { DEFAULT_EMAIL_LOCALE as EMAIL_LOCALE } from '@/lib/email/render';
 import { sendTemplatedEmail } from '@/lib/email/sendTemplatedEmail';
 import deMessages from '@/i18n/messages/de.json';
@@ -308,34 +307,6 @@ export async function POST(request: NextRequest) {
         </p>
       `,
     });
-  } catch {
-    // notification failure must not break the client flow
-  }
-
-  // Best-effort WhatsApp notification via uazapi, independent of the email above.
-  try {
-    const daysList = days.map(d => `• ${formatGermanDay(d)}`).join('\n');
-    const header = campaign
-      ? `🚢 *${campaign.label}: ${name}*`
-      : `🔔 *Nova Anfrage: ${name}*`;
-    const campaignBlock = campaign
-      ? `🎯 Interesses: ${interestLabels.length > 0 ? interestLabels.join(', ') : '—'}\n` +
-        `📆 Dia preferido: ${campaignData?.preferred_day ? formatGermanDay(campaignData.preferred_day) : 'indiferente'}\n` +
-        (campaignData?.children_ages ? `🧒 Idades: ${campaignData.children_ages}\n` : '') +
-        (outsideDach ? `⚠️ Telefone fora de DE/AT/CH\n` : '')
-      : '';
-    const text =
-      `${header}\n\n` +
-      `👥 ${pax} adulto(s)${children > 0 ? ` + ${children} criança(s)` : ''}\n` +
-      `📧 ${email}\n` +
-      `📱 ${phone || '—'}\n` +
-      `🏷️ Origem: ${source}\n` +
-      campaignBlock +
-      `\n📅 Dias:\n${daysList}\n\n` +
-      `👉 ${campaign ? leadUrl : propostaUrl}`;
-    await Promise.allSettled(
-      adminWhatsAppNumbers().map(n => sendWhatsAppText(n, text)),
-    );
   } catch {
     // notification failure must not break the client flow
   }
