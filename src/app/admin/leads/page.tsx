@@ -2,6 +2,7 @@ import { getAdminTranslations } from '@/i18n/admin';
 import { createClient } from '@/utils/supabase/server';
 import LeadsViewWrapper from './components/LeadsViewWrapper';
 import LeadManualSheet from './components/LeadManualSheet';
+import { matchesCampaign } from '@/lib/campaigns';
 
 export async function generateMetadata() {
   const t = await getAdminTranslations('admin.crm');
@@ -56,21 +57,23 @@ export default async function LeadsPage({
   const countClosed = allLeads.filter(l => l.status === 'closed').length;
   const conversionRate = total > 0 ? Math.round((countClosed / total) * 100) : 0;
 
-  // Apply filters server-side
-  let filtered = allLeads;
-  if (params.status) filtered = filtered.filter(l => l.status === params.status);
+  // Apply filters server-side. Status fica de fora deste primeiro passo: no
+  // kanban ele é a própria coluna, então filtrar por status esvaziaria o
+  // quadro. Os demais filtros valem para as duas visões — sem isso o kanban
+  // ignorava a campanha e misturava o carnaval com o resto.
+  let filtered = allLeads.filter(l => matchesCampaign(l.campaign, params.campaign));
   if (params.source) filtered = filtered.filter(l => l.source === params.source);
-  if (params.campaign) {
-    filtered = filtered.filter(l =>
-      params.campaign === 'none' ? !l.campaign : l.campaign === params.campaign
-    );
-  }
   if (params.q) {
     const q = params.q.toLowerCase();
     filtered = filtered.filter(
       l => l.name.toLowerCase().includes(q) || l.email.toLowerCase().includes(q)
     );
   }
+
+  const kanbanLeads = filtered;
+  const tableLeads = params.status
+    ? filtered.filter(l => l.status === params.status)
+    : filtered;
 
   const metrics = [
     { label: tc('total'), value: total },
@@ -111,8 +114,8 @@ export default async function LeadsPage({
 
         {/* Table / Kanban */}
         <LeadsViewWrapper
-          allLeads={allLeads}
-          filteredLeads={filtered}
+          allLeads={kanbanLeads}
+          filteredLeads={tableLeads}
           currentStatus={params.status}
           currentSource={params.source}
           currentCampaign={params.campaign}

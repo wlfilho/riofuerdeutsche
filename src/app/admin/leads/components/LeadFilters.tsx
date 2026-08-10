@@ -3,7 +3,7 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useTransition, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { CAMPAIGN_LIST } from '@/lib/campaigns';
+import CampaignFilter from '@/components/admin/CampaignFilter';
 
 type Props = {
   currentStatus?: string;
@@ -118,19 +118,7 @@ export default function LeadFilters({
       </select>
 
       {/* Campanha */}
-      <select
-        value={currentCampaign}
-        onChange={e => push({ campaign: e.target.value })}
-        className={SELECT_CLS}
-      >
-        <option value="">{t('todasCampanhas')}</option>
-        {CAMPAIGN_LIST.map(campaign => (
-          <option key={campaign.slug} value={campaign.slug}>
-            {campaign.label}
-          </option>
-        ))}
-        <option value="none">{t('semCampanha')}</option>
-      </select>
+      <CampaignFilter value={currentCampaign} />
 
       {/* Clear filters */}
       {hasFilters && (

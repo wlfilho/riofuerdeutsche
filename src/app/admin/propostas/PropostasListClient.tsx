@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { fmtEur } from '@/lib/adminFormat';
+import CampaignBadge from '../leads/components/CampaignBadge';
 import type { Proposal, ProposalStatus } from '@/lib/proposals';
 import type { ProposalAnalyticsSummary } from '@/lib/proposalAnalytics';
 
@@ -136,9 +137,12 @@ function ViewsBadge({ proposalId, summary }: { proposalId: string; summary?: Pro
 export default function PropostasListClient({
   initialProposals,
   analytics = {},
+  campaignByProposal = {},
 }: {
   initialProposals: Proposal[];
   analytics?: Record<string, ProposalAnalyticsSummary>;
+  /** Campanha de cada proposta, herdada do lead que aponta para ela. */
+  campaignByProposal?: Record<string, string | null>;
 }) {
   const t = useTranslations('admin.propostas');
   const tCommon = useTranslations('admin.common');
@@ -237,11 +241,14 @@ export default function PropostasListClient({
                 <tr key={p.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="font-medium text-gray-900">{p.client_name}</div>
-                    {p.internal_label && (
-                      <span className="inline-block mt-0.5 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded">
-                        {p.internal_label}
-                      </span>
-                    )}
+                    <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                      {p.internal_label && (
+                        <span className="inline-block px-1.5 py-0.5 text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded">
+                          {p.internal_label}
+                        </span>
+                      )}
+                      <CampaignBadge campaign={campaignByProposal[p.id] ?? null} />
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-gray-700 tabular-nums">{p.pax}</td>
                   <td className="px-4 py-3 tabular-nums">

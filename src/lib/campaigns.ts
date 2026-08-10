@@ -54,6 +54,24 @@ export function campaignLabel(slug: string | null | undefined): string | null {
 }
 
 /**
+ * Regra única do filtro por campanha, usada por CRM, leads e propostas.
+ *
+ * Mora aqui e não junto do componente de filtro porque quem chama é Server
+ * Component: função exportada de um módulo 'use client' não pode ser invocada
+ * no servidor — o build passa e só quebra em runtime.
+ *
+ * Sem filtro devolve tudo; 'none' seleciona quem não está em campanha alguma.
+ */
+export function matchesCampaign(
+  leadCampaign: string | null | undefined,
+  filter: string | undefined,
+): boolean {
+  if (!filter) return true;
+  if (filter === 'none') return !leadCampaign;
+  return leadCampaign === filter;
+}
+
+/**
  * Países oferecidos no seletor de DDI. O público é do DACH, mas 'other' existe
  * para ninguém ficar de fora — e é justamente o caso que interessa saber.
  *
