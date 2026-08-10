@@ -5,6 +5,9 @@ import { getProposalAnalyticsSummaries } from '@/lib/proposalAnalytics';
 import { createClient } from '@/utils/supabase/server';
 import PropostasListClient from './PropostasListClient';
 import AnfrageLinkButton from './AnfrageLinkButton';
+import CampaignFilter from '@/components/admin/CampaignFilter';
+import { matchesCampaign } from '@/lib/campaigns';
+import CampaignBadge from '../leads/components/CampaignBadge';
 
 type PendingLead = {
   id: string;
@@ -14,6 +17,7 @@ type PendingLead = {
   requested_days: string[] | null;
   source: string;
   status: 'new' | 'contacted';
+  campaign: string | null;
   created_at: string;
 };
 
@@ -62,6 +66,7 @@ async function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
               {t('via')}
               {tSource.has(lead.source) ? tSource(lead.source) : lead.source}
             </span>
+            <CampaignBadge campaign={lead.campaign} />
             <Link
               href={`/admin/propostas/nova?lead_id=${lead.id}`}
               className="ml-auto px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shrink-0"
@@ -75,21 +80,44 @@ async function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
   );
 }
 
-export default async function PropostasPage() {
+export default async function PropostasPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ campaign?: string }>;
+}) {
+  const { campaign } = await searchParams;
   const t = await getAdminTranslations('admin.propostas');
   const supabase = await createClient();
-  const [proposals, analytics, { data: pendingLeads }] = await Promise.all([
-    getProposals(),
-    getProposalAnalyticsSummaries(),
-    // Leads still in the pre-proposal pipeline; leads moved to lost/closed in
-    // the CRM (or already linked to a proposal) drop out of this strip.
-    supabase
-      .from('price_leads')
-      .select('id, name, pax, children, requested_days, source, status, created_at')
-      .is('proposal_id', null)
-      .in('status', ['new', 'contacted'])
-      .order('created_at', { ascending: false }),
-  ]);
+  const [allProposals, analytics, { data: pendingLeads }, { data: proposalLeads }] =
+    await Promise.all([
+      getProposals(),
+      getProposalAnalyticsSummaries(),
+      // Leads still in the pre-proposal pipeline; leads moved to lost/closed in
+      // the CRM (or already linked to a proposal) drop out of this strip.
+      supabase
+        .from('price_leads')
+        .select('id, name, pax, children, requested_days, source, status, campaign, created_at')
+        .is('proposal_id', null)
+        .in('status', ['new', 'contacted'])
+        .order('created_at', { ascending: false }),
+      // `proposals` não guarda campanha: quem sabe de onde a proposta veio é o
+      // lead que aponta para ela. Este mapa dá a etiqueta a cada proposta.
+      supabase
+        .from('price_leads')
+        .select('proposal_id, campaign')
+        .not('proposal_id', 'is', null),
+    ]);
+
+  const campaignByProposal = new Map<string, string | null>(
+    (proposalLeads ?? []).map(l => [l.proposal_id as string, l.campaign as string | null]),
+  );
+
+  const proposals = allProposals.filter(p =>
+    matchesCampaign(campaignByProposal.get(p.id) ?? null, campaign),
+  );
+  const leads = ((pendingLeads ?? []) as PendingLead[]).filter(l =>
+    matchesCampaign(l.campaign, campaign),
+  );
 
   return (
     <div className="p-4 sm:p-6 md:p-10">
@@ -97,6 +125,7 @@ export default async function PropostasPage() {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
           <div className="flex flex-wrap items-center gap-2">
+            <CampaignFilter value={campaign} />
             <AnfrageLinkButton />
             <Link
               href="/admin/propostas/nova"
@@ -107,9 +136,13 @@ export default async function PropostasPage() {
           </div>
         </div>
 
-        <PendingLeadsStrip leads={(pendingLeads ?? []) as PendingLead[]} />
+        <PendingLeadsStrip leads={leads} />
 
-        <PropostasListClient initialProposals={proposals} analytics={analytics} />
+        <PropostasListClient
+          initialProposals={proposals}
+          analytics={analytics}
+          campaignByProposal={Object.fromEntries(campaignByProposal)}
+        />
       </div>
     </div>
   );

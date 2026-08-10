@@ -1,6 +1,8 @@
 import { getAdminTranslations } from '@/i18n/admin';
 import { createClient } from '@/utils/supabase/server';
 import CrmViewWrapper from './components/CrmViewWrapper';
+import CampaignFilter from '@/components/admin/CampaignFilter';
+import { matchesCampaign } from '@/lib/campaigns';
 
 export async function generateMetadata() {
   const t = await getAdminTranslations('admin.crm');
@@ -32,7 +34,12 @@ export interface CrmLead {
   updated_at: string;
 }
 
-export default async function CrmPage() {
+export default async function CrmPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ campaign?: string }>;
+}) {
+  const { campaign } = await searchParams;
   const t = await getAdminTranslations('admin.crm');
   const tc = await getAdminTranslations('admin.common');
   const supabase = await createClient();
@@ -42,7 +49,11 @@ export default async function CrmPage() {
     .select('*')
     .order('created_at', { ascending: false });
 
-  const leads: CrmLead[] = (data ?? []) as CrmLead[];
+  // As métricas seguem o filtro: com o carnaval selecionado, a taxa de
+  // conversão que aparece é a daquela campanha, não a da carteira inteira.
+  const leads: CrmLead[] = ((data ?? []) as CrmLead[]).filter(l =>
+    matchesCampaign(l.campaign, campaign),
+  );
 
   const total = leads.length;
   const countNew = leads.filter(l => l.status === 'new').length;
@@ -65,11 +76,12 @@ export default async function CrmPage() {
   return (
     <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-[1600px]">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
             <p className="text-gray-500 mt-1">{t('subtitulo')}</p>
           </div>
+          <CampaignFilter value={campaign} />
         </div>
 
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
