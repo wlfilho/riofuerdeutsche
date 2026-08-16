@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
-import type { CrmLead } from '../page';
+import type { CrmLeadView } from '../page';
 
 function formatEstimate(min: number | null, max: number | null) {
   if (min === null && max === null) return '—';
@@ -27,7 +27,7 @@ function DeleteModal({
   onConfirm,
   loading,
 }: {
-  lead: CrmLead;
+  lead: CrmLeadView;
   onCancel: () => void;
   onConfirm: () => void;
   loading: boolean;
@@ -83,13 +83,13 @@ export default function CrmTable({
   onLeadClick,
   onLeadDelete,
 }: {
-  leads: CrmLead[];
-  onLeadClick: (lead: CrmLead) => void;
+  leads: CrmLeadView[];
+  onLeadClick: (lead: CrmLeadView) => void;
   onLeadDelete: (id: string) => void;
 }) {
   const router = useRouter();
-  const [leads, setLeads] = useState<CrmLead[]>(initialLeads);
-  const [deleteTarget, setDeleteTarget] = useState<CrmLead | null>(null);
+  const [leads, setLeads] = useState<CrmLeadView[]>(initialLeads);
+  const [deleteTarget, setDeleteTarget] = useState<CrmLeadView | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
@@ -97,6 +97,7 @@ export default function CrmTable({
   const tCommon = useTranslations('admin.common');
   const tStatus = useTranslations('admin.status.lead');
   const tSource = useTranslations('admin.status.source');
+  const tReason = useTranslations('admin.crm.motivoArquivo');
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -141,6 +142,7 @@ export default function CrmTable({
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colEstimativa')}</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('origem')}</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('status')}</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colTour')}</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('data')}</th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('acoes')}</th>
               </tr>
@@ -149,7 +151,7 @@ export default function CrmTable({
               {leads.map(lead => {
                 const statusClass = STATUS_CLASS[lead.status] ?? STATUS_CLASS.new;
                 return (
-                  <tr key={lead.id} className="hover:bg-gray-50">
+                  <tr key={lead.id} className={`hover:bg-gray-50 ${lead.archiveReason ? 'bg-gray-50/60' : ''}`}>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-0.5">
                         <button
@@ -158,6 +160,14 @@ export default function CrmTable({
                         >
                           {lead.name}
                         </button>
+                        {lead.archiveReason && (
+                          <span
+                            className="self-start px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-gray-200 text-gray-600"
+                            title={tReason(lead.archiveReason)}
+                          >
+                            {t('arquivado')}
+                          </span>
+                        )}
                         <a
                           href={`mailto:${lead.email}`}
                           className="text-xs text-gray-400 hover:text-green-700 transition-colors"
@@ -183,6 +193,12 @@ export default function CrmTable({
                       <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${statusClass}`}>
                         {tStatus(lead.status)}
                       </span>
+                    </td>
+
+                    <td className={`px-4 py-3 text-xs tabular-nums whitespace-nowrap ${
+                      lead.tourDatePast ? 'text-gray-400' : 'text-gray-700 font-medium'
+                    }`}>
+                      {lead.tourDate ? fmtDate(lead.tourDate) : tCommon('vazio')}
                     </td>
 
                     <td className="px-4 py-3 text-gray-500 text-xs tabular-nums whitespace-nowrap">

@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import CrmViewWrapper from './components/CrmViewWrapper';
 import CampaignFilter from '@/components/admin/CampaignFilter';
 import { matchesCampaign } from '@/lib/campaigns';
+import { leadArchiveReason, leadNextDate, leadTourDate, todayInRio, type ArchiveReason } from '@/lib/leadArchive';
 
 export async function generateMetadata() {
   const t = await getAdminTranslations('admin.crm');
@@ -30,8 +31,25 @@ export interface CrmLead {
   notes: string | null;
   campaign: string | null;
   campaign_data: unknown;
+  archived_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * Lead com os campos que o kanban precisa mas não estão na linha da tabela:
+ * a data do tour (que mora em `tour_dates`) e o estado de arquivamento
+ * (derivado a cada render por `leadArchiveReason`).
+ */
+export interface CrmLeadView extends CrmLead {
+  /** Próxima data do tour, ou a última se tudo já passou. */
+  tourDate: string | null;
+  /** Última data conhecida — é ela que decide o arquivamento. */
+  lastTourDate: string | null;
+  /** `tourDate` já aconteceu. Derivado aqui e não no card: o cliente pode
+   *  estar noutro fuso que o servidor, e a divergência quebraria a hidratação. */
+  tourDatePast: boolean;
+  archiveReason: ArchiveReason | null;
 }
 
 export default async function CrmPage({
@@ -44,23 +62,46 @@ export default async function CrmPage({
   const tc = await getAdminTranslations('admin.common');
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('price_leads')
-    .select('*')
-    .order('created_at', { ascending: false });
+  const [{ data, error }, { data: tourDateRows }] = await Promise.all([
+    supabase.from('price_leads').select('*').order('created_at', { ascending: false }),
+    supabase.from('tour_dates').select('lead_id, date'),
+  ]);
+
+  const datesByLead = new Map<string, string[]>();
+  for (const row of (tourDateRows ?? []) as { lead_id: string; date: string }[]) {
+    const list = datesByLead.get(row.lead_id);
+    if (list) list.push(row.date);
+    else datesByLead.set(row.lead_id, [row.date]);
+  }
+
+  const today = todayInRio();
 
   // As métricas seguem o filtro: com o carnaval selecionado, a taxa de
   // conversão que aparece é a daquela campanha, não a da carteira inteira.
-  const leads: CrmLead[] = ((data ?? []) as CrmLead[]).filter(l =>
-    matchesCampaign(l.campaign, campaign),
-  );
+  const leads: CrmLeadView[] = ((data ?? []) as CrmLead[])
+    .filter(l => matchesCampaign(l.campaign, campaign))
+    .map(l => {
+      const tourDates = datesByLead.get(l.id) ?? null;
+      const lastTourDate = leadTourDate(l.requested_days, tourDates);
+      const tourDate = leadNextDate(l.requested_days, tourDates, today);
+      return {
+        ...l,
+        lastTourDate,
+        tourDate,
+        tourDatePast: tourDate !== null && tourDate < today,
+        archiveReason: leadArchiveReason({ ...l, tourDate: lastTourDate }, today),
+      };
+    });
 
+  // Métricas cobrem a carteira inteira, arquivados incluídos: conversão só faz
+  // sentido sobre negócios encerrados, que são justamente os que saem da visão.
   const total = leads.length;
   const countNew = leads.filter(l => l.status === 'new').length;
   const countContacted = leads.filter(l => l.status === 'contacted').length;
   const countProposal = leads.filter(l => l.status === 'proposal_sent').length;
   const countClosed = leads.filter(l => l.status === 'closed').length;
   const countLost = leads.filter(l => l.status === 'lost').length;
+  const countArchived = leads.filter(l => l.archiveReason !== null).length;
   const eligible = total - countLost;
   const conversion = eligible > 0 ? Math.round((countClosed / eligible) * 100) : 0;
 
@@ -71,6 +112,7 @@ export default async function CrmPage({
     { label: t('proposta'), value: countProposal },
     { label: t('fechados'), value: countClosed },
     { label: t('conversao'), value: `${conversion}%` },
+    { label: t('arquivados'), value: countArchived, muted: true },
   ];
 
   return (
@@ -84,10 +126,15 @@ export default async function CrmPage({
           <CampaignFilter value={campaign} />
         </div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
           {metrics.map(card => (
-            <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+            <div
+              key={card.label}
+              className={`rounded-xl border p-4 text-center ${
+                card.muted ? 'bg-gray-50 border-gray-200 border-dashed' : 'bg-white border-gray-200'
+              }`}
+            >
+              <p className={`text-2xl font-bold ${card.muted ? 'text-gray-400' : 'text-gray-900'}`}>{card.value}</p>
               <p className="text-xs text-gray-500 mt-0.5">{card.label}</p>
             </div>
           ))}
