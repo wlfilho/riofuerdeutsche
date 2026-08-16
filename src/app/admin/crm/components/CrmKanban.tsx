@@ -17,7 +17,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { useTranslations } from 'next-intl';
 import TourDateKanbanFlow, { type KanbanStatusChange } from '@/components/admin/TourDateKanbanFlow';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
-import type { CrmLead, LeadStatus } from '../page';
+import { refreshArchiveReason } from '@/lib/leadArchive';
+import type { CrmLeadView, LeadStatus } from '../page';
 
 type ColumnConfig = {
   id: LeadStatus;
@@ -33,28 +34,62 @@ const COLUMNS: ColumnConfig[] = [
   { id: 'lost', headerClass: 'bg-red-50 border-red-100 text-red-700', countClass: 'bg-red-100 text-red-700' },
 ];
 
+/**
+ * Ordena a coluna pelo que está mais perto de acontecer. Leads sem data
+ * nenhuma (entrada manual, perdidos antigos) vão para o fim, entre si pelo
+ * mais recente — lá o que importa é a chegada, não o calendário.
+ */
+function byUpcoming(a: CrmLeadView, b: CrmLeadView) {
+  // Com "mostrar arquivados" ligado, o histórico vai para depois do que ainda
+  // está em jogo — senão os tours antigos ocupam o topo da coluna.
+  const archivedA = a.archiveReason !== null;
+  const archivedB = b.archiveReason !== null;
+  if (archivedA !== archivedB) return archivedA ? 1 : -1;
+  if (a.tourDate && b.tourDate) {
+    if (a.tourDate !== b.tourDate) return a.tourDate < b.tourDate ? -1 : 1;
+    return 0;
+  }
+  if (a.tourDate) return -1;
+  if (b.tourDate) return 1;
+  return a.created_at < b.created_at ? 1 : -1;
+}
+
 function formatEstimate(min: number | null, max: number | null) {
   if (min === null && max === null) return null;
   if (min !== null && max !== null) return `${fmtEur(min)}–${fmtEur(max)}`;
   return fmtEur(min ?? max);
 }
 
-function CardContent({ lead, isDragging = false }: { lead: CrmLead; isDragging?: boolean }) {
+function CardContent({ lead, isDragging = false }: { lead: CrmLeadView; isDragging?: boolean }) {
   const tSource = useTranslations('admin.status.source');
   const tCommon = useTranslations('admin.common');
+  const t = useTranslations('admin.crm');
+  const tReason = useTranslations('admin.crm.motivoArquivo');
   const estimate = formatEstimate(lead.estimated_min, lead.estimated_max);
+  const archived = lead.archiveReason !== null;
   return (
     <div
-      className={`bg-white rounded-xl border border-gray-200 p-3 select-none transition-shadow ${
-        isDragging ? 'shadow-lg rotate-1' : 'shadow-sm'
-      }`}
+      className={`rounded-xl border p-3 select-none transition-shadow ${
+        archived ? 'bg-gray-50 border-gray-200 border-dashed' : 'bg-white border-gray-200'
+      } ${isDragging ? 'shadow-lg rotate-1' : 'shadow-sm'}`}
     >
       <div className="flex items-start justify-between gap-2 mb-1.5">
-        <span className="font-semibold text-sm text-gray-900 leading-snug">{lead.name}</span>
+        <span className={`font-semibold text-sm leading-snug ${archived ? 'text-gray-500' : 'text-gray-900'}`}>
+          {lead.name}
+        </span>
         <span className="inline-block shrink-0 px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600">
           {tSource.has(lead.source) ? tSource(lead.source) : lead.source}
         </span>
       </div>
+
+      {archived && (
+        <span
+          className="inline-block mb-1.5 px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-gray-200 text-gray-600"
+          title={tReason(lead.archiveReason ?? 'manual')}
+        >
+          {t('arquivado')}
+        </span>
+      )}
 
       <p className="text-xs text-gray-400 mb-2 truncate">{lead.email}</p>
 
@@ -65,12 +100,28 @@ function CardContent({ lead, isDragging = false }: { lead: CrmLead; isDragging?:
           </svg>
           {lead.pax} {tCommon('pax')}
         </span>
-        <span className="inline-flex items-center gap-1">
-          <svg className="h-3 w-3 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-          </svg>
-          {fmtDate(lead.created_at)}
-        </span>
+        {/* A data do tour é a informação operacional; a de criação só aparece
+            quando o lead ainda não tem data marcada. */}
+        {lead.tourDate ? (
+          <span
+            className={`inline-flex items-center gap-1 font-medium ${
+              lead.tourDatePast ? 'text-gray-400' : 'text-gray-700'
+            }`}
+            title={t('dataDoTour')}
+          >
+            <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+            </svg>
+            {fmtDate(lead.tourDate)}
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1" title={t('criadoEm')}>
+            <svg className="h-3 w-3 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
+            {fmtDate(lead.created_at)}
+          </span>
+        )}
       </div>
 
       {estimate && (
@@ -80,7 +131,7 @@ function CardContent({ lead, isDragging = false }: { lead: CrmLead; isDragging?:
   );
 }
 
-function DraggableCard({ lead, onOpenDrawer }: { lead: CrmLead; onOpenDrawer: (lead: CrmLead) => void }) {
+function DraggableCard({ lead, onOpenDrawer }: { lead: CrmLeadView; onOpenDrawer: (lead: CrmLeadView) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: lead.id,
     data: { lead },
@@ -108,8 +159,8 @@ function KanbanColumn({
   onLeadClick,
 }: {
   column: ColumnConfig;
-  leads: CrmLead[];
-  onLeadClick: (lead: CrmLead) => void;
+  leads: CrmLeadView[];
+  onLeadClick: (lead: CrmLeadView) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
   const t = useTranslations('admin.crm');
@@ -161,12 +212,12 @@ export default function CrmKanban({
   onLeadClick,
   onStatusChange,
 }: {
-  leads: CrmLead[];
-  onLeadClick: (lead: CrmLead) => void;
-  onStatusChange: (updated: CrmLead) => void;
+  leads: CrmLeadView[];
+  onLeadClick: (lead: CrmLeadView) => void;
+  onStatusChange: (updated: CrmLeadView) => void;
 }) {
-  const [leads, setLeads] = useState<CrmLead[]>(initialLeads);
-  const [activeLead, setActiveLead] = useState<CrmLead | null>(null);
+  const [leads, setLeads] = useState<CrmLeadView[]>(initialLeads);
+  const [activeLead, setActiveLead] = useState<CrmLeadView | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [tourFlow, setTourFlow] = useState<KanbanStatusChange | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
@@ -197,7 +248,9 @@ export default function CrmKanban({
     if (!lead || lead.status === newStatus) return;
 
     const prev = [...leads];
-    const updated = { ...lead, status: newStatus };
+    // Trocar o status pode tirar (ou pôr) o card no arquivo — um perdido
+    // antigo que volta para "novo" tem de reaparecer na hora.
+    const updated = refreshArchiveReason({ ...lead, status: newStatus });
     setLeads(curr => curr.map(l => l.id === lead.id ? updated : l));
     onStatusChange(updated);
 
@@ -241,7 +294,7 @@ export default function CrmKanban({
             <KanbanColumn
               key={col.id}
               column={col}
-              leads={leads.filter(l => l.status === col.id)}
+              leads={leads.filter(l => l.status === col.id).sort(byUpcoming)}
               onLeadClick={onLeadClick}
             />
           ))}

@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
-import type { CrmLead, LeadStatus } from '@/app/admin/crm/page';
+import { refreshArchiveReason } from '@/lib/leadArchive';
+import type { CrmLeadView, LeadStatus } from '@/app/admin/crm/page';
 
 type Interaction = {
   id: string;
@@ -44,16 +45,17 @@ export default function LeadDrawer({
   onClose,
   onLeadUpdate,
 }: {
-  lead: CrmLead;
+  lead: CrmLeadView;
   onClose: () => void;
-  onLeadUpdate: (updated: CrmLead) => void;
+  onLeadUpdate: (updated: CrmLeadView) => void;
 }) {
-  const [lead, setLead] = useState<CrmLead>(initialLead);
+  const [lead, setLead] = useState<CrmLeadView>(initialLead);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [loadingInteractions, setLoadingInteractions] = useState(true);
   const [notes, setNotes] = useState(initialLead.notes ?? '');
   const [savingNotes, setSavingNotes] = useState(false);
   const [savingStatus, setSavingStatus] = useState(false);
+  const [savingArchive, setSavingArchive] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
   const t = useTranslations('admin.crm');
@@ -108,13 +110,49 @@ export default function LeadDrawer({
         setToast(tCommon('erroPrefixo', { mensagem: data.error ?? t('falhaAtualizarStatus') }));
         return;
       }
-      const updated = { ...lead, status: newStatus };
+      const updated = refreshArchiveReason({ ...lead, status: newStatus });
       setLead(updated);
       onLeadUpdate(updated);
     } catch {
       setToast(tCommon('erroRede'));
     } finally {
       setSavingStatus(false);
+    }
+  };
+
+  /**
+   * Arquiva ou desarquiva. O `archiveReason` é recalculado aqui com a mesma
+   * função do servidor em vez de um `router.refresh()`: desarquivar um lead
+   * cujo tour já passou tem de mostrar na hora que ele continua arquivado
+   * pela data, e não piscar de volta ao kanban.
+   */
+  const handleToggleArchive = async () => {
+    const next = lead.archiveReason === null;
+    setSavingArchive(true);
+    try {
+      const res = await fetch(`/api/admin/leads/${lead.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ archived: next }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setToast(tCommon('erroPrefixo', { mensagem: data.error ?? tCommon('erroSalvar') }));
+        return;
+      }
+      const { lead: saved } = await res.json();
+      const merged = refreshArchiveReason({
+        ...lead,
+        archived_at: saved?.archived_at ?? null,
+        updated_at: saved?.updated_at ?? lead.updated_at,
+      });
+      setLead(merged);
+      onLeadUpdate(merged);
+      setToast(merged.archiveReason ? t('leadArquivado') : t('leadDesarquivado'));
+    } catch {
+      setToast(tCommon('erroRede'));
+    } finally {
+      setSavingArchive(false);
     }
   };
 
@@ -248,6 +286,33 @@ export default function LeadDrawer({
                   <option key={value} value={value}>{tStatus(value)}</option>
                 ))}
               </select>
+            </div>
+
+            {/* Arquivo */}
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 border border-gray-200 px-3 py-2">
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-gray-700">
+                  {lead.archiveReason ? t('motivoArquivo.' + lead.archiveReason) : t('visivelNoKanban')}
+                </p>
+                {lead.archiveReason && lead.archiveReason !== 'manual' && (
+                  <p className="text-[11px] text-gray-500 mt-0.5">{t('arquivadoAutomaticamente')}</p>
+                )}
+              </div>
+              {/* Arquivamento automático não tem botão: desarquivar não faria
+                  nada enquanto a regra que o escondeu continuar valendo. */}
+              {(lead.archiveReason === null || lead.archiveReason === 'manual') && (
+                <button
+                  onClick={handleToggleArchive}
+                  disabled={savingArchive}
+                  className="shrink-0 px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {savingArchive
+                    ? tCommon('salvando')
+                    : lead.archiveReason === 'manual'
+                      ? t('desarquivar')
+                      : t('arquivar')}
+                </button>
+              )}
             </div>
 
             {/* Quick links */}

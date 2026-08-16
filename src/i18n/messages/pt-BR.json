@@ -295,7 +295,25 @@
       "estimativaEntre": "entre {min} e {max}",
       "observacoesSobreLead": "Observações sobre este lead…",
       "metaTitleLead": "Lead — Admin",
-      "metaTitleLeadNome": "{nome} — Lead"
+      "metaTitleLeadNome": "{nome} — Lead",
+      "arquivados": "Arquivados",
+      "arquivado": "Arquivado",
+      "arquivar": "Arquivar",
+      "desarquivar": "Desarquivar",
+      "leadArquivado": "Lead arquivado ✓",
+      "leadDesarquivado": "Lead desarquivado ✓",
+      "visivelNoKanban": "Visível no kanban",
+      "arquivadoAutomaticamente": "Sai do kanban sozinho. Para trazê-lo de volta, mude o status ou a data.",
+      "desarquivarIndisponivel": "Este lead foi arquivado por uma regra automática, não manualmente.",
+      "mostrarArquivados": "Mostrar arquivados ({count})",
+      "ocultarArquivados": "Ocultar arquivados",
+      "dataDoTour": "Data do tour",
+      "colTour": "Tour",
+      "motivoArquivo": {
+        "manual": "Arquivado manualmente",
+        "tour_passado": "Arquivado: o tour já aconteceu",
+        "perdido_antigo": "Arquivado: perdido há mais de 30 dias"
+      }
     },
     "contatos": {
       "metaTitle": "Contatos — Admin",

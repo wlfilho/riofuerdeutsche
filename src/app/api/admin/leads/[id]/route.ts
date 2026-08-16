@@ -51,7 +51,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const { status, claude_chat_url, notes } = body;
+  const { status, claude_chat_url, notes, archived } = body;
 
   if (status !== undefined && !VALID_STATUSES.includes(status)) {
     return NextResponse.json({ error: 'Status inválido.' }, { status: 400 });
@@ -61,6 +61,9 @@ export async function PATCH(
   if (status !== undefined) updates.status = status;
   if (claude_chat_url !== undefined) updates.claude_chat_url = claude_chat_url;
   if (notes !== undefined) updates.notes = notes;
+  // `archived` é booleano na API e timestamp na tabela: quem arquivou quer
+  // saber quando, mas o cliente só precisa ligar/desligar.
+  if (archived !== undefined) updates.archived_at = archived ? new Date().toISOString() : null;
 
   if (Object.keys(updates).length === 1) {
     return NextResponse.json({ error: 'Nenhum campo para atualizar.' }, { status: 400 });

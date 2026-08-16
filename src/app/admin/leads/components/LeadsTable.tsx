@@ -8,7 +8,7 @@ import StatusBadge from './StatusBadge';
 import SourceBadge from './SourceBadge';
 import CampaignBadge from './CampaignBadge';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
-import type { Lead } from '../page';
+import type { LeadView } from '../page';
 
 function formatEstimate(min: number | null, max: number | null) {
   if (min === null && max === null) return '—';
@@ -34,7 +34,7 @@ function DeleteModal({
   onConfirm,
   loading,
 }: {
-  lead: Lead;
+  lead: LeadView;
   onCancel: () => void;
   onConfirm: () => void;
   loading: boolean;
@@ -73,15 +73,16 @@ function DeleteModal({
   );
 }
 
-export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
+export default function LeadsTable({ leads: initialLeads }: { leads: LeadView[] }) {
   const router = useRouter();
-  const [leads, setLeads] = useState<Lead[]>(initialLeads);
-  const [deleteTarget, setDeleteTarget] = useState<Lead | null>(null);
+  const [leads, setLeads] = useState<LeadView[]>(initialLeads);
+  const [deleteTarget, setDeleteTarget] = useState<LeadView | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
   const t = useTranslations('admin.crm');
   const tCommon = useTranslations('admin.common');
+  const tReason = useTranslations('admin.crm.motivoArquivo');
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -128,13 +129,14 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colEstimativa')}</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('origem')}</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('status')}</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colTour')}</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('data')}</th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{tCommon('acoes')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {leads.map(lead => (
-                <tr key={lead.id} className="hover:bg-gray-50">
+                <tr key={lead.id} className={`hover:bg-gray-50 ${lead.archiveReason ? 'bg-gray-50/60' : ''}`}>
                   {/* Nome / Contato */}
                   <td className="px-4 py-3">
                     <div className="flex flex-col gap-0.5">
@@ -144,6 +146,14 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
                       >
                         {lead.name}
                       </Link>
+                      {lead.archiveReason && (
+                        <span
+                          className="self-start px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-gray-200 text-gray-600"
+                          title={tReason(lead.archiveReason)}
+                        >
+                          {t('arquivado')}
+                        </span>
+                      )}
                       <div className="flex items-center gap-2">
                         <a
                           href={`mailto:${lead.email}`}
@@ -197,6 +207,12 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
                   </td>
 
                   {/* Data */}
+                  <td className={`px-4 py-3 text-xs tabular-nums whitespace-nowrap ${
+                    lead.tourDatePast ? 'text-gray-400' : 'text-gray-700 font-medium'
+                  }`}>
+                    {lead.tourDate ? fmtDate(lead.tourDate) : tCommon('vazio')}
+                  </td>
+
                   <td className="px-4 py-3 text-gray-500 text-xs tabular-nums whitespace-nowrap">
                     {fmtDate(lead.created_at)}
                   </td>

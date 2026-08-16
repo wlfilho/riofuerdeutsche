@@ -16,7 +16,26 @@ import { useTranslations } from 'next-intl';
 import KanbanColumn, { KANBAN_COLUMNS } from './KanbanColumn';
 import { KanbanCardContent } from './KanbanCard';
 import TourDateKanbanFlow, { type KanbanStatusChange } from '@/components/admin/TourDateKanbanFlow';
-import type { Lead, LeadStatus } from '../page';
+import { refreshArchiveReason } from '@/lib/leadArchive';
+import type { LeadView, LeadStatus } from '../page';
+
+/**
+ * Ordena a coluna pelo que está mais perto de acontecer, com o arquivo no fim.
+ * Leads sem data nenhuma vão depois dos datados, entre si pelo mais recente —
+ * lá o que importa é a chegada, não o calendário.
+ */
+function byUpcoming(a: LeadView, b: LeadView) {
+  const archivedA = a.archiveReason !== null;
+  const archivedB = b.archiveReason !== null;
+  if (archivedA !== archivedB) return archivedA ? 1 : -1;
+  if (a.tourDate && b.tourDate) {
+    if (a.tourDate !== b.tourDate) return a.tourDate < b.tourDate ? -1 : 1;
+    return 0;
+  }
+  if (a.tourDate) return -1;
+  if (b.tourDate) return 1;
+  return a.created_at < b.created_at ? 1 : -1;
+}
 
 function Toast({ message, onDone }: { message: string; onDone: () => void }) {
   useEffect(() => {
@@ -30,9 +49,9 @@ function Toast({ message, onDone }: { message: string; onDone: () => void }) {
   );
 }
 
-export default function LeadsKanban({ allLeads }: { allLeads: Lead[] }) {
-  const [leads, setLeads] = useState<Lead[]>(allLeads);
-  const [activeLead, setActiveLead] = useState<Lead | null>(null);
+export default function LeadsKanban({ allLeads }: { allLeads: LeadView[] }) {
+  const [leads, setLeads] = useState<LeadView[]>(allLeads);
+  const [activeLead, setActiveLead] = useState<LeadView | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [tourFlow, setTourFlow] = useState<KanbanStatusChange | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
@@ -75,9 +94,11 @@ export default function LeadsKanban({ allLeads }: { allLeads: Lead[] }) {
     const lead = leads.find(l => l.id === active.id);
     if (!lead || lead.status === newStatus) return;
 
-    // Optimistic update
+    // Optimistic update. Trocar o status pode tirar (ou pôr) o card no
+    // arquivo — um perdido antigo que volta para "novo" tem de reaparecer.
     const prev = [...leads];
-    setLeads(curr => curr.map(l => l.id === lead.id ? { ...l, status: newStatus } : l));
+    const updated = refreshArchiveReason({ ...lead, status: newStatus });
+    setLeads(curr => curr.map(l => l.id === lead.id ? updated : l));
 
     try {
       const res = await fetch(`/api/admin/leads/${lead.id}`, {
@@ -117,7 +138,7 @@ export default function LeadsKanban({ allLeads }: { allLeads: Lead[] }) {
             <KanbanColumn
               key={col.id}
               column={col}
-              leads={filteredLeads.filter(l => l.status === col.id)}
+              leads={filteredLeads.filter(l => l.status === col.id).sort(byUpcoming)}
             />
           ))}
         </div>

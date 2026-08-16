@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { updateLeadStatus, updateLeadNotes } from '../actions';
+import { updateLeadStatus, updateLeadNotes, setLeadArchived } from '../actions';
+import type { ArchiveReason } from '@/lib/leadArchive';
 import type { LeadStatus } from '../../page';
 
 const STATUS_VALUES: LeadStatus[] = ['new', 'contacted', 'proposal_sent', 'closed', 'lost'];
@@ -13,13 +14,17 @@ export default function LeadStatusCard({
   leadId,
   initialStatus,
   initialNotes,
+  archiveReason,
 }: {
   leadId: string;
   initialStatus: LeadStatus;
   initialNotes: string | null;
+  archiveReason: ArchiveReason | null;
 }) {
   const [status, setStatus] = useState<LeadStatus>(initialStatus);
   const [statusSave, setStatusSave] = useState<SaveState>('idle');
+
+  const [archiveSave, setArchiveSave] = useState<SaveState>('idle');
 
   const [notes, setNotes] = useState(initialNotes ?? '');
   const [notesSave, setNotesSave] = useState<SaveState>('idle');
@@ -27,6 +32,23 @@ export default function LeadStatusCard({
   const t = useTranslations('admin.crm');
   const tCommon = useTranslations('admin.common');
   const tStatus = useTranslations('admin.status.lead');
+  const tReason = useTranslations('admin.crm.motivoArquivo');
+
+  /**
+   * Arquiva ou desarquiva. A action revalida a rota, então o `archiveReason`
+   * vindo do servidor é recalculado sozinho — aqui só falta refletir o estado
+   * do botão enquanto isso acontece.
+   */
+  const handleToggleArchive = async () => {
+    setArchiveSave('saving');
+    const result = await setLeadArchived(leadId, archiveReason === null);
+    if (result.error) {
+      setArchiveSave('error');
+      setTimeout(() => setArchiveSave('idle'), 3000);
+    } else {
+      setArchiveSave('idle');
+    }
+  };
 
   const handleStatusChange = async (newStatus: LeadStatus) => {
     setStatus(newStatus);
@@ -102,6 +124,36 @@ export default function LeadStatusCard({
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Arquivo */}
+        <div className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 border border-gray-200 px-3 py-2">
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-gray-700">
+              {archiveReason ? tReason(archiveReason) : t('visivelNoKanban')}
+            </p>
+            {archiveReason && archiveReason !== 'manual' && (
+              <p className="text-[11px] text-gray-500 mt-0.5">{t('arquivadoAutomaticamente')}</p>
+            )}
+            {archiveSave === 'error' && (
+              <p className="text-[11px] text-red-600 mt-0.5">{t('erroAoSalvar')}</p>
+            )}
+          </div>
+          {/* Arquivamento automático não tem botão: desarquivar não faria nada
+              enquanto a regra que escondeu o card continuar valendo. */}
+          {(archiveReason === null || archiveReason === 'manual') && (
+            <button
+              onClick={handleToggleArchive}
+              disabled={archiveSave === 'saving'}
+              className="shrink-0 px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {archiveSave === 'saving'
+                ? tCommon('salvando')
+                : archiveReason === 'manual'
+                  ? t('desarquivar')
+                  : t('arquivar')}
+            </button>
+          )}
         </div>
 
         {/* Notes */}
