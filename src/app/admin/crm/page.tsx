@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import CrmViewWrapper from './components/CrmViewWrapper';
 import CampaignFilter from '@/components/admin/CampaignFilter';
 import { matchesCampaign } from '@/lib/campaigns';
-import { leadArchiveReason, leadNextDate, leadTourDate, todayInRio, type ArchiveReason } from '@/lib/leadArchive';
+import { todayInRio, withArchiveState, type ArchiveState } from '@/lib/leadArchive';
 
 export async function generateMetadata() {
   const t = await getAdminTranslations('admin.crm');
@@ -38,19 +38,9 @@ export interface CrmLead {
 
 /**
  * Lead com os campos que o kanban precisa mas não estão na linha da tabela:
- * a data do tour (que mora em `tour_dates`) e o estado de arquivamento
- * (derivado a cada render por `leadArchiveReason`).
+ * a data do tour (que mora em `tour_dates`) e o estado de arquivamento.
  */
-export interface CrmLeadView extends CrmLead {
-  /** Próxima data do tour, ou a última se tudo já passou. */
-  tourDate: string | null;
-  /** Última data conhecida — é ela que decide o arquivamento. */
-  lastTourDate: string | null;
-  /** `tourDate` já aconteceu. Derivado aqui e não no card: o cliente pode
-   *  estar noutro fuso que o servidor, e a divergência quebraria a hidratação. */
-  tourDatePast: boolean;
-  archiveReason: ArchiveReason | null;
-}
+export type CrmLeadView = CrmLead & ArchiveState;
 
 export default async function CrmPage({
   searchParams,
@@ -67,31 +57,13 @@ export default async function CrmPage({
     supabase.from('tour_dates').select('lead_id, date'),
   ]);
 
-  const datesByLead = new Map<string, string[]>();
-  for (const row of (tourDateRows ?? []) as { lead_id: string; date: string }[]) {
-    const list = datesByLead.get(row.lead_id);
-    if (list) list.push(row.date);
-    else datesByLead.set(row.lead_id, [row.date]);
-  }
-
-  const today = todayInRio();
-
   // As métricas seguem o filtro: com o carnaval selecionado, a taxa de
   // conversão que aparece é a daquela campanha, não a da carteira inteira.
-  const leads: CrmLeadView[] = ((data ?? []) as CrmLead[])
-    .filter(l => matchesCampaign(l.campaign, campaign))
-    .map(l => {
-      const tourDates = datesByLead.get(l.id) ?? null;
-      const lastTourDate = leadTourDate(l.requested_days, tourDates);
-      const tourDate = leadNextDate(l.requested_days, tourDates, today);
-      return {
-        ...l,
-        lastTourDate,
-        tourDate,
-        tourDatePast: tourDate !== null && tourDate < today,
-        archiveReason: leadArchiveReason({ ...l, tourDate: lastTourDate }, today),
-      };
-    });
+  const leads: CrmLeadView[] = withArchiveState(
+    ((data ?? []) as CrmLead[]).filter(l => matchesCampaign(l.campaign, campaign)),
+    (tourDateRows ?? []) as { lead_id: string; date: string }[],
+    todayInRio(),
+  );
 
   // Métricas cobrem a carteira inteira, arquivados incluídos: conversão só faz
   // sentido sobre negócios encerrados, que são justamente os que saem da visão.

@@ -37,6 +37,33 @@ export async function updateLeadStatus(
   }
 }
 
+/**
+ * Arquiva ou desarquiva o lead. Booleano na assinatura e timestamp na tabela:
+ * quem arquivou quer saber quando, mas a UI só precisa ligar/desligar.
+ */
+export async function setLeadArchived(
+  leadId: string,
+  archived: boolean
+): Promise<{ error?: string }> {
+  try {
+    const { supabase } = await adminClient();
+    const { error } = await supabase
+      .from('price_leads')
+      .update({
+        archived_at: archived ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', leadId);
+    if (error) return { error: error.message };
+    revalidatePath(`/admin/leads/${leadId}`);
+    revalidatePath('/admin/leads');
+    revalidatePath('/admin/crm');
+    return {};
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : 'Erro desconhecido' };
+  }
+}
+
 export async function updateLeadNotes(
   leadId: string,
   notes: string

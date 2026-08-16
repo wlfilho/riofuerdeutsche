@@ -11,6 +11,7 @@ import LeadContactTimeline from './components/LeadContactTimeline';
 import type { LeadContact } from './components/LeadContactTimeline';
 import DeleteLeadButton from './components/DeleteLeadButton';
 import { TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
+import { leadArchiveReason, leadTourDate, todayInRio } from '@/lib/leadArchive';
 import type { Lead } from '../page';
 
 export async function generateMetadata({
@@ -64,6 +65,11 @@ export default async function LeadDetailPage({
   const contacts: LeadContact[] = (contactsResult.data ?? []) as LeadContact[];
   const tourDates: TourDate[] = (tourDatesResult.data ?? []) as unknown as TourDate[];
 
+  const archiveReason = leadArchiveReason(
+    { ...lead, tourDate: leadTourDate(lead.requested_days, tourDates.map(d => d.date)) },
+    todayInRio(),
+  );
+
   return (
     <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-6xl">
@@ -92,6 +98,7 @@ export default async function LeadDetailPage({
               leadId={lead.id}
               initialStatus={lead.status}
               initialNotes={lead.notes}
+              archiveReason={archiveReason}
             />
             <LeadContactTimeline leadId={lead.id} initialContacts={contacts} />
           </div>

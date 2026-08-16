@@ -7,24 +7,28 @@ import { useTranslations } from 'next-intl';
 import SourceBadge from './SourceBadge';
 import CampaignBadge from './CampaignBadge';
 import { fmtDate } from '@/lib/adminFormat';
-import type { Lead } from '../page';
+import type { LeadView } from '../page';
 
-export function KanbanCardContent({ lead, isDragging = false }: { lead: Lead; isDragging?: boolean }) {
+export function KanbanCardContent({ lead, isDragging = false }: { lead: LeadView; isDragging?: boolean }) {
   const t = useTranslations('admin.crm');
+  const tReason = useTranslations('admin.crm.motivoArquivo');
   const canConvert = lead.status !== 'closed' && lead.status !== 'lost';
+  const archived = lead.archiveReason !== null;
 
   return (
     <div
-      className={`bg-white rounded-xl border border-gray-200 p-3 select-none transition-shadow ${
-        isDragging ? 'shadow-lg rotate-1' : 'shadow-sm'
-      }`}
+      className={`rounded-xl border p-3 select-none transition-shadow ${
+        archived ? 'bg-gray-50 border-gray-200 border-dashed' : 'bg-white border-gray-200'
+      } ${isDragging ? 'shadow-lg rotate-1' : 'shadow-sm'}`}
     >
       {/* Header: name + source badge */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <Link
           href={`/admin/leads/${lead.id}`}
           onClick={e => e.stopPropagation()}
-          className="font-semibold text-sm text-gray-900 hover:text-green-700 transition-colors leading-snug"
+          className={`font-semibold text-sm hover:text-green-700 transition-colors leading-snug ${
+            archived ? 'text-gray-500' : 'text-gray-900'
+          }`}
         >
           {lead.name}
         </Link>
@@ -33,6 +37,15 @@ export function KanbanCardContent({ lead, isDragging = false }: { lead: Lead; is
           <CampaignBadge campaign={lead.campaign} />
         </div>
       </div>
+
+      {archived && (
+        <span
+          className="inline-block mb-1.5 px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-gray-200 text-gray-600"
+          title={tReason(lead.archiveReason ?? 'manual')}
+        >
+          {t('arquivado')}
+        </span>
+      )}
 
       {/* Email */}
       <a
@@ -51,12 +64,28 @@ export function KanbanCardContent({ lead, isDragging = false }: { lead: Lead; is
           </svg>
           {lead.pax}
         </span>
-        <span className="inline-flex items-center gap-1">
-          <svg className="h-3 w-3 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-          </svg>
-          {fmtDate(lead.created_at)}
-        </span>
+        {/* A data do tour é a informação operacional; a de criação só aparece
+            quando o lead ainda não tem data marcada. */}
+        {lead.tourDate ? (
+          <span
+            className={`inline-flex items-center gap-1 font-medium ${
+              lead.tourDatePast ? 'text-gray-400' : 'text-gray-700'
+            }`}
+            title={t('dataDoTour')}
+          >
+            <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+            </svg>
+            {fmtDate(lead.tourDate)}
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1" title={t('criadoEm')}>
+            <svg className="h-3 w-3 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
+            {fmtDate(lead.created_at)}
+          </span>
+        )}
       </div>
 
       {/* Actions */}
@@ -82,7 +111,7 @@ export function KanbanCardContent({ lead, isDragging = false }: { lead: Lead; is
   );
 }
 
-export default function KanbanCard({ lead }: { lead: Lead }) {
+export default function KanbanCard({ lead }: { lead: LeadView }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: lead.id,
     data: { lead },

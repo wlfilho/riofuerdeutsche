@@ -3,7 +3,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { useTranslations } from 'next-intl';
 import KanbanCard from './KanbanCard';
-import type { Lead, LeadStatus } from '../page';
+import type { LeadView, LeadStatus } from '../page';
 
 type ColumnConfig = {
   id: LeadStatus;
@@ -44,7 +44,7 @@ export default function KanbanColumn({
   leads,
 }: {
   column: ColumnConfig;
-  leads: Lead[];
+  leads: LeadView[];
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
   const t = useTranslations('admin.crm');
