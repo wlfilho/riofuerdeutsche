@@ -632,7 +632,19 @@
       "gruposSecao": "Grupos",
       "grupoAdicionaTodas": "Adiciona todas as atividades do grupo ao dia",
       "grupoAtividadesCount": "{count, plural, one {# atividade} other {# atividades}}",
-      "copiarLinkProposta": "Copiar link da proposta"
+      "copiarLinkProposta": "Copiar link da proposta",
+      "emailCliente": "E-mail",
+      "enviarEmail": "Enviar por e-mail",
+      "reenviarEmail": "Reenviar e-mail",
+      "semEmailCliente": "Proposta sem e-mail do cliente — edite a proposta para adicionar.",
+      "emailNuncaEnviado": "Marcada como enviada, mas nunca saiu por e-mail.",
+      "semEmailBadge": "sem e-mail",
+      "emailEnviadoEm": "{count, plural, one {Enviado em {data}} other {Enviado {count}× · último em {data}}}",
+      "erroEnvioEmail": "Falha no envio: {erro}",
+      "confirmarEnvioTitulo": "Enviar a proposta por e-mail?",
+      "confirmarEnvioTexto": "O cliente recebe em {email} o link permanente da proposta — assim ele guarda na caixa dele e nunca perde, mesmo que o WhatsApp saia do ar.",
+      "confirmarEnvioSoMarcar": "Só marcar como enviada",
+      "confirmarEnvioEnviar": "Enviar e marcar como enviada"
     },
     "atividades": {
       "breadcrumb": "Atividades",
@@ -1008,7 +1020,8 @@
         "posTour": "Pós-tour",
         "membros": "Membros",
         "sistema": "Sistema"
-      }
+      },
+      "envioSoPelaProposta": "Este template é enviado pelo botão da própria proposta (Propostas → abrir proposta → Enviar por e-mail)."
     },
     "configuracoes": {
       "titulo": "Configurações",

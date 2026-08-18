@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getAdminTranslations } from '@/i18n/admin';
 import { getProposals } from '@/lib/proposals';
 import { getProposalAnalyticsSummaries } from '@/lib/proposalAnalytics';
+import { getProposalEmailStatuses } from '@/lib/email/sendProposalEmail';
 import { createClient } from '@/utils/supabase/server';
 import PropostasListClient from './PropostasListClient';
 import AnfrageLinkButton from './AnfrageLinkButton';
@@ -88,10 +89,11 @@ export default async function PropostasPage({
   const { campaign } = await searchParams;
   const t = await getAdminTranslations('admin.propostas');
   const supabase = await createClient();
-  const [allProposals, analytics, { data: pendingLeads }, { data: proposalLeads }] =
+  const [allProposals, analytics, emailStatuses, { data: pendingLeads }, { data: proposalLeads }] =
     await Promise.all([
       getProposals(),
       getProposalAnalyticsSummaries(),
+      getProposalEmailStatuses(),
       // Leads still in the pre-proposal pipeline; leads moved to lost/closed in
       // the CRM (or already linked to a proposal) drop out of this strip.
       supabase
@@ -141,6 +143,7 @@ export default async function PropostasPage({
         <PropostasListClient
           initialProposals={proposals}
           analytics={analytics}
+          emailStatuses={emailStatuses}
           campaignByProposal={Object.fromEntries(campaignByProposal)}
         />
       </div>

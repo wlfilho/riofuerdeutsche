@@ -3,9 +3,12 @@
 import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { fmtDate, fmtEur } from '@/lib/adminFormat';
+import { fmtDate, fmtDateTime, fmtEur } from '@/lib/adminFormat';
 import { resolveDayTransportKey } from '@/lib/dayTransportLabel';
 import type { DepositBankInfo, Proposal, ProposalStatus } from '@/lib/proposals';
+// Só o tipo: `import type` some na compilação, então o lib de e-mail (Resend,
+// service role) não entra no bundle do browser.
+import type { ProposalEmailLogEntry } from '@/lib/email/sendProposalEmail';
 
 // ─── Format helpers ────────────────────────────────────────────────────────────
 // ATENÇÃO: formatDate/formatShortDate/formatEur/formatDuration/formatOnsiteCost e
@@ -588,9 +591,11 @@ async function downloadPDF(proposal: Proposal, bank: DepositBankInfo): Promise<v
 export default function PropostaOutputClient({
   proposal: initial,
   bank,
+  emailLog: initialEmailLog,
 }: {
   proposal: Proposal;
   bank: DepositBankInfo;
+  emailLog: ProposalEmailLogEntry[];
 }) {
   const t = useTranslations('admin.propostas');
   const tCommon = useTranslations('admin.common');
@@ -600,6 +605,14 @@ export default function PropostaOutputClient({
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  // ── Envio por e-mail ──
+  // O e-mail é o arquivo permanente do cliente (o WhatsApp some quando a conta
+  // cai). Envio sempre explícito; a troca de status só PERGUNTA, nunca dispara.
+  const [emailLog, setEmailLog] = useState<ProposalEmailLogEntry[]>(initialEmailLog);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  // Status pedido no select que ainda espera a decisão do modal.
+  const [pendingSentConfirm, setPendingSentConfirm] = useState(false);
 
   const proposal = useMemo(() => ({ ...initial, status }), [initial, status]);
 
@@ -640,7 +653,20 @@ export default function PropostaOutputClient({
     [shownItems, sortedDays]
   );
 
-  const handleStatusChange = async (newStatus: ProposalStatus) => {
+  const clientEmail = (initial.client_email ?? '').trim();
+
+  // Último envio que deu certo: decide entre "Enviar" e "Reenviar", e se a
+  // troca de status para 'sent' ainda precisa perguntar.
+  const lastSentEntry = useMemo(
+    () => emailLog.find(e => e.status === 'sent') ?? null,
+    [emailLog],
+  );
+  const sentCount = useMemo(
+    () => emailLog.filter(e => e.status === 'sent').length,
+    [emailLog],
+  );
+
+  const applyStatus = useCallback(async (newStatus: ProposalStatus) => {
     setStatusSaving(true);
     try {
       const res = await fetch(`/api/admin/proposals/${initial.id}`, {
@@ -653,8 +679,43 @@ export default function PropostaOutputClient({
       // status stays unchanged on network error
     } finally {
       setStatusSaving(false);
+      setPendingSentConfirm(false);
     }
+  }, [initial.id]);
+
+  // Marcar como "enviada" sem nunca ter mandado o e-mail é justamente o caso em
+  // que a proposta se perde depois. A tela pergunta — e nunca dispara sozinha,
+  // porque e-mail não tem desfazer.
+  const handleStatusChange = (newStatus: ProposalStatus) => {
+    if (newStatus === 'sent' && status !== 'sent' && clientEmail && !lastSentEntry) {
+      setPendingSentConfirm(true);
+      return;
+    }
+    void applyStatus(newStatus);
   };
+
+  const handleSendEmail = useCallback(async () => {
+    setEmailSending(true);
+    setEmailError(null);
+    try {
+      const res = await fetch(`/api/admin/proposals/${initial.id}/send-email`, {
+        method: 'POST',
+      });
+      const body = await res.json().catch(() => ({}));
+      // A rota registra tentativa que falhou também; o histórico da tela mostra
+      // as duas coisas.
+      if (body?.entry) setEmailLog(prev => [body.entry as ProposalEmailLogEntry, ...prev]);
+      // O envio marca a proposta como enviada; num erro de envio o status pode
+      // ter mudado assim mesmo, e a resposta diz isso.
+      if (body?.status === 'sent') setStatus('sent');
+      if (!res.ok) setEmailError(body?.error ?? tCommon('erroDesconhecido'));
+    } catch {
+      setEmailError(tCommon('erroRede'));
+    } finally {
+      setEmailSending(false);
+      setPendingSentConfirm(false);
+    }
+  }, [initial.id, tCommon]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(whatsappText);
@@ -817,6 +878,48 @@ export default function PropostaOutputClient({
               </dd>
             </div>
 
+            {/* E-mail ao cliente — o arquivo permanente da proposta */}
+            <div className="flex items-start gap-4">
+              <dt className="text-sm text-gray-400 w-28 shrink-0 pt-1">{t('emailCliente')}</dt>
+              <dd className="min-w-0 flex-1">
+                {clientEmail ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm text-gray-800 truncate">{clientEmail}</span>
+                    <button
+                      onClick={handleSendEmail}
+                      disabled={emailSending}
+                      className="text-xs font-semibold px-2 py-1 rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors shrink-0 disabled:opacity-50"
+                    >
+                      {emailSending
+                        ? tCommon('enviando')
+                        : lastSentEntry
+                          ? t('reenviarEmail')
+                          : t('enviarEmail')}
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-sm text-amber-700">{t('semEmailCliente')}</span>
+                )}
+
+                {lastSentEntry ? (
+                  <p className="text-xs text-gray-400 mt-1">
+                    {t('emailEnviadoEm', {
+                      data: fmtDateTime(lastSentEntry.created_at),
+                      count: sentCount,
+                    })}
+                  </p>
+                ) : clientEmail && status === 'sent' ? (
+                  <p className="text-xs text-amber-600 mt-1">{t('emailNuncaEnviado')}</p>
+                ) : null}
+
+                {emailError && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {t('erroEnvioEmail', { erro: emailError })}
+                  </p>
+                )}
+              </dd>
+            </div>
+
             {/* Total */}
             <div className="flex items-center gap-4 pt-2 border-t border-gray-100 mt-2">
               <dt className="text-sm text-gray-400 w-28 shrink-0">{tCommon('total')}</dt>
@@ -967,6 +1070,42 @@ export default function PropostaOutputClient({
         </div>
 
       </div>
+
+      {/* Confirmação ao marcar como enviada: o e-mail nunca sai sozinho, mas
+          também não deixa a proposta virar "enviada" sem ninguém perguntar. */}
+      {pendingSentConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-base font-bold text-gray-900">{t('confirmarEnvioTitulo')}</h3>
+            <p className="text-sm text-gray-600 mt-2">
+              {t('confirmarEnvioTexto', { email: clientEmail })}
+            </p>
+            <div className="flex flex-wrap justify-end gap-2 mt-6">
+              <button
+                onClick={() => setPendingSentConfirm(false)}
+                disabled={emailSending || statusSaving}
+                className="px-3 py-2 text-sm font-semibold text-gray-500 hover:text-gray-700 disabled:opacity-50"
+              >
+                {tCommon('cancelar')}
+              </button>
+              <button
+                onClick={() => applyStatus('sent')}
+                disabled={emailSending || statusSaving}
+                className="px-3 py-2 text-sm font-semibold bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              >
+                {t('confirmarEnvioSoMarcar')}
+              </button>
+              <button
+                onClick={handleSendEmail}
+                disabled={emailSending || statusSaving}
+                className="px-3 py-2 text-sm font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              >
+                {emailSending ? tCommon('enviando') : t('confirmarEnvioEnviar')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
