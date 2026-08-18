@@ -8,6 +8,9 @@ import { fmtEur } from '@/lib/adminFormat';
 import CampaignBadge from '../leads/components/CampaignBadge';
 import type { Proposal, ProposalStatus } from '@/lib/proposals';
 import type { ProposalAnalyticsSummary } from '@/lib/proposalAnalytics';
+// Só o tipo: `import type` some na compilação e o lib de e-mail (Resend,
+// service role) não entra no bundle do browser.
+import type { ProposalEmailStatus } from '@/lib/email/sendProposalEmail';
 
 
 // Dias de tour reais da proposta (únicos, ordenados), extraídos dos itens —
@@ -137,10 +140,13 @@ function ViewsBadge({ proposalId, summary }: { proposalId: string; summary?: Pro
 export default function PropostasListClient({
   initialProposals,
   analytics = {},
+  emailStatuses = {},
   campaignByProposal = {},
 }: {
   initialProposals: Proposal[];
   analytics?: Record<string, ProposalAnalyticsSummary>;
+  /** Envio por e-mail de cada proposta; ausente = nunca saiu por e-mail. */
+  emailStatuses?: Record<string, ProposalEmailStatus>;
   /** Campanha de cada proposta, herdada do lead que aponta para ela. */
   campaignByProposal?: Record<string, string | null>;
 }) {
@@ -276,6 +282,16 @@ export default function PropostasListClient({
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={p.status} />
+                    {/* Proposta "enviada" que nunca saiu por e-mail é a que se
+                        perde quando o WhatsApp some — fica marcada aqui. */}
+                    {p.status === 'sent' && !emailStatuses[p.id]?.last_sent_at && (
+                      <span
+                        title={t('emailNuncaEnviado')}
+                        className="block mt-1 text-[11px] font-semibold text-amber-600"
+                      >
+                        {t('semEmailBadge')}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <ViewsBadge proposalId={p.id} summary={analytics[p.id]} />

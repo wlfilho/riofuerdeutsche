@@ -128,6 +128,11 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
   const [testToast, setTestToast] = useState<string | null>(null)
 
   const [showSendModal, setShowSendModal] = useState(false)
+
+  // "Enviar para cliente" monta os shortcodes a partir de tour_clients — não
+  // conhece {{link}}/{{eckdaten}}/{{reisezeitraum}}, que só a proposta preenche.
+  // O envio destes templates é pelo botão da própria proposta.
+  const isProposalTemplate = template.slug.startsWith('angebot_link')
   const [sendingToClient, setSendingToClient] = useState(false)
   const [clientSentToast, setClientSentToast] = useState<string | null>(null)
 
@@ -285,7 +290,9 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
             <div className="relative flex flex-col items-center">
               <button
                 onClick={() => setShowSendModal(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-green-600 bg-green-600 text-white hover:bg-green-700 transition-colors"
+                disabled={isProposalTemplate}
+                title={isProposalTemplate ? t('envioSoPelaProposta') : undefined}
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-green-600 bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Users className="w-3.5 h-3.5" />
                 {t('enviarParaCliente')}

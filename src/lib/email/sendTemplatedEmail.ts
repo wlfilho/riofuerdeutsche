@@ -12,6 +12,14 @@ type SendTemplatedEmailParams = {
   subjectOverride?: string
   /** Locale do destinatário; sem ele, resolve por `contacts.locale` do `to`. */
   locale?: string
+  /** Cópia oculta — usada para o Will guardar o envio na própria caixa. */
+  bcc?: string
+  /**
+   * Ajuste no HTML já interpolado, para blocos que só existem sob condição
+   * (o template não tem `if`). Ex.: remover o botão do Instagram quando não há
+   * perfil configurado.
+   */
+  transformHtml?: (html: string) => string
 }
 
 export async function sendTemplatedEmail({
@@ -20,7 +28,15 @@ export async function sendTemplatedEmail({
   data,
   subjectOverride,
   locale,
-}: SendTemplatedEmailParams): Promise<{ success: boolean; error?: string; id?: string }> {
+  bcc,
+  transformHtml,
+}: SendTemplatedEmailParams): Promise<{
+  success: boolean
+  error?: string
+  id?: string
+  /** Assunto já interpolado — quem registra o envio em log grava este texto. */
+  subject?: string
+}> {
   try {
     const resolvedLocale = locale ?? (await getRecipientLocale(to))
     const template = await getEmailTemplate(slug, resolvedLocale)
@@ -47,17 +63,19 @@ export async function sendTemplatedEmail({
     }
 
     const subject = renderTemplate(subjectOverride ?? template.subject, dataWithSignature)
-    const html = renderTemplate(template.html_body, dataWithSignature)
+    const rendered = renderTemplate(template.html_body, dataWithSignature)
+    const html = transformHtml ? transformHtml(rendered) : rendered
 
     const { data: resendData, error: sendError } = await resend.emails.send({
       from: 'Will · Rio für Deutsche <will@riofuerdeutsche.de>',
       to,
+      ...(bcc ? { bcc } : {}),
       subject,
       html,
     })
 
-    if (sendError) return { success: false, error: sendError.message }
-    return { success: true, id: resendData?.id }
+    if (sendError) return { success: false, error: sendError.message, subject }
+    return { success: true, id: resendData?.id, subject }
   } catch (err) {
     return { success: false, error: String(err) }
   }
