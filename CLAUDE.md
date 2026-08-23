@@ -46,6 +46,15 @@ Guide chapters and pages are stored as **TipTap JSON** in the database (`guide_c
 
 `POST /api/membership/upgrade` — webhook that validates `MEMBERSHIP_UPGRADE_SECRET`, then calls Supabase RPC `upgrade_to_premium` to update role, `premium_until`, and `guide_edition`.
 
+### Contact Info (phone, WhatsApp, email, social)
+
+Never hardcode contact info anywhere in the app — it must always come from the admin's contact settings (edited under `/admin/configuracoes`, stored in Supabase, exposed to Server Components via `getSettings()` + `buildContactUrls()` in `src/lib/settings.ts`). This applies to any new page, component, or feature that shows a WhatsApp/phone/email/social link (proposal pages, tour pages, forms, emails, etc.).
+
+- `getSettings()` reads `public_contact_info` (public view) and `site_settings` (admin-only, RLS).
+- `buildContactUrls(settings)` returns ready-to-use hrefs: `whatsappHref`, `phoneHref`, `emailHref`, `instagramHref`, `youtubeHref`, `facebookHref`, `telegramHref`.
+- Usage pattern: call both in the Server Component/page (`const { whatsappHref, emailHref } = buildContactUrls(await getSettings())`), then pass the href down or use directly in JSX. Client components that need it (e.g. `Footer.tsx`) take `contact: ContactUrls` as a prop from a server wrapper (see `FooterServer.tsx`, `NavbarServer.tsx`) — they keep a `FALLBACK` constant only as a prop default, never as the primary source.
+- A hardcoded `wa.me/...` or `mailto:...` literal outside `src/lib/settings.ts` and the `FALLBACK` constants is a bug — this happened once already in `src/components/proposal/ProposalPage.tsx` (stale WhatsApp number/email baked into the JSX) and was fixed by wiring it to `getSettings()`/`buildContactUrls()` like everywhere else.
+
 ### Review System
 
 - Public submission at `/bewertung-schreiben` with honeypot spam protection and optional photo upload

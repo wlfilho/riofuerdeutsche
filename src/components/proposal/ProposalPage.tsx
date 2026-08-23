@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { getDepositBankInfo, getProposalByPublicToken, type ProposalItem } from '@/lib/proposals';
 import { formatCurrency, formatDate as formatDateIntl } from '@/lib/format';
+import { getSettings, buildContactUrls } from '@/lib/settings';
 import { proposalCurrency, resolveProposalLocale } from './locale';
 import CopyButton from './CopyButton';
 import ShareButtons from './ShareButtons';
@@ -196,6 +197,9 @@ export default async function ProposalPage({
   const deposit = proposal.deposit_amount ?? 0;
   const bank = deposit > 0 ? await getDepositBankInfo() : null;
   const onsiteCosts = collectOnsiteCosts(proposal.items);
+  // Telefone/e-mail de contato vêm das configurações do admin, como em todo
+  // o resto do site — nunca hardcoded aqui.
+  const { whatsappHref, emailHref } = buildContactUrls(await getSettings());
 
   // O cliente nunca vê preço por atividade nem linha de transporte.
   // Dias contam a partir das atividades: propostas antigas podem carregar uma
@@ -500,7 +504,7 @@ export default async function ProposalPage({
                 </a>
               ) : (
                 <a
-                  href="https://wa.me/5521990564944"
+                  href={whatsappHref}
                   target="_blank"
                   rel="noopener noreferrer"
                   data-track-click="whatsapp_cta"
@@ -619,7 +623,7 @@ export default async function ProposalPage({
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <a
-              href="https://wa.me/5521990564944"
+              href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
               data-track-click="whatsapp_contact"
@@ -629,7 +633,7 @@ export default async function ProposalPage({
               {t('replyWhatsApp')}
             </a>
             <a
-              href="mailto:riofuerdeutsche@gmail.com"
+              href={emailHref}
               data-track-click="email_contact"
               className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
             >
