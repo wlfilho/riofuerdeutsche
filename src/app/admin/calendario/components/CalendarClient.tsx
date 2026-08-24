@@ -60,6 +60,23 @@ export default function CalendarClient({
     return map;
   }, [visibleTours]);
 
+  // Dias com tours de 2+ clientes diferentes: um guia só cobre um pack por
+  // dia, então isso é sempre um alerta — independente do filtro de status,
+  // por isso usa `tours` (todos) e não `visibleTours`.
+  const conflictDays = useMemo(() => {
+    const leadsByDay = new Map<string, Set<string>>();
+    for (const t of tours) {
+      const set = leadsByDay.get(t.date) ?? new Set<string>();
+      set.add(t.lead_id);
+      leadsByDay.set(t.date, set);
+    }
+    const days = new Set<string>();
+    for (const [date, leads] of leadsByDay) {
+      if (leads.size > 1) days.add(date);
+    }
+    return days;
+  }, [tours]);
+
   // Tours in the active range: selected day > current view around the anchor
   const { listTours, listTitle } = useMemo(() => {
     if (selectedDay) {
@@ -130,6 +147,7 @@ export default function CalendarClient({
             view={view}
             anchor={anchor}
             toursByDay={toursByDay}
+            conflictDays={conflictDays}
             selectedDay={selectedDay}
             onDayClick={toggleDay}
             onNavigate={setAnchorISO}
@@ -232,6 +250,7 @@ export default function CalendarClient({
         ) : (
           <TourList
             tours={listTours}
+            conflictDays={conflictDays}
             groupByMonth={view === 'ano' && !selectedDay}
             onEdit={tour => setModal({ editing: tour })}
             onDelete={handleDelete}

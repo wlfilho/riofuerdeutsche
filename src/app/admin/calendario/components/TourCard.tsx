@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import {
+  AlertTriangle,
   CheckCircle2,
   Clock,
   ExternalLink,
@@ -66,13 +67,28 @@ function InfoItem({
 const INLINE_ACTION_BTN =
   'inline-flex items-center justify-center p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0';
 
+function ConflictBadge() {
+  const t = useTranslations('admin.calendario');
+  return (
+    <span
+      title={t('conflitoAgendaDica')}
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-[11px] font-semibold whitespace-nowrap"
+    >
+      <AlertTriangle className="w-3 h-3 shrink-0" />
+      {t('conflitoAgenda')}
+    </span>
+  );
+}
+
 /** Full-width row card used in the tour list. */
 export default function TourCard({
   tour,
+  hasConflict = false,
   onEdit,
   onDelete,
 }: {
   tour: TourDate;
+  hasConflict?: boolean;
   onEdit: (tour: TourDate) => void;
   onDelete: (tour: TourDate) => void;
 }) {
@@ -84,7 +100,11 @@ export default function TourCard({
   const d = parseISODate(tour.date);
   const day = tour.date.slice(8, 10);
   return (
-    <div className="relative rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div
+      className={`relative rounded-xl border bg-white p-4 shadow-sm ${
+        hasConflict ? 'border-red-200 ring-1 ring-red-100' : 'border-gray-200'
+      }`}
+    >
       {/* Edit / delete pinned to the top-right corner */}
       <div className="absolute top-2 right-2 flex items-center gap-0.5">
         <button
@@ -158,8 +178,9 @@ export default function TourCard({
             )}
           </div>
           <p className="text-sm text-gray-500 truncate mt-0.5">{tour.tour_name}</p>
-          <div className="mt-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
             <StatusBadge status={tour.status} />
+            {hasConflict && <ConflictBadge />}
           </div>
         </div>
 

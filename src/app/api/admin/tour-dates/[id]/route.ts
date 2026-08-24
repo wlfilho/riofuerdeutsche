@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { TOUR_DATE_SELECT } from '@/lib/tourDates';
+import { findConflictingTourDates, TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
+import { sendDateConflictAlert } from '@/lib/email/sendDateConflictAlert';
 
 async function verifyAdmin() {
   const supabase = await createClient();
@@ -48,6 +49,14 @@ export async function PATCH(
     return NextResponse.json({ error: 'Nenhum campo para atualizar.' }, { status: 400 });
   }
 
+  // Só precisa saber a data antiga pra decidir se checa conflito depois —
+  // reenviar a mesma data (ex.: editando só o preço) não deve re-alertar.
+  let oldDate: string | null = null;
+  if (updates.date !== undefined) {
+    const { data: current } = await supabase.from('tour_dates').select('date').eq('id', id).single();
+    oldDate = current?.date ?? null;
+  }
+
   const { data, error } = await supabase
     .from('tour_dates')
     .update(updates)
@@ -56,6 +65,20 @@ export async function PATCH(
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  const updated = data as unknown as TourDate;
+  if (updates.date !== undefined && updates.date !== oldDate) {
+    const others = await findConflictingTourDates(supabase, updated.date, updated.lead_id);
+    if (others.length > 0) {
+      await sendDateConflictAlert([{
+        date: updated.date,
+        tours: [
+          { lead_name: updated.lead?.name ?? '—', tour_name: updated.tour_name, status: updated.status },
+          ...others.map(o => ({ lead_name: o.lead?.name ?? '—', tour_name: o.tour_name, status: o.status })),
+        ],
+      }]);
+    }
+  }
 
   return NextResponse.json({ tourDate: data });
 }

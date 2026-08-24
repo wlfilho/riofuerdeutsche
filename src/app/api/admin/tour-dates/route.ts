@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { TOUR_DATE_SELECT } from '@/lib/tourDates';
+import { findConflictingTourDates, TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
+import { sendDateConflictAlert, type ConflictDateGroup } from '@/lib/email/sendDateConflictAlert';
 
 async function verifyAdmin() {
   const supabase = await createClient();
@@ -75,6 +76,27 @@ export async function POST(request: NextRequest) {
     .select(TOUR_DATE_SELECT);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Best-effort: um dia de tour novo pode colidir com o de outro cliente já
+  // agendado. Checagem roda por linha inserida (um tour de vários dias pode
+  // colidir só em alguns) e o alerta sai consolidado num único e-mail.
+  const inserted = (data ?? []) as unknown as TourDate[];
+  const conflictGroups: ConflictDateGroup[] = [];
+  for (const row of inserted) {
+    const others = await findConflictingTourDates(supabase, row.date, row.lead_id);
+    if (others.length > 0) {
+      conflictGroups.push({
+        date: row.date,
+        tours: [
+          { lead_name: row.lead?.name ?? '—', tour_name: row.tour_name, status: row.status },
+          ...others.map(o => ({ lead_name: o.lead?.name ?? '—', tour_name: o.tour_name, status: o.status })),
+        ],
+      });
+    }
+  }
+  if (conflictGroups.length > 0) {
+    await sendDateConflictAlert(conflictGroups);
+  }
 
   return NextResponse.json({ tourDates: data ?? [] }, { status: 201 });
 }

@@ -7,11 +7,13 @@ import TourCard from './TourCard';
 
 export default function TourList({
   tours,
+  conflictDays,
   groupByMonth = false,
   onEdit,
   onDelete,
 }: {
   tours: TourDate[];
+  conflictDays?: Set<string>;
   groupByMonth?: boolean;
   onEdit: (tour: TourDate) => void;
   onDelete: (tour: TourDate) => void;
@@ -22,7 +24,13 @@ export default function TourList({
     return (
       <div className="space-y-3">
         {tours.map(tour => (
-          <TourCard key={tour.id} tour={tour} onEdit={onEdit} onDelete={onDelete} />
+          <TourCard
+            key={tour.id}
+            tour={tour}
+            hasConflict={conflictDays?.has(tour.date) ?? false}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
         ))}
       </div>
     );
@@ -51,7 +59,13 @@ export default function TourList({
           </div>
           <div className="space-y-3">
             {monthTours.map(tour => (
-              <TourCard key={tour.id} tour={tour} onEdit={onEdit} onDelete={onDelete} />
+              <TourCard
+                key={tour.id}
+                tour={tour}
+                hasConflict={conflictDays?.has(tour.date) ?? false}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
             ))}
           </div>
         </section>
