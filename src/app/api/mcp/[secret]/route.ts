@@ -54,10 +54,10 @@ function safe<Args>(
 
 /** Chama a API REST da instância uazapi. Lança erro claro em caso de falha HTTP. */
 async function uazapi(path: string, body: Record<string, unknown>): Promise<unknown> {
-  const baseUrl = process.env.UAZAPI_BASE_URL;
+  const baseUrl = process.env.UAZAPI_URL;
   const token = process.env.UAZAPI_TOKEN;
   if (!baseUrl || !token) {
-    throw new Error("uazapi não configurado: defina UAZAPI_BASE_URL e UAZAPI_TOKEN.");
+    throw new Error("uazapi não configurado: defina UAZAPI_URL e UAZAPI_TOKEN.");
   }
 
   const res = await fetch(`${baseUrl}${path}`, {
