@@ -12,6 +12,7 @@ import type { LeadContact } from './components/LeadContactTimeline';
 import DeleteLeadButton from './components/DeleteLeadButton';
 import { TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
 import { leadArchiveReason, leadTourDate, todayInRio } from '@/lib/leadArchive';
+import { fetchLeadGroupsMap } from '@/lib/leadGroups';
 import type { Lead } from '../page';
 
 export async function generateMetadata({
@@ -42,7 +43,7 @@ export default async function LeadDetailPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [leadResult, contactsResult, tourDatesResult] = await Promise.all([
+  const [leadResult, contactsResult, tourDatesResult, groupsByLead] = await Promise.all([
     supabase.from('price_leads').select('*').eq('id', id).single(),
     supabase
       .from('lead_contacts')
@@ -55,13 +56,14 @@ export default async function LeadDetailPage({
       .eq('lead_id', id)
       .order('date', { ascending: true })
       .order('start_time', { ascending: true, nullsFirst: true }),
+    fetchLeadGroupsMap(supabase),
   ]);
 
   if (leadResult.error || !leadResult.data) {
     notFound();
   }
 
-  const lead = leadResult.data as Lead;
+  const lead = { ...(leadResult.data as Lead), groups: groupsByLead.get(id) ?? [] };
   const contacts: LeadContact[] = (contactsResult.data ?? []) as LeadContact[];
   const tourDates: TourDate[] = (tourDatesResult.data ?? []) as unknown as TourDate[];
 

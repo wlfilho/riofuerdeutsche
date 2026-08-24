@@ -4,8 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import SourceBadge from '../../components/SourceBadge';
-import CampaignBadge from '../../components/CampaignBadge';
+import GroupBadges from '@/components/admin/GroupBadges';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
+import type { LeadGroup } from '@/lib/leadGroups';
 import type { Lead } from '../../page';
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -17,7 +18,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
-export default function LeadDataCard({ lead }: { lead: Lead }) {
+export default function LeadDataCard({ lead }: { lead: Lead & { groups: LeadGroup[] } }) {
   const [claudeUrl, setClaudeUrl] = useState(lead.claude_chat_url || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -121,9 +122,9 @@ export default function LeadDataCard({ lead }: { lead: Lead }) {
           <SourceBadge source={lead.source} />
         </Row>
 
-        {lead.campaign && (
-          <Row label={t('campanha')}>
-            <CampaignBadge campaign={lead.campaign} />
+        {lead.groups.length > 0 && (
+          <Row label={t('grupos')}>
+            <GroupBadges groups={lead.groups} />
           </Row>
         )}
 

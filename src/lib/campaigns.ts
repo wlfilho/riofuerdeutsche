@@ -10,7 +10,7 @@
  * em `public.anfrage<Campanha>`.
  */
 
-export type CampaignSlug = 'aida-karneval-2028';
+export type CampaignSlug = 'aida-karneval-2027' | 'aida-karneval-2028';
 
 export interface Campaign {
   slug: CampaignSlug;
@@ -22,22 +22,43 @@ export interface Campaign {
   interests: string[];
   /** Rótulo pt-BR de cada interesse, para as notificações e o admin. */
   interestLabels: Record<string, string>;
+  /** Slug do template em `email_templates` usado na confirmação ao lead. */
+  emailTemplateSlug: string;
 }
 
+/** Interesses são os mesmos independente do ano — só a data do navio muda. */
+const AIDA_INTERESTS = ['sambodromo', 'klassiker', 'blocos', 'strand', 'favela', 'offen'];
+const AIDA_INTEREST_LABELS: Record<string, string> = {
+  sambodromo: 'Sambódromo (desfile)',
+  klassiker: 'Clássicos: Pão de Açúcar & Cristo',
+  blocos: 'Carnaval de rua (blocos)',
+  strand: 'Praia & Copacabana',
+  favela: 'Favela (Rocinha)',
+  offen: 'Indeciso / aberto a sugestões',
+};
+
 export const CAMPAIGNS: Record<CampaignSlug, Campaign> = {
+  // Datas ainda NÃO confirmadas pela AIDA — não há cruzeiro "Karneval" público
+  // divulgado para a temporada 2026/2027 (a linha "Große Winterpause Brasilien
+  // zum Karneval" pula para 2027/2028, caindo no Carnaval de 2028). 07 e 08 são
+  // placeholder (dom + seg do Carnaval 2027, chute do Will) — ajustar assim que
+  // ele tiver a confirmação real do cliente/da AIDA, e então tirar o aviso de
+  // "data provisória" do formulário e do e-mail de confirmação.
+  'aida-karneval-2027': {
+    slug: 'aida-karneval-2027',
+    label: 'AIDA Karneval 2027 (datas provisórias)',
+    fixedDays: ['2027-02-07', '2027-02-08'],
+    interests: AIDA_INTERESTS,
+    interestLabels: AIDA_INTEREST_LABELS,
+    emailTemplateSlug: 'anfrage_aida_bestaetigung_2027',
+  },
   'aida-karneval-2028': {
     slug: 'aida-karneval-2028',
     label: 'AIDA Karneval 2028',
     fixedDays: ['2028-02-26', '2028-02-27'],
-    interests: ['sambodromo', 'klassiker', 'blocos', 'strand', 'favela', 'offen'],
-    interestLabels: {
-      sambodromo: 'Sambódromo (desfile)',
-      klassiker: 'Clássicos: Pão de Açúcar & Cristo',
-      blocos: 'Carnaval de rua (blocos)',
-      strand: 'Praia & Copacabana',
-      favela: 'Favela (Rocinha)',
-      offen: 'Indeciso / aberto a sugestões',
-    },
+    interests: AIDA_INTERESTS,
+    interestLabels: AIDA_INTEREST_LABELS,
+    emailTemplateSlug: 'anfrage_aida_bestaetigung',
   },
 };
 
@@ -47,28 +68,6 @@ export function getCampaign(slug: unknown): Campaign | null {
   return typeof slug === 'string' && slug in CAMPAIGNS
     ? CAMPAIGNS[slug as CampaignSlug]
     : null;
-}
-
-export function campaignLabel(slug: string | null | undefined): string | null {
-  return getCampaign(slug)?.label ?? null;
-}
-
-/**
- * Regra única do filtro por campanha, usada por CRM, leads e propostas.
- *
- * Mora aqui e não junto do componente de filtro porque quem chama é Server
- * Component: função exportada de um módulo 'use client' não pode ser invocada
- * no servidor — o build passa e só quebra em runtime.
- *
- * Sem filtro devolve tudo; 'none' seleciona quem não está em campanha alguma.
- */
-export function matchesCampaign(
-  leadCampaign: string | null | undefined,
-  filter: string | undefined,
-): boolean {
-  if (!filter) return true;
-  if (filter === 'none') return !leadCampaign;
-  return leadCampaign === filter;
 }
 
 /**

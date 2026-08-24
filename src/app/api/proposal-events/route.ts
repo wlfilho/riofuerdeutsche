@@ -17,6 +17,11 @@ import { createClient } from '@/utils/supabase/server';
  * Robôs e IAs (link colado num agente que navega com headless browser) também
  * não contam: user-agent de automação é rejeitado em TODOS os eventos, antes
  * de qualquer acesso ao banco (BOT_UA_RE abaixo).
+ *
+ * De onde veio a abertura: país e cidade do IP são lidos dos headers de
+ * geolocalização da Vercel e gravados junto do evento (geoFromHeaders). É o
+ * sinal que separa "o cliente na Alemanha abriu" de "abriram daqui do Brasil"
+ * quando o fuso do navegador não decide — o IP em si nunca é guardado.
  */
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -73,6 +78,26 @@ function buildMetadata(type: EventType, raw: Record<string, unknown>): Record<st
       return { target, at_seconds: num(raw.at_seconds, 0, 86400) ?? 0 };
     }
   }
+}
+
+// Geolocalização aproximada do IP, injetada pela Vercel na borda. Em dev local
+// os headers não existem: fica null e a UI mostra "—" em vez de fingir origem.
+function geoFromHeaders(request: NextRequest): { country: string | null; city: string | null } {
+  const rawCountry = str(request.headers.get('x-vercel-ip-country'), 2)?.toUpperCase() ?? null;
+  const country = rawCountry && /^[A-Z]{2}$/.test(rawCountry) ? rawCountry : null;
+
+  // A cidade vem percent-encoded ("Rio%20de%20Janeiro"); acentos quebrados no
+  // encode não valem uma exceção — cai no valor cru.
+  const rawCity = str(request.headers.get('x-vercel-ip-city'), 120);
+  let city: string | null = null;
+  if (rawCity) {
+    try {
+      city = decodeURIComponent(rawCity);
+    } catch {
+      city = rawCity;
+    }
+  }
+  return { country, city };
 }
 
 async function isAdminRequest(): Promise<boolean> {
@@ -138,6 +163,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 404 });
   }
 
+  const geo = geoFromHeaders(request);
+
   const { error } = await admin.from('proposal_events').insert({
     proposal_id: proposal.id,
     session_id: sessionId,
@@ -147,6 +174,8 @@ export async function POST(request: NextRequest) {
     user_agent: userAgent,
     referrer: type === 'open' ? str(body.referrer, 300) : null,
     locale: str(body.locale, 10),
+    country: geo.country,
+    city: geo.city,
   });
 
   if (error) {

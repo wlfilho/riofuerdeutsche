@@ -2,8 +2,10 @@ import { getAdminTranslations } from '@/i18n/admin';
 import { createClient } from '@/utils/supabase/server';
 import LeadsViewWrapper from './components/LeadsViewWrapper';
 import LeadManualSheet from './components/LeadManualSheet';
-import { matchesCampaign } from '@/lib/campaigns';
+import { fetchLeadGroupsMap, matchesGroup, type LeadGroup } from '@/lib/leadGroups';
 import { todayInRio, withArchiveState, type ArchiveState } from '@/lib/leadArchive';
+
+export type { LeadGroup };
 
 export async function generateMetadata() {
   const t = await getAdminTranslations('admin.crm');
@@ -36,29 +38,33 @@ export interface Lead {
   updated_at: string;
 }
 
-/** Lead com a data do tour e o estado de arquivamento — ver src/lib/leadArchive.ts. */
-export type LeadView = Lead & ArchiveState;
+/**
+ * Lead com a data do tour, o estado de arquivamento e as etiquetas manuais
+ * — ver src/lib/leadArchive.ts e src/lib/leadGroups.ts.
+ */
+export type LeadView = Lead & ArchiveState & { groups: LeadGroup[] };
 
 export default async function LeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; source?: string; campaign?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; source?: string; group?: string; q?: string }>;
 }) {
   const params = await searchParams;
   const t = await getAdminTranslations('admin.crm');
   const tc = await getAdminTranslations('admin.common');
   const supabase = await createClient();
 
-  const [{ data, error }, { data: tourDateRows }] = await Promise.all([
+  const [{ data, error }, { data: tourDateRows }, groupsByLead] = await Promise.all([
     supabase.from('price_leads').select('*').order('created_at', { ascending: false }),
     supabase.from('tour_dates').select('lead_id, date'),
+    fetchLeadGroupsMap(supabase),
   ]);
 
   const allLeads: LeadView[] = withArchiveState(
     (data ?? []) as Lead[],
     (tourDateRows ?? []) as { lead_id: string; date: string }[],
     todayInRio(),
-  );
+  ).map(lead => ({ ...lead, groups: groupsByLead.get(lead.id) ?? [] }));
 
   // Metrics always from full list, arquivados incluídos: conversão só faz
   // sentido sobre negócios encerrados, que são justamente os que saem da visão.
@@ -73,7 +79,7 @@ export default async function LeadsPage({
   // kanban ele é a própria coluna, então filtrar por status esvaziaria o
   // quadro. Os demais filtros valem para as duas visões — sem isso o kanban
   // ignorava a campanha e misturava o carnaval com o resto.
-  let filtered = allLeads.filter(l => matchesCampaign(l.campaign, params.campaign));
+  let filtered = allLeads.filter(l => matchesGroup(l.groups, params.group));
   if (params.source) filtered = filtered.filter(l => l.source === params.source);
   if (params.q) {
     const q = params.q.toLowerCase();
@@ -136,7 +142,7 @@ export default async function LeadsPage({
           filteredLeads={tableLeads}
           currentStatus={params.status}
           currentSource={params.source}
-          currentCampaign={params.campaign}
+          currentGroup={params.group}
           currentQ={params.q}
         />
       </div>

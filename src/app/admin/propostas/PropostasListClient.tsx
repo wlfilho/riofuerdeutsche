@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { fmtEur } from '@/lib/adminFormat';
-import CampaignBadge from '../leads/components/CampaignBadge';
+import GroupBadges from '@/components/admin/GroupBadges';
 import type { Proposal, ProposalStatus } from '@/lib/proposals';
+import type { LeadGroup } from '@/lib/leadGroups';
 import type { ProposalAnalyticsSummary } from '@/lib/proposalAnalytics';
 // Só o tipo: `import type` some na compilação e o lib de e-mail (Resend,
 // service role) não entra no bundle do browser.
@@ -141,14 +142,14 @@ export default function PropostasListClient({
   initialProposals,
   analytics = {},
   emailStatuses = {},
-  campaignByProposal = {},
+  groupsByProposal = {},
 }: {
   initialProposals: Proposal[];
   analytics?: Record<string, ProposalAnalyticsSummary>;
   /** Envio por e-mail de cada proposta; ausente = nunca saiu por e-mail. */
   emailStatuses?: Record<string, ProposalEmailStatus>;
-  /** Campanha de cada proposta, herdada do lead que aponta para ela. */
-  campaignByProposal?: Record<string, string | null>;
+  /** Etiquetas de cada proposta, herdadas do lead que aponta para ela. */
+  groupsByProposal?: Record<string, LeadGroup[]>;
 }) {
   const t = useTranslations('admin.propostas');
   const tCommon = useTranslations('admin.common');
@@ -253,7 +254,7 @@ export default function PropostasListClient({
                           {p.internal_label}
                         </span>
                       )}
-                      <CampaignBadge campaign={campaignByProposal[p.id] ?? null} />
+                      <GroupBadges groups={groupsByProposal[p.id] ?? []} />
                     </div>
                   </td>
                   <td className="px-4 py-3 text-gray-700 tabular-nums">{p.pax}</td>

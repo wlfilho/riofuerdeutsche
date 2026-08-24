@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
 import { refreshArchiveReason } from '@/lib/leadArchive';
-import type { CrmLeadView, LeadStatus } from '@/app/admin/crm/page';
+import AnzahlungToggle, { type TourDateDeposit } from './AnzahlungToggle';
+import type { CrmLeadView, LeadGroup, LeadStatus } from '@/app/admin/crm/page';
 
 type Interaction = {
   id: string;
@@ -52,10 +53,15 @@ export default function LeadDrawer({
   const [lead, setLead] = useState<CrmLeadView>(initialLead);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [loadingInteractions, setLoadingInteractions] = useState(true);
+  const [tourDates, setTourDates] = useState<TourDateDeposit[]>([]);
   const [notes, setNotes] = useState(initialLead.notes ?? '');
   const [savingNotes, setSavingNotes] = useState(false);
   const [savingStatus, setSavingStatus] = useState(false);
   const [savingArchive, setSavingArchive] = useState(false);
+  const [availableGroups, setAvailableGroups] = useState<LeadGroup[]>([]);
+  const [groupInput, setGroupInput] = useState('');
+  const [savingGroup, setSavingGroup] = useState(false);
+  const [removingGroupId, setRemovingGroupId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const clearToast = useCallback(() => setToast(null), []);
   const t = useTranslations('admin.crm');
@@ -78,10 +84,19 @@ export default function LeadDrawer({
       .then(r => r.json())
       .then(data => {
         if (data.interactions) setInteractions(data.interactions);
+        if (data.tourDates) setTourDates(data.tourDates);
       })
       .catch(() => {})
       .finally(() => setLoadingInteractions(false));
   }, [lead.id]);
+
+  // Etiquetas cadastradas no sistema, pro autocomplete do combobox.
+  useEffect(() => {
+    fetch('/api/admin/lead-groups')
+      .then(r => r.json())
+      .then(data => { if (data.groups) setAvailableGroups(data.groups); })
+      .catch(() => {});
+  }, []);
 
   // Close on Escape
   useEffect(() => {
@@ -180,6 +195,71 @@ export default function LeadDrawer({
     }
   };
 
+  const handleAddGroup = async () => {
+    const name = groupInput.trim();
+    if (!name) return;
+    setSavingGroup(true);
+    try {
+      // Get-or-create: reaproveita o grupo se já existir com esse nome.
+      const groupRes = await fetch('/api/admin/lead-groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      const groupData = await groupRes.json();
+      if (!groupRes.ok) {
+        setToast(tCommon('erroPrefixo', { mensagem: groupData.error ?? tCommon('erroSalvar') }));
+        return;
+      }
+      const group: LeadGroup = groupData.group;
+
+      if (lead.groups.some(g => g.id === group.id)) {
+        setGroupInput('');
+        return;
+      }
+
+      const memberRes = await fetch(`/api/admin/leads/${lead.id}/groups`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ group_id: group.id }),
+      });
+      if (!memberRes.ok) {
+        const data = await memberRes.json();
+        setToast(tCommon('erroPrefixo', { mensagem: data.error ?? tCommon('erroSalvar') }));
+        return;
+      }
+
+      const updated = { ...lead, groups: [...lead.groups, group] };
+      setLead(updated);
+      onLeadUpdate(updated);
+      setAvailableGroups(prev => (prev.some(g => g.id === group.id) ? prev : [...prev, group]));
+      setGroupInput('');
+    } catch {
+      setToast(tCommon('erroRede'));
+    } finally {
+      setSavingGroup(false);
+    }
+  };
+
+  const handleRemoveGroup = async (groupId: string) => {
+    setRemovingGroupId(groupId);
+    try {
+      const res = await fetch(`/api/admin/leads/${lead.id}/groups?group_id=${groupId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json();
+        setToast(tCommon('erroPrefixo', { mensagem: data.error ?? tCommon('erroDeletar') }));
+        return;
+      }
+      const updated = { ...lead, groups: lead.groups.filter(g => g.id !== groupId) };
+      setLead(updated);
+      onLeadUpdate(updated);
+    } catch {
+      setToast(tCommon('erroRede'));
+    } finally {
+      setRemovingGroupId(null);
+    }
+  };
+
   const estimate = formatEstimate(lead.estimated_min, lead.estimated_max);
   const statusInfo = STATUS_CLASS[lead.status] ?? STATUS_CLASS.new;
 
@@ -202,6 +282,9 @@ export default function LeadDrawer({
                 {tStatus(lead.status)}
               </span>
               <span className="text-xs text-gray-400">{fmtDate(lead.created_at)}</span>
+            </div>
+            <div className="mt-2">
+              <AnzahlungToggle tourDates={tourDates} />
             </div>
           </div>
           <button
@@ -351,6 +434,55 @@ export default function LeadDrawer({
                   {t('criarProposta')}
                 </Link>
               )}
+            </div>
+          </div>
+
+          {/* Grupos / etiquetas */}
+          <div className="px-6 py-4 border-b border-gray-100">
+            <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">{t('grupos')}</label>
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {lead.groups.length === 0 && (
+                <span className="text-xs text-gray-400">{t('nenhumGrupo')}</span>
+              )}
+              {lead.groups.map(group => (
+                <span
+                  key={group.id}
+                  className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200 rounded-full"
+                >
+                  {group.name}
+                  <button
+                    onClick={() => handleRemoveGroup(group.id)}
+                    disabled={removingGroupId === group.id}
+                    title={tCommon('remover')}
+                    className="text-purple-400 hover:text-purple-700 disabled:opacity-40 leading-none"
+                  >
+                    ✕
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                list="lead-groups-datalist"
+                value={groupInput}
+                onChange={e => setGroupInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddGroup(); } }}
+                placeholder={t('grupoPlaceholder')}
+                className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <datalist id="lead-groups-datalist">
+                {availableGroups.map(group => (
+                  <option key={group.id} value={group.name} />
+                ))}
+              </datalist>
+              <button
+                onClick={handleAddGroup}
+                disabled={savingGroup || !groupInput.trim()}
+                className="shrink-0 px-3 py-2 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {savingGroup ? tCommon('salvando') : tCommon('adicionar')}
+              </button>
             </div>
           </div>
 

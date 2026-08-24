@@ -116,7 +116,7 @@ export default function IstRioGefaehrlich() {
         <main className="flex-grow pb-16">
           {/* 1. HERO SECTION FULL WIDTH */}
           <section className="w-full bg-[#0d1f15] pt-32 pb-20 px-5 lg:px-8 text-white">
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-3xl mx-auto">
               <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-8">
                 <span className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase">
                   Sicherheit
@@ -126,15 +126,15 @@ export default function IstRioGefaehrlich() {
                 </span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-6 tracking-tight text-center md:text-left leading-tight text-shadow-hero">
+              <h1 className="text-[34px] sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-5 tracking-tight text-center md:text-left leading-[1.1] text-balance text-shadow-hero">
                 Ist Rio de Janeiro gefährlich?
               </h1>
               
-              <p className="text-2xl md:text-3xl text-rio-yellow mb-12 text-center md:text-left font-medium max-w-3xl">
+              <p className="text-xl md:text-2xl lg:text-3xl text-rio-yellow mb-10 md:mb-12 text-center md:text-left font-medium leading-snug text-balance max-w-3xl">
                 Die Wahrheit von einem Carioca — nicht von einer Zeitung
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center md:justify-start gap-6 text-gray-300 border-t border-b border-white/10 py-6 mb-12">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center md:justify-start gap-5 sm:gap-6 text-gray-300 border-t border-b border-white/10 py-6 mb-2">
                 {/* Author Info */}
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full overflow-hidden relative bg-gray-800 border-2 border-rio-yellow shadow-sm shrink-0">
@@ -166,23 +166,23 @@ export default function IstRioGefaehrlich() {
             </div>
           </section>
 
-          <article className="max-w-4xl mx-auto px-5 lg:px-8 mt-16 mb-16">
-            <div className="text-xl text-gray-800 leading-relaxed font-medium mb-12">
+          <article className="max-w-3xl mx-auto px-5 lg:px-8 mt-12 md:mt-16 mb-16 text-[17px] md:text-lg leading-[1.75] text-gray-800 [&_p]:hyphens-auto [&_p]:break-words">
+            <div className="text-lg md:text-xl text-gray-800 leading-[1.7] font-medium mb-12 md:mb-14">
               <p>
                 Hallo! Ich bin Will, geboren und aufgewachsen in Rio de Janeiro. Ich habe einige Jahre im Rheinland, genauer gesagt in Köln, gelebt und studiert. Ich kenne die deutsche Sicherheitsliebe und ich verstehe genau, warum die Frage nach der Sicherheit in Rio so oft gestellt wird. Hier bekommst du eine ehrliche Antwort — ganz ohne Panikmache, aber auch ohne Filter.
               </p>
             </div>
 
             {/* 2. QUICK ANSWER */}
-            <div className="bg-[#0d1f15] text-white p-8 md:p-10 rounded-3xl shadow-xl mb-16">
-              <p className="text-xl md:text-2xl font-medium leading-relaxed mb-0">
+            <div className="bg-[#0d1f15] text-white p-6 sm:p-8 md:p-10 rounded-3xl shadow-xl mb-14 md:mb-16">
+              <p className="text-lg sm:text-xl md:text-2xl font-medium leading-[1.6] mb-0">
                 &ldquo;Rio ist für informierte Reisende sicher. Die Stadt hat Risiken — aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Wenn du weißt, was du tust, wirst du eine fantastische Zeit haben.&rdquo;
               </p>
             </div>
 
             {/* 3. ESTATÍSTICAS + CONTEXTO */}
-            <section className="prose prose-lg prose-green max-w-none text-gray-800 mb-16">
-              <h2 className="text-3xl font-bold text-[#0d1f15] mb-6">
+            <section className="text-gray-800 mb-14 md:mb-16 [&>p]:mb-6 [&>p]:leading-[1.8] [&>p:last-child]:mb-0">
+              <h2 className="text-[26px] md:text-3xl font-bold text-[#0d1f15] leading-tight text-balance mb-4 md:mb-6">
                 Zahlen und Kontext: Ein Blick hinter die Schlagzeilen
               </h2>
               <p>
@@ -198,76 +198,76 @@ export default function IstRioGefaehrlich() {
 
             {/* 4. DIE 7 HÄUFIGSTEN FEHLER */}
             <section className="mb-16">
-              <h2 className="text-3xl font-bold text-[#0d1f15] mb-8">
+              <h2 className="text-[26px] md:text-3xl font-bold text-[#0d1f15] leading-tight text-balance mb-6 md:mb-8">
                 Die 7 häufigsten Fehler, die Touristen machen
               </h2>
-              <div className="space-y-8">
+              <div className="[&>div+div]:mt-8 [&>div+div]:border-t [&>div+div]:border-gray-200 [&>div+div]:pt-8">
                 <div>
-                  <h3 className="text-xl font-bold text-[#0d1f15] mb-2 flex items-center gap-2">
-                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0">1</span>
+                  <h3 className="text-xl md:text-[22px] font-bold text-[#0d1f15] mb-3 flex items-start gap-3 leading-snug">
+                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">1</span>
                     Du buchst in der falschen Gegend
                   </h3>
-                  <p className="text-gray-700 pl-10">
+                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
                     Lapa, Centro nachts, bestimmte Zonen der Zona Norte — das sind keine Wohnviertel für Touristen, egal wie günstig das Airbnb sein mag. Die Wahl deines Viertels ist die wichtigste Entscheidung noch vor dem Flug. Eine Fehlentscheidung hier erschwert deine gesamte Reise.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-[#0d1f15] mb-2 flex items-center gap-2">
-                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0">2</span>
+                  <h3 className="text-xl md:text-[22px] font-bold text-[#0d1f15] mb-3 flex items-start gap-3 leading-snug">
+                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">2</span>
                     Du nutzt dein Handy falsch auf der Straße
                   </h3>
-                  <p className="text-gray-700 pl-10">
+                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
                     Ein neues Smartphone lässig in der Hand beim Spazierengehen am Gehsteig? Das ist das häufigste Ziel für Taschendiebe auf Fahrrädern. Es geht nicht darum, in Rio gar kein Handy dabei zu haben — es geht darum, <em>wann</em> und <em>wie</em> du es sicher benutzt.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-[#0d1f15] mb-2 flex items-center gap-2">
-                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0">3</span>
+                  <h3 className="text-xl md:text-[22px] font-bold text-[#0d1f15] mb-3 flex items-start gap-3 leading-snug">
+                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">3</span>
                     Du fährst mit dem falschen Taxi
                   </h3>
-                  <p className="text-gray-700 pl-10">
+                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
                     Die gelben Taxis der Straße sind in Rio nicht so extrem reguliert wie in Deutschland. Einfach am Flughafen einsteigen? Lieber nicht. Es gibt deutlich bessere, sicherere und auch günstigere Alternativen für Touristen. Deine Transport-Apps solltest du schon zu Hause installieren.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-[#0d1f15] mb-2 flex items-center gap-2">
-                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0">4</span>
+                  <h3 className="text-xl md:text-[22px] font-bold text-[#0d1f15] mb-3 flex items-start gap-3 leading-snug">
+                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">4</span>
                     Du gehst nachts zu Fuß
                   </h3>
-                  <p className="text-gray-700 pl-10">
+                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
                     Was in Berlin, München oder Köln völlig normal ist, funktioniert in Rio in vielen Ecken einfach anders. Nach Einbruch der Dunkelheit zu Fuß durch unbekannte oder kaum beleuchtete Straßen zu navigieren, ist das Risikoverhalten Nummer eins von Fremden.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-[#0d1f15] mb-2 flex items-center gap-2">
-                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0">5</span>
+                  <h3 className="text-xl md:text-[22px] font-bold text-[#0d1f15] mb-3 flex items-start gap-3 leading-snug">
+                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">5</span>
                     Du nimmst zu viel an den Strand mit
                   </h3>
-                  <p className="text-gray-700 pl-10">
+                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
                     Rios Strände sind wunderschön und in den Touristenvierteln meistens sicher polizeilich überwacht. Aber der Sand ist riesig, es gibt viele Menschen, und kurz ins Wasser gehen mit dem Rucksack unbeaufsichtigt am Handtuch? Das ist fahrlässig. Was du an den Strand mitnimmst, bestimmt, ob du einen schönen oder sehr schlechten Tag hast.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-[#0d1f15] mb-2 flex items-center gap-2">
-                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0">6</span>
+                  <h3 className="text-xl md:text-[22px] font-bold text-[#0d1f15] mb-3 flex items-start gap-3 leading-snug">
+                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">6</span>
                     Du zeigst Wohlstand
                   </h3>
-                  <p className="text-gray-700 pl-10">
+                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
                     Die dicke Spiegelreflexkamera um den Hals, eine teure Uhr, sichtbarer Schmuck — das sind klare Signale in einer Stadt, in der ein Großteil der Bevölkerung mit dem Mindestlohn kämpft. Rio hat leider eine extrem ausgeprägte soziale Ungleichheit, und Touristen, die Reichtum signalisieren, fallen sofort in das Raster aufmerksamer Augen.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-[#0d1f15] mb-2 flex items-center gap-2">
-                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0">7</span>
+                  <h3 className="text-xl md:text-[22px] font-bold text-[#0d1f15] mb-3 flex items-start gap-3 leading-snug">
+                    <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">7</span>
                     Du bist nicht vorbereitet auf den Notfall
                   </h3>
-                  <p className="text-gray-700 pl-10">
+                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
                     Die meisten Reisenden kommen ohne vorbereitete Apps (Wie bestelle ich mir ein alternatives Taxi?), ohne gespeicherte lokale Notfallnummern, ohne gesicherte Dokumentenkopien und ohne einen Backup-Plan für ihre Kreditkarten. Wenn wirklich etwas passiert, kostet Vorbereitung keine einzige Sekunde — absolute Unvorbereitung kostet dich den Urlaub.
                   </p>
                 </div>
@@ -281,7 +281,7 @@ export default function IstRioGefaehrlich() {
 
             {/* 6. DIE SICHEREN VIERTEL */}
             <section className="mb-16">
-              <h2 className="text-3xl font-bold text-[#0d1f15] mb-8">
+              <h2 className="text-[26px] md:text-3xl font-bold text-[#0d1f15] leading-tight text-balance mb-6 md:mb-8">
                 Wo kann ich sicher wohnen? Eine Kurzübersicht
               </h2>
 
@@ -299,12 +299,12 @@ export default function IstRioGefaehrlich() {
                     </div>
                   </div>
                   
-                  <p className="text-gray-600 leading-relaxed mb-6 flex-grow pl-[68px] mt--2">
+                  <p className="text-gray-600 leading-[1.7] mb-6 flex-grow pl-0 sm:pl-[68px]">
                     Hier kannst du als Tourist am wenigsten falsch machen. Exzellente Infrastruktur und dichte Überwachung.
                   </p>
                   
-                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 mt-auto">
-                    <p className="text-[#0d1f15] font-semibold text-[15px] leading-relaxed">
+                  <div className="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100 mt-auto">
+                    <p className="text-[#0d1f15] font-semibold text-[15px] leading-[1.7]">
                       Ipanema, Leblon, Botafogo, Humaitá, Jardim Botânico, Gávea, Urca.
                     </p>
                   </div>
@@ -323,12 +323,12 @@ export default function IstRioGefaehrlich() {
                     </div>
                   </div>
                   
-                  <p className="text-gray-600 leading-relaxed mb-6 flex-grow pl-[68px] mt--2">
+                  <p className="text-gray-600 leading-[1.7] mb-6 flex-grow pl-0 sm:pl-[68px]">
                     Klassische Touristengebiete oder traditionelle Viertel. Sicher, erfordern aber normales städtisches Bewusstsein, um nicht aufzufallen.
                   </p>
                   
-                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 mt-auto">
-                    <p className="text-[#0d1f15] font-semibold text-[15px] leading-relaxed">
+                  <div className="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100 mt-auto">
+                    <p className="text-[#0d1f15] font-semibold text-[15px] leading-[1.7]">
                       Copacabana, Flamengo, Laranjeiras, Catete, Glória.
                     </p>
                   </div>
@@ -347,12 +347,12 @@ export default function IstRioGefaehrlich() {
                     </div>
                   </div>
                   
-                  <p className="text-gray-600 leading-relaxed mb-6 flex-grow pl-[68px] mt--2">
+                  <p className="text-gray-600 leading-[1.7] mb-6 flex-grow pl-0 sm:pl-[68px]">
                     Tagsüber belebt, nachts erfordert es Vorwissen. Oft steilere Gegenden oder reine Partyviertel.
                   </p>
                   
-                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 mt-auto">
-                    <p className="text-[#0d1f15] font-semibold text-[15px] leading-relaxed">
+                  <div className="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100 mt-auto">
+                    <p className="text-[#0d1f15] font-semibold text-[15px] leading-[1.7]">
                       Santa Teresa (nachts aufpassen), Lapa (nur in Gruppen oder am frühen Abend), <Link href="/rio-guide/sehenswuerdigkeiten/rocinha" className="text-rio-green underline underline-offset-2 hover:text-[#1a4a35] transition-colors">Favelas mit Guide</Link>.
                     </p>
                   </div>
@@ -371,12 +371,12 @@ export default function IstRioGefaehrlich() {
                     </div>
                   </div>
                   
-                  <p className="text-gray-600 leading-relaxed mb-6 flex-grow pl-[68px] mt--2">
+                  <p className="text-gray-600 leading-[1.7] mb-6 flex-grow pl-0 sm:pl-[68px]">
                     Entweder reine Geschäftsviertel, die abends völlig leer sind, oder Gebiete ohne touristische Absicherung.
                   </p>
                   
-                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 mt-auto">
-                    <p className="text-[#0d1f15] font-semibold text-[15px] leading-relaxed">
+                  <div className="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100 mt-auto">
+                    <p className="text-[#0d1f15] font-semibold text-[15px] leading-[1.7]">
                       Centro (nachts), Zona Norte (die Nordzone) und bestimmte Bereiche der fernen Zona Oeste.
                     </p>
                   </div>
@@ -389,7 +389,7 @@ export default function IstRioGefaehrlich() {
                 </div>
                 <div>
                   <strong className="text-gray-900 block mb-1">Wichtig:</strong>
-                  <span className="text-gray-700 leading-relaxed">
+                  <span className="text-gray-700 leading-[1.8]">
                     Diese Liste ist nur ein Ausgangspunkt. Jedes Viertel hat Nuancen — eine Querstraße kann den Unterschied machen. Im vollständigen Guide erfährst du, worauf du genau achten musst, um deinen Aufenthalt absolut sicher zu genießen.
                   </span>
                 </div>
@@ -398,46 +398,46 @@ export default function IstRioGefaehrlich() {
 
             {/* 7. 5 DER 15 GOLDENEN REGELN */}
             <section className="mb-16">
-              <h2 className="text-3xl font-bold text-[#0d1f15] mb-6">
+              <h2 className="text-[26px] md:text-3xl font-bold text-[#0d1f15] leading-tight text-balance mb-4 md:mb-6">
                 Teaser: Einige der wichtigsten Überlebensregeln
               </h2>
-              <p className="text-lg text-gray-700 mb-8">
+              <p className="text-lg text-gray-700 leading-[1.8] mb-8">
                 Über die Jahre habe ich 15 goldene Regeln zusammengestellt, die ich jedem meiner deutschen Touristen vorab in unserem Guide mitgebe. Sie sind pragmatisch, ehrlich und ohne Panik. Hier sind 5 davon für dich als Vorgeschmack:
               </p>
 
-              <ul className="space-y-6 list-none p-0 text-gray-800">
+              <ul className="space-y-7 sm:space-y-8 list-none p-0 text-gray-800">
                 <li className="flex gap-4 items-start">
                   <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
-                  <div>
-                    <strong className="text-lg text-[#0d1f15] block mb-1">Nicht ostentieren</strong>
+                  <div className="leading-[1.8]">
+                    <strong className="text-lg text-[#0d1f15] block mb-1.5 leading-snug">Nicht ostentieren</strong>
                     Trage keine Rolex, lass die offensichtlichen Ketten und Ringe im Safe in Deutschland, halte das iPhone in der Tasche, solange du es nicht brauchst. Je gewöhnlicher du aussiehst, desto langweiliger bist du für potenziellen Ärger.
                   </div>
                 </li>
                 <li className="flex gap-4 items-start">
                   <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
-                  <div>
-                    <strong className="text-lg text-[#0d1f15] block mb-1">Uber und 99, immer</strong>
+                  <div className="leading-[1.8]">
+                    <strong className="text-lg text-[#0d1f15] block mb-1.5 leading-snug">Uber und 99, immer</strong>
                     Vergiss die normalen gelben Straßentaxis, insbesondere am Flughafen oder nachts nach einer Party. Nutzen per App fahrende private Fahrer gibt dir den exakten Preis, eine nachvollziehbare Route und absolute Datensicherheit. Punkt.
                   </div>
                 </li>
                 <li className="flex gap-4 items-start">
                   <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
-                  <div>
-                    <strong className="text-lg text-[#0d1f15] block mb-1">Deserte Straßen konsequent meiden</strong>
+                  <div className="leading-[1.8]">
+                    <strong className="text-lg text-[#0d1f15] block mb-1.5 leading-snug">Deserte Straßen konsequent meiden</strong>
                     Wenn du nachts in eine Straße schaust und dort sind keine Autos, keine Straßenhändler, keine Fußgänger, keine geöffneten Kioske — dann gehst du dort <em>nicht</em> hin. Wenn die Straße leer ist, gibt es in Rio fast immer einen guten Grund dafür.
                   </div>
                 </li>
                 <li className="flex gap-4 items-start">
                   <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
-                  <div>
-                    <strong className="text-lg text-[#0d1f15] block mb-1">Bei einem Überfall: Nicht reagieren</strong>
+                  <div className="leading-[1.8]">
+                    <strong className="text-lg text-[#0d1f15] block mb-1.5 leading-snug">Bei einem Überfall: Nicht reagieren</strong>
                     Sollte das absolut Unwahrscheinliche eintreten und man zwingt dich zur Herausgabe deiner Wertsachen: Ruhig bleiben. Keine schnellen Handbewegungen. Augen nach unten. Keine Diskussion, kein Heldentum. Gebe alles sofort und widerstandslos heraus. Das Leben und die körperliche Unversehrtheit sind endlos viel mehr wert als jedes verdammte Smartphone.
                   </div>
                 </li>
                 <li className="flex gap-4 items-start">
                   <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
-                  <div>
-                    <strong className="text-lg text-[#0d1f15] block mb-1">Situational Awareness (Situationsbewusstsein)</strong>
+                  <div className="leading-[1.8]">
+                    <strong className="text-lg text-[#0d1f15] block mb-1.5 leading-snug">Situational Awareness (Situationsbewusstsein)</strong>
                     Habe die gleiche Aufmerksamkeit wie an einem Freitagabend um 2 Uhr nachts am Bahnhof von Frankfurt oder am Kölner Hauptbahnhof. Nicht mehr (wer paranoid ist, hat keinen Spaß), aber definitiv auch nicht weniger. Sei stets bewusst, wer und was sich um dich herum befindet.
                   </div>
                 </li>
@@ -455,56 +455,56 @@ export default function IstRioGefaehrlich() {
 
             {/* 9. FAQ SEO */}
             <section className="mb-16">
-              <h2 className="text-3xl font-bold text-[#0d1f15] mb-8">
+              <h2 className="text-[26px] md:text-3xl font-bold text-[#0d1f15] leading-tight text-balance mb-6 md:mb-8">
                 Häufige Fragen (FAQ) zur Sicherheit in Brasilien
               </h2>
 
-              <div className="space-y-6">
+              <div className="[&>div+div]:mt-8 [&>div+div]:border-t [&>div+div]:border-gray-200 [&>div+div]:pt-8">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Ist Rio de Janeiro gefährlicher als São Paulo?</h3>
-                  <p className="text-gray-700">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Ist Rio de Janeiro gefährlicher als São Paulo?</h3>
+                  <p className="text-gray-700 leading-[1.8]">
                     Rio hat spezifische Herausforderungen, oft im Zusammenhang mit <Link href="/touren/favela-tour" className="text-rio-green underline hover:text-[#0d1f15]">Favelas</Link> auf Hügeln neben wohlhabenden Zonen, was Kriminalität sichtbarer machen kann. Die Kriminalitätsraten und die reale Gefahr für dich variieren jedoch stark je nach Stadtteil. Mit gesundem Menschenverstand ist das tägliche Risiko für informierte Touristen in beiden Mega-Städten absolut vergleichbar und handhabbar.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Welche Viertel in Rio sind am sichersten für Touristen?</h3>
-                  <p className="text-gray-700">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Welche Viertel in Rio sind am sichersten für Touristen?</h3>
+                  <p className="text-gray-700 leading-[1.8]">
                     Die Südzone (<span className="italic">Zona Sul</span>) gilt als der am stärksten gesicherte und sicherste Bereich für Urlauber und Expats. Dazu gehören neben Ipanema und Leblon auch Botafogo, Humaitá und Urca (die oft als die sicherste Nachbarschaft Rios gilt). Copacabana ist sehr beliebt, bedarf aber wegen der schieren Masse an Touristen in bestimmten Ecken nachts mehr Aufmerksamkeit für Taschendiebe.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Kann man in Rio alleine reisen?</h3>
-                  <p className="text-gray-700">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Kann man in Rio alleine reisen?</h3>
+                  <p className="text-gray-700 leading-[1.8]">
                     Ja, absolut. Wer sich selbstbewusst bewegt, grundlegende Sicherheitsregeln verinnerlicht, abends nicht alleine durch schwach beleuchtete Gassen spaziert und sichere Fahr-Apps konsequent einsetzt, kann die Stadt alleine hervorragend und gefahrlos entdecken. Tausende Backpacker und Alleinreisende tun dies reibungslos jedes Jahr.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Ist Copacabana sicher?</h3>
-                  <p className="text-gray-700">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Ist Copacabana sicher?</h3>
+                  <p className="text-gray-700 leading-[1.8]">
                     Tagsüber ist der Strand oft voll, stark frequentiert, gut polizeilich überwacht und absolut sicher (dennoch: Sachen auf dem Sand nicht unbewacht lassen). Sobald es Nacht wird, solltest du dich auf den stark beleuchteten Hautpstraßen halten, das ruhige Sandareal direkt am Wasser meiden und dunklen Straßenecken aus dem Weg gehen.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Wie gefährlich ist Lapa in Rio?</h3>
-                  <p className="text-gray-700">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Wie gefährlich ist Lapa in Rio?</h3>
+                  <p className="text-gray-700 leading-[1.8]">
                     Lapa, nahe am Zentrum, ist das Herzstück des Nachtlebens in Rio (Ausgehviertel). Freitagabends und am Wochenende platzt das Viertel aus allen Nähten, was dich vor der Leere der Nacht schützt. Dennoch rate ich: Fahre direkt mit einem Uber von A nach B ins Viertel hinein und direkt wieder hinaus — mach dort nachts keine Spaziergänge in dunkle Nebenstraßen. Gruppen sind besser.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Ist Rio sicher für Frauen allein?</h3>
-                  <p className="text-gray-700">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Ist Rio sicher für Frauen allein?</h3>
+                  <p className="text-gray-700 leading-[1.8]">
                     Frauen können sicher und problemlos alleine nach Rio reisen. Vorsicht ist jedoch geboten: Wie in fast jeder Metrople verlässt man sich besser auf geprüfte Uber anstatt Taxis zu winken, meidet unbelebte oder unbeleuchtete Strecken und schützt sein Getränk beim Feiern. Nutze primär sichere Viertel der <em>Zona Sul</em> als feste Basis. Brasilianische Frauen verhalten sich übrigens ähnlich achtsam in den Straßen. Vertraue deinem Bauchgefühl.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Wie sicher ist Rio im Vergleich zu anderen Städten Südamerikas?</h3>
-                  <p className="text-gray-700">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Wie sicher ist Rio im Vergleich zu anderen Städten Südamerikas?</h3>
+                  <p className="text-gray-700 leading-[1.8]">
                     Rio tendiert im Rahmen der großen südamerikanischen Metropolen ins Mittelfeld. Städte wie Buenos Aires (Argentinien) oder Santiago (Chile) gelten statistisch als etwas sicherer. Andere Metropolen im nördlichen Südamerika können deutlich heikler sein. In den touristenstarken und wirtschaftlichen Epizentren von Rio ist die Straßenpräsenz der Polizei enorm und bietet meist eine stabile Barriere gegen offene Bandenkriminalität für dich als Gast.
                   </p>
                 </div>
@@ -512,7 +512,7 @@ export default function IstRioGefaehrlich() {
             </section>
 
             {/* 10. ÜBER WILL */}
-            <section className="bg-white border text-gray-800 border-gray-200 rounded-3xl p-8 mb-16 flex flex-col md:flex-row gap-8 items-center shadow-lg">
+            <section className="bg-white border text-gray-800 border-gray-200 rounded-3xl p-6 sm:p-8 mb-16 flex flex-col md:flex-row gap-6 md:gap-8 items-center shadow-lg">
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shrink-0 relative bg-gray-100 ring-4 ring-green-50 shadow-inner">
                 {/* Fallback color/icon in case image not available */}
                 <Image 
@@ -524,10 +524,10 @@ export default function IstRioGefaehrlich() {
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-[#0d1f15] mb-2">Warum solltest du mir vertrauen?</h3>
-                <p className="text-gray-700 mb-4">
+                <p className="text-gray-700 leading-[1.8] mb-4">
                   Ich bin kein anonymer Redakteur hinter einem Schreibtisch. Ich bin ein Carioca. Ich besuche nicht bloß diese magische Stadt für Urlaube, sondern ich habe mein Leben hier gelernt, gelacht — und bin auch achtsam durch die schwierigen Ecken navigiert.
                 </p>
-                <p className="text-gray-700 font-medium">
+                <p className="text-gray-700 leading-[1.8] font-medium">
                   Deutsche Schule im Rio, 4 Jahre Student in Köln, und nun hier als mehrsprachiger Guide: Ich kenne beide Welten. Ich kenne die deutsche Rationalität und das improvisierte Talent Brasiliens. Ich garantiere dir: Mit guter Vorbereitung fühlst du dich bei deiner <Link href="/touren" className="text-rio-green underline hover:text-[#0d1f15]">Tour durch Rio</Link> sicherer, als du dir gerade vorstellen kannst. Viel Spaß am Zuckerhut!
                 </p>
                 <div className="mt-4">
@@ -544,7 +544,7 @@ export default function IstRioGefaehrlich() {
             </div>
 
             {/* 12. CTA TOURS */}
-            <section className="bg-[#0d1f15] text-white p-8 md:p-12 rounded-3xl shadow-xl mb-16">
+            <section className="bg-[#0d1f15] text-white p-6 sm:p-8 md:p-12 rounded-3xl shadow-xl mb-16">
               <h2 className="text-2xl md:text-3xl font-bold mb-4">
                 Rio sicher erleben — mit einem Guide, der diese Regeln täglich lebt
               </h2>
