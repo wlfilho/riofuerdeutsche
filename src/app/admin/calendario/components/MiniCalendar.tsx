@@ -19,6 +19,7 @@ export default function MiniCalendar({
   view,
   anchor,
   toursByDay,
+  conflictDays,
   selectedDay,
   onDayClick,
   onNavigate,
@@ -27,6 +28,7 @@ export default function MiniCalendar({
   view: CalendarView;
   anchor: Date;
   toursByDay: Map<string, TourDate[]>;
+  conflictDays: Set<string>;
   selectedDay: string | null;
   onDayClick: (iso: string) => void;
   onNavigate: (anchorISO: string) => void;
@@ -40,6 +42,7 @@ export default function MiniCalendar({
     const tours = toursByDay.get(iso) ?? [];
     const hasFechado = tours.some(t => t.status === 'fechado');
     const hasProposta = tours.some(t => t.status === 'proposta_enviada');
+    const hasConflict = conflictDays.has(iso);
     const isSelected = iso === selectedDay;
     const isToday = iso === today;
 
@@ -47,7 +50,10 @@ export default function MiniCalendar({
       <button
         key={iso}
         onClick={() => onDayClick(iso)}
+        title={hasConflict ? 'Conflito de agenda: mais de um cliente neste dia' : undefined}
         className={`mx-auto flex h-9 w-9 flex-col items-center justify-center rounded-lg text-xs transition-colors ${
+          hasConflict ? 'ring-2 ring-red-400 ring-offset-1' : ''
+        } ${
           isSelected
             ? 'bg-gray-900 text-white font-semibold'
             : isToday
@@ -81,13 +87,14 @@ export default function MiniCalendar({
       const prefix = `${year}-${String(m + 1).padStart(2, '0')}`;
       let hasFechado = false;
       let hasProposta = false;
+      let hasConflict = false;
       for (const [iso, tours] of toursByDay) {
         if (!iso.startsWith(prefix)) continue;
         if (tours.some(t => t.status === 'fechado')) hasFechado = true;
         if (tours.some(t => t.status === 'proposta_enviada')) hasProposta = true;
-        if (hasFechado && hasProposta) break;
+        if (conflictDays.has(iso)) hasConflict = true;
       }
-      return { hasFechado, hasProposta };
+      return { hasFechado, hasProposta, hasConflict };
     };
 
     return (
@@ -99,13 +106,16 @@ export default function MiniCalendar({
         />
         <div className="grid grid-cols-3 gap-1">
           {MONTH_NAMES_PT.map((name, m) => {
-            const { hasFechado, hasProposta } = monthStatus(m);
+            const { hasFechado, hasProposta, hasConflict } = monthStatus(m);
             const isCurrentMonth = today.startsWith(`${year}-${String(m + 1).padStart(2, '0')}`);
             return (
               <button
                 key={m}
                 onClick={() => onMonthClick(toISODate(new Date(year, m, 1)))}
+                title={hasConflict ? 'Conflito de agenda neste mês' : undefined}
                 className={`flex flex-col items-center justify-center rounded-lg py-2 text-xs transition-colors ${
+                  hasConflict ? 'ring-2 ring-red-400 ring-offset-1' : ''
+                } ${
                   isCurrentMonth
                     ? 'bg-green-100 text-green-800 font-semibold hover:bg-green-200'
                     : 'text-gray-700 hover:bg-gray-100'
