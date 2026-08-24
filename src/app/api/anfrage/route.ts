@@ -201,6 +201,32 @@ export async function POST(request: NextRequest) {
     leadId = lead.id;
   }
 
+  // Toda campanha também é uma etiqueta (`lead_groups`): o admin vê e filtra o
+  // lead da AIDA do mesmo jeito que qualquer grupo manual no CRM, em vez de um
+  // segundo sistema de rótulos paralelo. Best-effort — não deve derrubar o
+  // envio do formulário.
+  if (campaign) {
+    try {
+      const { data: existingGroup } = await supabase
+        .from('lead_groups')
+        .select('id')
+        .eq('name', campaign.label)
+        .maybeSingle();
+      const groupId = existingGroup?.id ?? (
+        await supabase.from('lead_groups').insert({ name: campaign.label }).select('id').single()
+      ).data?.id;
+      if (groupId) {
+        // 23505 = reenvio do formulário, o lead já tinha essa etiqueta — não é erro.
+        const { error: memberError } = await supabase
+          .from('lead_group_members')
+          .insert({ lead_id: leadId, group_id: groupId });
+        if (memberError && memberError.code !== '23505') throw memberError;
+      }
+    } catch (err) {
+      console.error('[anfrage] falha ao etiquetar lead com a campanha:', err);
+    }
+  }
+
   const paxLabel = `${pax} pax${children > 0 ? ` + ${children} criança${children !== 1 ? 's' : ''}` : ''}`;
   const interestLabels = (campaignData?.interests ?? []).map(
     id => campaign!.interestLabels[id] ?? id,
@@ -227,7 +253,7 @@ export async function POST(request: NextRequest) {
         (children > 0 ? ` + ${children} ${children === 1 ? 'Kind' : 'Kinder'}` : '');
 
       const sent = await sendTemplatedEmail({
-        slug: 'anfrage_aida_bestaetigung',
+        slug: campaign.emailTemplateSlug,
         to: email,
         locale: EMAIL_LOCALE,
         data: {

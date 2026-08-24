@@ -25,13 +25,18 @@ export async function GET(
 
   const { id } = await params;
 
-  const [leadResult, interactionsResult] = await Promise.all([
+  const [leadResult, interactionsResult, tourDatesResult] = await Promise.all([
     supabase.from('price_leads').select('*').eq('id', id).single(),
     supabase
       .from('lead_contacts')
       .select('*')
       .eq('lead_id', id)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('tour_dates')
+      .select('id, date, anzahlung_paid')
+      .eq('lead_id', id)
+      .order('date', { ascending: true }),
   ]);
 
   if (leadResult.error) return NextResponse.json({ error: leadResult.error.message }, { status: 500 });
@@ -39,6 +44,7 @@ export async function GET(
   return NextResponse.json({
     lead: leadResult.data,
     interactions: interactionsResult.data ?? [],
+    tourDates: tourDatesResult.data ?? [],
   });
 }
 

@@ -6,9 +6,9 @@ import { getProposalEmailStatuses } from '@/lib/email/sendProposalEmail';
 import { createClient } from '@/utils/supabase/server';
 import PropostasListClient from './PropostasListClient';
 import AnfrageLinkButton from './AnfrageLinkButton';
-import CampaignFilter from '@/components/admin/CampaignFilter';
-import { matchesCampaign } from '@/lib/campaigns';
-import CampaignBadge from '../leads/components/CampaignBadge';
+import GroupFilter from '@/components/admin/GroupFilter';
+import GroupBadges from '@/components/admin/GroupBadges';
+import { fetchLeadGroupsMap, matchesGroup, type LeadGroup } from '@/lib/leadGroups';
 
 type PendingLead = {
   id: string;
@@ -18,7 +18,7 @@ type PendingLead = {
   requested_days: string[] | null;
   source: string;
   status: 'new' | 'contacted';
-  campaign: string | null;
+  groups: LeadGroup[];
   created_at: string;
 };
 
@@ -67,7 +67,7 @@ async function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
               {t('via')}
               {tSource.has(lead.source) ? tSource(lead.source) : lead.source}
             </span>
-            <CampaignBadge campaign={lead.campaign} />
+            <GroupBadges groups={lead.groups} />
             <Link
               href={`/admin/propostas/nova?lead_id=${lead.id}`}
               className="ml-auto px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shrink-0"
@@ -84,12 +84,12 @@ async function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
 export default async function PropostasPage({
   searchParams,
 }: {
-  searchParams: Promise<{ campaign?: string }>;
+  searchParams: Promise<{ group?: string }>;
 }) {
-  const { campaign } = await searchParams;
+  const { group } = await searchParams;
   const t = await getAdminTranslations('admin.propostas');
   const supabase = await createClient();
-  const [allProposals, analytics, emailStatuses, { data: pendingLeads }, { data: proposalLeads }] =
+  const [allProposals, analytics, emailStatuses, { data: pendingLeads }, { data: proposalLeads }, groupsByLead] =
     await Promise.all([
       getProposals(),
       getProposalAnalyticsSummaries(),
@@ -98,28 +98,37 @@ export default async function PropostasPage({
       // the CRM (or already linked to a proposal) drop out of this strip.
       supabase
         .from('price_leads')
-        .select('id, name, pax, children, requested_days, source, status, campaign, created_at')
+        .select('id, name, pax, children, requested_days, source, status, created_at')
         .is('proposal_id', null)
         .in('status', ['new', 'contacted'])
         .order('created_at', { ascending: false }),
-      // `proposals` não guarda campanha: quem sabe de onde a proposta veio é o
+      // `proposals` não guarda etiqueta: quem sabe de onde a proposta veio é o
       // lead que aponta para ela. Este mapa dá a etiqueta a cada proposta.
       supabase
         .from('price_leads')
-        .select('proposal_id, campaign')
+        .select('id, proposal_id')
         .not('proposal_id', 'is', null),
+      fetchLeadGroupsMap(supabase),
     ]);
 
-  const campaignByProposal = new Map<string, string | null>(
-    (proposalLeads ?? []).map(l => [l.proposal_id as string, l.campaign as string | null]),
-  );
+  const groupsByProposal = new Map<string, LeadGroup[]>();
+  for (const row of (proposalLeads ?? []) as { id: string; proposal_id: string }[]) {
+    const groups = groupsByLead.get(row.id) ?? [];
+    if (groups.length === 0) continue;
+    const existing = groupsByProposal.get(row.proposal_id) ?? [];
+    groupsByProposal.set(
+      row.proposal_id,
+      [...existing, ...groups.filter(g => !existing.some(e => e.id === g.id))],
+    );
+  }
 
   const proposals = allProposals.filter(p =>
-    matchesCampaign(campaignByProposal.get(p.id) ?? null, campaign),
+    matchesGroup(groupsByProposal.get(p.id) ?? [], group),
   );
-  const leads = ((pendingLeads ?? []) as PendingLead[]).filter(l =>
-    matchesCampaign(l.campaign, campaign),
-  );
+  const leads = ((pendingLeads ?? []) as Omit<PendingLead, 'groups'>[]).map(l => ({
+    ...l,
+    groups: groupsByLead.get(l.id) ?? [],
+  })).filter(l => matchesGroup(l.groups, group));
 
   return (
     <div className="p-4 sm:p-6 md:p-10">
@@ -127,7 +136,7 @@ export default async function PropostasPage({
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
           <div className="flex flex-wrap items-center gap-2">
-            <CampaignFilter value={campaign} />
+            <GroupFilter value={group} />
             <AnfrageLinkButton />
             <Link
               href="/admin/propostas/nova"
@@ -144,7 +153,7 @@ export default async function PropostasPage({
           initialProposals={proposals}
           analytics={analytics}
           emailStatuses={emailStatuses}
-          campaignByProposal={Object.fromEntries(campaignByProposal)}
+          groupsByProposal={Object.fromEntries(groupsByProposal)}
         />
       </div>
     </div>

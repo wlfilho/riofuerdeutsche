@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { fmtDate, fmtDateTime, fmtEur } from '@/lib/adminFormat';
 import { resolveDayTransportKey } from '@/lib/dayTransportLabel';
+import AnzahlungToggle, { type TourDateDeposit } from '@/components/admin/AnzahlungToggle';
 import type { DepositBankInfo, Proposal, ProposalStatus } from '@/lib/proposals';
 // Só o tipo: `import type` some na compilação, então o lib de e-mail (Resend,
 // service role) não entra no bundle do browser.
@@ -592,10 +593,12 @@ export default function PropostaOutputClient({
   proposal: initial,
   bank,
   emailLog: initialEmailLog,
+  tourDates,
 }: {
   proposal: Proposal;
   bank: DepositBankInfo;
   emailLog: ProposalEmailLogEntry[];
+  tourDates: TourDateDeposit[];
 }) {
   const t = useTranslations('admin.propostas');
   const tCommon = useTranslations('admin.common');
@@ -853,6 +856,18 @@ export default function PropostaOutputClient({
                     <span className="text-xs text-gray-400">{tCommon('salvando')}</span>
                   )}
                 </div>
+              </dd>
+            </div>
+
+            {/* Sinal pago — mora em tour_dates, só aparece com data marcada */}
+            <div className="flex items-center gap-4">
+              <dt className="text-sm text-gray-400 w-28 shrink-0">{t('sinalPagamento')}</dt>
+              <dd>
+                {tourDates.length > 0 ? (
+                  <AnzahlungToggle tourDates={tourDates} />
+                ) : (
+                  <span className="text-xs text-gray-400">{t('sinalSemData')}</span>
+                )}
               </dd>
             </div>
 

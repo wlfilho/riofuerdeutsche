@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
+import GroupBadges from '@/components/admin/GroupBadges';
 import type { CrmLeadView } from '../page';
 
 function formatEstimate(min: number | null, max: number | null) {
@@ -20,6 +21,12 @@ const STATUS_CLASS: Record<string, string> = {
   closed: 'bg-green-100 text-green-700',
   lost: 'bg-red-100 text-red-700',
 };
+
+const STATUS_VALUES = ['new', 'contacted', 'proposal_sent', 'closed', 'lost'] as const;
+const SOURCE_VALUES = ['calculator', 'email', 'whatsapp', 'instagram', 'referral', 'other'] as const;
+
+const FIELD_CLS =
+  'px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent';
 
 function DeleteModal({
   lead,
@@ -99,6 +106,41 @@ export default function CrmTable({
   const tSource = useTranslations('admin.status.source');
   const tReason = useTranslations('admin.crm.motivoArquivo');
 
+  const [search, setSearch] = useState('');
+  const [sourceFilter, setSourceFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+
+  // Etiqueta não tem filtro aqui: já é o filtro "Grupo" do topo da página
+  // (GroupFilter), que também recalcula os cards de métrica — ter os dois
+  // faria a mesma coisa duas vezes.
+  const hasFilters = Boolean(search || sourceFilter || statusFilter || dateFrom || dateTo);
+
+  const clearFilters = () => {
+    setSearch('');
+    setSourceFilter('');
+    setStatusFilter('');
+    setDateFrom('');
+    setDateTo('');
+  };
+
+  const filteredLeads = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return leads.filter(lead => {
+      if (term && !lead.name.toLowerCase().includes(term) && !lead.email.toLowerCase().includes(term)) {
+        return false;
+      }
+      if (sourceFilter && lead.source !== sourceFilter) return false;
+      if (statusFilter && lead.status !== statusFilter) return false;
+      // Comparação por data (created_at é timestamp), não por hora.
+      const createdDate = lead.created_at.slice(0, 10);
+      if (dateFrom && createdDate < dateFrom) return false;
+      if (dateTo && createdDate > dateTo) return false;
+      return true;
+    });
+  }, [leads, search, sourceFilter, statusFilter, dateFrom, dateTo]);
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleteLoading(true);
@@ -132,6 +174,89 @@ export default function CrmTable({
 
   return (
     <>
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        {/* Busca */}
+        <div className="relative flex-1 min-w-48 max-w-xs">
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder={t('buscarPlaceholder')}
+            className={`w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent`}
+          />
+        </div>
+
+        {/* Origem */}
+        <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)} className={FIELD_CLS}>
+          <option value="">{tCommon('todas')}</option>
+          {SOURCE_VALUES.map(value => (
+            <option key={value} value={value}>
+              {tSource(value)}
+            </option>
+          ))}
+        </select>
+
+        {/* Status */}
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className={FIELD_CLS}>
+          <option value="">{tCommon('todos')}</option>
+          {STATUS_VALUES.map(value => (
+            <option key={value} value={value}>
+              {tStatus(value)}
+            </option>
+          ))}
+        </select>
+
+        {/* Intervalo de datas (criação do lead) */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-gray-500">{t('filtroDataDe')}</span>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={e => setDateFrom(e.target.value)}
+            className={FIELD_CLS}
+          />
+          <span className="text-xs text-gray-500">{t('filtroDataAte')}</span>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={e => setDateTo(e.target.value)}
+            className={FIELD_CLS}
+          />
+        </div>
+
+        {hasFilters && (
+          <button
+            onClick={clearFilters}
+            className="px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            {tCommon('limparFiltros')}
+          </button>
+        )}
+      </div>
+
+      {filteredLeads.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-200 flex flex-col items-center justify-center py-24 text-center">
+          <div className="text-5xl mb-4">🔍</div>
+          <p className="text-gray-700 font-medium">{t('nenhumResultadoFiltro')}</p>
+          <button
+            onClick={clearFilters}
+            className="mt-4 px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            {tCommon('limparFiltros')}
+          </button>
+        </div>
+      ) : (
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -148,7 +273,7 @@ export default function CrmTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {leads.map(lead => {
+              {filteredLeads.map(lead => {
                 const statusClass = STATUS_CLASS[lead.status] ?? STATUS_CLASS.new;
                 return (
                   <tr key={lead.id} className={`hover:bg-gray-50 ${lead.archiveReason ? 'bg-gray-50/60' : ''}`}>
@@ -168,6 +293,7 @@ export default function CrmTable({
                             {t('arquivado')}
                           </span>
                         )}
+                        <GroupBadges groups={lead.groups} />
                         <a
                           href={`mailto:${lead.email}`}
                           className="text-xs text-gray-400 hover:text-green-700 transition-colors"
@@ -263,6 +389,7 @@ export default function CrmTable({
           </table>
         </div>
       </div>
+      )}
 
       {deleteTarget && (
         <DeleteModal

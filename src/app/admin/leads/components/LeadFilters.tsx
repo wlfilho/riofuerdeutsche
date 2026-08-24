@@ -3,12 +3,12 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useTransition, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import CampaignFilter from '@/components/admin/CampaignFilter';
+import GroupFilter from '@/components/admin/GroupFilter';
 
 type Props = {
   currentStatus?: string;
   currentSource?: string;
-  currentCampaign?: string;
+  currentGroup?: string;
   currentQ?: string;
   hideStatus?: boolean;
 };
@@ -23,7 +23,7 @@ const SELECT_CLS =
 export default function LeadFilters({
   currentStatus = '',
   currentSource = '',
-  currentCampaign = '',
+  currentGroup = '',
   currentQ = '',
   hideStatus = false,
 }: Props) {
@@ -60,7 +60,7 @@ export default function LeadFilters({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);
 
-  const hasFilters = (!hideStatus && currentStatus) || currentSource || currentCampaign || currentQ;
+  const hasFilters = (!hideStatus && currentStatus) || currentSource || currentGroup || currentQ;
 
   return (
     <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -117,8 +117,8 @@ export default function LeadFilters({
         ))}
       </select>
 
-      {/* Campanha */}
-      <CampaignFilter value={currentCampaign} />
+      {/* Etiqueta */}
+      <GroupFilter value={currentGroup} />
 
       {/* Clear filters */}
       {hasFilters && (

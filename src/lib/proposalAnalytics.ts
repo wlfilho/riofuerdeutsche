@@ -32,6 +32,9 @@ export interface ProposalSessionStat {
   locale: string | null;
   user_agent: string | null;
   referrer: string | null;
+  country: string | null;
+  city: string | null;
+  tz: string | null;
   active_seconds: number;
   scroll_pct: number;
   saw_price: boolean;
@@ -116,6 +119,9 @@ export async function getProposalSessionStats(proposalId: string): Promise<Propo
     locale: row.locale,
     user_agent: row.user_agent,
     referrer: row.referrer,
+    country: row.country,
+    city: row.city,
+    tz: row.tz,
     active_seconds: n(row.active_seconds),
     scroll_pct: n(row.scroll_pct),
     saw_price: !!row.saw_price,
@@ -149,6 +155,88 @@ export function describeDevice(ua: string | null): string {
     : null;
   const icon = isTablet ? '💻' : isMobile ? '📱' : '🖥';
   return [icon, [os, browser].filter(Boolean).join(' · ')].filter(Boolean).join(' ');
+}
+
+/** Bandeira do código ISO-2 ("DE" → 🇩🇪) via indicadores regionais. */
+function flagEmoji(country: string): string {
+  if (!/^[A-Za-z]{2}$/.test(country)) return '';
+  return String.fromCodePoint(
+    ...[...country.toUpperCase()].map(c => 0x1f1e6 + c.charCodeAt(0) - 65),
+  );
+}
+
+/** Nome do país em pt-BR ("DE" → "Alemanha"); cai no próprio código se falhar. */
+function countryName(country: string): string {
+  try {
+    return new Intl.DisplayNames(['pt-BR'], { type: 'region' }).of(country) ?? country;
+  } catch {
+    return country;
+  }
+}
+
+export interface SessionOrigin {
+  /** Rótulo curto da célula: "🇩🇪 Berlin". */
+  label: string;
+  /** Detalhe pro title: país por extenso + fuso do navegador. */
+  detail: string;
+  /**
+   * Origem deduzida do fuso, não do IP — sessões anteriores ao país do IP e o
+   * dev local. Sinal mais fraco (o fuso viaja junto com o aparelho), então a UI
+   * mostra apagado.
+   */
+  fromTz: boolean;
+  /**
+   * País do IP diferente do país que o fuso do navegador sugere. Não é fraude:
+   * o caso típico é o cliente alemão que já desembarcou no Rio. Mas é
+   * exatamente o cruzamento que mostra se a leitura veio de quem se espera.
+   */
+  tzMismatch: boolean;
+}
+
+// Fuso → país esperado. Só os que aparecem na prática: alemão em casa, alemão
+// no Brasil, e os vizinhos de fuso que a Vercel devolve pra mesma região.
+const TZ_COUNTRY: Record<string, string> = {
+  'Europe/Berlin': 'DE',
+  'Europe/Vienna': 'AT',
+  'Europe/Zurich': 'CH',
+  'Europe/Lisbon': 'PT',
+  'America/Sao_Paulo': 'BR',
+  'America/Bahia': 'BR',
+  'America/Fortaleza': 'BR',
+  'America/Recife': 'BR',
+  'America/Manaus': 'BR',
+};
+
+/** Origem da sessão pro admin: bandeira + cidade, com o cruzamento IP × fuso. */
+export function describeOrigin(
+  country: string | null,
+  city: string | null,
+  tz: string | null,
+): SessionOrigin | null {
+  if (!country && !city) {
+    // Sem IP sobra o fuso: "Sao Paulo" com a bandeira do país que ele sugere.
+    if (!tz) return null;
+    const guess = TZ_COUNTRY[tz];
+    const place = tz.split('/').pop()?.replace(/_/g, ' ') ?? tz;
+    return {
+      label: [guess ? flagEmoji(guess) : '', place].filter(Boolean).join(' '),
+      detail: `Sem país do IP (abertura anterior ao registro) · fuso ${tz}`,
+      fromTz: true,
+      tzMismatch: false,
+    };
+  }
+
+  const flag = country ? flagEmoji(country) : '';
+  const name = country ? countryName(country) : '';
+  const label = [flag, city ?? name].filter(Boolean).join(' ') || '—';
+  const expected = tz ? TZ_COUNTRY[tz] : undefined;
+
+  return {
+    label,
+    detail: [city ? name : null, tz ? `fuso ${tz}` : null].filter(Boolean).join(' · '),
+    fromTz: false,
+    tzMismatch: !!country && !!expected && expected !== country,
+  };
 }
 
 /** Duração legível pro admin: 45s, 3min, 1h12min. */

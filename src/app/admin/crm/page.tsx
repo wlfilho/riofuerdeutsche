@@ -1,9 +1,11 @@
 import { getAdminTranslations } from '@/i18n/admin';
 import { createClient } from '@/utils/supabase/server';
 import CrmViewWrapper from './components/CrmViewWrapper';
-import CampaignFilter from '@/components/admin/CampaignFilter';
-import { matchesCampaign } from '@/lib/campaigns';
+import GroupFilter from '@/components/admin/GroupFilter';
+import { fetchLeadGroupsMap, matchesGroup, type LeadGroup } from '@/lib/leadGroups';
 import { todayInRio, withArchiveState, type ArchiveState } from '@/lib/leadArchive';
+
+export type { LeadGroup };
 
 export async function generateMetadata() {
   const t = await getAdminTranslations('admin.crm');
@@ -38,32 +40,36 @@ export interface CrmLead {
 
 /**
  * Lead com os campos que o kanban precisa mas não estão na linha da tabela:
- * a data do tour (que mora em `tour_dates`) e o estado de arquivamento.
+ * a data do tour (que mora em `tour_dates`), o estado de arquivamento e as
+ * etiquetas manuais (`lead_groups`).
  */
-export type CrmLeadView = CrmLead & ArchiveState;
+export type CrmLeadView = CrmLead & ArchiveState & { groups: LeadGroup[] };
 
 export default async function CrmPage({
   searchParams,
 }: {
-  searchParams: Promise<{ campaign?: string }>;
+  searchParams: Promise<{ group?: string }>;
 }) {
-  const { campaign } = await searchParams;
+  const { group } = await searchParams;
   const t = await getAdminTranslations('admin.crm');
   const tc = await getAdminTranslations('admin.common');
   const supabase = await createClient();
 
-  const [{ data, error }, { data: tourDateRows }] = await Promise.all([
+  const [{ data, error }, { data: tourDateRows }, groupsByLead] = await Promise.all([
     supabase.from('price_leads').select('*').order('created_at', { ascending: false }),
     supabase.from('tour_dates').select('lead_id, date'),
+    fetchLeadGroupsMap(supabase),
   ]);
 
-  // As métricas seguem o filtro: com o carnaval selecionado, a taxa de
-  // conversão que aparece é a daquela campanha, não a da carteira inteira.
-  const leads: CrmLeadView[] = withArchiveState(
-    ((data ?? []) as CrmLead[]).filter(l => matchesCampaign(l.campaign, campaign)),
+  const leadsWithGroups: CrmLeadView[] = withArchiveState(
+    (data ?? []) as CrmLead[],
     (tourDateRows ?? []) as { lead_id: string; date: string }[],
     todayInRio(),
-  );
+  ).map(lead => ({ ...lead, groups: groupsByLead.get(lead.id) ?? [] }));
+
+  // As métricas seguem o filtro: com uma etiqueta selecionada, a taxa de
+  // conversão que aparece é a daquele grupo, não a da carteira inteira.
+  const leads: CrmLeadView[] = leadsWithGroups.filter(l => matchesGroup(l.groups, group));
 
   // Métricas cobrem a carteira inteira, arquivados incluídos: conversão só faz
   // sentido sobre negócios encerrados, que são justamente os que saem da visão.
@@ -95,7 +101,7 @@ export default async function CrmPage({
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
             <p className="text-gray-500 mt-1">{t('subtitulo')}</p>
           </div>
-          <CampaignFilter value={campaign} />
+          <GroupFilter value={group} />
         </div>
 
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">

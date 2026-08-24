@@ -67,8 +67,8 @@ export default function MagicLinkForm({
           subtext: "Trag deinen Namen und deine E-Mail ein — wir schicken dir sofort einen Zugangslink. Kein Passwort nötig.",
           submitText: t("submitKostenlosenZugang"),
           trustText: t("trustKeinPasswortAbmeldbar"),
-          containerStyle: "bg-rio-yellow p-8 md:p-10 rounded-3xl shadow-lg border border-yellow-300",
-          headlineStyle: "text-2xl md:text-3xl font-bold text-[#0d1f15] mb-3",
+          containerStyle: "bg-rio-yellow p-6 sm:p-8 md:p-10 rounded-3xl shadow-lg border border-yellow-300",
+          headlineStyle: "text-[22px] sm:text-2xl md:text-3xl font-bold text-[#0d1f15] leading-snug text-balance mb-3",
         };
       case "inline2":
         return {
@@ -77,8 +77,8 @@ export default function MagicLinkForm({
           subtext: "Melde dich an und erhalte sofort Zugang zur vollständigen Sicherheits-Sektion im Rio für Deutsche Guide.",
           submitText: t("submitJetztKostenlosAnmelden"),
           trustText: t("trustKeinPasswortAbmeldbar"),
-          containerStyle: "bg-rio-yellow p-8 md:p-10 rounded-3xl shadow-lg border border-yellow-300",
-          headlineStyle: "text-2xl md:text-3xl font-bold text-[#0d1f15] mb-3",
+          containerStyle: "bg-rio-yellow p-6 sm:p-8 md:p-10 rounded-3xl shadow-lg border border-yellow-300",
+          headlineStyle: "text-[22px] sm:text-2xl md:text-3xl font-bold text-[#0d1f15] leading-snug text-balance mb-3",
         };
       case "final":
         return {
@@ -87,8 +87,8 @@ export default function MagicLinkForm({
           subtext: "Alles was du brauchst, um sicher und selbstbewusst durch Rio zu reisen — kostenlos, in einem Guide, von einem Carioca der fließend Deutsch spricht.",
           submitText: t("submitSicherheitsGuide"),
           trustText: t("trustKeinPasswortSofort"),
-          containerStyle: "bg-rio-yellow p-10 md:p-14 rounded-3xl w-full shadow-xl border border-yellow-300",
-          headlineStyle: "text-3xl md:text-5xl font-bold text-[#0d1f15] mb-4 tracking-tight",
+          containerStyle: "bg-rio-yellow p-6 sm:p-10 md:p-14 rounded-3xl w-full shadow-xl border border-yellow-300",
+          headlineStyle: "text-[28px] sm:text-3xl md:text-5xl font-bold text-[#0d1f15] leading-tight text-balance mb-4 tracking-tight",
         };
     }
   };
@@ -100,10 +100,10 @@ export default function MagicLinkForm({
       <div className={`${content.containerStyle} text-center flex flex-col items-center justify-center`}>
         {content.icon}
         <h3 className={content.headlineStyle}>{content.headline}</h3>
-        <p className="text-[#0d1f15]/80 text-lg mb-8 max-w-lg mx-auto">{content.subtext}</p>
+        <p className="text-[#0d1f15]/80 text-base sm:text-lg leading-relaxed mb-7 sm:mb-8 max-w-lg mx-auto">{content.subtext}</p>
         <Link
           href="/guide/sicherheit"
-          className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#0d1f15] text-white rounded-full font-bold text-lg hover:bg-[#1a3826] hover:scale-[1.02] transition-all shadow-md"
+          className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-4 bg-[#0d1f15] text-white rounded-full font-bold text-base sm:text-lg leading-snug hover:bg-[#1a3826] hover:scale-[1.02] transition-all shadow-md"
         >
           {t("jetztLesen")}
           <ArrowRight className="w-5 h-5" />
@@ -116,8 +116,8 @@ export default function MagicLinkForm({
     return (
       <div className={`${content.containerStyle} text-center flex flex-col items-center justify-center`}>
         <CheckCircle2 className="w-16 h-16 text-[#0d1f15] mb-6" />
-        <h3 className="text-3xl font-bold text-[#0d1f15] mb-3">{t("fastGeschafft")}</h3>
-        <p className="text-[#0d1f15]/80 text-lg">
+        <h3 className="text-2xl sm:text-3xl font-bold text-[#0d1f15] leading-snug text-balance mb-3">{t("fastGeschafft")}</h3>
+        <p className="text-[#0d1f15]/80 text-base sm:text-lg leading-relaxed">
           {t.rich("zugangslinkGesendet", {
             email,
             strong: (chunks) => <span className="font-bold text-[#0d1f15]">{chunks}</span>,
@@ -132,7 +132,7 @@ export default function MagicLinkForm({
       <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
         {content.icon}
         <h3 className={content.headlineStyle}>{content.headline}</h3>
-        <p className="text-[#0d1f15]/80 text-lg mb-8">{content.subtext}</p>
+        <p className="text-[#0d1f15]/80 text-base sm:text-lg leading-relaxed mb-7 sm:mb-8">{content.subtext}</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md w-full">
           {errorMsg && (
@@ -149,7 +149,7 @@ export default function MagicLinkForm({
               value={vorname}
               onChange={(e) => setVorname(e.target.value)}
               disabled={loading}
-              className="w-full px-5 py-4 rounded-2xl bg-white border border-transparent text-[#0d1f15] text-lg placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-[#0d1f15]/20 focus:border-[#0d1f15] transition-all"
+              className="w-full px-5 py-4 rounded-2xl bg-white border border-transparent text-[#0d1f15] text-base sm:text-lg placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-[#0d1f15]/20 focus:border-[#0d1f15] transition-all"
             />
             <input
               type="email"
@@ -158,17 +158,17 @@ export default function MagicLinkForm({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
-              className="w-full px-5 py-4 rounded-2xl bg-white border border-transparent text-[#0d1f15] text-lg placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-[#0d1f15]/20 focus:border-[#0d1f15] transition-all"
+              className="w-full px-5 py-4 rounded-2xl bg-white border border-transparent text-[#0d1f15] text-base sm:text-lg placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-[#0d1f15]/20 focus:border-[#0d1f15] transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full inline-flex md:mt-2 items-center justify-center gap-2 px-8 py-4 bg-[#0d1f15] text-white rounded-full font-bold text-xl hover:bg-[#1a3826] hover:scale-[1.02] transition-all shadow-lg disabled:opacity-70 disabled:hover:scale-100"
+            className="w-full inline-flex md:mt-2 items-center justify-center gap-2 px-5 sm:px-8 py-4 bg-[#0d1f15] text-white rounded-full font-bold text-[17px] sm:text-lg md:text-xl leading-snug hover:bg-[#1a3826] hover:scale-[1.02] transition-all shadow-lg disabled:opacity-70 disabled:hover:scale-100"
           >
-            {loading ? t("wirdGesendet") : content.submitText}
-            {!loading && <ArrowRight className="w-6 h-6" />}
+            <span className="text-balance">{loading ? t("wirdGesendet") : content.submitText}</span>
+            {!loading && <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />}
           </button>
 
           <p className="text-sm font-medium text-[#0d1f15]/60 mt-3">

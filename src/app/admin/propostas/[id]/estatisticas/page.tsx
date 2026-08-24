@@ -4,6 +4,7 @@ import { getAdminTranslations } from '@/i18n/admin';
 import { getProposalById } from '@/lib/proposals';
 import {
   describeDevice,
+  describeOrigin,
   fmtDuration,
   getProposalSessionStats,
   type ProposalSessionStat,
@@ -179,6 +180,7 @@ export default async function PropostaEstatisticasPage({
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colQuando')}</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colVisitante')}</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colAparelho')}</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colOrigem')}</th>
                       <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colTempo')}</th>
                       <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colScroll')}</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">{t('colSecoes')}</th>
@@ -196,6 +198,25 @@ export default async function PropostaEstatisticasPage({
                         </td>
                         <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
                           {describeDevice(s.user_agent)}
+                        </td>
+                        <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                          {(() => {
+                            const origin = describeOrigin(s.country, s.city, s.tz);
+                            if (!origin) return <span className="text-gray-400">—</span>;
+                            return (
+                              <span
+                                title={origin.detail || undefined}
+                                className={origin.fromTz ? 'text-gray-400' : undefined}
+                              >
+                                {origin.label}
+                                {origin.tzMismatch && (
+                                  <span className="ml-1 text-amber-600" title={t('origemDivergente')}>
+                                    ⚠
+                                  </span>
+                                )}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="px-4 py-3 text-right text-gray-700 tabular-nums whitespace-nowrap">
                           {fmtDuration(s.active_seconds)}
