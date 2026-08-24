@@ -13,9 +13,16 @@
 // estado em memória entre chamadas (serverless, uma invocação por request).
 
 import { timingSafeEqual } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
 import { createMcpHandler } from "mcp-handler";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { digitsOnly, phoneTail } from "@/lib/phone";
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 /** Compara em tempo constante pra não vazar o segredo por timing attack. */
 function isValidSecret(provided: string, expected: string): boolean {
@@ -85,6 +92,37 @@ async function uazapi(path: string, body: Record<string, unknown>): Promise<unkn
   return data;
 }
 
+/**
+ * Allowlist de `send_text_message`: só deixa enviar pra números que já são
+ * contato no CRM (tabela `contacts`). Casa pelos últimos 8 dígitos — mesma
+ * lógica de src/app/api/webhooks/uazapi/route.ts — porque o número que o
+ * Claude recebe pode vir em formato diferente do salvo no CRM. Isso limita o
+ * dano de um vazamento do MCP_PATH_SECRET: dá pra responder um lead
+ * existente, mas não pra mandar mensagem pra um número desconhecido.
+ */
+async function assertKnownContact(number: string): Promise<void> {
+  const target = phoneTail(digitsOnly(number));
+  if (!target) {
+    throw new Error(`Número inválido: "${number}".`);
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("contacts")
+    .select("phone")
+    .not("phone", "is", null);
+
+  if (error) {
+    throw new Error(`Falha ao consultar contatos do CRM: ${error.message}`);
+  }
+
+  const known = (data ?? []).some((c) => phoneTail(digitsOnly(c.phone)) === target);
+  if (!known) {
+    throw new Error(
+      `Envio bloqueado: ${number} não é um contato conhecido no CRM. Cadastre o contato antes de enviar mensagem pra ele.`
+    );
+  }
+}
+
 const mcpHandler = createMcpHandler(
   (server) => {
     server.registerTool(
@@ -146,13 +184,16 @@ const mcpHandler = createMcpHandler(
       {
         title: "Enviar mensagem de texto",
         description:
-          "Envia uma mensagem de texto pelo WhatsApp para um número. Ação real e irreversível — confirme o número e o conteúdo antes de chamar.",
+          "Envia uma mensagem de texto pelo WhatsApp para um número. Só funciona para números que já são contato no CRM (allowlist). Ação real e irreversível — confirme o número e o conteúdo antes de chamar.",
         inputSchema: z.object({
           number: z.string().min(1).describe("Número de destino (com DDI, ex: 5521999999999)."),
           text: z.string().min(1).max(4096).describe("Texto da mensagem, até 4096 caracteres."),
         }),
       },
-      safe(async ({ number, text }) => uazapi("/send/text", { number, text }))
+      safe(async ({ number, text }) => {
+        await assertKnownContact(number);
+        return uazapi("/send/text", { number, text });
+      })
     );
 
     server.registerTool(
