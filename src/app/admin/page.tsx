@@ -21,6 +21,7 @@ export async function generateMetadata() {
 
 interface DashboardTour {
   id: string;
+  lead_id: string;
   date: string;
   start_time: string | null;
   tour_name: string;
@@ -79,7 +80,7 @@ export default async function DashboardPage() {
       supabase.from('price_leads').select('status, created_at'),
       supabase
         .from('tour_dates')
-        .select('id, date, start_time, tour_name, status, pax, agreed_price, anzahlung_paid, lead:price_leads(name)')
+        .select('id, lead_id, date, start_time, tour_name, status, pax, agreed_price, anzahlung_paid, lead:price_leads(name)')
         .gte('date', monthStart)
         .order('date', { ascending: true })
         .order('start_time', { ascending: true, nullsFirst: true }),
@@ -121,6 +122,18 @@ export default async function DashboardPage() {
   const futureRevenue = upcomingClosed.reduce((sum, t) => sum + (t.agreed_price ?? 0), 0);
   const pendingAnzahlung = upcomingClosed.filter(t => !t.anzahlung_paid).length;
 
+  // Dias com tours de 2+ clientes diferentes ainda por vir — mesma regra do
+  // calendário (ver findConflictingTourDates): um guia só cobre um pack por
+  // dia. Só considera daqui pra frente porque conflito de data passada não
+  // precisa mais ser resolvido.
+  const conflictDatesCount = new Map<string, Set<string>>();
+  for (const t of upcomingTours) {
+    const leads = conflictDatesCount.get(t.date) ?? new Set<string>();
+    leads.add(t.lead_id);
+    conflictDatesCount.set(t.date, leads);
+  }
+  const conflictDaysCount = [...conflictDatesCount.values()].filter(leads => leads.size > 1).length;
+
   // — Propostas —
   const proposals = (proposalsRes.data ?? []) as DashboardProposal[];
   const sentProposals = proposals.filter(p => p.status === 'sent');
@@ -148,23 +161,32 @@ export default async function DashboardPage() {
   ];
 
   const pendingActions = [
+    conflictDaysCount > 0 && {
+      href: '/admin/calendario',
+      label: t('alertaConflitoAgenda', { count: conflictDaysCount }),
+      variant: 'danger' as const,
+    },
     leadCounts.new > 0 && {
       href: '/admin/crm',
       label: t('alertaLeadsSemContato', { count: leadCounts.new }),
+      variant: 'warning' as const,
     },
     draftProposals > 0 && {
       href: '/admin/propostas',
       label: t('alertaPropostasRascunho', { count: draftProposals }),
+      variant: 'warning' as const,
     },
     pendingAnzahlung > 0 && {
       href: '/admin/calendario',
       label: t('alertaSinalPendente', { count: pendingAnzahlung }),
+      variant: 'warning' as const,
     },
     pendingReviews > 0 && {
       href: '/admin/bewertungen',
       label: t('alertaAvaliacoesModerar', { count: pendingReviews }),
+      variant: 'warning' as const,
     },
-  ].filter(Boolean) as Array<{ href: string; label: string }>;
+  ].filter(Boolean) as Array<{ href: string; label: string; variant: 'warning' | 'danger' }>;
 
   const platformCards = [
     {
@@ -208,9 +230,13 @@ export default async function DashboardPage() {
               <Link
                 key={action.label}
                 href={action.href}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-50 border border-yellow-200 text-yellow-900 text-sm font-medium hover:bg-yellow-100 transition-colors"
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${
+                  action.variant === 'danger'
+                    ? 'bg-red-50 border-red-200 text-red-900 hover:bg-red-100'
+                    : 'bg-yellow-50 border-yellow-200 text-yellow-900 hover:bg-yellow-100'
+                }`}
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
+                <span className={`w-1.5 h-1.5 rounded-full ${action.variant === 'danger' ? 'bg-red-500' : 'bg-yellow-500'}`} />
                 {action.label}
               </Link>
             ))}

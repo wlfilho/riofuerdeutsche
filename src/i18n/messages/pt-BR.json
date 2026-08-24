@@ -193,6 +193,7 @@
       "verPropostas": "Ver propostas →",
       "nenhumaProposta": "Nenhuma proposta criada.",
       "erroCarregar": "Erro ao carregar dados: ",
+      "alertaConflitoAgenda": "{count, plural, one {# dia com conflito de agenda} other {# dias com conflito de agenda}}",
       "alertaLeadsSemContato": "{count, plural, one {# lead sem contato} other {# leads sem contato}}",
       "alertaPropostasRascunho": "{count, plural, one {# proposta em rascunho} other {# propostas em rascunho}}",
       "alertaSinalPendente": "{count, plural, one {# sinal pendente} other {# sinais pendentes}}",
