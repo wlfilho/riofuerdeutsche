@@ -13,29 +13,12 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { digitsOnly as digits, phoneTail as tail } from '@/lib/phone';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
-
-/** Só dígitos. "+49 170 1624062" -> "491701624062" */
-function digits(s: unknown): string {
-  return typeof s === 'string' ? s.replace(/\D+/g, '') : '';
-}
-
-/**
- * Os últimos 8 dígitos são a chave de casamento com `contacts.phone`.
- *
- * O cliente digita o telefone no formulário de um jeito e o WhatsApp entrega de
- * outro: DDI com ou sem, o nono dígito brasileiro que aparece e some, o zero
- * nacional alemão que o cliente às vezes escreve. Os últimos 8 sobrevivem a
- * todas essas variações e ainda são específicos o bastante para não colidir
- * numa base do tamanho desta.
- */
-function tail(phoneDigits: string): string | null {
-  return phoneDigits.length >= 8 ? phoneDigits.slice(-8) : null;
-}
 
 /** Extrai o telefone de qualquer um dos campos que o uazapi possa usar. */
 function extractPhone(p: Record<string, unknown>): string {
