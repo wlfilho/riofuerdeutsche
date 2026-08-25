@@ -434,6 +434,7 @@
       "contagemNovos": "{count, plural, one {# novo} other {# novos}}",
       "contagemContatados": "{count, plural, one {# contatado} other {# contatados}}",
       "ordenarPendentes": "Ordenar solicitações",
+      "verPerfil": "Ver perfil",
       "ordenarMaisAntigo": "Mais antigo primeiro",
       "ordenarMaisRecente": "Mais recente primeiro",
       "mostrandoDeTotal": "Mostrando {shown} de {total}",

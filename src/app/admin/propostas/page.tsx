@@ -15,6 +15,10 @@ import { daysSince } from '@/lib/adminFormat';
 type PendingLead = {
   id: string;
   name: string;
+  email: string;
+  phone: string | null;
+  notes: string | null;
+  contact_id: string;
   pax: number;
   children: number | null;
   requested_days: string[] | null;
@@ -38,6 +42,14 @@ function waitingClassName(days: number): string {
   return 'text-gray-400';
 }
 
+// Mesmos limiares do texto, como faixa lateral — a urgência dá pra sentir
+// antes de ler qualquer palavra do card.
+function urgencyBorderClassName(days: number): string {
+  if (days >= 5) return 'border-l-4 border-l-red-400';
+  if (days >= 2) return 'border-l-4 border-l-amber-400';
+  return 'border-l-4 border-l-gray-200';
+}
+
 async function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
   const t = await getAdminTranslations('admin.propostas');
   const tSource = await getAdminTranslations('admin.status.source');
@@ -56,39 +68,90 @@ async function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
     return (
       <div
         key={lead.id}
-        className="flex flex-wrap items-center gap-x-4 gap-y-1 bg-white border border-amber-100 rounded-lg px-4 py-2.5 text-sm"
+        className={`bg-white border border-amber-100 ${urgencyBorderClassName(waitingDays)} rounded-lg px-4 py-3`}
       >
-        <span className="font-semibold text-gray-800">{lead.name}</span>
-        <span
-          className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-            lead.status === 'new' ? 'bg-gray-100 text-gray-700' : 'bg-blue-100 text-blue-700'
-          }`}
-        >
-          {tLeadStatus(lead.status)}
-        </span>
-        <span className="text-gray-600">
-          {lead.pax} pax
-          {(lead.children ?? 0) > 0 && ` + ${t('criancas', { count: lead.children ?? 0 })}`}
-        </span>
-        {(lead.requested_days?.length ?? 0) > 0 && (
-          <span className="text-gray-500">
-            📅 {(lead.requested_days ?? []).map(formatShortDate).join(' · ')}
+        {/* Linha 1 — o dado que a pessoa procura primeiro: quem é e quão
+            urgente é responder. Nome em destaque, urgência sempre à direita. */}
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className="font-semibold text-gray-900 text-base">{lead.name}</span>
+          <span
+            className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+              lead.status === 'new' ? 'bg-gray-100 text-gray-700' : 'bg-blue-100 text-blue-700'
+            }`}
+          >
+            {tLeadStatus(lead.status)}
           </span>
+          <span className={`ml-auto text-xs ${waitingClassName(waitingDays)}`}>
+            {t('esperandoDias', { count: waitingDays })}
+          </span>
+        </div>
+
+        {/* Linha 2 — contexto da viagem, tom neutro (não compete com a linha 1). */}
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600">
+          <span>
+            {lead.pax} pax
+            {(lead.children ?? 0) > 0 && ` + ${t('criancas', { count: lead.children ?? 0 })}`}
+          </span>
+          {(lead.requested_days?.length ?? 0) > 0 && (
+            <>
+              <span className="text-gray-300">·</span>
+              <span>📅 {(lead.requested_days ?? []).map(formatShortDate).join(' · ')}</span>
+            </>
+          )}
+          <span className="text-gray-300">·</span>
+          <span className="text-gray-400">
+            {t('via')}
+            {tSource.has(lead.source) ? tSource(lead.source) : lead.source}
+          </span>
+        </div>
+
+        {/* Linha 3 — contato direto: telefone (97% dos leads tem) vira link de
+            WhatsApp, e-mail vira mailto. Antes só existia dentro do CRM. */}
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          {lead.phone && (
+            <a
+              href={`https://wa.me/${lead.phone.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 transition-colors tabular-nums"
+            >
+              💬 {lead.phone}
+            </a>
+          )}
+          <a
+            href={`mailto:${lead.email}`}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 transition-colors"
+          >
+            ✉️ {lead.email}
+          </a>
+        </div>
+
+        {/* Nota do CRM, só quando existe — mais da metade dos leads tem uma
+            (preferência, restrição, contexto) e ficava invisível aqui. */}
+        {lead.notes && (
+          <p className="mt-2 text-xs italic text-gray-500 bg-gray-50 rounded-md px-2.5 py-1.5 truncate" title={lead.notes}>
+            📝 {lead.notes}
+          </p>
         )}
-        <span className={`text-xs ${waitingClassName(waitingDays)}`}>
-          {t('esperandoDias', { count: waitingDays })}
-        </span>
-        <span className="text-xs text-gray-400">
-          {t('via')}
-          {tSource.has(lead.source) ? tSource(lead.source) : lead.source}
-        </span>
-        <GroupBadges groups={lead.groups} />
-        <Link
-          href={`/admin/propostas/nova?lead_id=${lead.id}`}
-          className="ml-auto px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shrink-0"
-        >
-          {t('criarProposta')}
-        </Link>
+
+        {/* Linha final — etiquetas à esquerda, ações à direita. */}
+        <div className="mt-2.5 flex flex-wrap items-center gap-2">
+          <GroupBadges groups={lead.groups} />
+          <div className="ml-auto flex items-center gap-2">
+            <Link
+              href={`/admin/contatos/${lead.contact_id}`}
+              className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors shrink-0"
+            >
+              {t('verPerfil')}
+            </Link>
+            <Link
+              href={`/admin/propostas/nova?lead_id=${lead.id}`}
+              className="px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shrink-0"
+            >
+              {t('criarProposta')}
+            </Link>
+          </div>
+        </div>
       </div>
     );
   });
@@ -132,7 +195,7 @@ export default async function PropostasPage({
       // the CRM (or already linked to a proposal) drop out of this strip.
       supabase
         .from('price_leads')
-        .select('id, name, pax, children, requested_days, source, status, created_at')
+        .select('id, name, email, phone, notes, contact_id, pax, children, requested_days, source, status, created_at')
         .is('proposal_id', null)
         .in('status', ['new', 'contacted'])
         .order('created_at', { ascending: false }),
