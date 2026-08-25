@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import ContactCRMTab from '@/components/admin/ContactCRMTab';
+import ContactPropostaTab from '@/components/admin/ContactPropostaTab';
 import { fmtDate, fmtDateTime, fmtEur } from '@/lib/adminFormat';
 
-type Tab = 'guide' | 'crm' | 'emails' | 'dokumente';
+type Tab = 'guide' | 'crm' | 'proposta' | 'emails' | 'dokumente';
 
 type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'lost';
 
@@ -62,6 +63,19 @@ interface TourClient {
   created_at: string;
 }
 
+interface Proposal {
+  id: string;
+  client_name: string;
+  internal_label: string | null;
+  pax: number;
+  status: 'draft' | 'sent' | 'accepted' | 'rejected';
+  total_amount: number | null;
+  currency?: 'EUR' | 'BRL' | null;
+  valid_until: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface EmailLog {
   id: string;
   client_id: string;
@@ -83,6 +97,7 @@ interface ContactData {
   lead_contacts: LeadContact[];
   tour_clients: TourClient[];
   email_logs: EmailLog[];
+  proposals: Proposal[];
 }
 
 interface ContactProfileProps {
@@ -850,6 +865,7 @@ function DokumenteTab({ contactId }: { contactId: string }) {
 const TABS: { key: Tab; labelKey: string }[] = [
   { key: 'guide',      labelKey: 'abaGuide' },
   { key: 'crm',        labelKey: 'abaCrm' },
+  { key: 'proposta',   labelKey: 'abaPropostas' },
   { key: 'emails',     labelKey: 'abaEmails' },
   { key: 'dokumente',  labelKey: 'abaDocumentos' },
 ];
@@ -989,6 +1005,12 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
                   <ContactCRMTab
                     leads={data.leads}
                     lead_contacts={data.lead_contacts}
+                  />
+                )}
+                {tab === 'proposta' && (
+                  <ContactPropostaTab
+                    leads={data.leads}
+                    proposals={data.proposals}
                   />
                 )}
                 {tab === 'emails' && (
