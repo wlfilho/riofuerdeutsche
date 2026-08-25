@@ -20,10 +20,20 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
-/** Extrai o telefone de qualquer um dos campos que o uazapi possa usar. */
+/**
+ * Extrai o telefone de qualquer um dos campos que o uazapi possa usar.
+ *
+ * Formato real observado (evento `messages`): telefone limpo em `chat.phone`,
+ * e o par chatid/sender_pn em `message.*`. NUNCA usar `message.sender` — é um
+ * LID (identificador de privacidade do WhatsApp), não telefone, e viraria um
+ * "telefone" de 13+ dígitos falso se entrasse nos candidatos.
+ */
 function extractPhone(p: Record<string, unknown>): string {
+  const chat = p.chat as Record<string, unknown> | undefined;
+  const msg = (p.message ?? p.msg) as Record<string, unknown> | undefined;
   const candidates = [
-    p.chatid, p.chatId, p.sender, p.from, p.number, p.phone, p.remoteJid,
+    chat?.phone, msg?.chatid, chat?.wa_chatid, msg?.sender_pn,
+    p.chatid, p.chatId, p.from, p.number, p.phone, p.remoteJid,
     (p.key as Record<string, unknown> | undefined)?.remoteJid,
   ];
   for (const c of candidates) {
@@ -53,7 +63,8 @@ function extractText(p: Record<string, unknown>): string {
 /** true = mensagem enviada pelo Will; false = recebida do cliente. */
 function extractFromMe(p: Record<string, unknown>): boolean {
   const key = p.key as Record<string, unknown> | undefined;
-  for (const c of [p.fromMe, p.fromme, key?.fromMe]) {
+  const msg = (p.message ?? p.msg) as Record<string, unknown> | undefined;
+  for (const c of [p.fromMe, p.fromme, key?.fromMe, msg?.fromMe]) {
     if (typeof c === 'boolean') return c;
     if (c === 'true') return true;
     if (c === 'false') return false;
@@ -62,12 +73,29 @@ function extractFromMe(p: Record<string, unknown>): boolean {
 }
 
 function extractTimestamp(p: Record<string, unknown>): string | null {
-  const raw = p.messageTimestamp ?? p.timestamp ?? p.t;
+  const msg = (p.message ?? p.msg) as Record<string, unknown> | undefined;
+  const raw = p.messageTimestamp ?? p.timestamp ?? p.t ?? msg?.messageTimestamp;
   const n = typeof raw === 'string' ? Number(raw) : typeof raw === 'number' ? raw : NaN;
   if (!Number.isFinite(n) || n <= 0) return null;
   // uazapi manda segundos em alguns eventos e milissegundos em outros.
   const ms = n > 1e12 ? n : n * 1000;
   return new Date(ms).toISOString();
+}
+
+/** true = mensagem de grupo. Prioriza os booleanos que o uazapi já manda prontos. */
+function extractIsGroup(p: Record<string, unknown>): boolean {
+  const chat = p.chat as Record<string, unknown> | undefined;
+  const msg = (p.message ?? p.msg) as Record<string, unknown> | undefined;
+  if (typeof msg?.isGroup === 'boolean') return msg.isGroup;
+  if (typeof chat?.wa_isGroup === 'boolean') return chat.wa_isGroup;
+  const chatid = msg?.chatid ?? chat?.wa_chatid ?? p.chatid ?? p.chatId ?? p.remoteJid ?? '';
+  return String(chatid).includes('@g.us');
+}
+
+/** Nome da instância uazapi que disparou o evento (`rfd`). */
+function extractInstance(p: Record<string, unknown>): string | null {
+  const c = p.instanceName ?? p.instance;
+  return typeof c === 'string' ? c : null;
 }
 
 export async function POST(request: NextRequest) {
@@ -102,7 +130,7 @@ export async function POST(request: NextRequest) {
     const phoneTail = tail(phone);
     const text = extractText(p);
     const fromMe = extractFromMe(p);
-    const isGroup = String(p.chatid ?? p.chatId ?? p.remoteJid ?? '').includes('@g.us');
+    const isGroup = extractIsGroup(p);
 
     let parseStatus: 'ok' | 'unparsed' | 'ignored' = 'ok';
     let parseNote: string | null = null;
@@ -149,7 +177,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { error: eventError } = await supabaseAdmin.from('whatsapp_events').insert({
-      instance: typeof p.instance === 'string' ? p.instance : null,
+      instance: extractInstance(p),
       phone: phone || null,
       phone_tail: phoneTail,
       direction: fromMe ? 'sent' : 'received',
