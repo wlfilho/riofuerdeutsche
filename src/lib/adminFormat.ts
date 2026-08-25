@@ -74,6 +74,17 @@ export function fmtNumber(value: number | null | undefined): string {
 }
 
 /**
+ * Dias inteiros desde uma data ISO até agora (nunca negativo).
+ * Usado pra sinalizar "parado há N dias" — leads aguardando proposta,
+ * propostas sem resposta — nas listas do admin.
+ */
+export function daysSince(iso: string): number {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return 0;
+  return Math.max(0, Math.floor((Date.now() - then) / 86_400_000));
+}
+
+/**
  * Nota/score com exatamente 1 casa decimal: 5 vira "5,0", não "5".
  * `fmtNumber` não serve aqui porque descartaria a casa decimal.
  */
