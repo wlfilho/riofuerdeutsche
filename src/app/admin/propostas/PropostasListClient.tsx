@@ -231,6 +231,11 @@ const TAB_LABEL_KEY: Record<StatusTab, string> = {
 };
 type SortKey = 'recent' | 'oldest' | 'value' | 'tourDate';
 
+// Quantas propostas mostrar de cada vez por aba, antes do "carregar mais" —
+// mesma lógica da faixa de leads pendentes: nada some, só fica escondido até
+// pedirem mais.
+const PAGE_SIZE = 20;
+
 export default function PropostasListClient({
   initialProposals,
   analytics = {},
@@ -259,6 +264,13 @@ export default function PropostasListClient({
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortKey>('recent');
   const [onlyNoEmail, setOnlyNoEmail] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  // Trocar de aba, buscar ou filtrar recomeça a paginação — senão o admin
+  // troca pra "Aceitas" e vê uma lista vazia porque o corte ficou lá atrás.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [tab, search, sortBy, onlyNoEmail]);
 
   const clearToast = useCallback(() => setToast(null), []);
 
@@ -348,6 +360,11 @@ export default function PropostasListClient({
     return sorted;
   }, [proposals, tab, search, onlyNoEmail, sortBy, emailStatuses]);
 
+  const shownProposals = useMemo(
+    () => visibleProposals.slice(0, visibleCount),
+    [visibleProposals, visibleCount],
+  );
+
   if (proposals.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -433,7 +450,7 @@ export default function PropostasListClient({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {visibleProposals.map(p => (
+                {shownProposals.map(p => (
                   <tr key={p.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-900">{p.client_name}</div>
@@ -540,7 +557,7 @@ export default function PropostasListClient({
           {/* Mobile: cards — a mesma tabela em 7 colunas força scroll lateral
               num celular, então abaixo de md a lista vira cartões. */}
           <div className="md:hidden divide-y divide-gray-100">
-            {visibleProposals.map(p => {
+            {shownProposals.map(p => {
               const days = getTourDays(p);
               const shownDays = days.slice(0, 2);
               return (
@@ -623,6 +640,20 @@ export default function PropostasListClient({
               );
             })}
           </div>
+
+          {visibleProposals.length > shownProposals.length && (
+            <div className="px-4 py-3 border-t border-gray-100 text-xs text-gray-500 text-center">
+              {t('mostrandoDeTotal', { shown: shownProposals.length, total: visibleProposals.length })}
+              {' · '}
+              <button
+                type="button"
+                onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                className="font-semibold text-green-700 hover:underline"
+              >
+                {t('carregarMais')}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
