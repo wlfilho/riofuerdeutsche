@@ -177,7 +177,7 @@ export default function TourCard({
               </a>
             )}
           </div>
-          <p className="text-sm text-gray-500 truncate mt-0.5">{tour.tour_name}</p>
+          {tour.tour_name && <p className="text-sm text-gray-500 truncate mt-0.5">{tour.tour_name}</p>}
           <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
             <StatusBadge status={tour.status} />
             {hasConflict && <ConflictBadge />}

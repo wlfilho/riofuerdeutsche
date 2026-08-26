@@ -271,37 +271,45 @@ export default async function DashboardPage() {
               <p className="text-sm text-gray-400 py-4">{t('nenhumTourFuturo')}</p>
             ) : (
               <ul className="divide-y divide-gray-100">
-                {upcomingTours.slice(0, 6).map(tour => (
-                  <li key={tour.id} className="py-2.5 flex items-center gap-3">
-                    <div className="w-20 flex-shrink-0">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {formatShortDate(tour.date)}
-                      </p>
-                      {tour.start_time && (
-                        <p className="text-xs text-gray-500">{formatTime(tour.start_time)}</p>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {tour.tour_name}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {tour.lead?.name ?? t('semLead')}
-                        {tour.pax != null && t('paxSufixo', { pax: tour.pax })}
-                        {tour.agreed_price != null && ` · ${fmtEur(tour.agreed_price)}`}
-                      </p>
-                    </div>
-                    <span
-                      className={`flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        tour.status === 'fechado'
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-amber-50 text-amber-700'
-                      }`}
-                    >
-                      {tTourStatus(tour.status)}
-                    </span>
-                  </li>
-                ))}
+                {upcomingTours.slice(0, 6).map(tour => {
+                  // Nome do tour é detalhe opcional (já está na proposta); o
+                  // que sempre aparece aqui é a data + o cliente.
+                  const details = [
+                    tour.tour_name,
+                    tour.pax != null ? t('paxSufixo', { pax: tour.pax }).replace(/^\s*·\s*/, '') : null,
+                    tour.agreed_price != null ? fmtEur(tour.agreed_price) : null,
+                  ].filter(Boolean);
+
+                  return (
+                    <li key={tour.id} className="py-2.5 flex items-center gap-3">
+                      <div className="w-20 flex-shrink-0">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {formatShortDate(tour.date)}
+                        </p>
+                        {tour.start_time && (
+                          <p className="text-xs text-gray-500">{formatTime(tour.start_time)}</p>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {tour.lead?.name ?? t('semLead')}
+                        </p>
+                        {details.length > 0 && (
+                          <p className="text-xs text-gray-500 truncate">{details.join(' · ')}</p>
+                        )}
+                      </div>
+                      <span
+                        className={`flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          tour.status === 'fechado'
+                            ? 'bg-green-50 text-green-700'
+                            : 'bg-amber-50 text-amber-700'
+                        }`}
+                      >
+                        {tTourStatus(tour.status)}
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>

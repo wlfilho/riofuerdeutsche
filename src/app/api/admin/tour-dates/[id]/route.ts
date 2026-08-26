@@ -30,14 +30,10 @@ export async function PATCH(
   if (body.status !== undefined && !VALID_STATUSES.includes(body.status)) {
     return NextResponse.json({ error: 'Status inválido.' }, { status: 400 });
   }
-  if (body.tour_name !== undefined && !body.tour_name?.trim()) {
-    return NextResponse.json({ error: 'Nome do tour é obrigatório.' }, { status: 400 });
-  }
-
   const updates: Record<string, unknown> = {};
   if (body.date !== undefined) updates.date = body.date;
   if (body.start_time !== undefined) updates.start_time = body.start_time || null;
-  if (body.tour_name !== undefined) updates.tour_name = body.tour_name.trim();
+  if (body.tour_name !== undefined) updates.tour_name = body.tour_name?.trim() || null;
   if (body.status !== undefined) updates.status = body.status;
   if (body.pax !== undefined) updates.pax = body.pax ?? null;
   if (body.meeting_point !== undefined) updates.meeting_point = body.meeting_point?.trim() || null;
