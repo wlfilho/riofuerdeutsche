@@ -28,7 +28,10 @@ export interface TourDate {
   lead_id: string;
   date: string; // YYYY-MM-DD
   start_time: string | null; // HH:MM:SS
-  tour_name: string;
+  // Opcional de propósito: o que importa no calendário é a data + o cliente,
+  // não o nome do passeio (isso já está descrito na proposta). Ver
+  // createMissingTourDates abaixo.
+  tour_name: string | null;
   status: TourDateStatus;
   pax: number | null;
   meeting_point: string | null;
@@ -43,7 +46,7 @@ export interface TourDateInput {
   lead_id: string;
   date: string;
   start_time: string | null;
-  tour_name: string;
+  tour_name: string | null;
   status: TourDateStatus;
   pax: number | null;
   meeting_point: string | null;
@@ -56,7 +59,7 @@ export const TOUR_DATE_SELECT = '*, lead:price_leads(id, name, email, phone, pro
 
 export interface ConflictingTourDate {
   id: string;
-  tour_name: string;
+  tour_name: string | null;
   status: TourDateStatus;
   lead: { id: string; name: string } | null;
 }
@@ -90,8 +93,9 @@ export async function findConflictingTourDates(
 }
 
 // Mantém o calendário coerente com o kanban: lead com proposta enviada/fechado
-// atualiza os tours vinculados; lead perdido apaga as datas pra liberar o dia
-// pra outro cliente. new/contacted não mexem no calendário.
+// atualiza os tours vinculados (e cria as linhas que ainda não existirem, a
+// partir de requested_days — ver nota abaixo); lead perdido apaga as datas
+// pra liberar o dia pra outro cliente. new/contacted não mexem no calendário.
 export async function syncTourDatesWithLeadStatus(
   supabase: SupabaseClient,
   leadId: string,
@@ -108,9 +112,62 @@ export async function syncTourDatesWithLeadStatus(
     : null;
   if (!tourStatus) return null;
 
-  const { error } = await supabase
+  const { error: updateError } = await supabase
     .from('tour_dates')
     .update({ status: tourStatus })
     .eq('lead_id', leadId);
-  return error?.message ?? null;
+  if (updateError) return updateError.message;
+
+  return createMissingTourDates(supabase, leadId, tourStatus);
+}
+
+// A data pedida pelo cliente (price_leads.requested_days) e o registro
+// operacional do tour (tour_dates) são conceitos diferentes — a segunda só
+// nascia quando alguém clicava "Adicionar tour" e preenchia nome/horário/ponto
+// de encontro. Isso deixava a porta aberta pra um lead virar proposal_sent/
+// closed sem NUNCA ganhar uma linha em tour_dates, sumindo do calendário mesmo
+// com a venda fechada (foi o caso do Joachim Tilg, 09/2026). Aqui garantimos
+// que todo dia pedido tenha pelo menos uma linha assim que o lead entra em
+// proposal_sent/closed — tour_name fica null (é detalhe, já está na
+// proposta; o que não pode faltar no calendário é a data + o cliente).
+async function createMissingTourDates(
+  supabase: SupabaseClient,
+  leadId: string,
+  tourStatus: TourDateStatus,
+): Promise<string | null> {
+  const { data: lead, error: leadError } = await supabase
+    .from('price_leads')
+    .select('requested_days, pax')
+    .eq('id', leadId)
+    .single();
+  if (leadError) return leadError.message;
+
+  const requestedDays: string[] = lead?.requested_days ?? [];
+  if (requestedDays.length === 0) return null;
+
+  const { data: existing, error: existingError } = await supabase
+    .from('tour_dates')
+    .select('date')
+    .eq('lead_id', leadId);
+  if (existingError) return existingError.message;
+
+  const existingDates = new Set((existing ?? []).map(d => d.date));
+  const missingDays = requestedDays.filter(date => !existingDates.has(date));
+  if (missingDays.length === 0) return null;
+
+  const rows: TourDateInput[] = missingDays.map(date => ({
+    lead_id: leadId,
+    date,
+    start_time: null,
+    tour_name: null,
+    status: tourStatus,
+    pax: lead?.pax ?? null,
+    meeting_point: null,
+    agreed_price: null,
+    anzahlung_paid: false,
+    notes: null,
+  }));
+
+  const { error: insertError } = await supabase.from('tour_dates').insert(rows);
+  return insertError?.message ?? null;
 }

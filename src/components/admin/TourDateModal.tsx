@@ -87,14 +87,13 @@ export default function TourDateModal({
 
   const handleSave = async () => {
     if (!leadId) { setError(t('selecioneCliente')); return; }
-    if (!tourName.trim()) { setError(t('informeNomeTour')); return; }
     if (dateRows.some(r => !r.date)) { setError(t('preenchaDatas')); return; }
 
     setSaving(true);
     setError(null);
 
     const common = {
-      tour_name: tourName.trim(),
+      tour_name: tourName.trim() || null,
       status,
       pax: pax ? Number(pax) : null,
       meeting_point: meetingPoint.trim() || null,
@@ -180,7 +179,7 @@ export default function TourDateModal({
           {/* Tour + status */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>{t('nomeTour')}</label>
+              <label className={labelClass}>{t('nomeTour')} <span className="normal-case text-gray-400 font-normal">({tc('opcional')})</span></label>
               <input
                 type="text"
                 value={tourName}

@@ -131,7 +131,8 @@ export default function CalendarClient({
   };
 
   const handleDelete = async (tour: TourDate) => {
-    if (!window.confirm(t('confirmarRemover', { tour: tour.tour_name, data: fmtDate(tour.date) }))) return;
+    const label = tour.tour_name ?? tour.lead?.name ?? tc('vazio');
+    if (!window.confirm(t('confirmarRemover', { tour: label, data: fmtDate(tour.date) }))) return;
     const res = await fetch(`/api/admin/tour-dates/${tour.id}`, { method: 'DELETE' });
     if (res.ok) {
       setTours(prev => prev.filter(t => t.id !== tour.id));

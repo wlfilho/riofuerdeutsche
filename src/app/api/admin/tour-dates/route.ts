@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
 
   const rows = [];
   for (const d of dates) {
-    if (!d.lead_id || !d.date || !d.tour_name?.trim()) {
-      return NextResponse.json({ error: 'lead_id, date e tour_name são obrigatórios.' }, { status: 400 });
+    if (!d.lead_id || !d.date) {
+      return NextResponse.json({ error: 'lead_id e date são obrigatórios.' }, { status: 400 });
     }
     if (!VALID_STATUSES.includes(d.status)) {
       return NextResponse.json({ error: 'Status inválido.' }, { status: 400 });
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       lead_id: d.lead_id,
       date: d.date,
       start_time: d.start_time || null,
-      tour_name: d.tour_name.trim(),
+      tour_name: d.tour_name?.trim() || null,
       status: d.status,
       pax: d.pax ?? null,
       meeting_point: d.meeting_point?.trim() || null,

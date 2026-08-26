@@ -27,7 +27,7 @@ function escapeHtml(s: string): string {
 
 export interface ConflictTourSummary {
   lead_name: string;
-  tour_name: string;
+  tour_name: string | null;
   status: TourDateStatus;
 }
 
@@ -59,7 +59,7 @@ export async function sendDateConflictAlert(groups: ConflictDateGroup[]): Promis
       .map(group => {
         const rows = group.tours
           .map(
-            t => `<li>${escapeHtml(t.lead_name)} — ${escapeHtml(t.tour_name)} <em>(${STATUS_LABEL_PT[t.status]})</em></li>`,
+            t => `<li>${escapeHtml(t.lead_name)}${t.tour_name ? ` — ${escapeHtml(t.tour_name)}` : ''} <em>(${STATUS_LABEL_PT[t.status]})</em></li>`,
           )
           .join('');
         return `

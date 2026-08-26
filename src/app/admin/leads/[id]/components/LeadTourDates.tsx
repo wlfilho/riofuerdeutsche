@@ -49,7 +49,8 @@ export default function LeadTourDates({
   };
 
   const handleDelete = async (tour: TourDate) => {
-    if (!window.confirm(t('confirmarRemover', { tour: tour.tour_name, data: fmtDate(tour.date) }))) return;
+    const label = tour.tour_name ?? tour.lead?.name ?? tc('vazio');
+    if (!window.confirm(t('confirmarRemover', { tour: label, data: fmtDate(tour.date) }))) return;
     setDeletingId(tour.id);
     setError(null);
     try {
@@ -108,7 +109,7 @@ export default function LeadTourDates({
                   )}
                 </div>
 
-                <p className="text-sm text-gray-600 mt-0.5 truncate">{tour.tour_name}</p>
+                {tour.tour_name && <p className="text-sm text-gray-600 mt-0.5 truncate">{tour.tour_name}</p>}
 
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-gray-400">
                   <span className="inline-flex items-center gap-1">
