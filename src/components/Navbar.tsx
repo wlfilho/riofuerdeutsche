@@ -107,9 +107,9 @@ type MobileEntry =
       };
 
 function buildMobileEntries(links: NavLink[], allTourenLabel: string): MobileEntry[] {
-    return links.map((link): MobileEntry => {
+    return links.flatMap((link): MobileEntry[] => {
         if (link.subLinks) {
-            return {
+            return [{
                 kind: "group",
                 key: link.href,
                 label: link.label,
@@ -117,23 +117,34 @@ function buildMobileEntries(links: NavLink[], allTourenLabel: string): MobileEnt
                 items: link.subLinks,
                 allHref: link.href,
                 allLabel: allTourenLabel,
-            };
+            }];
         }
 
+        // Rio-Guide vai direto para o hub em vez de listar os pontos turísticos.
+        // Um ponto turístico é conteúdo de pesquisa: o hub, com foto e contexto,
+        // apresenta cada um melhor do que seis linhas de texto num menu — e sem
+        // o segundo acordeão o menu inteiro cabe sem rolagem.
+        //
+        // Não é perda de SEO: o dropdown do desktop renderiza no mesmo HTML, o
+        // hub linka os seis, e link repetido para a mesma URL na mesma página
+        // não soma equity.
         if (link.subGroups) {
-            const first = link.subGroups[0];
-            return {
-                kind: "group",
-                key: link.href,
-                label: link.label,
-                basePath: link.href,
-                items: [...link.subGroups.flatMap((g) => g.items), ...(link.directLinks ?? [])],
-                allHref: first?.allHref,
-                allLabel: first?.allLabel,
-            };
+            const hubHref = link.subGroups[0]?.allHref ?? link.subGroups[0]?.href ?? link.href;
+            return [
+                { kind: "link", key: link.href, label: link.label, href: hubHref },
+                // Os directLinks sobem para o primeiro nível: sem o acordeão do
+                // Rio-Guide eles ficariam sem casa, e "Ist Rio gefährlich?" é a
+                // dúvida nº1 do público — isca de conteúdo, não sub-item.
+                ...(link.directLinks ?? []).map((dl): MobileEntry => ({
+                    kind: "link",
+                    key: dl.href,
+                    label: dl.label,
+                    href: dl.href,
+                })),
+            ];
         }
 
-        return { kind: "link", key: link.href, label: link.label, href: link.href };
+        return [{ kind: "link", key: link.href, label: link.label, href: link.href }];
     });
 }
 
