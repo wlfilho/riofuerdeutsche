@@ -1,19 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
     MapPin,
-    Phone,
     Menu,
     X,
     Instagram,
     Youtube,
+    Mail,
+    Send,
     ChevronDown,
     ChevronRight,
 } from "lucide-react";
 import HeaderAuth from "./HeaderAuth";
+import WhatsAppIcon from "./icons/WhatsAppIcon";
 import type { ContactUrls } from "@/lib/settings";
 
 type SubLink = { href: string; label: string };
@@ -83,46 +86,219 @@ function buildNavLinks(t: (key: string) => string): NavLink[] {
     ];
 }
 
-const NAVBAR_FALLBACK: Pick<ContactUrls, 'phone' | 'phoneHref' | 'instagramHref' | 'youtubeHref'> = {
-  phone: '+55 21 97927-7472',
-  phoneHref: 'tel:+5521979277472',
-  instagramHref: 'https://instagram.com/riofuerdeutsche',
-  youtubeHref: 'https://youtube.com/@riofuerdeutsche',
+/**
+ * Estrutura achatada do menu mobile: um único nível de submenu.
+ *
+ * No desktop o Rio-Guide tem flyout aninhado (Rio-Guide › Sehenswürdigkeiten ›
+ * itens), que num celular viraria três toques e dois acordeões para chegar em
+ * conteúdo que cabe numa lista só. Aqui os `subGroups` são fundidos com os
+ * `directLinks` num único acordeão.
+ */
+type MobileEntry =
+    | { kind: "link"; key: string; label: string; href: string }
+    | {
+          kind: "group";
+          key: string;
+          label: string;
+          basePath: string;
+          items: SubLink[];
+          allHref?: string;
+          allLabel?: string;
+      };
+
+function buildMobileEntries(links: NavLink[], allTourenLabel: string): MobileEntry[] {
+    return links.map((link): MobileEntry => {
+        if (link.subLinks) {
+            return {
+                kind: "group",
+                key: link.href,
+                label: link.label,
+                basePath: link.href,
+                items: link.subLinks,
+                allHref: link.href,
+                allLabel: allTourenLabel,
+            };
+        }
+
+        if (link.subGroups) {
+            const first = link.subGroups[0];
+            return {
+                kind: "group",
+                key: link.href,
+                label: link.label,
+                basePath: link.href,
+                items: [...link.subGroups.flatMap((g) => g.items), ...(link.directLinks ?? [])],
+                allHref: first?.allHref,
+                allLabel: first?.allLabel,
+            };
+        }
+
+        return { kind: "link", key: link.href, label: link.label, href: link.href };
+    });
 }
 
-export default function Navbar({ contact: contactProp }: { contact?: Pick<ContactUrls, 'phone' | 'phoneHref' | 'instagramHref' | 'youtubeHref'> }) {
-    const t = useTranslations('public.nav');
-    const navLinks = buildNavLinks(t);
+/**
+ * Separa o emoji inicial do rótulo ("🏔️ Klassiker Tour") para renderizar num
+ * slot de largura fixa. Sem isso cada linha começa num x diferente e a lista
+ * perde o eixo de leitura.
+ */
+const LEADING_EMOJI = /^(\p{Extended_Pictographic}️?)\s*/u;
 
-    // Merge per-field: use each DB value when present, otherwise the fallback.
-    // A default parameter only applies when `contact` is undefined, so an object
-    // with empty strings (DB miss) would otherwise defeat NAVBAR_FALLBACK entirely.
-    const contact: Pick<ContactUrls, 'phone' | 'phoneHref' | 'instagramHref' | 'youtubeHref'> = {
-        phone: contactProp?.phone?.trim() || NAVBAR_FALLBACK.phone,
+function splitEmoji(label: string): { emoji: string | null; text: string } {
+    const match = label.match(LEADING_EMOJI);
+    return match ? { emoji: match[1], text: label.slice(match[0].length) } : { emoji: null, text: label };
+}
+
+const NAVBAR_FALLBACK: ContactUrls = {
+  phone: '+55 21 97927-7472',
+  phoneHref: 'tel:+5521979277472',
+  whatsappHref: 'https://wa.me/5521979277472',
+  email: 'riofuerdeutsche@gmail.com',
+  emailHref: 'mailto:riofuerdeutsche@gmail.com',
+  instagramHref: 'https://instagram.com/riofuerdeutsche',
+  youtubeHref: 'https://youtube.com/@riofuerdeutsche',
+  facebookHref: '',
+  telegramHref: 'https://t.me/wlfilho',
+  telegram: 'wlfilho',
+  address: 'Rio de Janeiro, Brasilien',
+}
+
+const MOBILE_MENU_ID = "mobile-nav-panel";
+
+export default function Navbar({ contact: contactProp }: { contact?: ContactUrls }) {
+    const t = useTranslations('public.nav');
+    const pathname = usePathname();
+    const navLinks = buildNavLinks(t);
+    const mobileEntries = buildMobileEntries(navLinks, t('alleTourenAnsehen'));
+
+    // Merge por campo: usa o valor do banco quando existir, senão o fallback.
+    // Um default de parâmetro só valeria com `contact` undefined — um objeto com
+    // strings vazias (miss no banco) anularia o NAVBAR_FALLBACK inteiro.
+    const pick = (value: string | undefined, fallback: string) => value?.trim() || fallback;
+    const contact: ContactUrls = {
+        ...NAVBAR_FALLBACK,
+        ...contactProp,
+        phone: pick(contactProp?.phone, NAVBAR_FALLBACK.phone),
         phoneHref: contactProp?.phoneHref?.trim() && contactProp.phoneHref.trim() !== 'tel:'
             ? contactProp.phoneHref
             : NAVBAR_FALLBACK.phoneHref,
-        instagramHref: contactProp?.instagramHref?.trim() || NAVBAR_FALLBACK.instagramHref,
-        youtubeHref: contactProp?.youtubeHref?.trim() || NAVBAR_FALLBACK.youtubeHref,
+        whatsappHref: pick(contactProp?.whatsappHref, NAVBAR_FALLBACK.whatsappHref),
+        emailHref: pick(contactProp?.emailHref, NAVBAR_FALLBACK.emailHref),
+        instagramHref: pick(contactProp?.instagramHref, NAVBAR_FALLBACK.instagramHref),
+        youtubeHref: pick(contactProp?.youtubeHref, NAVBAR_FALLBACK.youtubeHref),
     };
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [mobileTourenOpen, setMobileTourenOpen] = useState(false);
-    const [mobileGuideOpen, setMobileGuideOpen] = useState(false);
-    const [mobileGuideSehenOpen, setMobileGuideSehenOpen] = useState(false);
+    const [openGroup, setOpenGroup] = useState<string | null>(null);
+
+    const panelRef = useRef<HTMLDivElement>(null);
+    const toggleRef = useRef<HTMLButtonElement>(null);
+
+    const isActive = useCallback(
+        (href: string) => pathname === href || (href !== "/" && pathname.startsWith(`${href}/`)),
+        [pathname]
+    );
+
+    const isGroupActive = (entry: Extract<MobileEntry, { kind: "group" }>) =>
+        isActive(entry.basePath) || entry.items.some((item) => isActive(item.href));
+
+    const activeGroupKey =
+        mobileEntries.find((e) => e.kind === "group" && isGroupActive(e))?.key ?? null;
+
+    const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+
+    // Abre já com o grupo da página atual expandido — evita o toque extra para
+    // o usuário se localizar.
+    const toggleMenu = () => {
+        if (isMenuOpen) {
+            setIsMenuOpen(false);
+            return;
+        }
+        setOpenGroup(activeGroupKey);
+        setIsMenuOpen(true);
+    };
+
+    // Navegou? O overlay fecha sozinho — cobre o botão "voltar" do navegador,
+    // que não passa pelo onClick dos links. Ajuste durante o render (e não num
+    // efeito) para não disparar um segundo render em cascata.
+    const [lastPathname, setLastPathname] = useState(pathname);
+    if (pathname !== lastPathname) {
+        setLastPathname(pathname);
+        setIsMenuOpen(false);
+    }
+
+    // Enquanto aberto: trava o scroll do fundo, prende o foco e escuta Escape.
+    useEffect(() => {
+        if (!isMenuOpen) return;
+
+        const { body } = document;
+        const previousOverflow = body.style.overflow;
+        body.style.overflow = "hidden";
+
+        panelRef.current?.focus();
+
+        const focusables = () => {
+            const inPanel = panelRef.current
+                ? Array.from(
+                      panelRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled])")
+                  ).filter((el) => !el.closest("[inert]"))
+                : [];
+            return toggleRef.current ? [...inPanel, toggleRef.current] : inPanel;
+        };
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                setIsMenuOpen(false);
+                toggleRef.current?.focus();
+                return;
+            }
+            if (event.key !== "Tab") return;
+
+            const list = focusables();
+            if (list.length === 0) return;
+
+            const first = list[0];
+            const last = list[list.length - 1];
+            const index = list.indexOf(document.activeElement as HTMLElement);
+
+            if (index === -1) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            } else if (event.shiftKey && index === 0) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && index === list.length - 1) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+
+        document.addEventListener("keydown", onKeyDown);
+        return () => {
+            document.removeEventListener("keydown", onKeyDown);
+            body.style.overflow = previousOverflow;
+        };
+    }, [isMenuOpen]);
+
+    const socials: { href: string; label: string; icon: React.ReactNode }[] = [
+        { href: contact.instagramHref, label: "Instagram", icon: <Instagram className="h-[18px] w-[18px]" /> },
+        { href: contact.youtubeHref, label: "YouTube", icon: <Youtube className="h-[18px] w-[18px]" /> },
+        { href: contact.telegramHref, label: "Telegram", icon: <Send className="h-[16px] w-[16px]" /> },
+        { href: contact.emailHref, label: "E-Mail", icon: <Mail className="h-[16px] w-[16px]" /> },
+    ].filter((s) => Boolean(s.href));
 
     return (
         <>
             {/* NAVBAR */}
             <header className="fixed top-0 left-0 right-0 z-[120] bg-white lg:bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 transition-all duration-300">
-                <div className="max-w-7xl mx-auto px-5 lg:px-8 h-20 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-5 lg:px-8 h-20 flex items-center justify-between gap-3">
                     <Link
                         href="/"
-                        className="font-heading font-black text-2xl tracking-tight text-rio-green flex items-center gap-2 group relative z-[130]"
-                        onClick={() => setIsMenuOpen(false)}
+                        className="font-heading font-black text-2xl tracking-tight text-rio-green flex items-center gap-2 group relative z-[130] min-w-0"
+                        onClick={closeMenu}
                     >
-                        <MapPin className="h-7 w-7 text-rio-yellow group-hover:-translate-y-1 transition-transform" />
-                        <span>Rio<span className="text-rio-blue font-light">FürDeutsche</span></span>
+                        <MapPin className="h-7 w-7 shrink-0 text-rio-yellow group-hover:-translate-y-1 transition-transform" />
+                        <span className="truncate">Rio<span className="text-rio-blue font-light">FürDeutsche</span></span>
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -239,175 +415,169 @@ export default function Navbar({ contact: contactProp }: { contact?: Pick<Contac
                         })}
                     </nav>
 
-                    <div className="flex items-center gap-4">
+                    {/* No mobile o acesso à conta vive dentro do menu: a variante
+                        desktop deste bloco tem ~140px e, somada ao logo, empurrava
+                        o hambúrguer para fora do viewport em telas < 430px. */}
+                    <div className="hidden lg:flex items-center gap-4">
                         <HeaderAuth />
-
-                        {/* Hamburger Button */}
-                        <button
-                            className="lg:hidden p-2 text-gray-700 hover:text-rio-green transition-colors relative z-[130]"
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            aria-label={t('menueOeffnen')}
-                            aria-expanded={isMenuOpen}
-                        >
-                            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                        </button>
                     </div>
+
+                    <button
+                        ref={toggleRef}
+                        className="lg:hidden -mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-gray-700 hover:text-rio-green hover:bg-gray-50 transition-colors relative z-[130]"
+                        onClick={toggleMenu}
+                        aria-label={isMenuOpen ? t('menueSchliessen') : t('menueOeffnen')}
+                        aria-expanded={isMenuOpen}
+                        aria-controls={MOBILE_MENU_ID}
+                    >
+                        {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    </button>
                 </div>
             </header>
 
-            {/* Mobile Menu Overlay */}
+            {/* MENU MOBILE */}
             <div
-                className={`fixed inset-0 z-[110] lg:hidden bg-white transition-all duration-500 ease-in-out ${isMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
+                id={MOBILE_MENU_ID}
+                ref={panelRef}
+                tabIndex={-1}
+                className={`fixed inset-0 z-[110] lg:hidden bg-white outline-none transition-all duration-300 ease-out ${isMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
                 role="dialog"
                 aria-modal="true"
                 aria-label={t('mobileNavigation')}
+                aria-hidden={!isMenuOpen}
+                inert={!isMenuOpen}
             >
-                <div className="flex flex-col h-full pt-24 pb-8 px-8 overflow-y-auto">
-                    <nav className="flex flex-col gap-8 items-center text-center py-10 w-full" aria-label={t('mobileNavigation')}>
-                        {navLinks.map((link) => {
-                            if (link.subLinks) {
-                                return (
-                                    <div key={link.label} className="flex flex-col items-center w-full">
-                                        <div className="flex items-center gap-2">
+                <div className="flex h-[100dvh] flex-col pt-20">
+                    <nav
+                        className="flex-1 overflow-y-auto overscroll-contain px-5 pt-4 pb-6"
+                        aria-label={t('mobileNavigation')}
+                    >
+                        <ul className="flex flex-col">
+                            {mobileEntries.map((entry) => {
+                                if (entry.kind === "link") {
+                                    const active = isActive(entry.href);
+                                    return (
+                                        <li key={entry.key}>
                                             <Link
-                                                href={link.href}
-                                                className="text-2xl font-bold text-gray-900 hover:text-rio-green transition-colors"
-                                                onClick={() => setIsMenuOpen(false)}
+                                                href={entry.href}
+                                                onClick={closeMenu}
+                                                aria-current={active ? "page" : undefined}
+                                                className={`flex h-14 items-center rounded-xl px-3 text-lg font-bold transition-colors ${active ? "bg-rio-green/10 text-rio-green" : "text-gray-900 active:bg-gray-50"}`}
                                             >
-                                                {link.label}
+                                                {entry.label}
                                             </Link>
-                                            <button
-                                                className="p-2"
-                                                onClick={() => setMobileTourenOpen(!mobileTourenOpen)}
-                                                aria-label={t('toggleSubmenu')}
-                                            >
-                                                <ChevronDown className={`w-6 h-6 transition-transform duration-300 ${mobileTourenOpen ? "-rotate-180 text-rio-green" : ""}`} />
-                                            </button>
-                                        </div>
-                                        <div className={`flex flex-col gap-4 overflow-hidden transition-all duration-300 w-full ${mobileTourenOpen ? "max-h-[600px] opacity-100 mt-6" : "max-h-0 opacity-0 mt-0"}`}>
-                                            {link.subLinks.map((sub, i) => (
-                                                <Link
-                                                    key={i}
-                                                    href={sub.href}
-                                                    className="text-lg font-medium text-gray-600 hover:text-rio-green transition-colors"
-                                                    onClick={() => setIsMenuOpen(false)}
-                                                >
-                                                    {sub.label}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            }
+                                        </li>
+                                    );
+                                }
 
-                            if (link.subGroups) {
+                                const open = openGroup === entry.key;
+                                const active = isGroupActive(entry);
+
                                 return (
-                                    <div key={link.label} className="flex flex-col items-center w-full">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-2xl font-bold text-gray-900">
-                                                {link.label}
-                                            </span>
-                                            <button
-                                                className="p-2"
-                                                onClick={() => setMobileGuideOpen(!mobileGuideOpen)}
-                                                aria-label={t('toggleSubmenu')}
-                                            >
-                                                <ChevronDown className={`w-6 h-6 transition-transform duration-300 ${mobileGuideOpen ? "-rotate-180 text-rio-green" : ""}`} />
-                                            </button>
-                                        </div>
-                                        <div className={`flex flex-col gap-2 overflow-hidden transition-all duration-300 w-full ${mobileGuideOpen ? "max-h-[600px] opacity-100 mt-6" : "max-h-0 opacity-0 mt-0"}`}>
-                                            {link.subGroups.map((group, gi) => (
-                                                <div key={gi} className="flex flex-col items-center gap-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-lg font-semibold text-gray-700">
-                                                            {group.label}
-                                                        </span>
-                                                        <button
-                                                            className="p-1"
-                                                            onClick={() => setMobileGuideSehenOpen(!mobileGuideSehenOpen)}
-                                                            aria-label={t('toggleSehenswuerdigkeiten')}
-                                                        >
-                                                            <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${mobileGuideSehenOpen ? "-rotate-180 text-rio-green" : ""}`} />
-                                                        </button>
-                                                    </div>
-                                                    <div className={`flex flex-col gap-3 overflow-hidden transition-all duration-300 w-full ${mobileGuideSehenOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
-                                                        {group.items.map((item, ii) => (
+                                    <li key={entry.key}>
+                                        {/* A linha inteira é um único alvo: no menu antigo o
+                                            rótulo navegava e só o chevron expandia, dois destinos
+                                            no mesmo item sem nada que os diferenciasse. */}
+                                        <button
+                                            type="button"
+                                            onClick={() => setOpenGroup(open ? null : entry.key)}
+                                            aria-expanded={open}
+                                            aria-controls={`${MOBILE_MENU_ID}-${entry.key}`}
+                                            className={`flex h-14 w-full items-center justify-between gap-3 rounded-xl px-3 text-left text-lg font-bold transition-colors active:bg-gray-50 ${active ? "text-rio-green" : "text-gray-900"}`}
+                                        >
+                                            <span>{entry.label}</span>
+                                            <ChevronDown
+                                                className={`h-5 w-5 shrink-0 transition-transform duration-300 ${open ? "-rotate-180 text-rio-green" : "text-gray-400"}`}
+                                            />
+                                        </button>
+
+                                        {/* grid-rows 0fr→1fr anima até a altura real do conteúdo;
+                                            o max-h fixo de antes cortava a lista se ela crescesse. */}
+                                        <div
+                                            id={`${MOBILE_MENU_ID}-${entry.key}`}
+                                            className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+                                        >
+                                            <div className="overflow-hidden" inert={!open}>
+                                                <ul className="ml-3 flex flex-col border-l border-gray-100 pb-2 pl-3">
+                                                    {entry.items.map((item) => {
+                                                        const { emoji, text } = splitEmoji(item.label);
+                                                        const itemActive = isActive(item.href);
+                                                        return (
+                                                            <li key={item.href}>
+                                                                <Link
+                                                                    href={item.href}
+                                                                    onClick={closeMenu}
+                                                                    aria-current={itemActive ? "page" : undefined}
+                                                                    className={`flex min-h-12 items-center gap-3 rounded-lg px-2 py-2.5 text-[15px] transition-colors active:bg-gray-50 ${itemActive ? "font-bold text-rio-green" : "font-medium text-gray-600"}`}
+                                                                >
+                                                                    {emoji && (
+                                                                        <span aria-hidden="true" className="w-6 shrink-0 text-center text-base leading-none">
+                                                                            {emoji}
+                                                                        </span>
+                                                                    )}
+                                                                    <span>{text}</span>
+                                                                </Link>
+                                                            </li>
+                                                        );
+                                                    })}
+
+                                                    {entry.allHref && (
+                                                        <li>
                                                             <Link
-                                                                key={ii}
-                                                                href={item.href}
-                                                                className="text-base font-medium text-gray-500 hover:text-rio-green transition-colors"
-                                                                onClick={() => setIsMenuOpen(false)}
+                                                                href={entry.allHref}
+                                                                onClick={closeMenu}
+                                                                className="flex min-h-12 items-center gap-1 rounded-lg px-2 py-2.5 text-[15px] font-bold text-rio-green active:bg-rio-green/5"
                                                             >
-                                                                {item.label}
+                                                                {entry.allLabel}
+                                                                <ChevronRight className="h-4 w-4" />
                                                             </Link>
-                                                        ))}
-                                                        {group.allHref && (
-                                                            <Link
-                                                                href={group.allHref}
-                                                                className="text-base font-medium text-rio-green hover:underline transition-colors"
-                                                                onClick={() => setIsMenuOpen(false)}
-                                                            >
-                                                                {group.allLabel} →
-                                                            </Link>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            {link.directLinks && link.directLinks.map((dl, i) => (
-                                                <Link
-                                                    key={i}
-                                                    href={dl.href}
-                                                    className="text-lg font-medium text-gray-600 hover:text-rio-green transition-colors"
-                                                    onClick={() => setIsMenuOpen(false)}
-                                                >
-                                                    {dl.label}
-                                                </Link>
-                                            ))}
+                                                        </li>
+                                                    )}
+                                                </ul>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </li>
                                 );
-                            }
+                            })}
+                        </ul>
 
-                            return (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    className="text-2xl font-bold text-gray-900 hover:text-rio-green transition-colors"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    {link.label}
-                                </Link>
-                            );
-                        })}
-
-                        <div className="w-full h-px bg-gray-100 max-w-xs my-2"></div>
-                        <div className="lg:hidden w-full">
-                            <HeaderAuth isMobile={true} onItemClick={() => setIsMenuOpen(false)} />
+                        {/* Área de membros: bloco à parte, não é navegação do site */}
+                        <div className="mt-6 border-t border-gray-100 pt-6">
+                            <HeaderAuth isMobile onItemClick={closeMenu} />
                         </div>
                     </nav>
 
-                    <div className="mt-auto pt-10 text-center border-t border-gray-100 pb-10">
-                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-4">{t('kontaktierenSieUns')}</p>
-                        <div className="flex flex-col items-center gap-4">
-                            <a href={contact.phoneHref} className="flex items-center gap-3 text-gray-700 font-semibold text-xl">
-                                <Phone className="h-6 w-6 text-rio-green" />
-                                <span suppressHydrationWarning>{contact.phone}</span>
+                    {/* Rodapé fixo — zona de alcance do polegar */}
+                    <div className="shrink-0 border-t border-gray-100 bg-white px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+                        {contact.whatsappHref && (
+                            <a
+                                href={contact.whatsappHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={closeMenu}
+                                className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#25D366] text-base font-bold text-white shadow-lg shadow-[#25D366]/25 transition-transform active:scale-[0.99]"
+                            >
+                                <WhatsAppIcon className="h-5 w-5" />
+                                {t('whatsappSchreiben')}
                             </a>
-                            <div className="flex gap-4 mt-2">
-                                {contact.instagramHref && (
-                                <a href={contact.instagramHref} target="_blank" rel="noopener noreferrer" className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-full text-gray-600 hover:text-rio-green hover:bg-gray-100 transition-all">
-                                    <Instagram className="h-[22px] w-[22px]" />
-                                    <span className="sr-only">Instagram</span>
-                                </a>
-                                )}
-                                {contact.youtubeHref && (
-                                <a href={contact.youtubeHref} target="_blank" rel="noopener noreferrer" className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-full text-gray-600 hover:text-rio-green hover:bg-gray-100 transition-all">
-                                    <Youtube className="h-6 w-6" />
-                                    <span className="sr-only">YouTube</span>
-                                </a>
-                                )}
+                        )}
+
+                        {socials.length > 0 && (
+                            <div className="mt-4 flex items-center justify-center gap-2">
+                                {socials.map((social) => (
+                                    <a
+                                        key={social.label}
+                                        href={social.href}
+                                        target={social.href.startsWith('mailto:') ? undefined : '_blank'}
+                                        rel="noopener noreferrer"
+                                        className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-gray-500 transition-colors hover:bg-gray-100 hover:text-rio-green"
+                                    >
+                                        {social.icon}
+                                        <span className="sr-only">{social.label}</span>
+                                    </a>
+                                ))}
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>

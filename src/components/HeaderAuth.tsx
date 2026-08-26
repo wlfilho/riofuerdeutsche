@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { User, LogOut, BookOpen, Settings, Star, ChevronDown, Loader2 } from 'lucide-react';
+import { User, LogOut, BookOpen, Settings, Star, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 
 interface UserInfo {
   firstName: string | null;
@@ -182,17 +182,35 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
 
   // NÃO LOGADO
   if (!user) {
+    // No mobile o "Anmelden" não é um link de navegação a mais: é a porta do
+    // guia premium. Vira um cartão com subtítulo, para não competir com
+    // "Kontakt" e "Bewertungen" no mesmo peso visual.
+    if (isMobile) {
+      return (
+        <Link
+          href="/login"
+          onClick={handleLinkClick}
+          className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3.5 transition-colors active:bg-gray-100"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rio-green/10 text-rio-green">
+            <User className="h-5 w-5" />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-base font-bold text-gray-900">{tAuth('anmelden')}</span>
+            <span className="block text-xs text-gray-500">{tAuth('mitgliederbereich')}</span>
+          </span>
+          <ChevronRight className="ml-auto h-5 w-5 shrink-0 text-gray-400" />
+        </Link>
+      );
+    }
+
     return (
       <Link
         href="/login"
         onClick={handleLinkClick}
-        className={
-          isMobile
-            ? "flex items-center gap-3 text-2xl font-bold text-gray-900 hover:text-rio-green transition-colors"
-            : "flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-700 hover:text-rio-green transition-colors duration-200"
-        }
+        className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-700 hover:text-rio-green transition-colors duration-200"
       >
-        <User className={isMobile ? "h-6 w-6 text-rio-green" : "h-4 w-4 text-rio-green"} />
+        <User className="h-4 w-4 text-rio-green" />
         <span>{tAuth('anmelden')}</span>
       </Link>
     );
@@ -201,27 +219,35 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
   // LOGADO
   const displayName = user.firstName || user.email.split('@')[0];
 
-  // Versão Mobile (sem dropdown, links diretos ou simplificados)
+  // Versão Mobile — cartão de identidade + linhas de ação alinhadas à esquerda,
+  // no mesmo eixo de leitura dos itens de navegação logo acima.
   if (isMobile) {
+    const rowClass =
+      'flex min-h-12 items-center gap-3 rounded-xl px-3 text-base font-bold transition-colors';
+
     return (
-      <div className="flex flex-col items-center gap-6 w-full">
-        <div className="flex flex-col items-center gap-2">
-          <span className="w-12 h-12 flex items-center justify-center bg-rio-green/10 text-rio-green text-xl font-bold rounded-full border border-rio-green/20">
+      <div className="w-full">
+        <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3.5">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-rio-green/20 bg-rio-green/10 text-base font-bold text-rio-green">
             {displayName.charAt(0).toUpperCase()}
           </span>
-          <p className="text-xl font-bold text-gray-900">{tDash('hallo', { name: displayName })}</p>
-          <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-            {user.role === 'admin' ? tDash('rollen.admin') : user.role === 'premium' ? tDash('rollen.premium') : tDash('rollen.gratisKonto')}
+          <span className="min-w-0">
+            <span className="block truncate text-base font-bold text-gray-900">
+              {tDash('hallo', { name: displayName })}
+            </span>
+            <span className="block text-xs font-bold uppercase tracking-wider text-gray-500">
+              {user.role === 'admin' ? tDash('rollen.admin') : user.role === 'premium' ? tDash('rollen.premium') : tDash('rollen.gratisKonto')}
+            </span>
           </span>
         </div>
 
-        <div className="flex flex-col gap-4 w-full max-w-xs">
+        <div className="mt-2 flex flex-col">
           <Link
             href="/dashboard"
             onClick={handleLinkClick}
-            className="flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-900 rounded-xl font-bold text-lg border border-gray-100"
+            className={`${rowClass} text-gray-900 active:bg-gray-50`}
           >
-            <BookOpen className="w-5 h-5 text-rio-green" />
+            <BookOpen className="h-5 w-5 shrink-0 text-rio-green" />
             {tDash('meinGuide')}
           </Link>
 
@@ -229,9 +255,9 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
             <Link
               href="/admin"
               onClick={handleLinkClick}
-              className="flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-900 rounded-xl font-bold text-lg border border-gray-100"
+              className={`${rowClass} text-gray-900 active:bg-gray-50`}
             >
-              <Settings className="w-5 h-5 text-rio-blue" />
+              <Settings className="h-5 w-5 shrink-0 text-rio-blue" />
               {tDash('dashboard')}
             </Link>
           )}
@@ -240,18 +266,18 @@ export default function HeaderAuth({ isMobile, onItemClick }: HeaderAuthProps) {
             <Link
               href="/dashboard?upgrade=true"
               onClick={handleLinkClick}
-              className="flex items-center justify-center gap-2 py-3 bg-rio-blue/5 text-rio-blue rounded-xl font-bold text-lg border border-rio-blue/10"
+              className={`${rowClass} bg-rio-blue/5 text-rio-blue active:bg-rio-blue/10`}
             >
-              <Star className="w-5 h-5" />
+              <Star className="h-5 w-5 shrink-0" />
               {tDash('upgradeAufPremium')}
             </Link>
           )}
 
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 py-3 text-red-500 font-bold text-lg"
+            className={`${rowClass} text-left text-red-500 active:bg-red-50`}
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="h-5 w-5 shrink-0" />
             {tAuth('abmelden')}
           </button>
         </div>
