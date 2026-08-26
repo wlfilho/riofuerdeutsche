@@ -3,16 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from "next-intl";
 import { createClient } from "@/utils/supabase/client";
-import { Star, ArrowRight, X, ChevronLeft, ChevronRight, Loader2, MessageCircle, Mail } from "lucide-react";
+import { Star, ArrowRight, Loader2, MessageCircle, Mail } from "lucide-react";
 import Link from "next/link";
 import ReviewCard, { Review } from "@/components/ReviewCard";
 
-export default function BewertungenClient({ whatsappHref }: { whatsappHref: string }) {
+interface BewertungenClientProps {
+    whatsappHref: string;
+    /** Id da review pra rolar até ela e destacar — vem da rota /bewertungen/[id]. */
+    highlightId?: string;
+}
+
+export default function BewertungenClient({ whatsappHref, highlightId }: BewertungenClientProps) {
     const t = useTranslations('public.bewertungen');
     const locale = useLocale();
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
-    const [lightbox, setLightbox] = useState<{ photos: string[]; index: number } | null>(null);
+    const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
     const supabase = createClient();
 
@@ -36,31 +42,24 @@ export default function BewertungenClient({ whatsappHref }: { whatsappHref: stri
         fetchReviews();
     }, []);
 
-    const openLightbox = (photos: string[]) => setLightbox({ photos, index: 0 });
-    const closeLightbox = () => setLightbox(null);
-    const next = (e?: React.MouseEvent) => {
-        e?.stopPropagation();
-        setLightbox(prev =>
-            prev ? { ...prev, index: (prev.index + 1) % prev.photos.length } : null
-        );
-    };
-    const prev = (e?: React.MouseEvent) => {
-        e?.stopPropagation();
-        setLightbox(prev =>
-            prev ? { ...prev, index: (prev.index - 1 + prev.photos.length) % prev.photos.length } : null
-        );
-    };
+    // Link direto pra uma review (/bewertungen/[id]): rola até o card e destaca
+    // por alguns segundos, assim que a lista carrega.
+    useEffect(() => {
+        if (!highlightId || loading || reviews.length === 0) return;
+        const el = document.getElementById(`review-${highlightId}`);
+        if (!el) return;
+        const timer = setTimeout(() => {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setHighlightedId(highlightId);
+        }, 150);
+        return () => clearTimeout(timer);
+    }, [highlightId, loading, reviews.length]);
 
     useEffect(() => {
-        const onKey = (e: KeyboardEvent) => {
-            if (!lightbox) return;
-            if (e.key === 'Escape') closeLightbox();
-            if (e.key === 'ArrowRight') next();
-            if (e.key === 'ArrowLeft') prev();
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [lightbox]);
+        if (!highlightedId) return;
+        const timer = setTimeout(() => setHighlightedId(null), 3000);
+        return () => clearTimeout(timer);
+    }, [highlightedId]);
 
     const hasReviews = reviews.length > 0;
     const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0) || 0;
@@ -125,13 +124,20 @@ export default function BewertungenClient({ whatsappHref }: { whatsappHref: stri
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="flex flex-col gap-6 max-w-5xl mx-auto">
                         {reviews.map((review) => (
-                            <ReviewCard
+                            <div
                                 key={review.id}
-                                review={review}
-                                onOpenPhotos={openLightbox}
-                            />
+                                id={`review-${review.id}`}
+                                className={`rounded-2xl transition-shadow duration-700 ${
+                                    highlightedId === review.id ? 'ring-2 ring-yellow-400 ring-offset-4 ring-offset-gray-50' : ''
+                                }`}
+                            >
+                                <ReviewCard
+                                    review={review}
+                                    layout="horizontal"
+                                />
+                            </div>
                         ))}
                     </div>
                 )}
@@ -172,56 +178,6 @@ export default function BewertungenClient({ whatsappHref }: { whatsappHref: stri
                     </div>
                 )}
             </main>
-
-            {/* Lightbox UI */}
-            {lightbox && (
-                <div
-                    className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center animate-in fade-in duration-300"
-                    onClick={closeLightbox}
-                >
-                    <div
-                        className="relative max-w-5xl max-h-[90vh] mx-4"
-                        onClick={e => e.stopPropagation()}
-                    >
-                        <img
-                            src={lightbox.photos[lightbox.index]}
-                            alt={t('photoAlt', { n: String(lightbox.index + 1) })}
-                            className="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl transition-all duration-300 transform scale-100"
-                        />
-
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2
-                            bg-black/60 backdrop-blur-md text-white text-xs px-4 py-1.5 rounded-full font-bold">
-                            {lightbox.index + 1} / {lightbox.photos.length}
-                        </div>
-
-                        {lightbox.photos.length > 1 && (
-                            <>
-                                <button onClick={prev}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2
-                                        bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full
-                                        w-12 h-12 flex items-center justify-center transition-all border border-white/20 hover:scale-110 active:scale-95 group">
-                                    <ChevronLeft className="w-6 h-6" />
-                                </button>
-                                <button onClick={next}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2
-                                        bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full
-                                        w-12 h-12 flex items-center justify-center transition-all border border-white/20 hover:scale-110 active:scale-95 group">
-                                    <ChevronRight className="w-6 h-6" />
-                                </button>
-                            </>
-                        )}
-                    </div>
-
-                    <button onClick={closeLightbox}
-                        className="absolute top-6 right-6 text-white/50 hover:text-white transition-all hover:scale-110 active:scale-90 p-2">
-                        <X className="w-8 h-8" />
-                    </button>
-
-                    <p className="absolute bottom-6 left-6 text-white/30 text-[10px] uppercase font-bold tracking-[2px]">
-                        {t('galleryLabel')}
-                    </p>
-                </div>
-            )}
         </>
     );
 }

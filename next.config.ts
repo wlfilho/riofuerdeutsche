@@ -21,6 +21,13 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.pexels.com',
       },
+      {
+        // Fotos enviadas pelos usuários (reviews) ficam no Supabase Storage.
+        // Sem isso, next/image recusa otimizar essas URLs.
+        protocol: 'https',
+        hostname: 'bufqrownlstrhwslcpaa.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
     ],
   },
   async redirects() {

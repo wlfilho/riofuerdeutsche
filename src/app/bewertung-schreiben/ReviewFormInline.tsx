@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { createClient } from '@/utils/supabase/client';
+import { uploadReviewPhoto } from '@/lib/uploadReviewPhoto';
 import { Star, Loader2 } from 'lucide-react';
 
 const ATTRACTIONS = [
@@ -139,14 +140,11 @@ export default function ReviewFormInline({ nickname, onSuccess }: ReviewFormInli
         try {
             const uploadedUrls: string[] = [];
             for (const file of photoFiles) {
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('review-photos')
-                    .upload(fileName, file, { cacheControl: '3600', upsert: false });
-                if (uploadError) { console.error('Upload error:', uploadError); continue; }
-                const { data: { publicUrl } } = supabase.storage.from('review-photos').getPublicUrl(uploadData.path);
-                uploadedUrls.push(publicUrl);
+                try {
+                    uploadedUrls.push(await uploadReviewPhoto(file));
+                } catch (uploadError) {
+                    console.error('Upload error:', uploadError);
+                }
             }
 
             const { error } = await supabase.from('reviews').insert({

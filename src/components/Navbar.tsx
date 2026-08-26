@@ -78,7 +78,7 @@ function buildNavLinks(t: (key: string) => string): NavLink[] {
         ],
     },
     { href: "/ueber-will", label: t("ueberUns") },
-    { href: "/#bewertungen", label: t("bewertungen") },
+    { href: "/bewertungen", label: t("bewertungen") },
     { href: "/kontakt", label: t("kontakt") },
     ];
 }

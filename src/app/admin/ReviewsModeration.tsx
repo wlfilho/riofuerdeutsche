@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { createClient } from '@/utils/supabase/client';
+import { uploadReviewPhoto } from '@/lib/uploadReviewPhoto';
 import { fmtDate, fmtDateTime, fmtScore } from '@/lib/adminFormat';
 import {
     Star, CheckCircle, XCircle, Clock, MessageSquare,
@@ -312,12 +313,11 @@ export default function ReviewsModeration() {
         setIsUploading(reviewId);
         const newUrls = [...currentUrls];
         for (const file of Array.from(files)) {
-            const ext = file.name.split('.').pop();
-            const fileName = `will-${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
-            const { data, error } = await supabase.storage.from('review-photos').upload(fileName, file, { cacheControl: '3600', upsert: false });
-            if (error) continue;
-            const { data: { publicUrl } } = supabase.storage.from('review-photos').getPublicUrl(data.path);
-            newUrls.push(publicUrl);
+            try {
+                newUrls.push(await uploadReviewPhoto(file));
+            } catch (error) {
+                console.error('Upload error:', error);
+            }
         }
         await supabase.from('reviews').update({ will_photo_urls: newUrls }).eq('id', reviewId);
         setIsUploading(null);

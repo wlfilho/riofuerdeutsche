@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { createClient } from '@/utils/supabase/client';
+import { uploadReviewPhoto } from '@/lib/uploadReviewPhoto';
 import { Star, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -163,31 +164,16 @@ export default function ReviewForm() {
         const supabase = createClient();
 
         try {
-            // 2. Upload de fotos (se houver)
+            // 2. Upload de fotos (se houver) — /api/reviews/upload-photo converte pra WebP no servidor
             const uploadedUrls: string[] = [];
-            
+
             for (const file of photoFiles) {
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-                
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('review-photos')
-                    .upload(fileName, file, {
-                        cacheControl: '3600',
-                        upsert: false,
-                    });
-                
-                if (uploadError) {
+                try {
+                    uploadedUrls.push(await uploadReviewPhoto(file));
+                } catch (uploadError) {
                     console.error('Upload error:', uploadError);
-                    continue; // continua mesmo se 1 foto falhar
+                    // continua mesmo se 1 foto falhar
                 }
-                
-                // Obter URL pública
-                const { data: { publicUrl } } = supabase.storage
-                    .from('review-photos')
-                    .getPublicUrl(uploadData.path);
-                
-                uploadedUrls.push(publicUrl);
             }
 
             // 3. Insert no Supabase
