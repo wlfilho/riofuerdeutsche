@@ -5,7 +5,7 @@ import { Instagram, Send, Facebook } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 // lucide-react não tem glyphs fiéis aos logos do WhatsApp/X — SVGs de marca.
-// WhatsApp: mesmo SVG usado no Footer.
+// WhatsApp: mesmo SVG usado no Footer e em proposal/ShareButtons.
 const WhatsAppIcon = ({ className }: { className?: string }) => (
     <svg
         viewBox="0 0 24 24"
@@ -39,28 +39,23 @@ interface ShareButtonsProps {
 
 /**
  * Botões de compartilhamento social — WhatsApp, Telegram, Facebook, X e Instagram.
- * Instagram não tem web intent oficial: usa Web Share API nativa quando disponível
- * (mobile) e cai para "copiar link" (pra colar em Story/DM) no desktop.
+ *
+ * WhatsApp/Telegram/Facebook/X são links `<a target="_blank">` de verdade, não
+ * `window.open()` disparado por JS — mesmo padrão já usado em
+ * proposal/ShareButtons.tsx. `window.open()` é bloqueado como pop-up em vários
+ * navegadores/webviews (Safari, browsers in-app do Instagram/Facebook, etc.);
+ * um `<a>` real é tratado como clique direto do usuário e nunca é bloqueado.
+ *
+ * Telegram usa telegram.me em vez de t.me pelo mesmo motivo do componente de
+ * propostas: alguns provedores no Brasil ainda bloqueiam o DNS de t.me.
+ *
+ * Instagram não tem web intent oficial: usa Web Share API nativa quando
+ * disponível (mobile) e cai para "copiar link" (pra colar em Story/DM) no
+ * desktop — esse continua sendo o único que precisa de JS de verdade.
  */
 export default function ShareButtons({ url, text, className = '' }: ShareButtonsProps) {
     const t = useTranslations('public.bewertungen');
     const [copied, setCopied] = useState(false);
-
-    const openPopup = (shareUrl: string) => {
-        window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=640');
-    };
-
-    const handleWhatsApp = () =>
-        openPopup(`https://api.whatsapp.com/send?text=${encodeURIComponent(`${text} ${url}`)}`);
-
-    const handleTelegram = () =>
-        openPopup(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
-
-    const handleFacebook = () =>
-        openPopup(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`);
-
-    const handleTwitter = () =>
-        openPopup(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`);
 
     const handleInstagram = async () => {
         if (typeof navigator !== 'undefined' && navigator.share) {
@@ -84,20 +79,48 @@ export default function ShareButtons({ url, text, className = '' }: ShareButtons
 
     return (
         <div className={`flex items-center justify-center flex-wrap gap-2 ${className}`}>
-            <button onClick={handleWhatsApp} aria-label={t('shareWhatsapp')} title={t('shareWhatsapp')} className={`${buttonBase} bg-[#25D366]`}>
+            <a
+                href={`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t('shareWhatsapp')}
+                title={t('shareWhatsapp')}
+                className={`${buttonBase} bg-[#25D366]`}
+            >
                 <WhatsAppIcon className="w-[17px] h-[17px]" />
-            </button>
-            <button onClick={handleTelegram} aria-label={t('shareTelegram')} title={t('shareTelegram')} className={`${buttonBase} bg-[#0088cc]`}>
+            </a>
+            <a
+                href={`https://telegram.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t('shareTelegram')}
+                title={t('shareTelegram')}
+                className={`${buttonBase} bg-[#0088cc]`}
+            >
                 <Send className="w-[16px] h-[16px]" />
-            </button>
-            <button onClick={handleFacebook} aria-label={t('shareFacebook')} title={t('shareFacebook')} className={`${buttonBase} bg-[#1877F2]`}>
+            </a>
+            <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t('shareFacebook')}
+                title={t('shareFacebook')}
+                className={`${buttonBase} bg-[#1877F2]`}
+            >
                 <Facebook className="w-[16px] h-[16px]" />
-            </button>
-            <button onClick={handleTwitter} aria-label={t('shareTwitter')} title={t('shareTwitter')} className={`${buttonBase} bg-black`}>
+            </a>
+            <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t('shareTwitter')}
+                title={t('shareTwitter')}
+                className={`${buttonBase} bg-black`}
+            >
                 <XIcon className="w-[15px] h-[15px]" />
-            </button>
+            </a>
             <div className="relative">
-                <button onClick={handleInstagram} aria-label={t('shareInstagram')} title={t('shareInstagram')} className={`${buttonBase} bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888]`}>
+                <button type="button" onClick={handleInstagram} aria-label={t('shareInstagram')} title={t('shareInstagram')} className={`${buttonBase} bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888]`}>
                     <Instagram className="w-[16px] h-[16px]" />
                 </button>
                 {copied && (
