@@ -55,6 +55,13 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     description,
     alternates: { canonical: canonicalUrl },
     openGraph: {
+      // `type` some se não for repetido aqui: definir openGraph num
+      // generateMetadata substitui o objeto inteiro do layout raiz (que tem
+      // type: "website"), não faz merge campo a campo. Sem isso, og:type
+      // desaparece — e é uma das 4 propriedades obrigatórias do Open Graph
+      // (junto com title, image, url); sem ela o Facebook pode não
+      // reconhecer o conteúdo como compartilhável.
+      type: 'website',
       title,
       description,
       url: canonicalUrl,
