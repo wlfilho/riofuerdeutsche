@@ -37,21 +37,33 @@ interface ShareButtonsProps {
     className?: string;
 }
 
+// iOS intercepta link de facebook.com/x.com via Universal Links e entrega pro
+// app nativo em vez do Safari — só que o app não sabe abrir a rota antiga de
+// share (/sharer/sharer.php, /intent/tweet), então só abre o feed, sem nada
+// preenchido. No desktop não tem app pra interceptar, o link direto funciona
+// liso (confirmado). navigator.platform === 'MacIntel' com touch é iPadOS se
+// disfarçando de Mac — Safari faz isso desde o iPad Pro com trackpad.
+function isMobileDevice() {
+    if (typeof navigator === 'undefined') return false;
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 /**
  * Botões de compartilhamento social — WhatsApp, Telegram, Facebook, X e Instagram.
  *
- * WhatsApp/Telegram/Facebook/X são links `<a target="_blank">` de verdade, não
- * `window.open()` disparado por JS — mesmo padrão já usado em
- * proposal/ShareButtons.tsx. `window.open()` é bloqueado como pop-up em vários
- * navegadores/webviews (Safari, browsers in-app do Instagram/Facebook, etc.);
- * um `<a>` real é tratado como clique direto do usuário e nunca é bloqueado.
+ * WhatsApp/Telegram são links `<a target="_blank">` de verdade em todo lugar —
+ * mesmo padrão já usado em proposal/ShareButtons.tsx, funcionam bem tanto no
+ * desktop quanto no celular (confirmado).
  *
- * Telegram usa telegram.me em vez de t.me pelo mesmo motivo do componente de
- * propostas: alguns provedores no Brasil ainda bloqueiam o DNS de t.me.
+ * Facebook/X também são `<a>` (funcionam liso no desktop), mas no celular o
+ * clique é interceptado: tenta primeiro o menu nativo de compartilhar do
+ * sistema (mesmo mecanismo do Instagram, que aí sim entrega certinho pro app
+ * do Facebook/X já logado) e só cai pro link direto se isso falhar.
  *
  * Instagram não tem web intent oficial: usa Web Share API nativa quando
  * disponível (mobile) e cai para "copiar link" (pra colar em Story/DM) no
- * desktop — esse continua sendo o único que precisa de JS de verdade.
+ * desktop.
  */
 export default function ShareButtons({ url, text, className = '' }: ShareButtonsProps) {
     const t = useTranslations('public.bewertungen');
@@ -72,6 +84,21 @@ export default function ShareButtons({ url, text, className = '' }: ShareButtons
         } catch {
             // clipboard indisponível (contexto não seguro, permissão etc.) — nada
             // mais a fazer; não tem terceira alternativa aqui.
+        }
+    };
+
+    // No desktop deixa o <a> navegar normal (href já é o fallback certo). No
+    // celular intercepta e tenta o menu nativo primeiro; só usa o link direto
+    // (fallbackUrl) se o share nativo não existir ou falhar por outro motivo
+    // que não seja a pessoa cancelar.
+    const handleAppShareIntercept = (fallbackUrl: string) => async (e: React.MouseEvent<HTMLAnchorElement>) => {
+        if (!isMobileDevice() || typeof navigator === 'undefined' || !navigator.share) return;
+        e.preventDefault();
+        try {
+            await navigator.share({ title: text, text, url });
+        } catch (err) {
+            if (err instanceof Error && err.name === 'AbortError') return;
+            window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
         }
     };
 
@@ -119,6 +146,7 @@ export default function ShareButtons({ url, text, className = '' }: ShareButtons
             </a>
             <a
                 href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`}
+                onClick={handleAppShareIntercept(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`)}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={t('shareFacebook')}
@@ -129,6 +157,7 @@ export default function ShareButtons({ url, text, className = '' }: ShareButtons
             </a>
             <a
                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`}
+                onClick={handleAppShareIntercept(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`)}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={t('shareTwitter')}
