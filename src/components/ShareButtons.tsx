@@ -57,22 +57,40 @@ export default function ShareButtons({ url, text, className = '' }: ShareButtons
     const t = useTranslations('public.bewertungen');
     const [copied, setCopied] = useState(false);
 
+    const copyLinkFallback = async () => {
+        try {
+            // navigator.clipboard.writeText() pode nunca resolver nem rejeitar —
+            // vimos isso acontecer de verdade quando o navegador fica esperando uma
+            // permissão de escrita que não vem. Sem esse timeout, o clique fica
+            // pendurado pra sempre e o botão parece simplesmente não fazer nada.
+            await Promise.race([
+                navigator.clipboard.writeText(url),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('clipboard timeout')), 2000)),
+            ]);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2500);
+        } catch {
+            // clipboard indisponível (contexto não seguro, permissão etc.) — nada
+            // mais a fazer; não tem terceira alternativa aqui.
+        }
+    };
+
     const handleInstagram = async () => {
         if (typeof navigator !== 'undefined' && navigator.share) {
             try {
                 await navigator.share({ title: text, text, url });
-            } catch {
-                // usuário cancelou o share nativo — não faz nada
+                return; // compartilhou de verdade — não precisa do fallback
+            } catch (err) {
+                // AbortError = a própria pessoa cancelou o share sheet: silêncio é
+                // o comportamento certo. Qualquer OUTRO erro (ex.: o gesto do clique
+                // não foi reconhecido como "user activation" pelo browser — já vimos
+                // isso acontecer) cai pro fallback de copiar link, em vez de não
+                // fazer literalmente nada, que é o que causava a sensação de botão
+                // quebrado.
+                if (err instanceof Error && err.name === 'AbortError') return;
             }
-            return;
         }
-        try {
-            await navigator.clipboard.writeText(url);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2500);
-        } catch {
-            // clipboard indisponível (contexto não seguro, permissão etc.) — ignora
-        }
+        await copyLinkFallback();
     };
 
     const buttonBase = "w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full text-white transition-all duration-300 hover:scale-110 active:scale-95 shadow-md shrink-0";
