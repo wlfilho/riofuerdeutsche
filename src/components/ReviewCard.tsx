@@ -120,14 +120,34 @@ export default function ReviewCard({ review, layout = 'grid' }: ReviewCardProps)
         return (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden font-sans">
                 <div className="flex flex-col sm:flex-row">
-                    {/* Sidebar: avatar, nome, data e nota */}
-                    <div className="sm:w-56 lg:w-64 shrink-0 bg-gray-50/70 p-6 flex items-center gap-3 sm:gap-4 border-b sm:border-b-0 sm:border-r border-gray-100">
-                        {avatar}
-                        <div className="min-w-0">
-                            <p className="font-bold text-gray-900 text-lg leading-tight truncate">{review.nickname}</p>
-                            <p className="text-gray-400 text-sm mt-0.5">{formattedDate}</p>
-                            <div className="mt-2.5">{stars}</div>
+                    {/* Sidebar: avatar, nome, data, nota e — só no desktop — locais visitados.
+                        No mobile o "Besucht" fica embaixo da galeria de fotos, dentro do
+                        conteúdo (bloco mais abaixo); no desktop cabe bem aqui, junto do resto
+                        do perfil, sem precisar rolar até o fim do card pra ver. */}
+                    <div className="sm:w-56 lg:w-64 shrink-0 bg-gray-50/70 p-6 flex flex-col gap-5 border-b sm:border-b-0 sm:border-r border-gray-100">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                            {avatar}
+                            <div className="min-w-0">
+                                <p className="font-bold text-gray-900 text-lg leading-tight truncate">{review.nickname}</p>
+                                <p className="text-gray-400 text-sm mt-0.5">{formattedDate}</p>
+                                <div className="mt-2.5">{stars}</div>
+                            </div>
                         </div>
+
+                        {review.attractions && review.attractions.length > 0 && (
+                            <div className="hidden sm:block">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">
+                                    {t('visitedLabel')}
+                                </p>
+                                {/* -ml-2.5 compensa o padding horizontal do badge (px-2.5): sem
+                                    isso, o texto do badge começa ~10px depois do "BESUCHT" acima. */}
+                                <div className="flex flex-wrap gap-1.5 -ml-2.5">
+                                    {review.attractions.map(att => (
+                                        <AttractionBadge key={att} name={att} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Conteúdo: título, texto e fotos */}
@@ -175,13 +195,15 @@ export default function ReviewCard({ review, layout = 'grid' }: ReviewCardProps)
                             </div>
                         )}
 
+                        {/* Mesmo bloco de "Besucht" da sidebar, repetido aqui só pro mobile
+                            (sm:hidden) — no celular a sidebar vira uma faixa no topo do card
+                            e não tem onde encaixar isso sem apertar; embaixo da galeria coube
+                            melhor. No desktop quem mostra é o bloco lá em cima. */}
                         {review.attractions && review.attractions.length > 0 && (
-                            <div className="mt-6 pt-5 border-t border-gray-50">
+                            <div className="sm:hidden mt-6 pt-5 border-t border-gray-50">
                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">
                                     {t('visitedLabel')}
                                 </p>
-                                {/* -ml-2.5 compensa o padding horizontal do badge (px-2.5): sem
-                                    isso, o texto do badge começa ~10px depois do "BESUCHT" acima. */}
                                 <div className="flex flex-wrap gap-1.5 -ml-2.5">
                                     {review.attractions.map(att => (
                                         <AttractionBadge key={att} name={att} />
