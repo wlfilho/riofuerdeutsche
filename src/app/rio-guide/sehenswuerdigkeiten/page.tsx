@@ -10,14 +10,14 @@ export const metadata: Metadata = {
         absolute: "Sehenswürdigkeiten Rio de Janeiro, Tipps vom Carioca auf Deutsch | Rio für Deutsche",
     },
     description:
-        "Die besten Sehenswürdigkeiten in Rio de Janeiro — Christus Erlöser, Zuckerhut, Escadaria Selarón und mehr. Insider-Tipps vom lokalen Guide, auf Deutsch.",
+        "Die besten Sehenswürdigkeiten in Rio de Janeiro: Christus Erlöser, Zuckerhut, Escadaria Selarón und mehr. Insider-Tipps vom lokalen Guide, auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten",
     },
     openGraph: {
-        title: "Sehenswürdigkeiten Rio de Janeiro — Tipps vom Carioca",
+        title: "Sehenswürdigkeiten Rio de Janeiro: Tipps vom Carioca",
         description:
-            "Christus Erlöser, Zuckerhut, Escadaria Selarón und mehr — alle Infos auf Deutsch, von einem Carioca.",
+            "Christus Erlöser, Zuckerhut, Escadaria Selarón und mehr: alle Infos auf Deutsch, von einem Carioca.",
         url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten",
     },
 };
@@ -26,14 +26,14 @@ const sehenswuerdigkeiten = [
     {
         name: "Christus Erlöser",
         badge: "Weltwunder",
-        tagline: "Das Wahrzeichen von Rio — und der Moment, der jeden sprachlos macht.",
+        tagline: "Das Wahrzeichen von Rio, und der Moment, der jeden sprachlos macht.",
         href: "/rio-guide/sehenswuerdigkeiten/christus-erloeser",
         emoji: "✝️",
     },
     {
         name: "Zuckerhut",
         badge: "Klassiker",
-        tagline: "Zwei Seilbahnen, 396 Meter — und der schönste Sonnenuntergang Rios.",
+        tagline: "Zwei Seilbahnen, 396 Meter, und der schönste Sonnenuntergang Rios.",
         href: "/rio-guide/sehenswuerdigkeiten/zuckerhut",
         emoji: "🚡",
     },
@@ -114,7 +114,7 @@ export default function SehenswuerdigkeitenPage() {
                                 </h1>
 
                                 <p className="text-xl lg:text-2xl text-white/70 font-medium leading-snug max-w-2xl">
-                                    Die besten Orte Rios — erklärt von einem Carioca, auf Deutsch.
+                                    Die besten Orte Rios, erklärt von einem Carioca, auf Deutsch.
                                 </p>
                             </div>
                         </FadeIn>

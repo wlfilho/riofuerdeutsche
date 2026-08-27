@@ -25,7 +25,7 @@ export default function NotFound() {
 
         <p className="text-gray-600 text-center max-w-md mb-10 text-base md:text-lg">
           Die gesuchte Seite existiert nicht (mehr) oder wurde verschoben.
-          Aber keine Sorge — Rio wartet auf dich!
+          Aber keine Sorge, Rio wartet auf dich!
         </p>
 
         {/* CTAs */}

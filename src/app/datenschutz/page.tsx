@@ -8,7 +8,7 @@ import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata: Metadata = {
   title: "Datenschutzerklärung",
-  description: "Datenschutzerklärung von Rio für Deutsche – Informationen zum Umgang mit deinen Daten.",
+  description: "Datenschutzerklärung von Rio für Deutsche, Informationen zum Umgang mit deinen Daten.",
   alternates: {
     canonical: "https://riofuerdeutsche.de/datenschutz",
   },

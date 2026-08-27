@@ -116,7 +116,7 @@ export default function GuidePage({
               🔓 Den kompletten Rio-Guide freischalten
             </h2>
             <p className="text-green-100 mb-4">
-              Sichere dir jetzt alle Kapitel — inklusive zukünftiger Updates und exklusiver Karten!
+              Sichere dir jetzt alle Kapitel, inklusive zukünftiger Updates und exklusiver Karten!
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
               <div className="bg-white/10 rounded-lg p-3">
@@ -143,7 +143,7 @@ export default function GuidePage({
                 rel="noopener noreferrer"
                 className="inline-block px-6 py-3 bg-yellow-400 text-gray-900 font-bold rounded-lg hover:bg-yellow-300 transition-all"
               >
-                Jetzt kaufen — 9€
+                Jetzt kaufen (9€)
               </a>
               <p className="text-sm text-green-100">Early Access Preis · Steigt mit jeder Edition</p>
             </div>

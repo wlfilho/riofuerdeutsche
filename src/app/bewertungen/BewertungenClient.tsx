@@ -153,7 +153,7 @@ export default function BewertungenClient({ whatsappHref, highlightId }: Bewertu
                                 Erlebe Rio mit einem Guide, dem du vertrauen kannst.
                             </h2>
                             <p className="text-gray-800 text-base leading-relaxed max-w-xl mx-auto mb-10">
-                                Die Erfahrungen unserer Gäste sprechen für sich. Mit Will erkundest du Rio auf Deutsch — sicher, authentisch und unvergesslich. Kein Touristenpfad, sondern echtes Rio.
+                                Die Erfahrungen unserer Gäste sprechen für sich. Mit Will erkundest du Rio auf Deutsch: sicher, authentisch und unvergesslich. Kein Touristenpfad, sondern echtes Rio.
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

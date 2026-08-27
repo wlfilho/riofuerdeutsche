@@ -13,11 +13,11 @@ export const metadata: Metadata = {
         absolute: "Escadaria Selarón Rio de Janeiro: Lapa Treppe & Geschichte | Rio für Deutsche",
     },
     description:
-        "Die berühmte Fliesentreppe zwischen Lapa und Santa Teresa — kostenlos, farbenprächtig und voller Geschichte. Alles, was du als deutscher Tourist wissen musst, erklärt von einem Carioca.",
+        "Die berühmte Fliesentreppe zwischen Lapa und Santa Teresa: kostenlos, farbenprächtig und voller Geschichte. Alles, was du als deutscher Tourist wissen musst, erklärt von einem Carioca.",
     openGraph: {
-        title: "Escadaria Selarón — Tipps vom Carioca auf Deutsch",
+        title: "Escadaria Selarón: Tipps vom Carioca auf Deutsch",
         description:
-            "215 Stufen, 2.000 Fliesen aus 60 Ländern — und eine Geschichte, die kaum jemand kennt. Insider-Tipps vom lokalen Guide auf Deutsch.",
+            "215 Stufen, 2.000 Fliesen aus 60 Ländern, und eine Geschichte, die kaum jemand kennt. Insider-Tipps vom lokalen Guide auf Deutsch.",
         url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/escadaria-selaron",
     },
     alternates: {
@@ -31,7 +31,7 @@ const jsonLd = {
     "@type": "TouristAttraction",
     name: "Escadaria Selarón",
     description:
-        "Die berühmte Fliesentreppe zwischen Lapa und Santa Teresa in Rio de Janeiro — 215 Stufen, über 2.000 Fliesen aus 60 Ländern, kostenloser Eintritt.",
+        "Die berühmte Fliesentreppe zwischen Lapa und Santa Teresa in Rio de Janeiro: 215 Stufen, über 2.000 Fliesen aus 60 Ländern, kostenloser Eintritt.",
     url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/escadaria-selaron",
     image: "https://riofuerdeutsche.de/images/selaron-bg.webp",
     touristType: "Cultural tourism",
@@ -107,7 +107,7 @@ export default function EscadariaSelaronPage() {
                         className="absolute inset-0 z-0 bg-cover bg-center"
                         style={{ backgroundImage: "url('/images/selaron-bg.webp')" }}
                         role="img"
-                        aria-label="Escadaria Selarón — die bunte Fliesentreppe zwischen Lapa und Santa Teresa in Rio de Janeiro"
+                        aria-label="Escadaria Selarón, die bunte Fliesentreppe zwischen Lapa und Santa Teresa in Rio de Janeiro"
                     />
 
                     {/* Dark overlay */}
@@ -256,7 +256,7 @@ export default function EscadariaSelaronPage() {
                                 <span className="text-2xl" role="img" aria-label="Auto">🚗</span>
                                 <div>
                                     <p className="text-[11px] font-bold tracking-widest uppercase text-rio-green mb-1">Mit Will</p>
-                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Privattransfer inklusive — kein Stress</p>
+                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Privattransfer inklusive, kein Stress</p>
                                 </div>
                             </FadeIn>
 
@@ -287,13 +287,13 @@ export default function EscadariaSelaronPage() {
                                     <div className="space-y-4">
                                         <p className="text-white/75 text-base leading-relaxed">
                                             <span className="text-amber-400 font-semibold">Beste Reisezeit:</span>{" "}
-                                            Ganzjährig geöffnet — Rio hat kein echtes Saison-Problem
+                                            Ganzjährig geöffnet, Rio hat kein echtes Saison-Problem
                                             bei dieser Attraktion, aber Regen macht die Mosaikfliesen rutschig. Vorsicht!
                                         </p>
 
                                         <p className="text-white/75 text-base leading-relaxed">
                                             <span className="text-amber-400 font-semibold">Wann hingehen:</span>{" "}
-                                            Vor 9 Uhr morgens oder ab 17 Uhr nachmittags — dann sind
+                                            Vor 9 Uhr morgens oder ab 17 Uhr nachmittags, dann sind
                                             die Gruppenreisen weg, das Licht ist perfekt für Fotos und die Atmosphäre
                                             ist entspannt.
                                         </p>
@@ -306,7 +306,7 @@ export default function EscadariaSelaronPage() {
 
                                         <p className="text-white/75 text-base leading-relaxed">
                                             <span className="text-amber-400 font-semibold">Abends:</span>{" "}
-                                            Die Treppe liegt am Rand von Lapa — ein Viertel, das nachts
+                                            Die Treppe liegt am Rand von Lapa, einem Viertel, das nachts
                                             Charme hat, aber auch Aufmerksamkeit verlangt. Ich empfehle, abends mit
                                             mir oder in einer Gruppe zu kommen.
                                         </p>
@@ -328,7 +328,7 @@ export default function EscadariaSelaronPage() {
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
                                     Stell dir vor: Ein chilenischer Künstler kommt in den 80er Jahren nach Rio,
                                     verliebt sich in die Stadt und beschließt, die kaputte Treppe vor seinem Haus
-                                    zu renovieren — einfach so, aus einer Laune heraus. Was als persönliches
+                                    zu renovieren, einfach so, aus einer Laune heraus. Was als persönliches
                                     Projekt begann, wurde über 23 Jahre zu einem der bekanntesten Kunstwerke
                                     Lateinamerikas. Die Escadaria Selarón ist heute ein UNESCO-anerkanntes
                                     Kulturdenkmal, das täglich Tausende aus aller Welt anzieht. Und der Eintritt?
@@ -337,7 +337,7 @@ export default function EscadariaSelaronPage() {
 
                                 {/* Parágrafo 2 */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
-                                    Über 2.000 Fliesen aus mehr als 60 Ländern bedecken die 215 Stufen —
+                                    Über 2.000 Fliesen aus mehr als 60 Ländern bedecken die 215 Stufen,
                                     darunter auch deutsche. Wenn du genau hinschaust, wirst du Motive aus
                                     München, Heidelberg und Berlin finden, die Selarón von Besuchern geschenkt
                                     bekam. Die Treppe verbindet die beiden Bohème-Viertel Lapa und Santa Teresa,
@@ -349,7 +349,7 @@ export default function EscadariaSelaronPage() {
                                 <p className="text-lg text-gray-600 leading-relaxed pt-2 border-t border-gray-100">
                                     Ich bin hier aufgewachsen und kenne diese Treppe seit Jahrzehnten. Als ich
                                     das erste Mal einem deutschen Gast die Geschichte von Jorge Selarón erzählt
-                                    habe — die ganze Geschichte, nicht die Version der Reiseführer — war die
+                                    habe (die ganze Geschichte, nicht die Version der Reiseführer) war die
                                     Reaktion immer dieselbe: Stille, dann Gänsehaut. Was hinter diesen Fliesen
                                     steckt, ist viel mehr als bunte Keramik. Lass mich es dir erzählen.
                                 </p>
@@ -367,7 +367,7 @@ export default function EscadariaSelaronPage() {
                                 <div className="rounded-2xl overflow-hidden shadow-sm">
                                     <Image
                                         src="/images/buntes-fliesend-01.webp"
-                                        alt="Bunte Mosaikfliesen der Escadaria Selarón — Detailansicht der farbenprächtigen Keramik aus aller Welt"
+                                        alt="Bunte Mosaikfliesen der Escadaria Selarón, Detailansicht der farbenprächtigen Keramik aus aller Welt"
                                         width={1200}
                                         height={800}
                                         className="w-full h-auto"
@@ -375,7 +375,7 @@ export default function EscadariaSelaronPage() {
                                     />
                                 </div>
                                 <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
-                                    Über 2.000 Fliesen aus mehr als 60 Ländern — jede ein Geschenk, jede eine Geschichte.
+                                    Über 2.000 Fliesen aus mehr als 60 Ländern, jede ein Geschenk, jede eine Geschichte.
                                 </figcaption>
                             </figure>
                         </FadeIn>
@@ -400,7 +400,7 @@ export default function EscadariaSelaronPage() {
                                 {/* P1 — Origem */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     Jorge Selarón wurde 1947 in Chile geboren. Nach Reisen durch mehr als
-                                    50 Länder als Maler und Bildhauer kam er 1983 nach Rio de Janeiro —
+                                    50 Länder als Maler und Bildhauer kam er 1983 nach Rio de Janeiro
                                     und blieb für immer. Er ließ sich in einem Haus am oberen Ende einer
                                     heruntergekommenen Treppe zwischen Lapa und Santa Teresa nieder, und
                                     1990 begann er aus einem Impuls heraus, die Stufen mit Fliesen zu
@@ -412,9 +412,9 @@ export default function EscadariaSelaronPage() {
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     Mit der Zeit wuchs der Ruhm. Touristen aus aller Welt brachten Fliesen
                                     aus ihren Heimatländern als Geschenk. Deutschland, Frankreich, Portugal,
-                                    Japan, Australien — jede von einem Besucher hinzugefügte Kachel machte
+                                    Japan, Australien, denn jede von einem Besucher hinzugefügte Kachel machte
                                     die Treppe universeller. Heute sind es mehr als 2.000 Fliesen aus über
-                                    60 Ländern — manche Quellen sprechen sogar von 120. Der Künstler sagte,
+                                    60 Ländern, manche Quellen sprechen sogar von 120. Der Künstler sagte,
                                     das Werk werde nie fertig sein: Es sei ein{" "}
                                     <em>„verrückter und unvollendeter Traum"</em>.
                                 </p>
@@ -427,7 +427,7 @@ export default function EscadariaSelaronPage() {
                                     <em>„Brasilien, ich liebe Dich. Selarón."</em>{" "}
                                     2005 erkannte die Stadt Rio die Treppe offiziell als historisches Monument an.
                                     Sie erschien in Musikvideos von U2 und Snoop Dogg, in Kampagnen von
-                                    Coca-Cola und American Express — und im Bewerbungsvideo Rios für die
+                                    Coca-Cola und American Express, und im Bewerbungsvideo Rios für die
                                     Olympischen Spiele 2016.
                                 </p>
 
@@ -436,7 +436,7 @@ export default function EscadariaSelaronPage() {
                                     <div className="rounded-2xl overflow-hidden shadow-sm">
                                         <Image
                                             src="/images/jorge-selaron.webp"
-                                            alt="Jorge Selarón — der chilenische Künstler vor seiner berühmten Fliesentreppe in Rio de Janeiro"
+                                            alt="Jorge Selarón, der chilenische Künstler vor seiner berühmten Fliesentreppe in Rio de Janeiro"
                                             width={1200}
                                             height={800}
                                             className="w-full h-auto"
@@ -444,7 +444,7 @@ export default function EscadariaSelaronPage() {
                                         />
                                     </div>
                                     <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
-                                        Jorge Selarón (1947–2013) — der chilenische Künstler, der Rio sein Lebenswerk schenkte.
+                                        Jorge Selarón (1947–2013), der chilenische Künstler, der Rio sein Lebenswerk schenkte.
                                     </figcaption>
                                 </figure>
 
@@ -463,11 +463,11 @@ export default function EscadariaSelaronPage() {
                                 {/* P5 — O legado e a morte */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     Selarón lebte bis zum Ende an der Treppe. Man konnte ihn dort häufig
-                                    antreffen — roten Hut auf dem Kopf, an den Fliesen arbeitend oder
+                                    antreffen, roten Hut auf dem Kopf, an den Fliesen arbeitend oder
                                     bis tief in die Nacht Geschichten mit Besuchern austauschend. Am
                                     10. Januar 2013 wurde er leblos auf seiner eigenen Treppe gefunden,
                                     mit Brandspuren am Körper. Die Umstände sind bis heute ungeklärt.
-                                    Die Stadt übernahm die Pflege des Werks — das heute Kulturerbe
+                                    Die Stadt übernahm die Pflege des Werks, das heute Kulturerbe
                                     von Rio de Janeiro ist.
                                 </p>
 
@@ -476,8 +476,8 @@ export default function EscadariaSelaronPage() {
                                     Was die Selarón so carioca macht, ist nicht ihr Standort, sondern ihr
                                     Geist: Sie entstand aus einem Impuls, wuchs ohne Plan, wurde durch die
                                     Großzügigkeit anderer finanziert und hat sich selbst nie allzu ernst
-                                    genommen. Genau so funktioniert Rio. Und genau deshalb ist diese Treppe —
-                                    von einem Chilenen gebaut, mit Fliesen aus aller Welt — heute eines der
+                                    genommen. Genau so funktioniert Rio. Und genau deshalb ist diese Treppe
+                                    (von einem Chilenen gebaut, mit Fliesen aus aller Welt) heute eines der
                                     authentischsten Symbole der Stadt.
                                 </p>
 
@@ -504,7 +504,7 @@ export default function EscadariaSelaronPage() {
                                     </div>
                                 </div>
                                 <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
-                                    Zahlen &amp; Fakten zur Escadaria Selarón — 23 Jahre Arbeit, 215 Stufen, über 2.000 Fliesen aus aller Welt.
+                                    Zahlen &amp; Fakten zur Escadaria Selarón: 23 Jahre Arbeit, 215 Stufen, über 2.000 Fliesen aus aller Welt.
                                 </figcaption>
                             </figure>
                         </FadeIn>
@@ -538,11 +538,11 @@ export default function EscadariaSelaronPage() {
                                             nachmittags so nicht gibt. Und unten an der Treppe, rechts,
                                             gibt es eine kleine Bar, die seit früh morgens Kaffee und{" "}
                                             <span className="text-white font-semibold italic">Pão de Queijo</span>{" "}
-                                            serviert — das beste Frühstück in Lapa, ohne Touristen, ohne Schlange.
+                                            serviert, das beste Frühstück in Lapa, ohne Touristen, ohne Schlange.
                                         </p>
 
                                         <p className="text-white/60 text-base leading-relaxed">
-                                            Und noch etwas — such die Fliese mit der Baía de Guanabara, in Rot
+                                            Und noch etwas: such die Fliese mit der Baía de Guanabara, in Rot
                                             gezeichnet, an der pyramidenförmigen Wand unten. Sie ist der
                                             Liebling aller, die ich je dorthin mitgenommen habe.
                                         </p>
@@ -595,7 +595,7 @@ export default function EscadariaSelaronPage() {
                                     <div className="p-5 flex flex-col flex-grow">
                                         <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Christus Erlöser</h3>
                                         <p className="text-gray-500 text-sm leading-relaxed flex-grow">
-                                            Beide Highlights in einem Tag — Selarón am Morgen, Christus am Nachmittag.
+                                            Beide Highlights in einem Tag: Selarón am Morgen, Christus am Nachmittag.
                                         </p>
                                         <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
                                             Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -638,7 +638,7 @@ export default function EscadariaSelaronPage() {
                                 <span className="text-rio-yellow">mit deutschsprachigem Reiseführer entdecken</span>
                             </h2>
                             <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Ich erzähle dir die Geschichte, die kein Reiseführer kennt — und bringe dich
+                                Ich erzähle dir die Geschichte, die kein Reiseführer kennt, und bringe dich
                                 dorthin, wenn das Licht und die Stimmung perfekt sind. Mit Privattransfer,
                                 ohne Stress.
                             </p>

@@ -12,11 +12,11 @@ export const metadata = {
         absolute: "Zuckerhut Rio de Janeiro (Pão de Açúcar): Tickets & Tipps | Rio für Deutsche",
     },
     description:
-        "Alles über den Zuckerhut in Rio: Tickets, beste Reisezeit, Insider-Tipps vom Carioca. Sugarloaf Mountain Rio — so erlebst du ihn richtig. Auf Deutsch, mit lokalem Wissen.",
+        "Alles über den Zuckerhut in Rio: Tickets, beste Reisezeit, Insider-Tipps vom Carioca. Sugarloaf Mountain Rio, so erlebst du ihn richtig. Auf Deutsch, mit lokalem Wissen.",
     openGraph: {
-        title: "Zuckerhut Rio de Janeiro — Tipps vom Carioca",
+        title: "Zuckerhut Rio de Janeiro: Tipps vom Carioca",
         description:
-            "Tickets, Anfahrt, Insider-Tipps und Geschichte — alles was du über den Zuckerhut wissen musst. Auf Deutsch, von einem Carioca.",
+            "Tickets, Anfahrt, Insider-Tipps und Geschichte: alles was du über den Zuckerhut wissen musst. Auf Deutsch, von einem Carioca.",
         url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/zuckerhut",
     },
     alternates: {
@@ -29,14 +29,14 @@ const jsonLd = {
     "@type": "TouristAttraction",
     name: "Zuckerhut",
     description:
-        "Der Zuckerhut (Pão de Açúcar) in Rio de Janeiro — 396 Meter hoch, erreichbar per Seilbahn in zwei Etappen, mit spektakulärem Blick auf die Guanabara-Bucht und den Sonnenuntergang.",
+        "Der Zuckerhut (Pão de Açúcar) in Rio de Janeiro: 396 Meter hoch, erreichbar per Seilbahn in zwei Etappen, mit spektakulärem Blick auf die Guanabara-Bucht und den Sonnenuntergang.",
     url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/zuckerhut",
     image: "https://riofuerdeutsche.de/images/zuckerhut-pao-de-acucar-bg.webp",
     touristType: "Cultural tourism",
     isAccessibleForFree: false,
     address: {
         "@type": "PostalAddress",
-        streetAddress: "Praça General Tibúrcio, 85 — Urca",
+        streetAddress: "Praça General Tibúrcio, 85, Urca",
         addressLocality: "Rio de Janeiro",
         addressRegion: "RJ",
         addressCountry: "BR",
@@ -164,7 +164,7 @@ export default function ZuckerhutPage() {
 
                                 {/* Tagline */}
                                 <p className="text-xl lg:text-2xl text-white/70 font-medium leading-snug max-w-2xl mb-10">
-                                    Zwei Seilbahnen, 396 Meter — und der schönste Sonnenuntergang Rios
+                                    Zwei Seilbahnen, 396 Meter, und der schönste Sonnenuntergang Rios
                                 </p>
 
                                 {/* CTA Buttons */}
@@ -250,7 +250,7 @@ export default function ZuckerhutPage() {
                                 <span className="text-2xl" role="img" aria-label="Auto">🚗</span>
                                 <div>
                                     <p className="text-[11px] font-bold tracking-widest uppercase text-rio-green mb-1">Mit Will</p>
-                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Privattransfer inklusive — kein Stress</p>
+                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Privattransfer inklusive, kein Stress</p>
                                 </div>
                             </FadeIn>
 
@@ -259,7 +259,7 @@ export default function ZuckerhutPage() {
                                 <span className="text-2xl" role="img" aria-label="Menschenmenge">👥</span>
                                 <div>
                                     <p className="text-[11px] font-bold tracking-widest uppercase text-gray-400 mb-1">Wann hin?</p>
-                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Sonnenuntergang (17–19 Uhr) für die schönste Aussicht — oder früh morgens für kurze Wartezeiten</p>
+                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Sonnenuntergang (17–19 Uhr) für die schönste Aussicht, oder früh morgens für kurze Wartezeiten</p>
                                 </div>
                             </FadeIn>
 
@@ -298,7 +298,7 @@ export default function ZuckerhutPage() {
                                     {/* Texto */}
                                     <p className="text-white/75 text-base leading-relaxed">
                                         Die Seilbahn zum Zuckerhut hält bei starkem Wind oder Gewitter. An klaren
-                                        Tagen — besonders Juni bis August — ist die Sicht auf Niterói, die Zona Sul
+                                        Tagen (besonders Juni bis August) ist die Sicht auf Niterói, die Zona Sul
                                         und den Corcovado unschlagbar. Bei Sonnenuntergang sind die Warteschlangen
                                         länger, aber der Moment ist es absolut wert.
                                     </p>
@@ -317,7 +317,7 @@ export default function ZuckerhutPage() {
 
                                 {/* Parágrafo 1 */}
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Der Zuckerhut ist für mich das stärkste Symbol von Rio — und das sage ich
+                                    Der Zuckerhut ist für mich das stärkste Symbol von Rio, und das sage ich
                                     als Carioca, der hier aufgewachsen ist. Von oben siehst du alles auf einmal:
                                     die Bucht, die Strände, den Corcovado in der Ferne, und das Meer, das sich
                                     bis zum Horizont erstreckt. Es gibt keinen anderen Ort in Rio, der dir
@@ -327,7 +327,7 @@ export default function ZuckerhutPage() {
                                 {/* Parágrafo 2 */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     Das Besondere am Zuckerhut sind die zwei Seilbahnen. Die erste bringt dich
-                                    auf den Morro da Urca — ein Zwischenstopp, den die meisten Touristen
+                                    auf den Morro da Urca, ein Zwischenstopp, den die meisten Touristen
                                     ignorieren und damit einen der besten Aussichtspunkte Rios verpassen. Die
                                     zweite Seilbahn führt dann weiter auf den Gipfel, 396 Meter über dem
                                     Meeresspiegel.
@@ -336,7 +336,7 @@ export default function ZuckerhutPage() {
                                 {/* Parágrafo 3 */}
                                 <p className="text-lg text-gray-600 leading-relaxed pt-2 border-t border-gray-100">
                                     Als die Seilbahn 1912 eröffnet wurde, war sie eine der ersten der Welt.
-                                    Heute fahren die modernen Kabinen mit Panorama-Glaswänden — du siehst in
+                                    Heute fahren die modernen Kabinen mit Panorama-Glaswänden, du siehst in
                                     alle Richtungen gleichzeitig. Der beste Moment: wenn die Sonne hinter dem
                                     Corcovado untergeht und der Christus golden leuchtet. Den solltest du
                                     nicht verpassen.
@@ -359,7 +359,7 @@ export default function ZuckerhutPage() {
                                         className="w-full rounded-2xl shadow-md"
                                     />
                                     <figcaption className="mt-3 text-sm text-gray-400 text-center">
-                                        Der Zuckerhut erhebt sich 396 Meter über die Guanabara-Bucht — eines der bekanntesten Naturwahrzeichen der Welt.
+                                        Der Zuckerhut erhebt sich 396 Meter über die Guanabara-Bucht, eines der bekanntesten Naturwahrzeichen der Welt.
                                     </figcaption>
                                 </figure>
                             </div>
@@ -384,15 +384,15 @@ export default function ZuckerhutPage() {
 
                                 {/* P1 — O nome */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
-                                    Der Name „Pão de Açúcar" — auf Deutsch wörtlich „Zuckerbrot" — kommt von
+                                    Der Name „Pão de Açúcar" (auf Deutsch wörtlich „Zuckerbrot") kommt von
                                     der charakteristischen Form des Berges, die an die konischen Zuckerformen
                                     erinnert, die im kolonialen Brasilien zur Raffination verwendet wurden. Im
-                                    Englischen heißt er „Sugarloaf Mountain" — ein Name, der weltweit bekannt ist.
+                                    Englischen heißt er „Sugarloaf Mountain", ein Name, der weltweit bekannt ist.
                                 </p>
 
                                 {/* P2 — Primeira subida */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
-                                    Die erste dokumentierte Besteigung des Zuckerhuts war 1817 — von der
+                                    Die erste dokumentierte Besteigung des Zuckerhuts war 1817, von der
                                     Engländerin Henrietta Carstairs. Zu Fuß, ohne Seilbahn, über die Felsen.
                                     Heute ist das auch noch möglich: Es gibt Kletterrouten für Erfahrene,
                                     die direkt auf den Gipfel führen.
@@ -400,7 +400,7 @@ export default function ZuckerhutPage() {
 
                                 {/* P3 — Teleférico */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
-                                    Die Seilbahn wurde 1912 eingeweiht — eine der ersten der Welt überhaupt.
+                                    Die Seilbahn wurde 1912 eingeweiht, eine der ersten der Welt überhaupt.
                                     Die heutigen Kabinen wurden 2008 erneuert und haben vollständige
                                     Panorama-Glaswände. Jede Kabine fasst bis zu 65 Personen. Die Fahrt von
                                     der Talstation bis zum Gipfel dauert insgesamt etwa 10 Minuten.
@@ -422,7 +422,7 @@ export default function ZuckerhutPage() {
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     Für das deutsche Publikum gibt es eine besondere Verbindung: Im
                                     James-Bond-Film „Moonraker" von 1979 findet eine spektakuläre Kampfszene
-                                    genau hier statt — auf der Seilbahn des Zuckerhuts. Der Film war ein
+                                    genau hier statt, auf der Seilbahn des Zuckerhuts. Der Film war ein
                                     großer Erfolg in Deutschland, und viele deutsche Besucher kennen den
                                     Zuckerhut genau deswegen.
                                 </p>
@@ -438,7 +438,7 @@ export default function ZuckerhutPage() {
                                 {/* P6 — Copa do Mundo */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     Während der Fußball-Weltmeisterschaft 2014 wurde der Zuckerhut jeden
-                                    Abend in den Farben der spielenden Nationalmannschaften beleuchtet —
+                                    Abend in den Farben der spielenden Nationalmannschaften beleuchtet,
                                     auch in Schwarz-Rot-Gold, als Deutschland spielte. Ein unvergesslicher
                                     Anblick für alle, die damals in Rio waren.
                                 </p>
@@ -458,7 +458,7 @@ export default function ZuckerhutPage() {
                                         <div className="rounded-2xl overflow-hidden border border-gray-100">
                                             <Image
                                                 src="/images/rio-guide/sehenswuerdigkeiten/infografik-zuckerhut-01.webp"
-                                                alt="Infografik: Zuckerhut – Alle wichtigen Infos auf einen Blick"
+                                                alt="Infografik: Zuckerhut, alle wichtigen Infos auf einen Blick"
                                                 width={1200}
                                                 height={900}
                                                 className="w-full h-auto block"
@@ -467,7 +467,7 @@ export default function ZuckerhutPage() {
                                         </div>
                                     </div>
                                     <figcaption className="mt-3 text-sm text-gray-400 text-center">
-                                        Zuckerhut auf einen Blick — Tickets, Öffnungszeiten, Anfahrt und Insider-Tipps zusammengefasst.
+                                        Zuckerhut auf einen Blick: Tickets, Öffnungszeiten, Anfahrt und Insider-Tipps zusammengefasst.
                                     </figcaption>
                                 </figure>
                             </div>
@@ -496,12 +496,12 @@ export default function ZuckerhutPage() {
 
                                         {/* Título */}
                                         <h3 className="text-2xl lg:text-3xl font-heading font-bold text-white mb-5 leading-tight">
-                                            Morro da Urca — der unterschätzte Stopp
+                                            Morro da Urca, der unterschätzte Stopp
                                         </h3>
 
                                         {/* Texto */}
                                         <p className="text-white/75 text-lg leading-relaxed">
-                                            Die meisten Touristen fahren direkt durch bis zum Gipfel — und
+                                            Die meisten Touristen fahren direkt durch bis zum Gipfel, und
                                             verpassen dabei den Morro da Urca, die erste Seilbahn-Station.
                                             Bleib dort 30 bis 40 Minuten. Du hast eine fantastische Aussicht,
                                             fast keine Menschenmassen, und es gibt eine Bar mit Caipirinha und
@@ -552,7 +552,7 @@ export default function ZuckerhutPage() {
                                     <div className="p-5 flex flex-col flex-grow">
                                         <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Christus Erlöser</h3>
                                         <p className="text-gray-500 text-sm leading-relaxed flex-grow">
-                                            Vom Zuckerhut siehst du ihn perfekt — der nächste logische Schritt auf deiner Rio-Tour.
+                                            Vom Zuckerhut siehst du ihn perfekt, der nächste logische Schritt auf deiner Rio-Tour.
                                         </p>
                                         <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
                                             Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -599,7 +599,7 @@ export default function ZuckerhutPage() {
                                 <span className="text-rio-yellow">mit deinem deutschsprachigen Tourguide erleben</span>
                             </h2>
                             <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Als Carioca zeige ich dir nicht nur die Aussicht — ich zeige dir den Moment,
+                                Als Carioca zeige ich dir nicht nur die Aussicht. Ich zeige dir den Moment,
                                 den du nie vergisst. Auf Deutsch, ohne Touristenfalle.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">

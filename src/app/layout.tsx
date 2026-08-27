@@ -51,7 +51,7 @@ export const metadata: Metadata = {
         url: "/images/rio-background.webp",
         width: 1200,
         height: 630,
-        alt: "Rio de Janeiro Panorama – Rio für Deutsche",
+        alt: "Rio de Janeiro Panorama, Rio für Deutsche",
       },
     ],
   },
