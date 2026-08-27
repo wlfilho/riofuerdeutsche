@@ -14,7 +14,7 @@ import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
-    title: "Favela Tour Rio de Janeiro — sicher & authentisch",
+    title: "Favela Tour Rio de Janeiro: sicher & authentisch",
     description: "Favela Tour in Rio de Janeiro auf Deutsch mit lokalem Guide. Favela Santa Marta & Rocinha erklärt. Sicher, authentisch, unvergesslich.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/favela-tour",
@@ -33,7 +33,7 @@ const favelaExperiences = [
         effort: "Leicht",
         image: "/images/rocinha.webp",
         link: "/rio-guide/sehenswuerdigkeiten/rocinha",
-        desc: "Rocinha ist die größte Favela Brasiliens — mit über 100.000 Einwohnern eine Stadt in der Stadt. Bäckereien, Restaurants, Schulen, Handwerker und Künstler, die ihre eigene Wirtschaft aufgebaut haben. Was hier auf den ersten Blick wie ein Viertel aussieht, ist in Wirklichkeit eine pulsierende Gemeinschaft voller Kreativität und Energie — mit einer der besten Aussichten auf Rio, die kein Reiseführer kennt.",
+        desc: "Rocinha ist die größte Favela Brasiliens, mit über 100.000 Einwohnern eine Stadt in der Stadt. Bäckereien, Restaurants, Schulen, Handwerker und Künstler, die ihre eigene Wirtschaft aufgebaut haben. Was hier auf den ersten Blick wie ein Viertel aussieht, ist in Wirklichkeit eine pulsierende Gemeinschaft voller Kreativität und Energie, mit einer der besten Aussichten auf Rio, die kein Reiseführer kennt.",
         tip: "Ich kenne die Familien in der Rocinha seit Jahren. Wir trinken Kaffee, hören Geschichten, sehen Orte, die kein normaler Tourist betritt. Tourismus, der hier ankommt, stärkt die lokale Wirtschaft direkt.",
         style: { objectPosition: "50% 5%" }
     },
@@ -43,8 +43,8 @@ const favelaExperiences = [
         effort: "Leicht",
         image: "/images/the-maze.webp",
         link: "/rio-guide/sehenswuerdigkeiten/the-maze",
-        desc: "The Maze ist einer der außergewöhnlichsten Orte in ganz Rio de Janeiro. Auf dem Morro Tavares Bastos im Stadtteil Catete hat der ehemalige BBC-Korrespondent Bob Nadkarni über vier Jahrzehnte ein labyrintisches Kulturzentrum geschaffen — mit Kunstgalerie, Bar und Hostel in einem. Die Wände sind mit handgefertigten Mosaiken internationaler Künstler geschmückt, und die Dachterrasse bietet einen der spektakulärsten Ausblicke der Stadt über die Guanabara-Bucht und den Zuckerhut.",
-        tip: "The Maze ist am besten mit einem lokalen Guide zu erleben. Man erreicht den Morro Tavares Bastos mit kleinen VW-Vans ab der Rua Bento Lisboa im Catete — ich begleite dich den ganzen Weg und erzähle dir die faszinierende Geschichte dieses Ortes und seiner Gemeinschaft."
+        desc: "The Maze ist einer der außergewöhnlichsten Orte in ganz Rio de Janeiro. Auf dem Morro Tavares Bastos im Stadtteil Catete hat der ehemalige BBC-Korrespondent Bob Nadkarni über vier Jahrzehnte ein labyrintisches Kulturzentrum geschaffen, mit Kunstgalerie, Bar und Hostel in einem. Die Wände sind mit handgefertigten Mosaiken internationaler Künstler geschmückt, und die Dachterrasse bietet einen der spektakulärsten Ausblicke der Stadt über die Guanabara-Bucht und den Zuckerhut.",
+        tip: "The Maze ist am besten mit einem lokalen Guide zu erleben. Man erreicht den Morro Tavares Bastos mit kleinen VW-Vans ab der Rua Bento Lisboa im Catete. Ich begleite dich den ganzen Weg und erzähle dir die faszinierende Geschichte dieses Ortes und seiner Gemeinschaft."
     },
     {
         name: "Favela Santa Marta",
@@ -52,8 +52,8 @@ const favelaExperiences = [
         effort: "Leicht",
         image: "/images/rio-favela.webp",
         link: "/rio-guide/sehenswuerdigkeiten/santa-marta",
-        desc: "Favela Santa Marta ist eine der geschichtsträchtigsten Favelas Rio de Janeiros — und weltberühmt als Drehort von Michael Jacksons Musikvideo \"They Don't Care About Us\" (1996). Mit rund 8.000 Einwohnern liegt sie auf einem steilen Hügel in Botafogo und bietet von oben einen atemberaubenden Blick auf den Cristo Redentor, die Lagoa und die Bucht von Botafogo. Als erste offiziell befriedete (pacificada) Favela Rios gilt sie als Vorbild für die gesamte Stadt — und ist ideal für deine erste Favela-Erfahrung.",
-        tip: "Die lebensgroße Michael-Jackson-Statue auf dem Platz, wo das berühmte Video gedreht wurde, ist ein beliebter Fotospot. Nimm den Teleférico (Seilbahn) — er ist kostenlos und ersetzt die steilen Stufen mit einem Panoramablick über Rio.",
+        desc: "Favela Santa Marta ist eine der geschichtsträchtigsten Favelas Rio de Janeiros, und weltberühmt als Drehort von Michael Jacksons Musikvideo \"They Don't Care About Us\" (1996). Mit rund 8.000 Einwohnern liegt sie auf einem steilen Hügel in Botafogo und bietet von oben einen atemberaubenden Blick auf den Cristo Redentor, die Lagoa und die Bucht von Botafogo. Als erste offiziell befriedete (pacificada) Favela Rios gilt sie als Vorbild für die gesamte Stadt, und ist ideal für deine erste Favela-Erfahrung.",
+        tip: "Die lebensgroße Michael-Jackson-Statue auf dem Platz, wo das berühmte Video gedreht wurde, ist ein beliebter Fotospot. Nimm den Teleférico (Seilbahn). Er ist kostenlos und ersetzt die steilen Stufen mit einem Panoramablick über Rio.",
         badge: "Botafogo"
     }
 ];
@@ -106,7 +106,7 @@ export default async function FavelaTourPage() {
                                     Favela Tour <span className="whitespace-nowrap">Rio de Janeiro</span>
                                 </h1>
                                 <p className="text-xl lg:text-2xl xl:text-3xl font-bold text-rio-yellow mt-4">
-                                    Authentisch &amp; Sicher — auf Deutsch mit lokalem Guide
+                                    Authentisch &amp; Sicher, auf Deutsch mit lokalem Guide
                                 </p>
 
                                 <div className="pt-6 flex flex-col sm:flex-row gap-4">
@@ -140,18 +140,18 @@ export default async function FavelaTourPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Eine Favela Tour in Rio de Janeiro ist eines der eindrucksvollsten Erlebnisse, das diese Stadt zu bieten hat — vorausgesetzt, du machst sie mit jemandem, der dort aufgewachsen ist. Rund ein Viertel der Bevölkerung lebt in diesen Vierteln, die weit mehr sind als das, was man aus den Nachrichten kennt. Hier pulsiert Kultur, Kreativität und Gemeinschaft — und genau das möchte ich dir zeigen.
+                                    Eine Favela Tour in Rio de Janeiro ist eines der eindrucksvollsten Erlebnisse, das diese Stadt zu bieten hat, vorausgesetzt, du machst sie mit jemandem, der dort aufgewachsen ist. Rund ein Viertel der Bevölkerung lebt in diesen Vierteln, die weit mehr sind als das, was man aus den Nachrichten kennt. Hier pulsiert Kultur, Kreativität und Gemeinschaft, und genau das möchte ich dir zeigen.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Meine Favela Tour ist kein „Armuts-Tourismus". Es geht darum, die Realität der Menschen zu verstehen, lokale Künstler und Unternehmer kennenzulernen und die unglaubliche Aussicht zu genießen, die viele dieser Viertel bieten. Als gebürtiger Carioca kenne ich die Gemeinschaften persönlich und führe die gesamte Tour auf Deutsch — das ist der entscheidende Unterschied zu den üblichen Angeboten. Ich sorge dafür, dass dein Besuch <Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">sicher</Link> und respektvoll abläuft.
+                                        Meine Favela Tour ist kein „Armuts-Tourismus". Es geht darum, die Realität der Menschen zu verstehen, lokale Künstler und Unternehmer kennenzulernen und die unglaubliche Aussicht zu genießen, die viele dieser Viertel bieten. Als gebürtiger Carioca kenne ich die Gemeinschaften persönlich und führe die gesamte Tour auf Deutsch, das ist der entscheidende Unterschied zu den üblichen Angeboten. Ich sorge dafür, dass dein Besuch <Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">sicher</Link> und respektvoll abläuft.
                                     </p>
                                     <p>
-                                        Wer schon von <Link href="/rio-guide/sehenswuerdigkeiten/rocinha" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela Rocinha</Link> gehört hat — ja, sie ist die größte Favela Rio de Janeiros und absolut beeindruckend. Für deinen ersten Besuch empfehle ich dir aber <Link href="/rio-guide/sehenswuerdigkeiten/santa-marta" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela Santa Marta besuchen</Link> in Botafogo: überschaubar, lebendig und mit einem atemberaubenden Ausblick vom Teleférico (Seilbahn). Santa Marta war die erste offiziell „befriedete" Favela Rios und wurde weltberühmt durch Michael Jacksons Musikvideo „They Don't Care About Us" (1996). Sie ist der perfekte Einstieg für eine authentische und sichere Favela-Erfahrung in Rio de Janeiro.
+                                        Wer schon von <Link href="/rio-guide/sehenswuerdigkeiten/rocinha" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela Rocinha</Link> gehört hat, und ja, sie ist die größte Favela Rio de Janeiros und absolut beeindruckend. Für deinen ersten Besuch empfehle ich dir aber <Link href="/rio-guide/sehenswuerdigkeiten/santa-marta" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela Santa Marta besuchen</Link> in Botafogo: überschaubar, lebendig und mit einem atemberaubenden Ausblick vom Teleférico (Seilbahn). Santa Marta war die erste offiziell „befriedete" Favela Rios und wurde weltberühmt durch Michael Jacksons Musikvideo „They Don't Care About Us" (1996). Sie ist der perfekte Einstieg für eine authentische und sichere Favela-Erfahrung in Rio de Janeiro.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Ob das legendäre <Link href="/rio-guide/sehenswuerdigkeiten/the-maze" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">The Maze entdecken</Link>, die beeindruckende <Link href="/rio-guide/sehenswuerdigkeiten/rocinha" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Rocinha mit Guide</Link> oder das authentische Santa Marta — schreib mir einfach und ich plane eine Favela Tour, die dir echte Einblicke gibt, ohne dabei die Würde der Bewohner zu vergessen.
+                                    Ob das legendäre <Link href="/rio-guide/sehenswuerdigkeiten/the-maze" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">The Maze entdecken</Link>, die beeindruckende <Link href="/rio-guide/sehenswuerdigkeiten/rocinha" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Rocinha mit Guide</Link> oder das authentische Santa Marta. Schreib mir einfach und ich plane eine Favela Tour, die dir echte Einblicke gibt, ohne dabei die Würde der Bewohner zu vergessen.
                                 </p>
                             </div>
                         </FadeIn>
@@ -163,7 +163,7 @@ export default async function FavelaTourPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12 text-center lg:text-left">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Favela Santa Marta, Rocinha &amp; The Maze — <span className="text-rio-green">3 besondere Erlebnisse</span>
+                                Favela Santa Marta, Rocinha &amp; The Maze: <span className="text-rio-green">3 besondere Erlebnisse</span>
                             </h2>
                             <p className="mt-4 text-gray-600 text-lg">
                                 Jede Favela in Rio de Janeiro hat ihre eigene Geschichte. Hier sind die drei Erlebnisse, die ich dir zeigen möchte.
@@ -238,11 +238,11 @@ export default async function FavelaTourPage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6">
-                                Favela Tour in Rio de Janeiro — <br className="hidden sm:block" />
+                                Favela Tour in Rio de Janeiro, <br className="hidden sm:block" />
                                 <span className="text-rio-yellow text-2xl lg:text-4xl">respektvoll und unvergesslich.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Schreib mir per WhatsApp oder E-Mail und ich organisiere eine sichere und authentische Favela Tour für dich — mit echtem Einblick in die Kultur und Gemeinschaft.
+                                Schreib mir per WhatsApp oder E-Mail und ich organisiere eine sichere und authentische Favela Tour für dich, mit echtem Einblick in die Kultur und Gemeinschaft.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link

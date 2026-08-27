@@ -12,8 +12,8 @@ import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
-    title: "Tagesausflüge ab Rio — Búzios, Ilha Grande & Paraty",
-    description: "Die schönsten Tagesausflüge ab Rio de Janeiro — Búzios, Ilha Grande, Paraty, Petrópolis und Arraial do Cabo. Mit einem lokalen Guide, sicher und auf Deutsch.",
+    title: "Tagesausflüge ab Rio: Búzios, Ilha Grande & Paraty",
+    description: "Die schönsten Tagesausflüge ab Rio de Janeiro: Búzios, Ilha Grande, Paraty, Petrópolis und Arraial do Cabo. Mit einem lokalen Guide, sicher und auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/tagesausfluege",
     },
@@ -36,36 +36,36 @@ const tagesausfluegDestinos = [
     {
         name: "Arraial do Cabo",
         image: "/images/arraial-do-cabo.webp",
-        desc: `Arraial do Cabo wird nicht umsonst die „brasilianische Karibik" genannt. Das kristallklare, türkisblaue Wasser und die weißen Sandstrände gehören zu den schönsten des Landes. Eine Bootstour durch die Buchten ist ein absolutes Highlight — mit Schnorcheln, Schildkröten und Postkartenpanoramen.`,
-        tip: "Die Praia do Forno ist der schönste Strand — erreichbar nur zu Fuß über einen kurzen Trail. Ich kenne die Route und die beste Tageszeit, um den Strand fast für dich allein zu haben.",
+        desc: `Arraial do Cabo wird nicht umsonst die „brasilianische Karibik" genannt. Das kristallklare, türkisblaue Wasser und die weißen Sandstrände gehören zu den schönsten des Landes. Eine Bootstour durch die Buchten ist ein absolutes Highlight, mit Schnorcheln, Schildkröten und Postkartenpanoramen.`,
+        tip: "Die Praia do Forno ist der schönste Strand, erreichbar nur zu Fuß über einen kurzen Trail. Ich kenne die Route und die beste Tageszeit, um den Strand fast für dich allein zu haben.",
         badges: ["~2,5h von Rio", "Ganztägig"],
     },
     {
         name: "Búzios",
         image: "/images/buzios.webp",
-        desc: "Das ehemalige Fischerdorf wurde in den 1960ern durch Brigitte Bardot weltberühmt — und hat seinen Charme bis heute bewahrt. Búzios bietet über 20 Strände, charmante Gassen voller Boutiquen und Restaurants, und eine entspannte Atmosphäre, die an die französische Riviera erinnert.",
-        tip: "Die Rua das Pedras ist das Herz von Búzios — perfekt für ein Mittagessen mit Meerblick. Für den Strand empfehle ich die Praia da Tartaruga: ruhig, geschützt und ideal zum Schnorcheln.",
+        desc: "Das ehemalige Fischerdorf wurde in den 1960ern durch Brigitte Bardot weltberühmt, und hat seinen Charme bis heute bewahrt. Búzios bietet über 20 Strände, charmante Gassen voller Boutiquen und Restaurants, und eine entspannte Atmosphäre, die an die französische Riviera erinnert.",
+        tip: "Die Rua das Pedras ist das Herz von Búzios, perfekt für ein Mittagessen mit Meerblick. Für den Strand empfehle ich die Praia da Tartaruga: ruhig, geschützt und ideal zum Schnorcheln.",
         badges: ["~2,5h von Rio", "Ganztägig"],
     },
     {
         name: "Ilha Grande",
         image: "/images/ilha-grande.webp",
-        desc: "Ilha Grande ist eine autofreie Tropeninsel mit üppigem Regenwald, einsamen Stränden und glasklarem Wasser. Die Insel ist nur per Boot erreichbar und fühlt sich an wie eine andere Welt. Die Lopes Mendes gilt als einer der schönsten Strände Brasiliens — weißer Sand, türkises Wasser und kaum Menschen.",
+        desc: "Ilha Grande ist eine autofreie Tropeninsel mit üppigem Regenwald, einsamen Stränden und glasklarem Wasser. Die Insel ist nur per Boot erreichbar und fühlt sich an wie eine andere Welt. Die Lopes Mendes gilt als einer der schönsten Strände Brasiliens: weißer Sand, türkises Wasser und kaum Menschen.",
         tip: "Für einen Tagesausflug empfehle ich die Bootstour rund um die Insel mit Stopps zum Schnorcheln und Schwimmen. Wer mehr Zeit hat, sollte mindestens eine Übernachtung einplanen.",
         badges: ["~3h von Rio", "Ganztägig"],
     },
     {
         name: "Paraty",
         image: "/images/paraty.webp",
-        desc: "Paraty ist eine perfekt erhaltene Kolonialstadt aus dem 18. Jahrhundert — UNESCO-Weltkulturerbe, eingebettet zwischen Regenwald und Meer. Die kopfsteingepflasterten Gassen, die weißen Fassaden mit bunten Türen und Fenstern und die tropischen Inseln in der Bucht machen Paraty zu einem der charmantesten Orte Brasiliens.",
-        tip: "Kombiniere den Besuch der Altstadt mit einer Bootstour durch die Bucht — mit Stopps an einsamen Stränden und Schnorchelpunkten. Die Cachaçarias (Schnapsbrennereien) auf dem Weg sind ebenfalls einen Stopp wert.",
+        desc: "Paraty ist eine perfekt erhaltene Kolonialstadt aus dem 18. Jahrhundert, UNESCO-Weltkulturerbe, eingebettet zwischen Regenwald und Meer. Die kopfsteingepflasterten Gassen, die weißen Fassaden mit bunten Türen und Fenstern und die tropischen Inseln in der Bucht machen Paraty zu einem der charmantesten Orte Brasiliens.",
+        tip: "Kombiniere den Besuch der Altstadt mit einer Bootstour durch die Bucht, mit Stopps an einsamen Stränden und Schnorchelpunkten. Die Cachaçarias (Schnapsbrennereien) auf dem Weg sind ebenfalls einen Stopp wert.",
         badges: ["~4h von Rio", "Ganztägig"],
     },
     {
         name: "Petrópolis",
         image: "/images/palacio-quitandinha-petropolis.webp",
         desc: `Die „Kaiserstadt" in den Bergen war einst die Sommerresidenz des brasilianischen Kaisers Pedro II. Auf 800 Metern Höhe ist es angenehm kühl, und die Stadt bietet das Museu Imperial (der meistbesuchte Palast Brasiliens), die Kathedrale São Pedro de Alcântara und eine charmante Innenstadt mit deutschem und österreichischem Einfluss.`,
-        tip: "Petrópolis ist perfekt für einen Regentag — auf 800 Metern ist das Wetter oft anders als in Rio, und die Museen und Cafés sind hervorragend. Die Cervejaria Bohemia bietet eine tolle Brauereitour.",
+        tip: "Petrópolis ist perfekt für einen Regentag, denn auf 800 Metern ist das Wetter oft anders als in Rio, und die Museen und Cafés sind hervorragend. Die Cervejaria Bohemia bietet eine tolle Brauereitour.",
         badges: ["~1,5h von Rio", "Ganztägig"],
     },
 ];
@@ -86,7 +86,7 @@ export default async function TagesausfluegePage() {
                     <div className="absolute inset-0 z-0">
                         <Image
                             src="/images/ilha-grande-bg.webp"
-                            alt="Tagesausflüge ab Rio de Janeiro — Arraial do Cabo, Búzios und Ilha Grande"
+                            alt="Tagesausflüge ab Rio de Janeiro: Arraial do Cabo, Búzios und Ilha Grande"
                             fill
                             priority
                             fetchPriority="high"
@@ -150,15 +150,15 @@ export default async function TagesausfluegePage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Rio de Janeiro</Link> ist spektakulär — aber die Region rund um die Stadt hat noch viel mehr zu bieten. Paradiesische Strände, koloniale Bergstädte, tropische Inseln und kristallklares Wasser warten nur wenige Stunden entfernt auf dich.
+                                    <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Rio de Janeiro</Link> ist spektakulär, aber die Region rund um die Stadt hat noch viel mehr zu bieten. Paradiesische Strände, koloniale Bergstädte, tropische Inseln und kristallklares Wasser warten nur wenige Stunden entfernt auf dich.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Mit meinen Tagesausflügen erlebst du die schönsten Ziele rund um Rio — bequem, sicher und ohne den Stress, alles selbst organisieren zu müssen. Ich hole dich ab, fahre dich hin, zeige dir die besten Spots und bringe dich abends entspannt zurück. Alles auf Deutsch, alles mit Insider-Wissen.
+                                        Mit meinen Tagesausflügen erlebst du die schönsten Ziele rund um Rio, bequem, sicher und ohne den Stress, alles selbst organisieren zu müssen. Ich hole dich ab, fahre dich hin, zeige dir die besten Spots und bringe dich abends entspannt zurück. Alles auf Deutsch, alles mit Insider-Wissen.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Von den Traumstränden in Arraial do Cabo über die charmante Kolonialstadt Paraty bis zur tropischen Ilha Grande — schreib mir und ich plane deinen perfekten Ausflug.
+                                    Von den Traumstränden in Arraial do Cabo über die charmante Kolonialstadt Paraty bis zur tropischen Ilha Grande. Schreib mir und ich plane deinen perfekten Ausflug.
                                 </p>
                             </div>
                         </FadeIn>
@@ -170,7 +170,7 @@ export default async function TagesausfluegePage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12 text-center lg:text-left">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Tagesausflüge ab Rio de Janeiro — <span className="text-rio-green">5 traumhafte Ziele</span>
+                                Tagesausflüge ab Rio de Janeiro: <span className="text-rio-green">5 traumhafte Ziele</span>
                             </h2>
                             <p className="mt-4 text-gray-600 text-lg">
                                 Jedes Ziel hat seinen eigenen Charme. Hier sind die besten Ausflüge, die ich für dich organisieren kann.
@@ -236,10 +236,10 @@ export default async function TagesausfluegePage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6">
-                                Tagesausflüge ab Rio — <span className="text-rio-yellow text-2xl lg:text-4xl">ich plane deinen perfekten Tag.</span>
+                                Tagesausflüge ab Rio: <span className="text-rio-yellow text-2xl lg:text-4xl">ich plane deinen perfekten Tag.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Schreib mir per WhatsApp oder E-Mail und wir planen gemeinsam deinen Tagesausflug — von Búzios bis Ilha Grande, alles auf Deutsch und ohne Stress.
+                                Schreib mir per WhatsApp oder E-Mail und wir planen gemeinsam deinen Tagesausflug, von Búzios bis Ilha Grande, alles auf Deutsch und ohne Stress.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link

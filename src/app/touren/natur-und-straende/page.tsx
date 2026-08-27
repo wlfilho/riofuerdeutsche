@@ -14,7 +14,7 @@ import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
-    title: "Natur & Strände in Rio — Wanderungen & Regenwald",
+    title: "Natur & Strände in Rio: Wanderungen & Regenwald",
     description: "Entdecken Sie Rios wilde Seite: Tijuca-Regenwald, Pedra da Gávea, Prainha und versteckte Strände mit einem deutschsprachigen Guide. Natur-Touren für Abenteurer und Naturliebhaber.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/natur-und-straende",
@@ -33,7 +33,7 @@ const naturalAttractions = [
         effort: "Moderat",
         image: "/images/floresta-da-tijuca.webp",
         desc: "Der größte urbane Regenwald der Welt liegt mitten in Rio. Auf versteckten Wanderwegen erwarten dich Wasserfälle, exotische Vögel und eine Stille, die du mitten in einer Millionenstadt nie erwartet hättest.",
-        tip: "Ich kenne Wasserfälle, die in keinem Reiseführer stehen — Cascatinha Taunay und der versteckte Poço do Rinoceronte gehören zu meinen Favoriten.",
+        tip: "Ich kenne Wasserfälle, die in keinem Reiseführer stehen: Cascatinha Taunay und der versteckte Poço do Rinoceronte gehören zu meinen Favoriten.",
         style: { objectPosition: "50% 0%" }
     },
     {
@@ -41,23 +41,23 @@ const naturalAttractions = [
         time: "~4–5 Std.",
         effort: "Anspruchsvoll",
         image: "/images/pico-da-tijuca.webp",
-        desc: "Mit 1.022 Metern ist der Pico da Tijuca der höchste Punkt des Nationalparks. Die Wanderung durch dichten Atlantischen Regenwald wird mit einem 360°-Panorama über ganz Rio belohnt — ein unvergessliches Erlebnis für aktive Naturliebhaber.",
-        tip: "Die letzten Meter zum Gipfel führen über Metalltreppen am Felsen — abenteuerlich, aber absolut sicher und die Aussicht ist die Belohnung."
+        desc: "Mit 1.022 Metern ist der Pico da Tijuca der höchste Punkt des Nationalparks. Die Wanderung durch dichten Atlantischen Regenwald wird mit einem 360°-Panorama über ganz Rio belohnt, ein unvergessliches Erlebnis für aktive Naturliebhaber.",
+        tip: "Die letzten Meter zum Gipfel führen über Metalltreppen am Felsen, abenteuerlich, aber absolut sicher und die Aussicht ist die Belohnung."
     },
     {
         name: "Pedra Bonita",
         time: "~2–3 Std.",
         effort: "Moderat",
         image: "/images/pedra-bonita.webp",
-        desc: "Die Pedra Bonita bietet einen der spektakulärsten Aussichtspunkte Rios — und ist gleichzeitig die Startrampe für Gleitschirmflieger. Die moderate Wanderung führt durch den Regenwald und endet mit einem Panoramablick, der dir den Atem raubt.",
-        tip: "Von hier siehst du gleichzeitig die Pedra da Gávea, die Strände der Südzone und die Lagunen — perfekt bei klarem Wetter am Vormittag."
+        desc: "Die Pedra Bonita bietet einen der spektakulärsten Aussichtspunkte Rios, und ist gleichzeitig die Startrampe für Gleitschirmflieger. Die moderate Wanderung führt durch den Regenwald und endet mit einem Panoramablick, der dir den Atem raubt.",
+        tip: "Von hier siehst du gleichzeitig die Pedra da Gávea, die Strände der Südzone und die Lagunen, perfekt bei klarem Wetter am Vormittag."
     },
     {
         name: "Pedra da Gávea",
         time: "~5–6 Std.",
         effort: "Anspruchsvoll",
         image: "/images/pedra-da-gavea.webp",
-        desc: "Einer der höchsten Küstenfelsen der Welt — 844 Meter über dem Meer. Die Wanderung ist anspruchsvoll, mit einer berühmten Kletterpassage namens „Carrasqueira\", aber der Blick vom Gipfel ist absolut episch.",
+        desc: "Einer der höchsten Küstenfelsen der Welt, 844 Meter über dem Meer. Die Wanderung ist anspruchsvoll, mit einer berühmten Kletterpassage namens „Carrasqueira\", aber der Blick vom Gipfel ist absolut episch.",
         tip: "Diese Tour ist nur für sportliche Wanderer geeignet. Dafür erlebst du Rio aus einer Perspektive, die kaum ein Tourist je sieht."
     },
     {
@@ -65,15 +65,15 @@ const naturalAttractions = [
         time: "~3 Std.",
         effort: "Moderat",
         image: "/images/morro-dois-irmaos.webp",
-        desc: "Die „Zwei Brüder\" sind die ikonischen Zwillingsgipfel über Ipanema und Leblon. Die Wanderung startet im Vidigal und belohnt dich mit einem der legendärsten Blicke über Rio — Strände, Lagune und Meer, alles auf einmal.",
-        tip: "Der Aufstieg durch die Favela Vidigal ist Teil des Erlebnisses — bunt, lebendig und mit lokalen Bars unterwegs."
+        desc: "Die „Zwei Brüder\" sind die ikonischen Zwillingsgipfel über Ipanema und Leblon. Die Wanderung startet im Vidigal und belohnt dich mit einem der legendärsten Blicke über Rio: Strände, Lagune und Meer, alles auf einmal.",
+        tip: "Der Aufstieg durch die Favela Vidigal ist Teil des Erlebnisses, bunt, lebendig und mit lokalen Bars unterwegs."
     },
     {
         name: "Praia Vermelha",
         time: "~1–2 Std.",
         effort: "Leicht",
         image: "/images/praia-vermelha.webp",
-        desc: "Ein kleiner, geschützter Strand direkt am Fuß des Zuckerhuts. Kristallklares Wasser, umgeben von Regenwald und Felsen — ein Geheimtipp, der sich wie eine Karibik-Oase mitten in Rio anfühlt.",
+        desc: "Ein kleiner, geschützter Strand direkt am Fuß des Zuckerhuts. Kristallklares Wasser, umgeben von Regenwald und Felsen, ein Geheimtipp, der sich wie eine Karibik-Oase mitten in Rio anfühlt.",
         tip: "Perfekt zum Kombinieren mit dem Zuckerhut oder einem Spaziergang auf der Pista Claudio Coutinho, einem flachen Uferweg mit Affen und Meerblick."
     },
     {
@@ -81,8 +81,8 @@ const naturalAttractions = [
         time: "~3–4 Std.",
         effort: "Leicht",
         image: "/images/prainha.webp",
-        desc: "Der schönste Naturstrand Rios, versteckt hinter grünen Hügeln im Westen der Stadt. Surfer lieben die Wellen, Naturfreunde den unberührten Atlantischen Regenwald rundherum. Kein Hochhaus, keine Hotelketten — nur Natur.",
-        tip: "Prainha ist unter der Woche fast menschenleer. Am Wochenende wird es voller — ich plane die Tour immer für einen Wochentag."
+        desc: "Der schönste Naturstrand Rios, versteckt hinter grünen Hügeln im Westen der Stadt. Surfer lieben die Wellen, Naturfreunde den unberührten Atlantischen Regenwald rundherum. Kein Hochhaus, keine Hotelketten, nur Natur.",
+        tip: "Prainha ist unter der Woche fast menschenleer. Am Wochenende wird es voller, deshalb plane ich die Tour immer für einen Wochentag."
     },
     {
         name: "Praia de Grumari",
@@ -90,7 +90,7 @@ const naturalAttractions = [
         effort: "Leicht",
         image: "/images/grumari.webp",
         desc: "Noch wilder und unberührter als Prainha: Grumari ist ein Naturschutzgebiet mit goldenem Sand, türkisfarbenem Wasser und grünen Hügeln. Einer der letzten Strände Rios, der sich anfühlt wie vor 100 Jahren.",
-        tip: "Grumari und Prainha liegen nebeneinander — wir kombinieren beide an einem Tag für das ultimative Strand-und-Natur-Erlebnis."
+        tip: "Grumari und Prainha liegen nebeneinander, wir kombinieren beide an einem Tag für das ultimative Strand-und-Natur-Erlebnis."
     },
     {
         name: "Botanischer Garten",
@@ -187,7 +187,7 @@ export default async function NaturTourPage() {
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Als gebürtiger Carioca kenne ich die Wanderwege, Geheimpfade und Naturjuwelen Rios wie meine Westentasche. Ob eine leichte Wanderung durch den Tijuca-Regenwald, eine anspruchsvolle Gipfeltour auf die Pedra da Gávea oder ein entspannter Tag an den wilden Stränden von Prainha und Grumari — ich zeige dir das grüne, abenteuerliche Rio abseits der Touristenpfade.
+                                        Als gebürtiger Carioca kenne ich die Wanderwege, Geheimpfade und Naturjuwelen Rios wie meine Westentasche. Ob eine leichte Wanderung durch den Tijuca-Regenwald, eine anspruchsvolle Gipfeltour auf die Pedra da Gávea oder ein entspannter Tag an den wilden Stränden von Prainha und Grumari, ich zeige dir das grüne, abenteuerliche Rio abseits der Touristenpfade.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
@@ -203,7 +203,7 @@ export default async function NaturTourPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12 text-center lg:text-left">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Entdecke Rios Natur — <span className="text-rio-green">9 Highlights</span>
+                                Entdecke Rios Natur: <span className="text-rio-green">9 Highlights</span>
                             </h2>
                         </FadeIn>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -269,11 +269,11 @@ export default async function NaturTourPage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6">
-                                Dein Abenteuer in Rios Natur — <br className="hidden sm:block" />
+                                Dein Abenteuer in Rios Natur, <br className="hidden sm:block" />
                                 <span className="text-rio-yellow">ich plane es für dich.</span>
                             </h2>
                              <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
-                                Ob Regenwald-Wanderung, Gipfeltour oder versteckter Strand — schreib mir per WhatsApp oder E-Mail und ich stelle deine perfekte Natur-Tour zusammen.
+                                Ob Regenwald-Wanderung, Gipfeltour oder versteckter Strand. Schreib mir per WhatsApp oder E-Mail und ich stelle deine perfekte Natur-Tour zusammen.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link

@@ -12,8 +12,8 @@ import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
-    title: "Karneval Tour in Rio — Sambódromo, Blocos & mehr",
-    description: "Erlebe den Karneval in Rio de Janeiro mit einem echten Carioca als Guide. Sambódromo, Blocos de Rua und Samba-Ensaios — sicher, authentisch und komplett auf Deutsch.",
+    title: "Karneval Tour in Rio: Sambódromo, Blocos & mehr",
+    description: "Erlebe den Karneval in Rio de Janeiro mit einem echten Carioca als Guide. Sambódromo, Blocos de Rua und Samba-Ensaios: sicher, authentisch und komplett auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/karneval-tour",
     },
@@ -28,21 +28,21 @@ const karnevalExperiences = [
     {
         name: "Sambódromo",
         image: "/images/carnival Sambodramo 2026.webp",
-        desc: "Das Sambódromo ist die Hauptbühne des Karnevals in Rio — hier treten die besten Samba-Schulen der Stadt in einem spektakulären Wettbewerb gegeneinander an. Tausende Tänzer, aufwendige Kostüme, riesige Festwagen und Samba-Musik, die durch die ganze Arena hallt. Ein Erlebnis, das man einmal im Leben gesehen haben muss.",
+        desc: "Das Sambódromo ist die Hauptbühne des Karnevals in Rio, hier treten die besten Samba-Schulen der Stadt in einem spektakulären Wettbewerb gegeneinander an. Tausende Tänzer, aufwendige Kostüme, riesige Festwagen und Samba-Musik, die durch die ganze Arena hallt. Ein Erlebnis, das man einmal im Leben gesehen haben muss.",
         tip: "Die Desfiles der Grupo Especial (Sonntag und Montag) sind die Highlights, aber die Grupo de Acesso am Freitag und Samstag ist günstiger und fast genauso beeindruckend. Ich helfe dir bei den Tickets und erkläre dir alles vor Ort.",
         badges: ["Sonntag & Montag", "Hauptevent"]
     },
     {
         name: "Blocos de Rua",
         image: "/images/bloco-de-rua.webp",
-        desc: "Die Blocos de Rua sind das Herz und die Seele des Karnevals für die Cariocas. Hunderte Straßenfeste verteilt über die ganze Stadt — von riesigen Blocos mit hunderttausenden Teilnehmern bis zu kleinen, lokalen Feiern in den Vierteln. Hier erlebst du den echten, ungefilterten Karneval, gemeinsam mit den Einheimischen.",
-        tip: "Die großen Blocos wie Cordão do Bola Preta sind legendär, aber die kleinen Blocos in den Vierteln sind oft entspannter und sicherer. Ich zeige dir die besten für deinen Geschmack — und sorge dafür, dass du sicher feierst.",
+        desc: "Die Blocos de Rua sind das Herz und die Seele des Karnevals für die Cariocas. Hunderte Straßenfeste verteilt über die ganze Stadt, von riesigen Blocos mit hunderttausenden Teilnehmern bis zu kleinen, lokalen Feiern in den Vierteln. Hier erlebst du den echten, ungefilterten Karneval, gemeinsam mit den Einheimischen.",
+        tip: "Die großen Blocos wie Cordão do Bola Preta sind legendär, aber die kleinen Blocos in den Vierteln sind oft entspannter und sicherer. Ich zeige dir die besten für deinen Geschmack, und sorge dafür, dass du sicher feierst.",
         badges: ["Tagsüber", "Kostenlos & offen"]
     },
     {
-        name: "Ensaios — Proben der Samba-Schulen",
+        name: "Ensaios (Proben der Samba-Schulen)",
         image: "/images/ensaio-escola-de-samba.webp",
-        desc: "Wochen vor dem offiziellen Karneval öffnen die großen Samba-Schulen ihre Tore für öffentliche Proben — die Ensaios. Hier erlebst du die Energie des Karnevals hautnah, tanzt mitten unter den Sambistas und spürst den Rhythmus der Bateria. Weniger Touristen, mehr Authentizität und eine Atmosphäre, die viele Besucher als noch intensiver als den Karneval selbst beschreiben.",
+        desc: "Wochen vor dem offiziellen Karneval öffnen die großen Samba-Schulen ihre Tore für öffentliche Proben, die Ensaios. Hier erlebst du die Energie des Karnevals hautnah, tanzt mitten unter den Sambistas und spürst den Rhythmus der Bateria. Weniger Touristen, mehr Authentizität und eine Atmosphäre, die viele Besucher als noch intensiver als den Karneval selbst beschreiben.",
         tip: "Die Ensaios der Mangueira und der Salgueiro sind besonders mitreißend. Der Eintritt kostet meist nur R$ 30–50 und die Stimmung ist unglaublich. Ich begleite dich hin und sorge dafür, dass du das volle Erlebnis genießen kannst.",
         badges: ["Wochen vor Karneval", "Ab R$ 30"]
     }
@@ -64,7 +64,7 @@ export default async function KarnevalTourPage() {
                     <div className="absolute inset-0 z-0">
                         <Image
                             src="/images/bloco-background.webp"
-                            alt="Karneval Tour in Rio de Janeiro — Sambódromo und Blocos de Rua"
+                            alt="Karneval Tour in Rio de Janeiro: Sambódromo und Blocos de Rua"
                             fill
                             priority
                             fetchPriority="high"
@@ -126,7 +126,7 @@ export default async function KarnevalTourPage() {
                 <div className="bg-rio-yellow/10 border-b border-rio-yellow/30">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8 py-3">
                         <p className="text-sm font-medium text-gray-700 text-center">
-                            📅 <span className="font-bold">Diese Tour ist nur während der Karnevalszeit verfügbar</span> — Februar/März 2027
+                            📅 <span className="font-bold">Diese Tour ist nur während der Karnevalszeit verfügbar</span>, Februar/März 2027
                         </p>
                     </div>
                 </div>
@@ -137,15 +137,15 @@ export default async function KarnevalTourPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Der Karneval in Rio de Janeiro ist mehr als eine Party — er ist das kulturelle Herz Brasiliens. Millionen Menschen feiern tagelang auf den Straßen, die Samba-Schulen liefern atemberaubende Shows im Sambódromo, und die ganze Stadt vibriert vor Energie und Lebensfreude.
+                                    Der Karneval in Rio de Janeiro ist mehr als eine Party. Er ist das kulturelle Herz Brasiliens. Millionen Menschen feiern tagelang auf den Straßen, die Samba-Schulen liefern atemberaubende Shows im Sambódromo, und die ganze Stadt vibriert vor Energie und Lebensfreude.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Aber der Karneval kann für Erstbesucher auch überwältigend sein: Welche Blocos lohnen sich? Wie kommt man sicher an Tickets für das Sambódromo? Wo feiert man am besten, ohne sich unsicher zu fühlen? Genau hier komme ich ins Spiel. Als Carioca habe ich den Karneval mein ganzes Leben lang gefeiert und kenne jeden Trick, jede Abkürzung und die besten Spots — abseits der Touristenmassen.
+                                        Aber der Karneval kann für Erstbesucher auch überwältigend sein: Welche Blocos lohnen sich? Wie kommt man sicher an Tickets für das Sambódromo? Wo feiert man am besten, ohne sich unsicher zu fühlen? Genau hier komme ich ins Spiel. Als Carioca habe ich den Karneval mein ganzes Leben lang gefeiert und kenne jeden Trick, jede Abkürzung und die besten Spots, abseits der Touristenmassen.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Vom Sambódromo über die besten Blocos de Rua bis zu den legendären Ensaios der Samba-Schulen — schreib mir und ich mache deinen Karneval in Rio unvergesslich.
+                                    Vom Sambódromo über die besten Blocos de Rua bis zu den legendären Ensaios der Samba-Schulen. Schreib mir und ich mache deinen Karneval in Rio unvergesslich.
                                 </p>
                             </div>
                         </FadeIn>
@@ -157,7 +157,7 @@ export default async function KarnevalTourPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12 text-center lg:text-left">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Karneval in Rio de Janeiro — <span className="text-rio-green">3 unvergessliche Erlebnisse</span>
+                                Karneval in Rio de Janeiro: <span className="text-rio-green">3 unvergessliche Erlebnisse</span>
                             </h2>
                             <p className="mt-4 text-gray-600 text-lg">
                                 Der Karneval hat viele Gesichter. Hier sind die drei Erlebnisse, die du nicht verpassen darfst.
@@ -223,11 +223,11 @@ export default async function KarnevalTourPage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6">
-                                Karneval in Rio de Janeiro — <br className="hidden sm:block" />
+                                Karneval in Rio de Janeiro, <br className="hidden sm:block" />
                                 <span className="text-rio-yellow text-2xl lg:text-4xl">mit einem Carioca an deiner Seite.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Schreib mir per WhatsApp oder E-Mail und ich plane deinen perfekten Karneval — von Sambódromo-Tickets bis zu den besten Blocos, sicher und unvergesslich.
+                                Schreib mir per WhatsApp oder E-Mail und ich plane deinen perfekten Karneval, von Sambódromo-Tickets bis zu den besten Blocos, sicher und unvergesslich.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link

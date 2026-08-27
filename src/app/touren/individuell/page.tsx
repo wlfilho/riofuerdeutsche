@@ -8,8 +8,8 @@ import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
-    title: "Individuelle Tour in Rio — dein Wunschtag mit Guide",
-    description: "Plane deine individuelle Tour in Rio de Janeiro — du bestimmst die Orte, das Tempo und die Interessen. Dein persönlicher Carioca-Guide organisiert den perfekten Tag, komplett auf Deutsch.",
+    title: "Individuelle Tour in Rio: dein Wunschtag mit Guide",
+    description: "Plane deine individuelle Tour in Rio de Janeiro: du bestimmst die Orte, das Tempo und die Interessen. Dein persönlicher Carioca-Guide organisiert den perfekten Tag, komplett auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/individuell",
     },
@@ -62,7 +62,7 @@ export default async function IndividuelleTourPage() {
                                     Individuelle Tour in Rio de Janeiro
                                 </h1>
                                 <p className="text-xl lg:text-2xl xl:text-3xl font-bold text-rio-yellow mt-4">
-                                    Dein Wunschtag — du bestimmst, ich organisiere
+                                    Dein Wunschtag: du bestimmst, ich organisiere
                                 </p>
 
                                 <div className="pt-6 flex flex-col sm:flex-row gap-4">
@@ -96,18 +96,18 @@ export default async function IndividuelleTourPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Keine der Touren passt perfekt zu dir? Dann lass uns deinen eigenen Tag in Rio zusammenstellen. Du sagst mir, was dich interessiert — ich plane den Rest.
+                                    Keine der Touren passt perfekt zu dir? Dann lass uns deinen eigenen Tag in Rio zusammenstellen. Du sagst mir, was dich interessiert. Ich plane den Rest.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Vielleicht willst du morgens den Cristo besuchen, mittags in einer Favela authentisch essen und abends Samba in Lapa erleben. Oder du hast nur vier Stunden vor dem Flug und willst das Maximum rausholen. Vielleicht reist du mit Kindern, mit deinen Eltern oder als Paar auf Hochzeitsreise — jede Situation ist anders, und genau dafür gibt es die individuelle Tour.
+                                        Vielleicht willst du morgens den Cristo besuchen, mittags in einer Favela authentisch essen und abends Samba in Lapa erleben. Oder du hast nur vier Stunden vor dem Flug und willst das Maximum rausholen. Vielleicht reist du mit Kindern, mit deinen Eltern oder als Paar auf Hochzeitsreise: jede Situation ist anders, und genau dafür gibt es die individuelle Tour.
                                     </p>
                                     <p>
                                         Als gebürtiger Carioca, der in Deutschland gelebt hat, verstehe ich genau, was deutsche Reisende erwarten: Pünktlichkeit, klare Kommunikation, Sicherheit und gleichzeitig echte, ungeschönte Erlebnisse. Ich passe jede Tour an deine Wünsche, dein Tempo und dein Budget an.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Schreib mir einfach auf WhatsApp, was du dir vorstellst — und innerhalb von 24 Stunden bekommst du einen Vorschlag für deinen perfekten Tag in Rio.
+                                    Schreib mir einfach auf WhatsApp, was du dir vorstellst, und innerhalb von 24 Stunden bekommst du einen Vorschlag für deinen perfekten Tag in Rio.
                                 </p>
                             </div>
                         </FadeIn>
@@ -119,7 +119,7 @@ export default async function IndividuelleTourPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="text-center mb-16">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900">
-                                So funktioniert&apos;s — in 3 einfachen Schritten
+                                So funktioniert&apos;s, in 3 einfachen Schritten
                             </h2>
                         </FadeIn>
 
@@ -129,19 +129,19 @@ export default async function IndividuelleTourPage() {
                                     num: "01",
                                     icon: "💬",
                                     title: "Schreib mir deine Wünsche",
-                                    desc: "Erzähl mir, was dich interessiert: Sehenswürdigkeiten, Strände, Kultur, Fußball, Essen — alles ist möglich. Sag mir auch, wie viele Tage du hast, mit wem du reist und welches Tempo dir am liebsten ist."
+                                    desc: "Erzähl mir, was dich interessiert: Sehenswürdigkeiten, Strände, Kultur, Fußball, Essen, alles ist möglich. Sag mir auch, wie viele Tage du hast, mit wem du reist und welches Tempo dir am liebsten ist."
                                 },
                                 {
                                     num: "02",
                                     icon: "📋",
                                     title: "Ich plane deinen Tag",
-                                    desc: "Innerhalb von 24 Stunden bekommst du einen individuellen Vorschlag mit Ablauf, Highlights und Tipps — kostenlos und unverbindlich. Du entscheidest, ob und was du ändern möchtest."
+                                    desc: "Innerhalb von 24 Stunden bekommst du einen individuellen Vorschlag mit Ablauf, Highlights und Tipps, kostenlos und unverbindlich. Du entscheidest, ob und was du ändern möchtest."
                                 },
                                 {
                                     num: "03",
                                     icon: "🚀",
                                     title: "Wir erleben Rio zusammen",
-                                    desc: "Am Tag deiner Tour hole ich dich ab und wir starten. Alles ist organisiert — Transport, Tickets, Restaurants. Du genießt einfach den Tag, ich kümmere mich um den Rest. Komplett auf Deutsch."
+                                    desc: "Am Tag deiner Tour hole ich dich ab und wir starten. Alles ist organisiert: Transport, Tickets, Restaurants. Du genießt einfach den Tag, ich kümmere mich um den Rest. Komplett auf Deutsch."
                                 }
                             ].map((step, i) => (
                                 <FadeIn key={i} delay={0.1 * i} direction="up" className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative pt-12">
@@ -202,10 +202,10 @@ export default async function IndividuelleTourPage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6 leading-tight">
-                                Deine individuelle Tour in Rio de Janeiro — lass uns loslegen.
+                                Deine individuelle Tour in Rio de Janeiro, lass uns loslegen.
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Schreib mir per WhatsApp oder E-Mail, was du dir vorstellst. Innerhalb von 24 Stunden hast du deinen persönlichen Tourenvorschlag — kostenlos und unverbindlich.
+                                Schreib mir per WhatsApp oder E-Mail, was du dir vorstellst. Innerhalb von 24 Stunden hast du deinen persönlichen Tourenvorschlag, kostenlos und unverbindlich.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link

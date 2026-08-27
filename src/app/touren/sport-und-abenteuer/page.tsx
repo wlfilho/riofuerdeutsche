@@ -8,8 +8,8 @@ import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
-    title: "Sport & Abenteuer in Rio — Surfen, Paragliding & mehr",
-    description: "Erlebe Rio de Janeiro von der sportlichen Seite — Surfen, Stand-up Paddle, Paragliding und Asa Delta. Adrenalin pur mit einem lokalen Guide, sicher und auf Deutsch.",
+    title: "Sport & Abenteuer in Rio: Surfen, Paragliding & mehr",
+    description: "Erlebe Rio de Janeiro von der sportlichen Seite: Surfen, Stand-up Paddle, Paragliding und Asa Delta. Adrenalin pur mit einem lokalen Guide, sicher und auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/sport-und-abenteuer",
     },
@@ -23,8 +23,8 @@ const estimatedTourDuration = "2–4 Stunden";
 const activities = [
     {
         title: "Surfen in Rio de Janeiro",
-        description: "Rio hat einige der besten Surfspots Brasiliens — direkt vor der Haustür. Von den kraftvollen Wellen in Prainha und Grumari über die anfängerfreundliche Praia do Arpoador bis zum konsistenten Break am Posto 7 in Recreio. Egal ob Anfänger oder erfahrener Surfer, ich finde den perfekten Spot und den richtigen Instructor für dich.",
-        tip: "Prainha ist der beste Surfspot in Rio — aber nur Locals wissen, wann die Bedingungen perfekt sind. Ich checke den Swell-Forecast und bringe dich zur richtigen Zeit an den richtigen Strand.",
+        description: "Rio hat einige der besten Surfspots Brasiliens, direkt vor der Haustür. Von den kraftvollen Wellen in Prainha und Grumari über die anfängerfreundliche Praia do Arpoador bis zum konsistenten Break am Posto 7 in Recreio. Egal ob Anfänger oder erfahrener Surfer, ich finde den perfekten Spot und den richtigen Instructor für dich.",
+        tip: "Prainha ist der beste Surfspot in Rio, aber nur Locals wissen, wann die Bedingungen perfekt sind. Ich checke den Swell-Forecast und bringe dich zur richtigen Zeit an den richtigen Strand.",
         image: "/images/surf-untericht.webp",
         badges: [
             { icon: MapPin, text: "Prainha / Arpoador" },
@@ -34,7 +34,7 @@ const activities = [
     {
         title: "Stand-up Paddle",
         description: "Stand-up Paddle in Rio ist ein Erlebnis der besonderen Art. Paddle über das ruhige Wasser der Lagoa Rodrigo de Freitas mit dem Cristo Redentor im Hintergrund, erkunde die Küste von Urca mit Blick auf den Zuckerhut oder genieße den Sonnenaufgang auf dem Meer vor Copacabana. Perfekt für alle Fitness-Levels.",
-        tip: "Die Lagoa ist perfekt für Anfänger — kein Wellengang und eine traumhafte Kulisse. Für Fortgeschrittene empfehle ich die Route entlang der Küste von Urca bei Sonnenaufgang.",
+        tip: "Die Lagoa ist perfekt für Anfänger, kein Wellengang und eine traumhafte Kulisse. Für Fortgeschrittene empfehle ich die Route entlang der Küste von Urca bei Sonnenaufgang.",
         image: "/images/sup-rio.webp",
         badges: [
             { icon: MapPin, text: "Lagoa / Urca / Copa" },
@@ -43,8 +43,8 @@ const activities = [
     },
     {
         title: "Paragliding über São Conrado",
-        description: "Vom Startpunkt an der Pedra Bonita (520 Meter Höhe) springst du mit einem erfahrenen Tandem-Piloten in die Luft und gleitest über den Tijuca-Regenwald, die Favela Rocinha und den Strand von São Conrado — mit einem Panoramablick, den du nie vergessen wirst. Die Landung erfolgt direkt am Strand. Eines der ikonischsten Erlebnisse in Rio.",
-        tip: "Morgens zwischen 8 und 10 Uhr sind die Bedingungen oft am besten — weniger Wind, klarere Sicht. Ich organisiere den Transfer zur Rampe und einen zertifizierten Piloten, der auch Englisch oder Deutsch spricht.",
+        description: "Vom Startpunkt an der Pedra Bonita (520 Meter Höhe) springst du mit einem erfahrenen Tandem-Piloten in die Luft und gleitest über den Tijuca-Regenwald, die Favela Rocinha und den Strand von São Conrado, mit einem Panoramablick, den du nie vergessen wirst. Die Landung erfolgt direkt am Strand. Eines der ikonischsten Erlebnisse in Rio.",
+        tip: "Morgens zwischen 8 und 10 Uhr sind die Bedingungen oft am besten, weniger Wind und klarere Sicht. Ich organisiere den Transfer zur Rampe und einen zertifizierten Piloten, der auch Englisch oder Deutsch spricht.",
         image: "/images/paraglider-rio.webp",
         badges: [
             { icon: MapPin, text: "Pedra Bonita / São Conrado" },
@@ -52,9 +52,9 @@ const activities = [
         ]
     },
     {
-        title: "Asa Delta — Drachenfliegen",
-        description: "Asa Delta ist das Original — Rio de Janeiro ist einer der wenigen Orte weltweit, wo man mitten über einer Millionenstadt Drachenfliegen kann. Der Start erfolgt von der gleichen Rampe wie beim Paragliding (Pedra Bonita), aber das Gefühl ist völlig anders: du liegst horizontal, spürst den Wind direkt und fliegst wie ein Vogel über die Stadt. Noch intensiver, noch freier, noch unvergesslicher.",
-        tip: "Asa Delta ist nichts für schwache Nerven — aber mit einem erfahrenen Tandem-Piloten bist du in sicheren Händen. Der Flug dauert etwa 10-15 Minuten und endet mit einer sanften Landung am Strand von São Conrado.",
+        title: "Asa Delta (Drachenfliegen)",
+        description: "Asa Delta ist das Original: Rio de Janeiro ist einer der wenigen Orte weltweit, wo man mitten über einer Millionenstadt Drachenfliegen kann. Der Start erfolgt von der gleichen Rampe wie beim Paragliding (Pedra Bonita), aber das Gefühl ist völlig anders: du liegst horizontal, spürst den Wind direkt und fliegst wie ein Vogel über die Stadt. Noch intensiver, noch freier, noch unvergesslicher.",
+        tip: "Asa Delta ist nichts für schwache Nerven, aber mit einem erfahrenen Tandem-Piloten bist du in sicheren Händen. Der Flug dauert etwa 10-15 Minuten und endet mit einer sanften Landung am Strand von São Conrado.",
         image: "/images/drachen-fliegen-rio.webp",
         badges: [
             { icon: MapPin, text: "Pedra Bonita / São Conrado" },
@@ -144,13 +144,13 @@ export default async function SportUndAbenteuerPage() {
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 {/* Lead Paragraph */}
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Rio de Janeiro ist nicht nur zum Anschauen da — die Stadt ist ein riesiger Outdoor-Spielplatz. Zwischen Atlantik und Regenwald, Stränden und Granitfelsen warten Erlebnisse, die deinen Puls garantiert in die Höhe treiben.
+                                    Rio de Janeiro ist nicht nur zum Anschauen da. Die Stadt ist ein riesiger Outdoor-Spielplatz. Zwischen Atlantik und Regenwald, Stränden und Granitfelsen warten Erlebnisse, die deinen Puls garantiert in die Höhe treiben.
                                 </p>
 
                                 {/* Body Paragraph */}
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Ob du auf den Wellen von Prainha surfst, über die Strände von Ipanema paddelst, mit dem Gleitschirm über São Conrado schwebst oder mit einem Asa Delta über die Stadt fliegst — ich organisiere alles für dich. Von der Ausrüstung über den Instructor bis zum sicheren Transport. Du genießt das Adrenalin, ich kümmere mich um den Rest.
+                                        Ob du auf den Wellen von Prainha surfst, über die Strände von Ipanema paddelst, mit dem Gleitschirm über São Conrado schwebst oder mit einem Asa Delta über die Stadt fliegst. Ich organisiere alles für dich. Von der Ausrüstung über den Instructor bis zum sicheren Transport. Du genießt das Adrenalin, ich kümmere mich um den Rest.
                                     </p>
                                 </div>
 
@@ -171,9 +171,9 @@ export default async function SportUndAbenteuerPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Sport & Abenteuer in Rio de Janeiro — <span className="text-rio-green">4 Erlebnisse für Adrenalin-Fans</span>
+                                Sport & Abenteuer in Rio de Janeiro: <span className="text-rio-green">4 Erlebnisse für Adrenalin-Fans</span>
                             </h2>
-                            <p className="text-gray-500 mt-3 text-lg">Vom Ozean bis in die Lüfte — hier sind die besten Outdoor-Aktivitäten, die ich für dich organisieren kann.</p>
+                            <p className="text-gray-500 mt-3 text-lg">Vom Ozean bis in die Lüfte: hier sind die besten Outdoor-Aktivitäten, die ich für dich organisieren kann.</p>
                         </FadeIn>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -236,10 +236,10 @@ export default async function SportUndAbenteuerPage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6">
-                                Dein Abenteuer in Rio de Janeiro — sicher und unvergesslich.
+                                Dein Abenteuer in Rio de Janeiro, sicher und unvergesslich.
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
-                                Schreib mir per WhatsApp oder E-Mail und ich organisiere dein perfektes Sport-Erlebnis — vom Surfkurs bis zum Paragliding-Flug, alles sicher und mit lokaler Expertise.
+                                Schreib mir per WhatsApp oder E-Mail und ich organisiere dein perfektes Sport-Erlebnis, vom Surfkurs bis zum Paragliding-Flug, alles sicher und mit lokaler Expertise.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link

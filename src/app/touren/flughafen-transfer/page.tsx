@@ -19,7 +19,7 @@ import { getSettings, buildContactUrls } from "@/lib/settings";
 export const metadata = {
     title: "Transfer Rio de Janeiro: Flughafen, Kreuzfahrthafen & Hotel",
     description:
-        "Privater Transfer in Rio de Janeiro — vom Flughafen (GIG & SDU) oder Kreuzfahrthafen direkt zu deiner Unterkunft. Ich hole dich persönlich ab, auf Deutsch, mit deinem Namen auf dem Schild.",
+        "Privater Transfer in Rio de Janeiro, vom Flughafen (GIG & SDU) oder Kreuzfahrthafen direkt zu deiner Unterkunft. Ich hole dich persönlich ab, auf Deutsch, mit deinem Namen auf dem Schild.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/flughafen-transfer",
     },
@@ -168,7 +168,7 @@ export default async function FlughafenTransferPage() {
                                         Du kommst aus der Ankunftshalle, und da steht jemand mit deinem Namen auf dem Schild. Und der spricht Deutsch.
                                     </p>
                                     <p>
-                                        Das bin ich selbst — kein Fahrer, den ich für dich bestellt habe. Ich fahre dich vom Flughafen oder vom Kreuzfahrthafen direkt zu deiner Unterkunft, und unterwegs sind die ersten Fragen schon beantwortet: wo du Geld wechselst, was dein Viertel taugt, was du morgen früh als Erstes machst.
+                                        Das bin ich selbst, kein Fahrer, den ich für dich bestellt habe. Ich fahre dich vom Flughafen oder vom Kreuzfahrthafen direkt zu deiner Unterkunft, und unterwegs sind die ersten Fragen schon beantwortet: wo du Geld wechselst, was dein Viertel taugt, was du morgen früh als Erstes machst.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
@@ -187,7 +187,7 @@ export default async function FlughafenTransferPage() {
                                 Welche Strecken ich fahre
                             </h2>
                             <p className="text-lg text-gray-600">
-                                In beide Richtungen, zum selben Preis — Hinfahrt wie Rückfahrt.
+                                In beide Richtungen, zum selben Preis, Hinfahrt wie Rückfahrt.
                             </p>
                         </FadeIn>
 
@@ -216,7 +216,7 @@ export default async function FlughafenTransferPage() {
                                 Preise pro Strecke
                             </h2>
                             <p className="text-lg text-gray-600">
-                                Achte auf das Gepäck, nicht nur auf die Personenzahl — wer zwei Wochen nach Brasilien fliegt, reist selten mit Handgepäck allein.
+                                Achte auf das Gepäck, nicht nur auf die Personenzahl, denn wer zwei Wochen nach Brasilien fliegt, reist selten mit Handgepäck allein.
                             </p>
                         </FadeIn>
 
@@ -255,7 +255,7 @@ export default async function FlughafenTransferPage() {
 
                         <FadeIn direction="up">
                             <p className="mt-6 text-base text-gray-600 max-w-[900px]">
-                                Mehr Personen oder mehr Gepäck? Schreib mir — größere Fahrzeuge organisiere ich auf Anfrage.
+                                Mehr Personen oder mehr Gepäck? Schreib mir, größere Fahrzeuge organisiere ich auf Anfrage.
                             </p>
                         </FadeIn>
 
@@ -298,7 +298,7 @@ export default async function FlughafenTransferPage() {
                                 <span className="text-rio-yellow">Zeige ich dir die Stadt.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Auf der Fahrt vom Flughafen reden wir sowieso schon darüber, was du in Rio sehen willst. Die meisten hängen den Transfer deshalb an eine Tour — dann kennst du dein Gegenüber schon, bevor der erste Tag losgeht.
+                                Auf der Fahrt vom Flughafen reden wir sowieso schon darüber, was du in Rio sehen willst. Die meisten hängen den Transfer deshalb an eine Tour, dann kennst du dein Gegenüber schon, bevor der erste Tag losgeht.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link

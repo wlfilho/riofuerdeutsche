@@ -12,8 +12,8 @@ import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
-    title: "Rio by Night — Nachtleben in Rio mit lokalem Guide",
-    description: "Erlebe das Nachtleben von Rio de Janeiro sicher und authentisch — Samba in Lapa, Cocktails in Leblon, Craft-Biere in Botafogo. Dein Carioca-Guide zeigt dir die besten Spots, komplett auf Deutsch.",
+    title: "Rio by Night: Nachtleben in Rio mit lokalem Guide",
+    description: "Erlebe das Nachtleben von Rio de Janeiro sicher und authentisch: Samba in Lapa, Cocktails in Leblon, Craft-Biere in Botafogo. Dein Carioca-Guide zeigt dir die besten Spots, komplett auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/by-night",
     },
@@ -29,14 +29,14 @@ const nightExperiences = [
         name: "Lapa",
         image: "/images/lapa-by-night.webp",
         desc: "Lapa ist das pulsierende Herz des Nachtlebens von Rio. Unter den berühmten Arcos da Lapa findest du Samba-Clubs, Live-Musik-Bars und eine Energie, die ihresgleichen sucht. Freitag- und Samstagnacht verwandeln sich die Straßen in eine riesige Open-Air-Party.",
-        tip: "Die besten Samba-Clubs sind die kleinen, unscheinbaren Lokale in den Seitenstraßen — nicht die großen Touristenlokale an der Hauptstraße. Ich zeige dir, wo die Cariocas wirklich tanzen.",
+        tip: "Die besten Samba-Clubs sind die kleinen, unscheinbaren Lokale in den Seitenstraßen, nicht die großen Touristenlokale an der Hauptstraße. Ich zeige dir, wo die Cariocas wirklich tanzen.",
         badges: ["Samba & Live-Musik", "Freitag & Samstag"]
     },
     {
         name: "Leblon",
         image: "/images/leblon-by-night.webp",
         desc: "Leblon ist das elegante Gegenstück zu Lapa. Hier findest du stilvolle Cocktailbars, gehobene Restaurants und eine entspannte Atmosphäre. Das Viertel gilt als eines der sichersten in Rio und ist perfekt für einen genussvollen Abend mit guten Drinks und noch besserem Essen.",
-        tip: "Die Straße Dias Ferreira ist die Gastro-Meile von Leblon — auf wenigen hundert Metern reihen sich die besten Restaurants und Bars aneinander. Reservierung empfohlen!",
+        tip: "Die Straße Dias Ferreira ist die Gastro-Meile von Leblon, auf wenigen hundert Metern reihen sich die besten Restaurants und Bars aneinander. Reservierung empfohlen!",
         badges: ["Cocktails & Restaurants", "Gehoben & sicher"]
     },
     {
@@ -49,15 +49,15 @@ const nightExperiences = [
     {
         name: "Copacabana",
         image: "/images/quiosque-copacabana-by-night.webp",
-        desc: "Copacabana bei Nacht hat einen ganz besonderen Charme. Die beleuchtete Strandpromenade, Bars direkt am Meer und das bunte Treiben auf der Avenida Atlântica schaffen eine einzigartige Atmosphäre. Von entspannten Kiosks am Strand bis zu Live-Musik in historischen Bars — Copa hat für jeden etwas.",
+        desc: "Copacabana bei Nacht hat einen ganz besonderen Charme. Die beleuchtete Strandpromenade, Bars direkt am Meer und das bunte Treiben auf der Avenida Atlântica schaffen eine einzigartige Atmosphäre. Von entspannten Kiosks am Strand bis zu Live-Musik in historischen Bars, Copa hat für jeden etwas.",
         tip: "Der Kiosk am Posto 6 ist der perfekte Ort für ein kaltes Bier mit Blick auf den beleuchteten Strand. Danach geht's weiter in die Seitenstraßen, wo die lokalen Bars versteckt sind.",
         badges: ["Strandpromenade & Bars", "Klassisch & lebendig"]
     },
     {
         name: "Santa Teresa",
         image: "/images/santa-teresa-by-night.webp",
-        desc: "Santa Teresa thront auf einem Hügel über der Stadt und bietet das romantischste Nachtleben Rios. Kleine Bars mit Aussicht, Kunstgalerien die abends öffnen und eine bohème Atmosphäre, die an europäische Altstädte erinnert — nur mit tropischem Flair und einem Panoramablick über Rio.",
-        tip: "Der Largo do Guimarães ist das Zentrum des Nachtlebens in Santa Teresa. Starte dort mit einem Caipirinha und lass dich durch die Gassen treiben — du wirst überrascht sein, was du findest.",
+        desc: "Santa Teresa thront auf einem Hügel über der Stadt und bietet das romantischste Nachtleben Rios. Kleine Bars mit Aussicht, Kunstgalerien die abends öffnen und eine bohème Atmosphäre, die an europäische Altstädte erinnert, nur mit tropischem Flair und einem Panoramablick über Rio.",
+        tip: "Der Largo do Guimarães ist das Zentrum des Nachtlebens in Santa Teresa. Starte dort mit einem Caipirinha und lass dich durch die Gassen treiben, du wirst überrascht sein, was du findest.",
         badges: ["Rooftop-Bars & Kunst", "Romantisch & bohème"]
     }
 ];
@@ -78,7 +78,7 @@ export default async function RioByNightPage() {
                     <div className="absolute inset-0 z-0">
                         <Image
                             src="/images/lapa-by-night-bg.webp"
-                            alt="Rio by Night — Nachtleben in Rio de Janeiro"
+                            alt="Rio by Night, Nachtleben in Rio de Janeiro"
                             fill
                             priority
                             fetchPriority="high"
@@ -142,15 +142,15 @@ export default async function RioByNightPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Wenn die Sonne untergeht, erwacht Rio de Janeiro erst richtig zum Leben. Samba-Rhythmen in Lapa, Cocktails mit Meerblick in Leblon, Craft-Biere in den versteckten Bars von Botafogo — das Nachtleben dieser Stadt ist legendär und so vielfältig wie die Cariocas selbst.
+                                    Wenn die Sonne untergeht, erwacht Rio de Janeiro erst richtig zum Leben. Samba-Rhythmen in Lapa, Cocktails mit Meerblick in Leblon, Craft-Biere in den versteckten Bars von Botafogo: das Nachtleben dieser Stadt ist legendär und so vielfältig wie die Cariocas selbst.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Aber nachts in einer fremden Stadt unterwegs zu sein kann auch verunsichern — besonders in Rio. Genau deshalb bin ich an deiner Seite. Als gebürtiger Carioca kenne ich die <Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">sicheren Spots</Link>, die besten Bars und die Orte, an denen die Stimmung wirklich einzigartig ist. Kein Touristenfallen, keine unsicheren Ecken — nur das echte Rio bei Nacht.
+                                        Aber nachts in einer fremden Stadt unterwegs zu sein kann auch verunsichern, besonders in Rio. Genau deshalb bin ich an deiner Seite. Als gebürtiger Carioca kenne ich die <Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">sicheren Spots</Link>, die besten Bars und die Orte, an denen die Stimmung wirklich einzigartig ist. Kein Touristenfallen, keine unsicheren Ecken, nur das echte Rio bei Nacht.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Von der lebhaften Samba-Szene in Lapa bis zu den entspannten Rooftop-Bars in Santa Teresa — schreib mir und ich stelle dir die perfekte Nacht in Rio zusammen.
+                                    Von der lebhaften Samba-Szene in Lapa bis zu den entspannten Rooftop-Bars in Santa Teresa. Schreib mir und ich stelle dir die perfekte Nacht in Rio zusammen.
                                 </p>
                             </div>
                         </FadeIn>
@@ -162,7 +162,7 @@ export default async function RioByNightPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12 text-center lg:text-left">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Nachtleben in Rio de Janeiro — <span className="text-rio-green">5 Viertel, 5 Erlebnisse</span>
+                                Nachtleben in Rio de Janeiro: <span className="text-rio-green">5 Viertel, 5 Erlebnisse</span>
                             </h2>
                             <p className="mt-4 text-gray-600 text-lg">
                                 Jedes Viertel hat seinen eigenen Charakter. Hier sind die besten Spots für deine Nacht in Rio.
@@ -228,11 +228,11 @@ export default async function RioByNightPage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6">
-                                Deine Nacht in Rio de Janeiro — <br className="hidden sm:block" />
+                                Deine Nacht in Rio de Janeiro, <br className="hidden sm:block" />
                                 <span className="text-rio-yellow text-2xl lg:text-4xl">sicher und unvergesslich.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Schreib mir per WhatsApp oder E-Mail und ich plane den perfekten Abend für dich — von Samba bis Cocktails, immer sicher und mit Insider-Wissen.
+                                Schreib mir per WhatsApp oder E-Mail und ich plane den perfekten Abend für dich, von Samba bis Cocktails, immer sicher und mit Insider-Wissen.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link

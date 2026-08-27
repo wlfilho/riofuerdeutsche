@@ -12,8 +12,8 @@ import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
-    title: "Regentage in Rio de Janeiro — Was tun bei Regen?",
-    description: "Regen in Rio? Kein Problem! Museen, AquaRio, Capoeira-Kurse und Wellness — die besten Indoor-Aktivitäten in Rio de Janeiro für schlechtes Wetter. Tipps von einem echten Carioca.",
+    title: "Regentage in Rio de Janeiro: Was tun bei Regen?",
+    description: "Regen in Rio? Kein Problem! Museen, AquaRio, Capoeira-Kurse und Wellness: die besten Indoor-Aktivitäten in Rio de Janeiro für schlechtes Wetter. Tipps von einem echten Carioca.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/regentage",
     },
@@ -103,15 +103,15 @@ export default async function RegentagePage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Auch im tropischen Rio regnet es — manchmal kräftig. Aber ein Regentag in Rio muss kein verlorener Tag sein. Im Gegenteil: Die Stadt hat so viele großartige Indoor-Erlebnisse, dass du dir fast wünschen wirst, es würde öfter regnen.
+                                    Auch im tropischen Rio regnet es, manchmal kräftig. Aber ein Regentag in Rio muss kein verlorener Tag sein. Im Gegenteil: Die Stadt hat so viele großartige Indoor-Erlebnisse, dass du dir fast wünschen wirst, es würde öfter regnen.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Von weltberühmten Museen über das größte Meeresaquarium Südamerikas bis hin zu Capoeira-Kursen und historischen Cafés — Rio hat für jeden Geschmack etwas zu bieten, wenn das Wetter nicht mitspielt. Ich zeige dir die besten Indoor-Aktivitäten und sorge dafür, dass dein Tag genauso unvergesslich wird wie bei Sonnenschein.
+                                        Von weltberühmten Museen über das größte Meeresaquarium Südamerikas bis hin zu Capoeira-Kursen und historischen Cafés: Rio hat für jeden Geschmack etwas zu bieten, wenn das Wetter nicht mitspielt. Ich zeige dir die besten Indoor-Aktivitäten und sorge dafür, dass dein Tag genauso unvergesslich wird wie bei Sonnenschein.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Schreib mir einfach und ich stelle dir das perfekte Regentag-Programm zusammen — spontan und flexibel, genau wie das Wetter in Rio.
+                                    Schreib mir einfach und ich stelle dir das perfekte Regentag-Programm zusammen, spontan und flexibel, genau wie das Wetter in Rio.
                                 </p>
                             </div>
                         </FadeIn>
@@ -123,7 +123,7 @@ export default async function RegentagePage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Regentage in Rio de Janeiro —{" "}
+                                Regentage in Rio de Janeiro,{" "}
                                 <span className="text-rio-green">8 Indoor-Erlebnisse</span>
                             </h2>
                             <p className="text-gray-500 mt-3 text-lg">Regen? Perfekt. Hier sind die besten Aktivitäten, wenn das Wetter nicht mitspielt.</p>
@@ -135,55 +135,55 @@ export default async function RegentagePage() {
                                     title: "Museu do Amanhã",
                                     image: "/images/mudeu-do-amanha.webp",
                                     desc: "Der perfekte Regentag-Kandidat: Das futuristische Museum von Santiago Calatrava auf der Praça Mauá ist komplett indoor, interaktiv und so beeindruckend, dass du den Regen draußen völlig vergisst. Die Ausstellung über Nachhaltigkeit und Zukunft ist faszinierend für alle Altersgruppen.",
-                                    tip: "Dienstags ist der Eintritt frei — und bei Regen ist es oft leerer als sonst. Perfekter Zeitpunkt für einen entspannten Besuch ohne Warteschlangen.",
+                                    tip: "Dienstags ist der Eintritt frei, und bei Regen ist es oft leerer als sonst. Perfekter Zeitpunkt für einen entspannten Besuch ohne Warteschlangen.",
                                     badges: ["Praça Mauá", "~1,5 Stunden"]
                                 },
                                 {
                                     title: "AquaRio",
                                     image: "/images/aquario-rio-de-janeiro.webp",
-                                    desc: "Das größte Meeresaquarium Südamerikas ist wie gemacht für Regentage. Über 350 Arten auf 26.000 Quadratmetern — von Haien über Schildkröten bis zu bunten Korallenfischen. Komplett überdacht, klimatisiert und direkt neben dem Museu do Amanhã. Zwei Stunden, die wie im Flug vergehen.",
-                                    tip: "Kombiniere AquaRio mit dem Museu do Amanhã direkt nebenan — ein perfekter Regentag auf der Praça Mauá, ohne einen Schritt im Regen zu machen.",
+                                    desc: "Das größte Meeresaquarium Südamerikas ist wie gemacht für Regentage. Über 350 Arten auf 26.000 Quadratmetern: von Haien über Schildkröten bis zu bunten Korallenfischen. Komplett überdacht, klimatisiert und direkt neben dem Museu do Amanhã. Zwei Stunden, die wie im Flug vergehen.",
+                                    tip: "Kombiniere AquaRio mit dem Museu do Amanhã direkt nebenan, ein perfekter Regentag auf der Praça Mauá, ohne einen Schritt im Regen zu machen.",
                                     badges: ["Praça Mauá", "~2 Stunden"]
                                 },
                                 {
-                                    title: "CCBB — Centro Cultural Banco do Brasil",
+                                    title: "CCBB (Centro Cultural Banco do Brasil)",
                                     image: "/images/centro-cultural-banco-do-brasil.webp",
-                                    desc: "Eines der meistbesuchten Kulturzentren der Welt — und bei Regen dein bester Freund in Rio. Wechselnde Weltklasse-Ausstellungen, Kino, Theater und ein gemütliches Café, alles unter einem Dach in einem prächtigen Gebäude im Centro. Der Eintritt ist kostenlos oder minimal.",
-                                    tip: "Schau vorher online, welche Ausstellung gerade läuft — das CCBB holt regelmäßig internationale Blockbuster-Shows. Tickets sind kostenlos aber begrenzt.",
+                                    desc: "Eines der meistbesuchten Kulturzentren der Welt, und bei Regen dein bester Freund in Rio. Wechselnde Weltklasse-Ausstellungen, Kino, Theater und ein gemütliches Café, alles unter einem Dach in einem prächtigen Gebäude im Centro. Der Eintritt ist kostenlos oder minimal.",
+                                    tip: "Schau vorher online, welche Ausstellung gerade läuft, denn das CCBB holt regelmäßig internationale Blockbuster-Shows. Tickets sind kostenlos aber begrenzt.",
                                     badges: ["Centro", "~1–2 Stunden"]
                                 },
                                 {
-                                    title: "MAR — Museu de Arte do Rio",
+                                    title: "MAR (Museu de Arte do Rio)",
                                     image: "/images/museu-de-arte-do-rio.webp",
-                                    desc: "Kunst, Geschichte und eine fantastische Dachterrasse — das MAR erzählt die visuelle Geschichte Rios durch Fotografie, Installationen und wechselnde Ausstellungen. An Regentagen hast du das Museum oft fast für dich allein, und wenn der Regen nachlässt, wartet die Aussicht von oben.",
-                                    tip: "Liegt direkt neben dem Museu do Amanhã und dem AquaRio — alle drei lassen sich an einem Regentag perfekt kombinieren.",
+                                    desc: "Kunst, Geschichte und eine fantastische Dachterrasse: das MAR erzählt die visuelle Geschichte Rios durch Fotografie, Installationen und wechselnde Ausstellungen. An Regentagen hast du das Museum oft fast für dich allein, und wenn der Regen nachlässt, wartet die Aussicht von oben.",
+                                    tip: "Liegt direkt neben dem Museu do Amanhã und dem AquaRio, alle drei lassen sich an einem Regentag perfekt kombinieren.",
                                     badges: ["Praça Mauá", "~1 Stunde"]
                                 },
                                 {
-                                    title: "MAM — Museu de Arte Moderne",
+                                    title: "MAM (Museu de Arte Moderne)",
                                     image: "/images/museu-de-arte-moderna-rio-de-janeiro.webp",
-                                    desc: "Das brutalistische Gebäude im Aterro do Flamengo ist schon von außen beeindruckend — und drinnen erwarten dich wechselnde Ausstellungen zeitgenössischer Kunst. Bei Regen eine willkommene Oase der Ruhe, und wenn die Wolken aufreißen, locken die Gärten von Burle Marx direkt vor der Tür.",
-                                    tip: "Das MAM-Kino zeigt oft ausgezeichnete Arthouse-Filme — perfekte Ergänzung zum Museumsbesuch an einem verregneten Nachmittag.",
+                                    desc: "Das brutalistische Gebäude im Aterro do Flamengo ist schon von außen beeindruckend, und drinnen erwarten dich wechselnde Ausstellungen zeitgenössischer Kunst. Bei Regen eine willkommene Oase der Ruhe, und wenn die Wolken aufreißen, locken die Gärten von Burle Marx direkt vor der Tür.",
+                                    tip: "Das MAM-Kino zeigt oft ausgezeichnete Arthouse-Filme, eine perfekte Ergänzung zum Museumsbesuch an einem verregneten Nachmittag.",
                                     badges: ["Aterro do Flamengo", "~1 Stunde"]
                                 },
                                 {
                                     title: "Museu Nacional de Belas Artes",
                                     image: "/images/museu-belas-artes-rio.webp",
-                                    desc: "Die wichtigste Kunstsammlung Brasiliens in einem eleganten Gebäude neben dem Teatro Municipal. Von der Kolonialzeit bis zur Moderne — bei Regen hast du endlich die Muße, die brasilianische Kunstgeschichte in Ruhe zu entdecken. Eintritt oft kostenlos.",
-                                    tip: "Kombiniere den Besuch mit dem Teatro Municipal und der Confeitaria Colombo — alle drei liegen im Centro fußläufig beieinander.",
+                                    desc: "Die wichtigste Kunstsammlung Brasiliens in einem eleganten Gebäude neben dem Teatro Municipal. Von der Kolonialzeit bis zur Moderne, bei Regen hast du endlich die Muße, die brasilianische Kunstgeschichte in Ruhe zu entdecken. Eintritt oft kostenlos.",
+                                    tip: "Kombiniere den Besuch mit dem Teatro Municipal und der Confeitaria Colombo, alle drei liegen im Centro fußläufig beieinander.",
                                     badges: ["Cinelândia", "~1 Stunde"]
                                 },
                                 {
                                     title: "Confeitaria Colombo",
                                     image: "/images/confeitaria-colombo.webp",
-                                    desc: "Es gibt kaum einen besseren Ort, um einen Regentag in Rio zu genießen, als dieses legendäre Café aus der Belle Époque. Seit 1894 serviert die Confeitaria Colombo Kaffee und Gebäck unter riesigen belgischen Spiegeln und Jugendstil-Dekor. Draußen prasselt der Regen, drinnen fühlst du dich wie in einem Wiener Kaffeehaus — nur tropisch.",
+                                    desc: "Es gibt kaum einen besseren Ort, um einen Regentag in Rio zu genießen, als dieses legendäre Café aus der Belle Époque. Seit 1894 serviert die Confeitaria Colombo Kaffee und Gebäck unter riesigen belgischen Spiegeln und Jugendstil-Dekor. Draußen prasselt der Regen, drinnen fühlst du dich wie in einem Wiener Kaffeehaus, nur tropisch.",
                                     tip: "Bestelle den Café com Pastel de Nata und nimm dir Zeit, die Einrichtung zu bewundern. Der perfekte Ort, um eine Regenpause stilvoll zu überbrücken.",
                                     badges: ["Centro", "~45 Minuten"]
                                 },
                                 {
                                     title: "Capoeira- oder Samba-Kurs",
                                     image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&h=400&fit=crop&q=80",
-                                    desc: "Was gibt es Besseres an einem Regentag, als etwas typisch Brasilianisches zu lernen? Capoeira verbindet Kampfkunst, Tanz und Musik in einer einzigartigen Mischung — und ein Samba-Kurs bringt dir die Schritte bei, die du für den nächsten Karneval brauchst. Indoor, aktiv und garantiert unvergesslich.",
+                                    desc: "Was gibt es Besseres an einem Regentag, als etwas typisch Brasilianisches zu lernen? Capoeira verbindet Kampfkunst, Tanz und Musik in einer einzigartigen Mischung, und ein Samba-Kurs bringt dir die Schritte bei, die du für den nächsten Karneval brauchst. Indoor, aktiv und garantiert unvergesslich.",
                                     tip: "Ich kenne die besten Schulen in Rio, die auch Kurse für absolute Anfänger auf Englisch oder mit Übersetzung anbieten. Schreib mir und ich organisiere alles.",
                                     badges: ["Verschiedene Standorte", "~1,5 Stunden"]
                                 }
@@ -233,7 +233,7 @@ export default async function RegentagePage() {
                                 <span className="text-rio-yellow">Ich mache das Beste daraus.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Schreib mir per WhatsApp oder E-Mail und ich stelle dir spontan das perfekte Indoor-Programm zusammen — flexibel, sicher und mit Insider-Wissen.
+                                Schreib mir per WhatsApp oder E-Mail und ich stelle dir spontan das perfekte Indoor-Programm zusammen, flexibel, sicher und mit Insider-Wissen.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link

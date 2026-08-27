@@ -12,8 +12,8 @@ import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
-    title: "Fußball Tour in Rio — Maracanã, Flamengo & Live-Spiele",
-    description: "Erlebe die Fußball-Leidenschaft von Rio de Janeiro hautnah — Maracanã-Tour, Museu do Flamengo und Live-Spiele im Stadion. Mit einem echten Carioca als Guide, komplett auf Deutsch.",
+    title: "Fußball Tour in Rio: Maracanã, Flamengo & Live-Spiele",
+    description: "Erlebe die Fußball-Leidenschaft von Rio de Janeiro hautnah: Maracanã-Tour, Museu do Flamengo und Live-Spiele im Stadion. Mit einem echten Carioca als Guide, komplett auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/fussball",
     },
@@ -32,24 +32,24 @@ const fussballHighlights = [
 
 const fussballPlaces = [
     {
-        name: "Maracanã — Stadion & Museum",
+        name: "Maracanã (Stadion & Museum)",
         image: "/images/maracana-rio-de-janeiro.webp",
-        desc: "Das Maracanã ist mehr als ein Stadion — es ist ein Tempel des Fußballs. Hier schoss Pelé sein tausendstes Tor, hier fand das WM-Finale 2014 statt, und hier schlägt das Herz des brasilianischen Fußballs. Bei der offiziellen Tour siehst du die Umkleidekabinen, den Spielertunnel, den Rasen aus nächster Nähe und das interaktive Museum mit der Geschichte des brasilianischen Fußballs.",
-        tip: "Buche die Tour vormittags — dann ist es leerer und du hast mehr Zeit für Fotos auf dem Rasen. Ich erkläre dir die Geschichten hinter den Trophäen und Fotos, die kein Audioguide kennt.",
+        desc: "Das Maracanã ist mehr als ein Stadion. Es ist ein Tempel des Fußballs. Hier schoss Pelé sein tausendstes Tor, hier fand das WM-Finale 2014 statt, und hier schlägt das Herz des brasilianischen Fußballs. Bei der offiziellen Tour siehst du die Umkleidekabinen, den Spielertunnel, den Rasen aus nächster Nähe und das interaktive Museum mit der Geschichte des brasilianischen Fußballs.",
+        tip: "Buche die Tour vormittags, dann ist es leerer und du hast mehr Zeit für Fotos auf dem Rasen. Ich erkläre dir die Geschichten hinter den Trophäen und Fotos, die kein Audioguide kennt.",
         badges: ["Maracanã", "~2 Stunden"],
     },
     {
         name: "Museu do Flamengo",
         image: "/images/museu-do-flamengo.webp",
-        desc: "Flamengo ist nicht einfach ein Club — mit über 40 Millionen Fans ist er der größte Verein Brasiliens und eine echte Institution. Das Museu do Flamengo erzählt die Geschichte dieses Phänomens: von den Anfängen über die großen Titel bis zu den Legenden wie Zico und Gabigol. Selbst wenn du kein Flamengo-Fan bist, wirst du die Leidenschaft spüren.",
-        tip: "Frag mich nach den Rivalitäten zwischen Flamengo, Fluminense, Vasco und Botafogo — die Geschichten sind fantastisch und erklären viel über die Kultur von Rio.",
+        desc: "Flamengo ist nicht einfach ein Club, denn mit über 40 Millionen Fans ist er der größte Verein Brasiliens und eine echte Institution. Das Museu do Flamengo erzählt die Geschichte dieses Phänomens: von den Anfängen über die großen Titel bis zu den Legenden wie Zico und Gabigol. Selbst wenn du kein Flamengo-Fan bist, wirst du die Leidenschaft spüren.",
+        tip: "Frag mich nach den Rivalitäten zwischen Flamengo, Fluminense, Vasco und Botafogo, die Geschichten sind fantastisch und erklären viel über die Kultur von Rio.",
         badges: ["Gávea", "~1,5 Stunden"],
     },
     {
         name: "Live-Spiel im Stadion",
         image: "/images/spiel-am-maracana.webp",
-        desc: "Ein Fußballspiel in Rio live zu erleben ist pures Adrenalin. Die Fans singen 90 Minuten lang ohne Pause, Trommeln und Fahnen füllen die Tribünen, und die Atmosphäre ist elektrisierend. Ob im Maracanã, im Nilton Santos oder im São Januário — ich organisiere die Tickets, begleite dich sicher ins Stadion und erkläre dir alles, was um dich herum passiert.",
-        tip: "Ein Clássico (Derby) wie Flamengo vs. Fluminense oder Vasco vs. Botafogo ist das ultimative Erlebnis. Ich checke den Spielplan und finde das beste Spiel während deines Aufenthalts — inklusive sicherer Plätze und Tipps zum Mitfeiern.",
+        desc: "Ein Fußballspiel in Rio live zu erleben ist pures Adrenalin. Die Fans singen 90 Minuten lang ohne Pause, Trommeln und Fahnen füllen die Tribünen, und die Atmosphäre ist elektrisierend. Ob im Maracanã, im Nilton Santos oder im São Januário. Ich organisiere die Tickets, begleite dich sicher ins Stadion und erkläre dir alles, was um dich herum passiert.",
+        tip: "Ein Clássico (Derby) wie Flamengo vs. Fluminense oder Vasco vs. Botafogo ist das ultimative Erlebnis. Ich checke den Spielplan und finde das beste Spiel während deines Aufenthalts, inklusive sicherer Plätze und Tipps zum Mitfeiern.",
         badges: ["Nach Spielplan", "~4 Stunden"],
     },
 ];
@@ -70,7 +70,7 @@ export default async function FussballTourPage() {
                     <div className="absolute inset-0 z-0">
                         <Image
                             src="/images/maracana-rio-de-janeiro-background.webp"
-                            alt="Fußball Tour in Rio de Janeiro — Maracanã und Fußball-Leidenschaft der Cariocas"
+                            alt="Fußball Tour in Rio de Janeiro: Maracanã und Fußball-Leidenschaft der Cariocas"
                             fill
                             priority
                             fetchPriority="high"
@@ -134,15 +134,15 @@ export default async function FussballTourPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Fußball ist in Rio de Janeiro nicht nur ein Sport — er ist eine Religion. Die Stadt hat einige der legendärsten Clubs der Welt hervorgebracht, das ikonischste Stadion des Planeten gebaut und eine Fußballkultur geschaffen, die man nur verstehen kann, wenn man sie live erlebt.
+                                    Fußball ist in Rio de Janeiro nicht nur ein Sport. Er ist eine Religion. Die Stadt hat einige der legendärsten Clubs der Welt hervorgebracht, das ikonischste Stadion des Planeten gebaut und eine Fußballkultur geschaffen, die man nur verstehen kann, wenn man sie live erlebt.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Bei meiner Fußball Tour nehme ich dich mit hinter die Kulissen: vom Maracanã, wo Pelé sein tausendstes Tor schoss, über das Museum des größten Clubs Brasiliens bis hin zu einem echten Spiel im Stadion — mit Tausenden leidenschaftlichen Fans um dich herum. Als Carioca und Fußballfan erkläre ich dir alles auf Deutsch: die Rivalitäten, die Gesänge, die Tradition.
+                                        Bei meiner Fußball Tour nehme ich dich mit hinter die Kulissen: vom Maracanã, wo Pelé sein tausendstes Tor schoss, über das Museum des größten Clubs Brasiliens bis hin zu einem echten Spiel im Stadion, mit Tausenden leidenschaftlichen Fans um dich herum. Als Carioca und Fußballfan erkläre ich dir alles auf Deutsch: die Rivalitäten, die Gesänge, die Tradition.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Ob du das Maracanã besichtigen, die Geschichte von Flamengo entdecken oder ein Live-Spiel erleben möchtest — schreib mir und ich organisiere dein Fußball-Erlebnis in Rio.
+                                    Ob du das Maracanã besichtigen, die Geschichte von Flamengo entdecken oder ein Live-Spiel erleben möchtest. Schreib mir und ich organisiere dein Fußball-Erlebnis in Rio.
                                 </p>
                             </div>
                         </FadeIn>
@@ -154,10 +154,10 @@ export default async function FussballTourPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12 text-center lg:text-left">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Fußball in Rio de Janeiro — <span className="text-rio-green">3 unvergessliche Erlebnisse</span>
+                                Fußball in Rio de Janeiro: <span className="text-rio-green">3 unvergessliche Erlebnisse</span>
                             </h2>
                             <p className="mt-4 text-gray-600 text-lg">
-                                Vom legendären Maracanã bis zum Live-Spiel — hier ist Fußball mehr als nur ein Sport.
+                                Vom legendären Maracanã bis zum Live-Spiel: hier ist Fußball mehr als nur ein Sport.
                             </p>
                         </FadeIn>
 
@@ -220,10 +220,10 @@ export default async function FussballTourPage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6">
-                                Fußball in Rio de Janeiro — <span className="text-rio-yellow text-2xl lg:text-4xl">erlebe die Leidenschaft live.</span>
+                                Fußball in Rio de Janeiro, <span className="text-rio-yellow text-2xl lg:text-4xl">erlebe die Leidenschaft live.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Schreib mir per WhatsApp oder E-Mail und ich organisiere dein perfektes Fußball-Erlebnis — vom Maracanã-Besuch bis zum Live-Spiel im Stadion.
+                                Schreib mir per WhatsApp oder E-Mail und ich organisiere dein perfektes Fußball-Erlebnis, vom Maracanã-Besuch bis zum Live-Spiel im Stadion.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link
