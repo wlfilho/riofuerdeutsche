@@ -50,7 +50,7 @@ const faqSchema = {
             "name": "Was kostet eine Tour in Rio de Janeiro?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Die Preise variieren je nach Dauer und Art der Tour. Eine Halbtags-Stadtführung (4-5 Stunden) beginnt ab 150€, ein ganzer Tag ab 250€. Tagesausflüge zu Zielen wie Búzios oder Ilha Grande kosten ab 300€ inklusive Transport. Schreib mir einfach und ich mache dir ein unverbindliches Angebot — passend zu deinem Budget und deinen Wünschen."
+                "text": "Der Preis hängt von drei Dingen ab: wie lange ihr unterwegs seid, wie viele ihr seid und wohin es gehen soll. Eine Halbtagstour durch die Stadt lässt sich nicht mit einem Tagesausflug nach Búzios oder Ilha Grande vergleichen. Schick mir deine Anfrage mit deinen Wunschtagen und Interessen — du bekommst ein persönliches Angebot mit Ablauf und Preis, kostenlos und unverbindlich."
             }
         },
         {
@@ -512,7 +512,7 @@ export default async function TourenPage() {
                                         },
                                         {
                                             question: "Was kostet eine Tour in Rio de Janeiro?",
-                                            answer: "Die Preise variieren je nach Dauer und Art der Tour. Eine Halbtags-Stadtführung (4-5 Stunden) beginnt ab 150€, ein ganzer Tag ab 250€. Tagesausflüge zu Zielen wie Búzios oder Ilha Grande kosten ab 300€ inklusive Transport. Schreib mir einfach und ich mache dir ein unverbindliches Angebot — passend zu deinem Budget und deinen Wünschen."
+                                            answer: "Der Preis hängt von drei Dingen ab: wie lange ihr unterwegs seid, wie viele ihr seid und wohin es gehen soll. Eine Halbtagstour durch die Stadt lässt sich nicht mit einem Tagesausflug nach Búzios oder Ilha Grande vergleichen. Schick mir deine Anfrage mit deinen Wunschtagen und Interessen — du bekommst ein persönliches Angebot mit Ablauf und Preis, kostenlos und unverbindlich."
                                         },
                                         {
                                             question: "Wie buche ich eine Tour?",
