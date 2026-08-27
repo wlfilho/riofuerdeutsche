@@ -14,7 +14,7 @@ const faqs = [
     },
     {
         q: "Was kostet eine Favela Tour in der Rocinha?",
-        a: "Die Favela Tour mit Will startet ab ca. 80 €. Der Eintritt in die Rocinha selbst ist kostenlos — bezahlt wird die Begleitung, die Lokalkenntnis und die Verbindung zur Community.",
+        a: "Die Favela Tour mit Will startet ab ca. 60 € pro Person. Der Eintritt in die Rocinha selbst ist kostenlos — bezahlt wird die Begleitung, die Lokalkenntnis und die Verbindung zur Community.",
     },
     {
         q: "Wie macht man das berühmte Drohnen-Video in der Rocinha?",

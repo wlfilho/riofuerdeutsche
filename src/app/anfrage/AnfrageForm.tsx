@@ -13,7 +13,6 @@ import {
   type FoundVia,
   type Interesse,
 } from '@/lib/interessen';
-import { PREIS_AB_PRO_PERSON, preisSpanne } from '@/lib/preis';
 import {
   ArrowLeft,
   CalendarDays,
@@ -312,7 +311,6 @@ export default function AnfrageForm({
   };
 
   if (submitted) {
-    const spanne = preisSpanne(pax + children);
     const waText = encodeURIComponent(
       t('successWhatsappPrefill', {
         name: name.trim().split(' ')[0],
@@ -356,22 +354,6 @@ export default function AnfrageForm({
           )}
         </RecapBox>
 
-        {/* Faixa de preço do grupo. Só aparece quando a âncora existir — ver
-            src/lib/preis.ts. As colunas estimated_min/max do banco não servem:
-            são resíduo da calculadora antiga e nada as escreve. */}
-        {spanne && (
-          <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-              {t('successPreisTitel')}
-            </p>
-            <p className="mt-1 text-lg font-bold text-gray-900">
-              {spanne.min} – {spanne.max} €
-            </p>
-            <p className="mt-0.5 text-[13px] text-gray-500">
-              {t('successPreisHinweis', { pax: people })}
-            </p>
-          </div>
-        )}
 
         <NextSteps
           title={t('successStepsTitle')}
@@ -512,14 +494,6 @@ export default function AnfrageForm({
         <p>{t('intro2')}</p>
       </div>
 
-      {/* Âncora de preço antes do primeiro campo. Renderiza só quando o número
-          existir — enquanto PREIS_AB_PRO_PERSON for null, ausência é melhor que
-          "€0" ou placeholder em produção. */}
-      {PREIS_AB_PRO_PERSON !== null && (
-        <p className="mt-6 rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-[15px] text-gray-700 leading-relaxed">
-          {t('preisAnker', { preis: `${PREIS_AB_PRO_PERSON} €` })}
-        </p>
-      )}
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-7">
         <Section title={t('sectionContact')}>
