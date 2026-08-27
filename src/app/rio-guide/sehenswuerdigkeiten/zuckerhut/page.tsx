@@ -53,7 +53,7 @@ const jsonLd = {
 const faqItems = [
     {
         q: "Was kostet die Seilbahn zum Zuckerhut?",
-        a: "Das Ticket kostet rund 25 € (R$ 130 bis 150) für beide Seilbahn-Etappen. Mit Will ist der Transfer zur Talstation inklusive.",
+        a: "Das Ticket kostet rund 25 € (R$ 130 bis 150) für beide Seilbahn-Etappen. Mit Will ist der Transfer zur Talstation inklusive. Wenn du 60 oder älter bist, zahlst du nur die Hälfte, egal aus welchem Land du kommst. Du brauchst dafür nur einen Ausweis mit Foto und Geburtsdatum, dein Reisepass reicht. Beim Kauf im Netz wählst du das ermäßigte Ticket direkt aus.",
     },
     {
         q: "Wann ist die beste Zeit für den Zuckerhut?",

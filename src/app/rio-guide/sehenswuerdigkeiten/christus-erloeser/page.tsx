@@ -53,7 +53,7 @@ const jsonLd = {
 const faqItems = [
     {
         q: "Was kostet der Eintritt zum Christus Erlöser?",
-        a: "Der Eintritt liegt bei rund 17 € (R$ 90 bis 100), je nach Saison und Transportmittel zum Gipfel. Mit Will ist der Privattransfer inklusive, du kümmerst dich um nichts.",
+        a: "Der Eintritt liegt bei rund 17 € (R$ 90 bis 100), je nach Saison und Transportmittel zum Gipfel. Mit Will ist der Privattransfer inklusive, du kümmerst dich um nichts. Eine Sache, die viele überrascht: In Brasilien zahlen Menschen ab 60 bei vielen Attraktionen die Hälfte, am Corcovado gilt das aber nur für Personen mit Wohnsitz in Brasilien, sowohl beim Zug als auch bei den Vans. Als Reisende zahlst du also den vollen Preis, auch mit Ausweis. Am Zuckerhut ist es übrigens anders, dort bekommst du die Ermäßigung auch als Gast aus dem Ausland.",
     },
     {
         q: "Wann ist die beste Zeit für einen Besuch?",
