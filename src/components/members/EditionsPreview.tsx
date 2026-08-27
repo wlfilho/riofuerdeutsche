@@ -81,8 +81,7 @@ export default function EditionsPreview() {
             {t('titel')}
           </h2>
           <p className="text-gray-500 text-base max-w-xl mx-auto leading-relaxed">
-            Wer jetzt einsteigt, bekommt alle zukünftigen Editionen kostenlos —
-            der Preis steigt mit jeder neuen Edition.
+            Wer jetzt einsteigt, bekommt alle zukünftigen Editionen kostenlos. Der Preis steigt mit jeder neuen Edition.
           </p>
         </div>
 
@@ -154,7 +153,7 @@ export default function EditionsPreview() {
         {/* Footer */}
         <div className="text-center mt-10 pt-8 border-t border-[#e8e4dc]">
           <p className="text-sm text-gray-500">
-            🔒 Einmal kaufen — alle Editionen für immer inklusive. Der Preis steigt nur für Neukäufer.
+            🔒 Einmal kaufen: alle Editionen für immer inklusive. Der Preis steigt nur für Neukäufer.
           </p>
         </div>
 

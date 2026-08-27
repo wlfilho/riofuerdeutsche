@@ -143,7 +143,7 @@ export function Stepper({
       <div className="flex items-stretch h-12 bg-white border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-green-500 focus-within:border-transparent">
         <button
           type="button"
-          aria-label={`${label} — ${decLabel}`}
+          aria-label={`${label}, ${decLabel}`}
           onClick={() => onChange(clamp(value - 1))}
           disabled={value <= min}
           className={btnCls}
@@ -162,7 +162,7 @@ export function Stepper({
         />
         <button
           type="button"
-          aria-label={`${label} — ${incLabel}`}
+          aria-label={`${label}, ${incLabel}`}
           onClick={() => onChange(clamp(value + 1))}
           disabled={value >= 99}
           className={btnCls}

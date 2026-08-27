@@ -68,7 +68,7 @@ export default function CTAGuideCompleto() {
             margin: "0 auto 32px",
           }}
         >
-          Edition 1, 2, 3 und 4 — alles über Rio auf Deutsch. Alle zukünftigen
+          Edition 1, 2, 3 und 4: alles über Rio auf Deutsch. Alle zukünftigen
           Updates inklusive. Der Preis steigt mit jeder neuen Edition.
         </p>
 

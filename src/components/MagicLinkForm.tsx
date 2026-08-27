@@ -64,7 +64,7 @@ export default function MagicLinkForm({
         return {
           icon: <Shield className="w-10 h-10 text-[#0d1f15] mb-4" />,
           headline: "Willst du die vollständigen Tipps zu jedem dieser 7 Fehler?",
-          subtext: "Trag deinen Namen und deine E-Mail ein — wir schicken dir sofort einen Zugangslink. Kein Passwort nötig.",
+          subtext: "Trag deinen Namen und deine E-Mail ein. Wir schicken dir sofort einen Zugangslink. Kein Passwort nötig.",
           submitText: t("submitKostenlosenZugang"),
           trustText: t("trustKeinPasswortAbmeldbar"),
           containerStyle: "bg-rio-yellow p-6 sm:p-8 md:p-10 rounded-3xl shadow-lg border border-yellow-300",
@@ -73,7 +73,7 @@ export default function MagicLinkForm({
       case "inline2":
         return {
           icon: null,
-          headline: "Die kompletten 15 Regeln — kostenlos",
+          headline: "Die kompletten 15 Regeln, kostenlos",
           subtext: "Melde dich an und erhalte sofort Zugang zur vollständigen Sicherheits-Sektion im Rio für Deutsche Guide.",
           submitText: t("submitJetztKostenlosAnmelden"),
           trustText: t("trustKeinPasswortAbmeldbar"),
@@ -84,7 +84,7 @@ export default function MagicLinkForm({
         return {
           icon: null,
           headline: "Rio wartet auf dich. Geh vorbereitet hin.",
-          subtext: "Alles was du brauchst, um sicher und selbstbewusst durch Rio zu reisen — kostenlos, in einem Guide, von einem Carioca der fließend Deutsch spricht.",
+          subtext: "Alles was du brauchst, um sicher und selbstbewusst durch Rio zu reisen: kostenlos, in einem Guide, von einem Carioca der fließend Deutsch spricht.",
           submitText: t("submitSicherheitsGuide"),
           trustText: t("trustKeinPasswortSofort"),
           containerStyle: "bg-rio-yellow p-6 sm:p-10 md:p-14 rounded-3xl w-full shadow-xl border border-yellow-300",

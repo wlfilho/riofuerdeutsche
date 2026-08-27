@@ -56,7 +56,7 @@ export default function CTABeratung() {
             margin: "0 auto 20px",
           }}
         >
-          60 Minuten mit Will per Videocall — sichere Unterkunft finden, Routen
+          60 Minuten mit Will per Videocall: sichere Unterkunft finden, Routen
           planen und alle deine Fragen beantwortet. Von einem Carioca, der
           fließend Deutsch spricht.
         </p>

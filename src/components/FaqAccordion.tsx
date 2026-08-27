@@ -17,13 +17,13 @@ function buildItems(whatsappHref: string, emailHref: string): FaqItem[] {
   return [
     {
       q: "Sprichst du wirklich fließend Deutsch?",
-      a: "Ja — ich bin in Rio auf eine deutsche Schule gegangen und habe vier Jahre in Köln gelebt und studiert. Deutsch ist für mich keine Fremdsprache, sondern ein echter Teil meiner Identität.",
+      a: "Ja. Ich bin in Rio auf eine deutsche Schule gegangen und habe vier Jahre in Köln gelebt und studiert. Deutsch ist für mich keine Fremdsprache, sondern ein echter Teil meiner Identität.",
     },
     {
       q: "Ist Rio de Janeiro wirklich so gefährlich?",
-      a: "Rio hat Risiken — aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben.",
+      a: "Rio hat Risiken, aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben.",
       cta: {
-        label: "Die 7 häufigsten Fehler — und wie du sie vermeidest →",
+        label: "Die 7 häufigsten Fehler und wie du sie vermeidest →",
         href: "/ist-rio-gefaehrlich",
       },
     },
@@ -34,26 +34,26 @@ function buildItems(whatsappHref: string, emailHref: string): FaqItem[] {
           Am schnellsten über das{" "}
           <Link href="/anfrage?von=site" className={linkClass}>
             Anfrageformular
-          </Link>{" "}
-          — dort stehen schon die Fragen, die ich sowieso stellen würde. Lieber direkt? Schreib mir auf{" "}
+          </Link>
+          . Dort stehen schon die Fragen, die ich sowieso stellen würde. Lieber direkt? Schreib mir auf{" "}
           <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className={linkClass}>
             WhatsApp
           </a>{" "}
           oder per{" "}
           <a href={emailHref} className={linkClass}>
             E-Mail
-          </a>{" "}
-          — ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.
+          </a>
+          . Ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.
         </>
       ),
     },
     {
       q: "Fahre ich allein oder in einer Gruppe?",
-      a: "Alle Touren sind privat oder in sehr kleinen Gruppen (max. 6 Personen) — niemals ein Touristenbus. Du buchst direkt bei mir, nicht über eine Agentur.",
+      a: "Alle Touren sind privat oder in sehr kleinen Gruppen (max. 6 Personen), niemals ein Touristenbus. Du buchst direkt bei mir, nicht über eine Agentur.",
     },
     {
       q: "Was kostet eine Tour?",
-      a: "Der Preis hängt von der Dauer, der Gruppengröße und den gewählten Aktivitäten ab. Schreib mir — ich erstelle dir ein persönliches Angebot, das zu deinem Budget passt.",
+      a: "Der Preis hängt von der Dauer, der Gruppengröße und den gewählten Aktivitäten ab. Schreib mir. Ich erstelle dir ein persönliches Angebot, das zu deinem Budget passt.",
     },
   ];
 }

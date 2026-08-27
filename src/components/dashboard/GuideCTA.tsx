@@ -20,14 +20,14 @@ function buildCtaMap(t: (key: string) => string): Record<string, CTAConfig> {
     sicherheit: {
       icon: '🛡️',
       title: t('sicherheitTitle'),
-      subtitle: 'Lade dir unsere kompakte Zusammenfassung der wichtigsten Sicherheitstipps für Rio herunter — kostenlos und sofort verfügbar.',
+      subtitle: 'Lade dir unsere kompakte Zusammenfassung der wichtigsten Sicherheitstipps für Rio herunter, kostenlos und sofort verfügbar.',
       buttonLabel: t('sicherheitButton'),
       buttonHref: '/dashboard?upgrade=true',
     },
     unterkunft: {
       icon: '🏨',
       title: t('unterkunftTitle'),
-      subtitle: '60 Minuten mit Will per Videocall — sichere Unterkunft finden, Routen planen und alle Fragen beantwortet. Von einem Carioca, der fließend Deutsch spricht.',
+      subtitle: '60 Minuten mit Will per Videocall: sichere Unterkunft finden, Routen planen und alle Fragen beantwortet. Von einem Carioca, der fließend Deutsch spricht.',
       buttonLabel: t('unterkunftButton'),
       // A página /unterkunft/beratung nunca existiu (404 desde sempre). Em vez
       // de inventar uma, o CTA vira teste de demanda pela /anfrage. O
@@ -39,7 +39,7 @@ function buildCtaMap(t: (key: string) => string): Record<string, CTAConfig> {
     transport: {
       icon: '✈️',
       title: t('transportTitle'),
-      subtitle: 'Komm sicher und stressfrei vom Flughafen ins Hotel — mit unserem privaten Transferservice, der nur für unsere Mitglieder verfügbar ist.',
+      subtitle: 'Komm sicher und stressfrei vom Flughafen ins Hotel, mit unserem privaten Transferservice, der nur für unsere Mitglieder verfügbar ist.',
       buttonLabel: t('transportButton'),
       buttonHref: 'https://riofuerdeutsche.de/kontakt',
     },
@@ -50,7 +50,7 @@ function buildDefaultCta(t: (key: string) => string): CTAConfig {
   return {
     icon: '🌴',
     title: t('defaultTitle'),
-    subtitle: 'Erlebe Rio mit einem echten Carioca als Guide — maßgeschneidert auf deine Interessen, auf Deutsch.',
+    subtitle: 'Erlebe Rio mit einem echten Carioca als Guide, maßgeschneidert auf deine Interessen, auf Deutsch.',
     buttonLabel: t('defaultButton'),
     buttonHref: 'https://riofuerdeutsche.de/kontakt',
     secondaryLabel: t('kontaktAufnehmen'),
