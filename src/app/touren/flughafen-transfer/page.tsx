@@ -271,7 +271,7 @@ export default async function FlughafenTransferPage() {
                                     <li className="flex gap-3">
                                         <Check className="w-5 h-5 text-rio-green shrink-0 mt-0.5" />
                                         <span>
-                                            Bei Flugausfall oder Verspätung verschieben wir den Transfer kostenlos.
+                                            Bei Flugausfall oder Verspätung verschiebe ich den Transfer kostenlos.
                                         </span>
                                     </li>
                                 </ul>
