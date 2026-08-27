@@ -90,7 +90,7 @@ export default async function RocinhaV2Page() {
                         >
                             <Link href="/" className="hover:text-gray-700 transition-colors">Startseite</Link>
                             <ChevronRight className="w-3.5 h-3.5 mx-1.5 shrink-0" />
-                            <Link href="/rio-guide" className="hover:text-gray-700 transition-colors">Rio-Guide</Link>
+                            <Link href="/rio-guide/sehenswuerdigkeiten" className="hover:text-gray-700 transition-colors">Rio-Guide</Link>
                             <ChevronRight className="w-3.5 h-3.5 mx-1.5 shrink-0" />
                             <Link href="/rio-guide/sehenswuerdigkeiten" className="hover:text-gray-700 transition-colors">Sehenswürdigkeiten</Link>
                             <ChevronRight className="w-3.5 h-3.5 mx-1.5 shrink-0" />

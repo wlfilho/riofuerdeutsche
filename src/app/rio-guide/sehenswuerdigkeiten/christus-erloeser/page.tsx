@@ -132,7 +132,7 @@ export default function ChristusErloeserPage() {
                                 </Link>
                                 <ChevronRight className="w-4 h-4 mx-2 text-white/25 shrink-0" />
                                 <Link
-                                    href="/rio-guide"
+                                    href="/rio-guide/sehenswuerdigkeiten"
                                     className="hover:text-white transition-colors"
                                 >
                                     Rio-Guide

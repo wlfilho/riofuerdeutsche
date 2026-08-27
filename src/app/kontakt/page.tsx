@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import AnfrageForm from "@/app/anfrage/AnfrageForm";
 import NavbarServer from "@/components/NavbarServer";
 import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
@@ -49,6 +51,32 @@ export default async function KontaktPage() {
               <p className="text-xl lg:text-2xl text-gray-600 max-w-2xl leading-relaxed mb-16">
                 {t("heroSubtitle")}
               </p>
+            </FadeIn>
+
+            {/* Formulário no topo, canais abaixo. A /kontakt NÃO redireciona pra
+                /anfrage de propósito: ela é "index, follow" e a /anfrage é
+                "noindex, nofollow" — redirecionar jogaria fora o sinal de SEO de
+                uma URL que já recebe tráfego e é linkada do rodapé.
+                `defaultVon="site"` porque quem chega aqui veio navegando, não de
+                campanha. */}
+            <FadeIn direction="up">
+              <div className="mb-20">
+                <Suspense>
+                  <AnfrageForm
+                    embedded
+                    defaultVon="site"
+                    whatsappHref={c.whatsappHref}
+                    instagramHref={c.instagramHref}
+                    instagramHandle={settings.business_instagram.replace(/^@/, "")}
+                  />
+                </Suspense>
+              </div>
+            </FadeIn>
+
+            <FadeIn direction="up">
+              <h2 className="text-2xl lg:text-3xl font-heading font-black text-gray-900 mb-8">
+                {t("directChannelsTitle")}
+              </h2>
             </FadeIn>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">

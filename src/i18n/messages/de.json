@@ -60,7 +60,13 @@
       "backHome": "Zurück zur Startseite",
       "themaContext": "Du fragst nach:",
       "themaUnterkunft": "Unterkunftsberatung",
-      "themaTransfer": "Flughafentransfer"
+      "themaTransfer": "Flughafentransfer",
+      "themaAussichtNatur": "Aussicht & Natur",
+      "themaKunstKultur": "Kunst & Kultur",
+      "themaPostkartenTour": "Die Postkarten-Tour",
+      "themaBergMeer": "Berg & Meer",
+      "themaNaturPur": "Natur pur",
+      "themaGeheimtipps": "Geheimtipps"
     },
     "anfrageAida": {
       "metaTitle": "AIDA im Karneval 2028 — Gruppentour in Rio",
@@ -221,7 +227,8 @@
       "languageNote": "\"Ich spreche fließend Deutsch — du kannst mir auf Deutsch schreiben.\"",
       "followMe": "Folge mir:",
       "instagram": "Instagram",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "directChannelsTitle": "Lieber direkt schreiben?"
     },
     "angebot": {
       "metaTitle": "Ihr Angebot — Rio für Deutsche",

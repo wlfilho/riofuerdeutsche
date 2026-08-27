@@ -51,14 +51,32 @@ function todayIso(): string {
   return new Date().toISOString().split('T')[0];
 }
 
+/** Sem o fundo cinza de página cheia: quem hospeda já tem o seu. */
+function EmbeddedShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="w-full max-w-xl mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-10">
+      {children}
+    </div>
+  );
+}
+
 export default function AnfrageForm({
   whatsappHref,
   instagramHref,
   instagramHandle,
+  embedded = false,
+  defaultVon,
 }: {
   whatsappHref: string;
   instagramHref: string;
   instagramHandle: string;
+  /** Embutido em outra página (hoje só a /kontakt): o título vira h2, porque a
+   *  página hospedeira já tem o h1, e o formulário larga o fundo de página
+   *  cheia para caber dentro do layout dela. */
+  embedded?: boolean;
+  /** Canal de chegada quando a URL não traz ?von= — o caso da /kontakt, que é
+   *  navegação interna e não campanha. */
+  defaultVon?: string;
 }) {
   const t = useTranslations('public.anfrage');
   const locale = useLocale();
@@ -67,7 +85,7 @@ export default function AnfrageForm({
   // Ambos vão crus para a rota, que é quem valida — o formulário não decide
   // o que é válido, senão a lista de tours passa a viver em dois lugares.
   // Valor fora da lista é ignorado lá, sem quebrar o envio.
-  const von = searchParams.get('von');
+  const von = searchParams.get('von') ?? defaultVon ?? null;
   const tour = searchParams.get('tour');
   const thema = searchParams.get('thema');
   // Só o thema é validado aqui, e não pra decidir o que enviar (a rota é quem
@@ -81,6 +99,12 @@ export default function AnfrageForm({
   const themaLabels: Record<Thema, string> = {
     unterkunft: t('themaUnterkunft'),
     transfer: t('themaTransfer'),
+    'aussicht-natur': t('themaAussichtNatur'),
+    'kunst-kultur': t('themaKunstKultur'),
+    'postkarten-tour': t('themaPostkartenTour'),
+    'berg-meer': t('themaBergMeer'),
+    'natur-pur': t('themaNaturPur'),
+    'geheimtipps': t('themaGeheimtipps'),
   };
   const themaLabel = isThema(thema) ? themaLabels[thema] : null;
 
@@ -255,16 +279,19 @@ export default function AnfrageForm({
     );
   }
 
+  const Shell = embedded ? EmbeddedShell : FormShell;
+  const Heading = embedded ? 'h2' : 'h1';
+
   return (
-    <FormShell>
+    <Shell>
       <header className="text-center">
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
           <MapPin className="w-3.5 h-3.5" />
           {t('badge')}
         </span>
-        <h1 className="mt-4 text-2xl sm:text-3xl font-bold text-gray-900 leading-tight text-balance">
+        <Heading className="mt-4 text-2xl sm:text-3xl font-bold text-gray-900 leading-tight text-balance">
           {t('title')}
-        </h1>
+        </Heading>
       </header>
 
       {/* Quem chega por um CTA de assunto específico (hoje só a consultoria de
@@ -457,6 +484,6 @@ export default function AnfrageForm({
           <p className="text-xs text-gray-400 text-center leading-relaxed">{t('privacyNote')}</p>
         </div>
       </form>
-    </FormShell>
+    </Shell>
   );
 }

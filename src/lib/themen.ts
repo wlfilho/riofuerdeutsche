@@ -14,7 +14,22 @@
  * O rótulo em alemão mora no i18n (`public.anfrage.thema.<slug>`), não aqui:
  * é texto que o visitante lê.
  */
-export const THEMA_SLUGS = ['unterkunft', 'transfer'] as const;
+export const THEMA_SLUGS = [
+  // Serviços
+  'unterkunft',
+  'transfer',
+  // Os 6 programas da /touren/klassiker. Não são tours próprios — são
+  // recortes de interesse dentro do mesmo passeio, que é exatamente o que o
+  // multi-select de temas da Fase 2 vai coletar. Por isso reusam `thema` em
+  // vez de uma coluna nova: chegam como ?tour=klassiker&thema=<slug>, com o
+  // tour dizendo DE ONDE veio e o tema O QUE a pessoa quer.
+  'aussicht-natur',
+  'kunst-kultur',
+  'postkarten-tour',
+  'berg-meer',
+  'natur-pur',
+  'geheimtipps',
+] as const;
 
 export type Thema = (typeof THEMA_SLUGS)[number];
 

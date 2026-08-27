@@ -58,7 +58,7 @@ const breadcrumbJsonLd = {
     "@type": "BreadcrumbList",
     itemListElement: [
         { "@type": "ListItem", position: 1, name: "Startseite", item: "https://riofuerdeutsche.de" },
-        { "@type": "ListItem", position: 2, name: "Rio-Guide", item: "https://riofuerdeutsche.de/rio-guide" },
+        { "@type": "ListItem", position: 2, name: "Rio-Guide", item: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten" },
         { "@type": "ListItem", position: 3, name: "Sehenswürdigkeiten", item: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten" },
         { "@type": "ListItem", position: 4, name: "Rocinha", item: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/rocinha" },
     ],
@@ -164,7 +164,7 @@ export default function RocinhaPage() {
                                     </Link>
                                     <ChevronRight className="w-4 h-4 mx-2 text-white/25 shrink-0" />
                                     <Link
-                                        href="/rio-guide"
+                                        href="/rio-guide/sehenswuerdigkeiten"
                                         className="hover:text-white transition-colors"
                                     >
                                         Rio-Guide

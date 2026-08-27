@@ -93,9 +93,10 @@ export default function SehenswuerdigkeitenPage() {
                                     Startseite
                                 </Link>
                                 <ChevronRight className="w-4 h-4 mx-2 text-white/25 shrink-0" />
-                                <Link href="/rio-guide" className="hover:text-white transition-colors">
-                                    Rio-Guide
-                                </Link>
+                                {/* Texto, não link: esta É a página do Rio-Guide, e um
+                                    breadcrumb que aponta pra si mesmo confunde leitor e
+                                    rastreador. */}
+                                <span className="text-white/60">Rio-Guide</span>
                                 <ChevronRight className="w-4 h-4 mx-2 text-white/25 shrink-0" />
                                 <span className="text-[#22a262] font-semibold">Sehenswürdigkeiten</span>
                             </nav>
