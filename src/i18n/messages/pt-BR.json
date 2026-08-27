@@ -327,7 +327,10 @@
         "perdido_antigo": "Arquivado: perdido há mais de 30 dias"
       },
       "viaCanal": "via {canal}",
-      "paginaDeTour": "Página de tour"
+      "paginaDeTour": "Página de tour",
+      "interessen": "Interesses",
+      "wunsch": "Pedido do cliente",
+      "foundVia": "Como nos achou"
     },
     "contatos": {
       "metaTitle": "Contatos — Admin",

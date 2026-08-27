@@ -14,6 +14,7 @@ import {
 } from '@/lib/campaigns';
 import { isTourSlug } from '@/lib/tours';
 import { isThema } from '@/lib/themen';
+import { isInteresse, UNENTSCHLOSSEN } from '@/lib/interessen';
 
 /**
  * Canais de CHEGADA aceitos no `?von=` da /anfrage — de onde a pessoa veio
@@ -129,6 +130,19 @@ export async function POST(request: NextRequest) {
   // pessoa quer; `tour_slug` é de onde ela veio. Os dois podem coexistir.
   const thema = isThema(body.thema) ? body.thema : null;
 
+  // Temas do multi-select. Valor desconhecido é descartado em silêncio, como o
+  // tour e o thema — campo opcional não pode derrubar um pedido válido.
+  // 'unentschlossen' é exclusivo: quem pede recomendação não está escolhendo, e
+  // gravar os dois seria ruído na hora de montar a proposta. O formulário já
+  // impede, mas a rota é a fronteira que vale.
+  const rawInteressen = Array.isArray(body.interessen) ? body.interessen : [];
+  const interessenFiltrados = [...new Set(rawInteressen.filter(isInteresse))];
+  const interessen = interessenFiltrados.includes(UNENTSCHLOSSEN)
+    ? [UNENTSCHLOSSEN]
+    : interessenFiltrados;
+
+  const wunsch = typeof body.wunsch === 'string' ? body.wunsch.trim().slice(0, 500) : '';
+
   if (!name) {
     return NextResponse.json({ error: 'Bitte gib deinen Namen an.' }, { status: 400 });
   }
@@ -213,6 +227,12 @@ export async function POST(request: NextRequest) {
     arrival_channel: arrivalChannel,
     tour_slug: tourSlug,
     thema,
+    // Coluna vazia em vez de array vazio: null diz "não respondeu", {} diria
+    // "respondeu nada" — a diferença importa pra medir se o campo funciona.
+    interessen: interessen.length > 0 ? interessen : null,
+    // Coluna própria, NUNCA `notes`: notes é anotação interna do Will (33 dos
+    // 66 leads já têm) e misturar com texto do cliente é irreversível.
+    wunsch: wunsch || null,
     contact_id: contact.id,
     campaign: campaign?.slug ?? null,
     campaign_data: campaignData,
@@ -377,7 +397,9 @@ export async function POST(request: NextRequest) {
           <strong>Crianças:</strong> ${children}<br/>
           <strong>Origem:</strong> formulário${arrivalChannel ? ` (via ${escapeHtml(arrivalChannel)})` : ''}<br/>
           <strong>Página de tour:</strong> ${tourSlug ? escapeHtml(tourSlug) : '—'}<br/>
-          <strong>Assunto:</strong> ${thema ? escapeHtml(thema) : '—'}
+          <strong>Assunto:</strong> ${thema ? escapeHtml(thema) : '—'}<br/>
+          <strong>Interesses:</strong> ${interessen.length > 0 ? escapeHtml(interessen.join(', ')) : '—'}<br/>
+          <strong>Pedido especial:</strong> ${wunsch ? escapeHtml(wunsch) : '—'}
         </p>
         ${campaignHtml}
         <p><strong>Dias desejados:</strong></p>
@@ -393,5 +415,9 @@ export async function POST(request: NextRequest) {
     // notification failure must not break the client flow
   }
 
-  return NextResponse.json({ ok: true });
+  // O id volta pro cliente porque o "Wie hast du uns gefunden?" é respondido
+  // DEPOIS do envio, na página de sucesso. O que dá pra fazer com ele está
+  // limitado em POST /api/anfrage/found-via: um valor de lista fechada, uma vez
+  // só, num lead recém-criado.
+  return NextResponse.json({ ok: true, leadId });
 }

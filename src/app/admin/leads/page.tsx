@@ -30,6 +30,12 @@ export interface Lead {
   arrival_channel: string | null;
   /** Página de tour de onde a Anfrage partiu (?tour=). Null = não veio de tour. */
   tour_slug: string | null;
+  /** Temas do multi-select da /anfrage. Null = não respondeu. */
+  interessen: string[] | null;
+  /** Pedido em texto livre do CLIENTE — não confundir com `notes`, que é do admin. */
+  wunsch: string | null;
+  /** Origem declarada pelo visitante na página de sucesso. */
+  found_via: string | null;
   status: LeadStatus;
   proposal_id: string | null;
   notes: string | null;

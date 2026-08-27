@@ -132,6 +132,31 @@ export default function LeadDataCard({ lead }: { lead: Lead & { groups: LeadGrou
           </div>
         </Row>
 
+        {lead.interessen && lead.interessen.length > 0 && (
+          <Row label={t('interessen')}>
+            <div className="flex flex-wrap gap-1.5">
+              {lead.interessen.map(v => (
+                <span
+                  key={v}
+                  className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-800"
+                >
+                  {v}
+                </span>
+              ))}
+            </div>
+          </Row>
+        )}
+
+        {/* Escrito pelo cliente. A nota interna do Will fica noutro lugar — os
+            dois nunca se misturam. */}
+        {lead.wunsch && (
+          <Row label={t('wunsch')}>
+            <p className="whitespace-pre-wrap text-gray-800">{lead.wunsch}</p>
+          </Row>
+        )}
+
+        {lead.found_via && <Row label={t('foundVia')}>{lead.found_via}</Row>}
+
         {lead.tour_slug && (
           <Row label={t('paginaDeTour')}>
             <Link

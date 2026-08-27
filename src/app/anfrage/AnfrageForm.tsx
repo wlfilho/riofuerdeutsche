@@ -1,16 +1,26 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { isThema, type Thema } from '@/lib/themen';
+import { isTourSlug } from '@/lib/tours';
+import {
+  FOUND_VIA_VALUES,
+  INTERESSE_TOURS,
+  UNENTSCHLOSSEN,
+  type FoundVia,
+  type Interesse,
+} from '@/lib/interessen';
+import { PREIS_AB_PRO_PERSON, preisSpanne } from '@/lib/preis';
 import {
   ArrowLeft,
   CalendarDays,
   Check,
   Compass,
   Instagram,
+  Clock,
   Loader2,
   MapPin,
   Plus,
@@ -25,6 +35,7 @@ import {
   LinkRow,
   MeanwhileSection,
   NextSteps,
+  OptionTile,
   PhoneField,
   RecapBox,
   RecapRow,
@@ -96,6 +107,28 @@ export default function AnfrageForm({
   // um rótulo pra cada slug novo em THEMA_SLUGS, e o check:i18n consegue ver
   // as chaves. Montar o nome da chave por interpolação passaria batido nos
   // dois — o script conta isso como "chave dinâmica ignorada".
+  // Chamadas t() literais, como nos temas: o compilador cobra rótulo pra cada
+  // valor novo e o check:i18n enxerga as chaves. Montar o nome da chave por
+  // função — que foi como escrevi primeiro — passa batido nos dois.
+  const interesseLabels: Record<Interesse, string> = {
+    klassiker: t('interesseKlassiker'),
+    'natur-und-straende': t('interesseNaturUndStraende'),
+    'favela-tour': t('interesseFavelaTour'),
+    'kultur-und-geschichte': t('interesseKulturUndGeschichte'),
+    'by-night': t('interesseByNight'),
+    fussball: t('interesseFussball'),
+    tagesausfluege: t('interesseTagesausfluege'),
+    unentschlossen: t('interesseUnentschlossen'),
+  };
+  const foundViaLabels: Record<FoundVia, string> = {
+    google: t('foundViaGoogle'),
+    ki: t('foundViaKi'),
+    empfehlung: t('foundViaEmpfehlung'),
+    social: t('foundViaSocial'),
+    kreuzfahrt: t('foundViaKreuzfahrt'),
+    sonstiges: t('foundViaSonstiges'),
+  };
+
   const themaLabels: Record<Thema, string> = {
     unterkunft: t('themaUnterkunft'),
     transfer: t('themaTransfer'),
@@ -116,11 +149,74 @@ export default function AnfrageForm({
   const [children, setChildren] = useState(0);
   const [days, setDays] = useState<string[]>([]);
   const [dayInput, setDayInput] = useState('');
+  // Pré-seleção pelo ?tour= da URL: quem clicou o CTA de uma página de tour já
+  // disse o que quer. Editável — é sugestão, não trava (o usuário pode ter
+  // clicado na Favela e querer também os Klassiker).
+  const [interessen, setInteressen] = useState<Interesse[]>(() =>
+    isTourSlug(tour) && (INTERESSE_TOURS as readonly string[]).includes(tour)
+      ? [tour as Interesse]
+      : []
+  );
+  const [wunsch, setWunsch] = useState('');
   const [website, setWebsite] = useState(''); // honeypot
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [leadId, setLeadId] = useState<string | null>(null);
+
+  /**
+   * Funil view -> start -> submit. Sessão só na memória: nada de cookie ou
+   * localStorage, então recarregar a página conta como visita nova — que é o
+   * que interessa (uma pessoa que volta e desiste de novo é sinal, não ruído).
+   */
+  const sessionRef = useRef<string>('');
+  const startedRef = useRef(false);
+  if (!sessionRef.current && typeof crypto !== 'undefined') {
+    sessionRef.current = crypto.randomUUID();
+  }
+
+  const trackAnfrage = (event: 'view' | 'start' | 'submit', extra?: Record<string, unknown>) => {
+    if (!sessionRef.current) return;
+    const payload = JSON.stringify({
+      sessionId: sessionRef.current, event, von, tour, thema, ...extra,
+    });
+    // sendBeacon sobrevive ao fechamento da aba — essencial pra medir abandono.
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/anfrage/events', new Blob([payload], { type: 'application/json' }));
+      return;
+    }
+    fetch('/api/anfrage/events', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: payload, keepalive: true,
+    }).catch(() => {});
+  };
+
+  /** 'start' no primeiro campo preenchido — é o que separa quem olhou de quem tentou. */
+  const marcarStart = () => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    trackAnfrage('start');
+  };
+  const [foundVia, setFoundVia] = useState<FoundVia | null>(null);
+
+  /**
+   * "Ich weiß es noch nicht" e os temas são mutuamente exclusivos: quem pede
+   * recomendação não está escolhendo, e um lead com os dois seria ruído na
+   * hora de montar a proposta.
+   */
+  const toggleInteresse = (value: Interesse) => {
+    marcarStart();
+    setInteressen(prev => {
+      if (value === UNENTSCHLOSSEN) {
+        return prev.includes(UNENTSCHLOSSEN) ? [] : [UNENTSCHLOSSEN];
+      }
+      const semUnentschlossen = prev.filter(v => v !== UNENTSCHLOSSEN);
+      return semUnentschlossen.includes(value)
+        ? semUnentschlossen.filter(v => v !== value)
+        : [...semUnentschlossen, value];
+    });
+  };
 
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -179,6 +275,8 @@ export default function AnfrageForm({
           source: von,
           tour,
           thema,
+          interessen,
+          wunsch,
           website,
         }),
       });
@@ -187,6 +285,9 @@ export default function AnfrageForm({
         setError(data.error ?? t('errorGeneric'));
         return;
       }
+      const novoLeadId = typeof data.leadId === 'string' ? data.leadId : null;
+      trackAnfrage('submit', { leadId: novoLeadId });
+      setLeadId(novoLeadId);
       setSubmitted(true);
     } catch {
       setError(t('errorNetwork'));
@@ -195,7 +296,28 @@ export default function AnfrageForm({
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { trackAnfrage('view'); }, []);
+
+  /** Telemetria opcional: falha em silêncio, nunca atrapalha quem já converteu. */
+  const responderFoundVia = (value: FoundVia) => {
+    setFoundVia(value);
+    if (!leadId) return;
+    fetch('/api/anfrage/found-via', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ leadId, value }),
+    }).catch(() => {});
+  };
+
   if (submitted) {
+    const spanne = preisSpanne(pax + children);
+    const waText = encodeURIComponent(
+      t('successWhatsappPrefill', {
+        name: name.trim().split(' ')[0],
+        datum: days.map(d => formatGermanDay(d, locale)).join(', '),
+      })
+    );
     const people = [
       t('successRecapAdults', { count: pax }),
       ...(children > 0 ? [t('successRecapChildren', { count: children })] : []),
@@ -224,7 +346,31 @@ export default function AnfrageForm({
             </span>
           </RecapRow>
           <RecapRow icon={<Users className="w-4 h-4" />}>{people}</RecapRow>
+          {interessen.length > 0 && (
+            <RecapRow icon={<Compass className="w-4 h-4" />}>
+              {interessen
+                .map(v => interesseLabels[v])
+                .join(' · ')}
+            </RecapRow>
+          )}
         </RecapBox>
+
+        {/* Faixa de preço do grupo. Só aparece quando a âncora existir — ver
+            src/lib/preis.ts. As colunas estimated_min/max do banco não servem:
+            são resíduo da calculadora antiga e nada as escreve. */}
+        {spanne && (
+          <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              {t('successPreisTitel')}
+            </p>
+            <p className="mt-1 text-lg font-bold text-gray-900">
+              {spanne.min} – {spanne.max} €
+            </p>
+            <p className="mt-0.5 text-[13px] text-gray-500">
+              {t('successPreisHinweis', { pax: people })}
+            </p>
+          </div>
+        )}
 
         <NextSteps
           title={t('successStepsTitle')}
@@ -233,11 +379,48 @@ export default function AnfrageForm({
 
         {whatsappHref && (
           <WhatsAppCta
-            href={whatsappHref}
+            href={`${whatsappHref}?text=${waText}`}
             question={t('successWhatsappQuestion')}
             action={t('successWhatsappAction')}
           />
         )}
+
+        {/* "Wie hast du uns gefunden?" mora AQUI e não no formulário: depois do
+            envio a pessoa já converteu, não há o que abandonar, e o formulário
+            não cresce (67% dos visitantes estão no celular). Campo opcional —
+            some assim que responde, sem confirmação que roube a atenção do
+            botão de WhatsApp. */}
+        {leadId && (
+          <div className="mt-8 rounded-xl border border-gray-100 bg-gray-50 px-4 py-4">
+            {foundVia ? (
+              <p className="text-[15px] font-medium text-gray-700">{t('foundViaDanke')}</p>
+            ) : (
+              <>
+                <p className="text-[15px] font-medium text-gray-800">{t('foundViaFrage')}</p>
+                <p className="mt-0.5 text-[13px] text-gray-500">{t('foundViaHint')}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {FOUND_VIA_VALUES.map(value => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => responderFoundVia(value)}
+                      className="min-h-11 px-4 py-2 rounded-full border border-gray-200 bg-white text-[15px] text-gray-700 hover:border-gray-300 active:bg-gray-50 transition-colors"
+                    >
+                      {foundViaLabels[value]}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Aviso discreto: a tela já entregou tudo que importa, então o e-mail
+            é cópia de segurança — mas quem espera confirmação precisa saber
+            onde procurar. */}
+        <p className="mt-6 text-center text-[13px] text-gray-400 leading-relaxed">
+          {t('successSpamHinweis')}
+        </p>
 
         <MeanwhileSection title={t('successMeanwhileTitle')}>
           <LinkRow
@@ -320,6 +503,15 @@ export default function AnfrageForm({
         <p>{t('intro2')}</p>
       </div>
 
+      {/* Âncora de preço antes do primeiro campo. Renderiza só quando o número
+          existir — enquanto PREIS_AB_PRO_PERSON for null, ausência é melhor que
+          "€0" ou placeholder em produção. */}
+      {PREIS_AB_PRO_PERSON !== null && (
+        <p className="mt-6 rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-[15px] text-gray-700 leading-relaxed">
+          {t('preisAnker', { preis: `${PREIS_AB_PRO_PERSON} €` })}
+        </p>
+      )}
+
       <form onSubmit={handleSubmit} className="mt-8 space-y-7">
         <Section title={t('sectionContact')}>
           <Field label={t('nameLabel')} required error={fieldErrors.name}>
@@ -327,7 +519,7 @@ export default function AnfrageForm({
               ref={nameRef}
               type="text"
               value={name}
-              onChange={e => { setName(e.target.value); clearFieldError('name'); }}
+              onChange={e => { setName(e.target.value); clearFieldError('name'); marcarStart(); }}
               className={inputCls(!!fieldErrors.name)}
               placeholder={t('namePlaceholder')}
               autoComplete="name"
@@ -340,7 +532,7 @@ export default function AnfrageForm({
               type="email"
               inputMode="email"
               value={email}
-              onChange={e => { setEmail(e.target.value); clearFieldError('email'); }}
+              onChange={e => { setEmail(e.target.value); clearFieldError('email'); marcarStart(); }}
               className={inputCls(!!fieldErrors.email)}
               placeholder={t('emailPlaceholder')}
               autoComplete="email"
@@ -384,6 +576,57 @@ export default function AnfrageForm({
               decLabel={t('decrement')}
               incLabel={t('increment')}
             />
+          </div>
+        </Section>
+
+        {/* Multi-select de temas. Coluna única, tiles de 52px: em 380px (67% dos
+            visitantes estão no celular) duas colunas dariam ~170px por alvo e
+            "Kultur & Geschichte" quebraria em duas linhas. Scroll custa menos
+            que polegar errando. */}
+        <Section title={t('interessenLabel')} hint={t('interessenHint')}>
+          <fieldset className="space-y-2.5">
+            <legend className="sr-only">{t('interessenLabel')}</legend>
+
+            {INTERESSE_TOURS.map(slug => (
+              <OptionTile
+                key={slug}
+                type="checkbox"
+                checked={interessen.includes(slug)}
+                onChange={() => toggleInteresse(slug)}
+              >
+                {interesseLabels[slug]}
+                {slug === 'klassiker' && (
+                  <span className="block text-[13px] text-gray-500">
+                    {t('interesseKlassikerHint')}
+                  </span>
+                )}
+              </OptionTile>
+            ))}
+
+            {/* Respiro acima, mas tile idêntico: peso visual igual aos temas,
+                sem ser lido como um oitavo tema. É posicionamento do negócio,
+                não escapatória. */}
+            <div className="pt-1.5">
+              <OptionTile
+                type="checkbox"
+                checked={interessen.includes(UNENTSCHLOSSEN)}
+                onChange={() => toggleInteresse(UNENTSCHLOSSEN)}
+              >
+                {t('interesseUnentschlossen')}
+              </OptionTile>
+            </div>
+          </fieldset>
+
+          <div className="mt-5">
+            <Field label={t('wunschLabel')}>
+              <textarea
+                value={wunsch}
+                onChange={e => setWunsch(e.target.value.slice(0, 500))}
+                rows={3}
+                placeholder={t('wunschPlaceholder')}
+                className={`${inputCls()} resize-none`}
+              />
+            </Field>
           </div>
         </Section>
 
@@ -472,6 +715,13 @@ export default function AnfrageForm({
             aria-hidden="true"
           />
 
+          {/* Prazo acima do botão, não no rodapé: é o que responde "e depois?"
+              no momento exato da hesitação. */}
+          <p className="flex items-start gap-2 text-[15px] text-gray-700 leading-snug">
+            <Clock className="w-4 h-4 mt-0.5 shrink-0 text-green-600" />
+            {t('antwortVersprechen')}
+          </p>
+
           <button
             type="submit"
             disabled={submitting}
@@ -482,6 +732,17 @@ export default function AnfrageForm({
           </button>
 
           <p className="text-xs text-gray-400 text-center leading-relaxed">{t('privacyNote')}</p>
+
+          {/* Impressum perto do formulário: alemão confere quem está do outro
+              lado, e a ausência lê como desconfiança. */}
+          <p className="text-center">
+            <Link
+              href="/impressum"
+              className="text-xs text-gray-400 underline underline-offset-2 hover:text-gray-600 transition-colors"
+            >
+              {t('impressumHinweis')}
+            </Link>
+          </p>
         </div>
       </form>
     </Shell>
