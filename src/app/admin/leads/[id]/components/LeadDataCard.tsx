@@ -119,8 +119,30 @@ export default function LeadDataCard({ lead }: { lead: Lead & { groups: LeadGrou
         )}
 
         <Row label={tCommon('origem')}>
-          <SourceBadge source={lead.source} />
+          <div className="flex flex-wrap items-center gap-1.5">
+            <SourceBadge source={lead.source} />
+            {/* Chegada e submissão são coisas diferentes: 'Formulário · via
+                whatsapp' quer dizer que a pessoa veio do WhatsApp e preencheu
+                a Anfrage. Ver o bloco em src/app/api/anfrage/route.ts. */}
+            {lead.arrival_channel && (
+              <span className="text-xs text-gray-500">
+                {t('viaCanal', { canal: lead.arrival_channel })}
+              </span>
+            )}
+          </div>
         </Row>
+
+        {lead.tour_slug && (
+          <Row label={t('paginaDeTour')}>
+            <Link
+              href={`/touren/${lead.tour_slug}`}
+              target="_blank"
+              className="text-green-700 hover:underline"
+            >
+              /touren/{lead.tour_slug}
+            </Link>
+          </Row>
+        )}
 
         {lead.groups.length > 0 && (
           <Row label={t('grupos')}>

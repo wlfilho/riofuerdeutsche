@@ -3,7 +3,11 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-const SOURCE_VALUES = ['email', 'whatsapp', 'instagram', 'calculator', 'referral', 'other'] as const;
+// 'site' entra aqui porque contacts.source PODE ser 'site' (quem chegou pelo
+// ?von=site da /anfrage). Sem a opção, abrir a ficha desse contato mostrava o
+// select em branco. 'form' continua fora: contacts.source nunca é 'form' — lá
+// vai o canal de chegada, não o de submissão.
+const SOURCE_VALUES = ['email', 'whatsapp', 'instagram', 'site', 'calculator', 'referral', 'other'] as const;
 
 interface ContactFormData {
   name: string;

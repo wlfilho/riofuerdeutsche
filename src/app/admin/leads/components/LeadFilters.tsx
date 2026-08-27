@@ -15,6 +15,9 @@ type Props = {
 
 const STATUS_VALUES = ['new', 'contacted', 'proposal_sent', 'closed', 'lost'] as const;
 
+// Só valores que price_leads.source pode assumir de verdade. 'site' NÃO entra:
+// ele é canal de chegada (arrival_channel / contacts.source), não de submissão
+// — como opção aqui virava filtro morto, sempre com zero resultados.
 const SOURCE_VALUES = ['form', 'calculator', 'email', 'whatsapp', 'instagram', 'referral', 'other'] as const;
 
 const SELECT_CLS =

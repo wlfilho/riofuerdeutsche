@@ -26,6 +26,10 @@ export interface Lead {
   estimated_min: number | null;
   estimated_max: number | null;
   source: LeadSource;
+  /** Canal de chegada (?von=). Independente de `source`, que é o de submissão. */
+  arrival_channel: string | null;
+  /** Página de tour de onde a Anfrage partiu (?tour=). Null = não veio de tour. */
+  tour_slug: string | null;
   status: LeadStatus;
   proposal_id: string | null;
   notes: string | null;

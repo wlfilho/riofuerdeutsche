@@ -12,13 +12,19 @@ import {
   type CampaignData,
   type PhoneCountry,
 } from '@/lib/campaigns';
+import { isTourSlug } from '@/lib/tours';
 
 /**
  * Canais de CHEGADA aceitos no `?von=` da /anfrage — de onde a pessoa veio
  * antes de preencher. Não confundir com o canal de SUBMISSÃO, que para tudo
  * que passa por esta rota é sempre 'form'. Ver o comentário em leadFields.
+ *
+ * 'site' cobre os CTAs que não saem de página de tour (header, footer, home,
+ * FAQ): separa "veio navegando" de "veio de uma página de tour", que é o que
+ * o `tour_slug` registra. Os dois são independentes — um CTA da home tem
+ * von=site e tour null; um da /touren/klassiker tem von=site e tour=klassiker.
  */
-const VALID_ARRIVAL_CHANNELS = ['whatsapp', 'email', 'instagram'] as const;
+const VALID_ARRIVAL_CHANNELS = ['whatsapp', 'email', 'instagram', 'site'] as const;
 
 function isIsoDate(s: unknown): s is string {
   return (
@@ -112,6 +118,12 @@ export async function POST(request: NextRequest) {
     ? (body.source as string)
     : null;
 
+  // Slug desconhecido vira null em silêncio, nunca erro: o ?tour= é atribuição
+  // de origem, não dado do pedido. Tour renomeado, link velho num e-mail antigo
+  // ou slug digitado errado não podem custar um lead — o pedido entra igual,
+  // só sem saber de que página veio.
+  const tourSlug = isTourSlug(body.tour) ? body.tour : null;
+
   if (!name) {
     return NextResponse.json({ error: 'Bitte gib deinen Namen an.' }, { status: 400 });
   }
@@ -194,6 +206,7 @@ export async function POST(request: NextRequest) {
     requested_days: days,
     source: 'form',
     arrival_channel: arrivalChannel,
+    tour_slug: tourSlug,
     contact_id: contact.id,
     campaign: campaign?.slug ?? null,
     campaign_data: campaignData,
@@ -356,7 +369,8 @@ export async function POST(request: NextRequest) {
           <strong>Telefone:</strong> ${escapeHtml(phone) || '—'}<br/>
           <strong>Adultos:</strong> ${pax}<br/>
           <strong>Crianças:</strong> ${children}<br/>
-          <strong>Origem:</strong> formulário${arrivalChannel ? ` (via ${escapeHtml(arrivalChannel)})` : ''}
+          <strong>Origem:</strong> formulário${arrivalChannel ? ` (via ${escapeHtml(arrivalChannel)})` : ''}<br/>
+          <strong>Página de tour:</strong> ${tourSlug ? escapeHtml(tourSlug) : '—'}
         </p>
         ${campaignHtml}
         <p><strong>Dias desejados:</strong></p>

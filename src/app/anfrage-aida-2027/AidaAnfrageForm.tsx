@@ -53,8 +53,10 @@ export default function AidaAnfrageForm({
 }) {
   const t = useTranslations('public.anfrageAida2027');
   const searchParams = useSearchParams();
+  // Cru para a rota, que é quem valida — mesma regra do formulário principal
+  // (src/app/anfrage/AnfrageForm.tsx). Filtrar aqui já custou o canal 'site',
+  // que existia na rota e era rebaixado para 'other' antes de chegar lá.
   const von = searchParams.get('von');
-  const source = von === 'whatsapp' || von === 'email' || von === 'instagram' ? von : 'other';
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -124,7 +126,7 @@ export default function AidaAnfrageForm({
           preferredDay,
           interests,
           consent,
-          source,
+          source: von,
           website,
         }),
       });

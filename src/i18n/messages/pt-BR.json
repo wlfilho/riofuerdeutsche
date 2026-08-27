@@ -124,6 +124,7 @@
       },
       "source": {
         "form": "Formulário",
+        "site": "Site",
         "calculator": "Calculadora",
         "email": "E-mail",
         "whatsapp": "WhatsApp",
@@ -324,7 +325,9 @@
         "manual": "Arquivado manualmente",
         "tour_passado": "Arquivado: o tour já aconteceu",
         "perdido_antigo": "Arquivado: perdido há mais de 30 dias"
-      }
+      },
+      "viaCanal": "via {canal}",
+      "paginaDeTour": "Página de tour"
     },
     "contatos": {
       "metaTitle": "Contatos — Admin",

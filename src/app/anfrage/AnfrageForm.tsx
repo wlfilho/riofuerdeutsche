@@ -62,8 +62,12 @@ export default function AnfrageForm({
   const t = useTranslations('public.anfrage');
   const locale = useLocale();
   const searchParams = useSearchParams();
+  // `von` = canal de chegada, `tour` = página de tour de onde o CTA partiu.
+  // Ambos vão crus para a rota, que é quem valida — o formulário não decide
+  // o que é válido, senão a lista de tours passa a viver em dois lugares.
+  // Valor fora da lista é ignorado lá, sem quebrar o envio.
   const von = searchParams.get('von');
-  const source = von === 'whatsapp' || von === 'email' || von === 'instagram' ? von : 'other';
+  const tour = searchParams.get('tour');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -133,7 +137,8 @@ export default function AnfrageForm({
           pax,
           children,
           days,
-          source,
+          source: von,
+          tour,
           website,
         }),
       });
