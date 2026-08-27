@@ -81,7 +81,7 @@ const faqJsonLd = {
             name: "Kann man die Rocinha alleine besuchen?",
             acceptedAnswer: {
                 "@type": "Answer",
-                text: "Technisch ja, aber ohne Begleitung verpasst du das Wesentliche — und bewegst dich in einem Ort, dessen Codes du nicht kennst. Mit Will bekommst du Zugang zu Familien, Aussichten und Geschichten, die man allein nie findet.",
+                text: "Technisch ja, aber ohne Begleitung verpasst du das Wesentliche, und bewegst dich in einem Ort, dessen Codes du nicht kennst. Mit Will bekommst du Zugang zu Familien, Aussichten und Geschichten, die man allein nie findet.",
             },
         },
         {
@@ -89,7 +89,7 @@ const faqJsonLd = {
             name: "Was kostet eine Favela Tour in der Rocinha?",
             acceptedAnswer: {
                 "@type": "Answer",
-                text: "Der Eintritt in die Rocinha selbst ist kostenlos — bezahlt wird die Begleitung, die Lokalkenntnis und die Verbindung zur Community. Was die Tour kostet, hängt davon ab, wie lange ihr unterwegs seid und wie viele ihr seid. Schick mir deine Anfrage und du bekommst ein persönliches Angebot, kostenlos und unverbindlich.",
+                text: "Der Eintritt in die Rocinha selbst ist kostenlos, bezahlt wird die Begleitung, die Lokalkenntnis und die Verbindung zur Community. Was die Tour kostet, hängt davon ab, wie lange ihr unterwegs seid und wie viele ihr seid. Schick mir deine Anfrage und du bekommst ein persönliches Angebot, kostenlos und unverbindlich.",
             },
         },
         {
@@ -97,7 +97,7 @@ const faqJsonLd = {
             name: "Wie macht man das berühmte Drohnen-Video in der Rocinha?",
             acceptedAnswer: {
                 "@type": "Answer",
-                text: "Das Drohnen-Video wird von lokalen Anbietern direkt in der Rocinha angeboten und kostet rund 200 Reais pro Person. Will zeigt dir, wo und wann du es am besten machst — ohne lange Schlange.",
+                text: "Das Drohnen-Video wird von lokalen Anbietern direkt in der Rocinha angeboten und kostet rund 200 Reais pro Person. Will zeigt dir, wo und wann du es am besten machst, ohne lange Schlange.",
             },
         },
         {

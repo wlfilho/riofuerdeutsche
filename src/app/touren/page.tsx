@@ -349,7 +349,7 @@ export default async function TourenPage() {
                                     emoji: "☔",
                                     title: "Regentage in Rio de Janeiro",
                                     image: "/images/mudeu-do-amanha.webp",
-                                    desc: "Regen in Rio? Kein Problem! Museen, Gastronomie, Indoor-Aktivitäten und kulturelle Erlebnisse — damit kein Tag verloren geht.",
+                                    desc: "Regen in Rio? Kein Problem! Museen, Gastronomie, Indoor-Aktivitäten und kulturelle Erlebnisse, damit kein Tag verloren geht.",
                                     badges: ["Flexibel", "Indoor-Erlebnisse"]
                                 },
                                 {
@@ -357,7 +357,7 @@ export default async function TourenPage() {
                                     emoji: "🧗",
                                     title: "Sport & Abenteuer in Rio de Janeiro",
                                     image: "/images/paraglider-rio.webp",
-                                    desc: "Surfen, Paragliding, Stand-up Paddle, Klettern und mehr — Rio de Janeiro ist ein Paradies für Abenteurer und Sportbegeisterte.",
+                                    desc: "Surfen, Paragliding, Stand-up Paddle, Klettern und mehr. Rio de Janeiro ist ein Paradies für Abenteurer und Sportbegeisterte.",
                                     badges: ["3–8 Stunden", "Adrenalin & Natur"]
                                 },
                                 {

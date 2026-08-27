@@ -37,7 +37,7 @@ const faqJsonLd = {
       name: "Sprichst du wirklich fließend Deutsch?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Ja — ich bin in Rio auf eine deutsche Schule gegangen und habe vier Jahre in Köln gelebt und studiert. Deutsch ist für mich keine Fremdsprache, sondern ein echter Teil meiner Identität.",
+        text: "Ja. Ich bin in Rio auf eine deutsche Schule gegangen und habe vier Jahre in Köln gelebt und studiert. Deutsch ist für mich keine Fremdsprache, sondern ein echter Teil meiner Identität.",
       },
     },
     {
@@ -45,7 +45,7 @@ const faqJsonLd = {
       name: "Ist Rio de Janeiro wirklich so gefährlich?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Rio hat Risiken — aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben. Mehr dazu: riofuerdeutsche.de/ist-rio-gefaehrlich",
+        text: "Rio hat Risiken, aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben. Mehr dazu: riofuerdeutsche.de/ist-rio-gefaehrlich",
       },
     },
     {
@@ -53,7 +53,7 @@ const faqJsonLd = {
       name: "Wie buche ich eine Tour?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Am schnellsten über das Anfrageformular auf riofuerdeutsche.de/anfrage — dort stehen schon die Fragen, die ich sowieso stellen würde. Lieber direkt? Schreib mir auf WhatsApp oder per E-Mail — ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.",
+        text: "Am schnellsten über das Anfrageformular auf riofuerdeutsche.de/anfrage. Dort stehen schon die Fragen, die ich sowieso stellen würde. Lieber direkt? Schreib mir auf WhatsApp oder per E-Mail. Ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.",
       },
     },
     {
@@ -61,7 +61,7 @@ const faqJsonLd = {
       name: "Fahre ich allein oder in einer Gruppe?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Alle Touren sind privat oder in sehr kleinen Gruppen (max. 6 Personen) — niemals ein Touristenbus. Du buchst direkt bei mir, nicht über eine Agentur.",
+        text: "Alle Touren sind privat oder in sehr kleinen Gruppen (max. 6 Personen), niemals ein Touristenbus. Du buchst direkt bei mir, nicht über eine Agentur.",
       },
     },
     {
@@ -69,7 +69,7 @@ const faqJsonLd = {
       name: "Was kostet eine Tour?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Der Preis hängt von der Dauer, der Gruppengröße und den gewählten Aktivitäten ab. Schreib mir — ich erstelle dir ein persönliches Angebot, das zu deinem Budget passt.",
+        text: "Der Preis hängt von der Dauer, der Gruppengröße und den gewählten Aktivitäten ab. Schreib mir. Ich erstelle dir ein persönliches Angebot, das zu deinem Budget passt.",
       },
     },
   ],
@@ -132,7 +132,7 @@ const buildJsonLd = (telephone: string, email: string, instagramHref: string, yo
       "@type": "TouristTrip",
       name: "Favela Tour in Rio de Janeiro",
       description:
-        "Ein respektvoller Einblick in die Kultur und den Alltag der Favelas — Rocinha und The Maze.",
+        "Ein respektvoller Einblick in die Kultur und den Alltag der Favelas: Rocinha und The Maze.",
       touristType: "Deutschsprachige Touristen",
       provider: { "@id": "https://riofuerdeutsche.de/#business" },
     },
@@ -147,21 +147,21 @@ const buildJsonLd = (telephone: string, email: string, instagramHref: string, yo
     {
       "@type": "TouristTrip",
       name: "Kultur & Geschichte in Rio",
-      description: "Museen, historische Gebäude und die faszinierende Geschichte Rios — vom kolonialen Zentrum bis zur Praça Mauá.",
+      description: "Museen, historische Gebäude und die faszinierende Geschichte Rios, vom kolonialen Zentrum bis zur Praça Mauá.",
       touristType: "Deutschsprachige Touristen",
       provider: { "@id": "https://riofuerdeutsche.de/#business" },
     },
     {
       "@type": "TouristTrip",
       name: "Karneval in Rio de Janeiro",
-      description: "Sambódromo, Blocos de Rua und Samba-Ensaios — das größte Fest der Welt hautnah erleben.",
+      description: "Sambódromo, Blocos de Rua und Samba-Ensaios, das größte Fest der Welt hautnah erleben.",
       touristType: "Deutschsprachige Touristen",
       provider: { "@id": "https://riofuerdeutsche.de/#business" },
     },
     {
       "@type": "TouristTrip",
       name: "Tagesausflüge ab Rio de Janeiro",
-      description: "Búzios, Ilha Grande, Paraty, Petrópolis und Arraial do Cabo — traumhafte Ausflüge rund um Rio.",
+      description: "Búzios, Ilha Grande, Paraty, Petrópolis und Arraial do Cabo, traumhafte Ausflüge rund um Rio.",
       touristType: "Deutschsprachige Touristen",
       provider: { "@id": "https://riofuerdeutsche.de/#business" },
     },
@@ -182,7 +182,7 @@ const tours = [
     title: "Favela Tour in Rio de Janeiro",
     duration: "2–3 Stunden",
     highlights: "2 Highlights",
-    desc: "Ein respektvoller Einblick in die Kultur und den Alltag der Favelas — Rocinha und The Maze.",
+    desc: "Ein respektvoller Einblick in die Kultur und den Alltag der Favelas: Rocinha und The Maze.",
     img: "/images/rio-favela.webp",
     alt: "Authentische Favela Tour in Rio de Janeiro",
     link: "/touren/favela-tour",
@@ -200,7 +200,7 @@ const tours = [
     title: "Kultur & Geschichte in Rio",
     duration: "4–6 Stunden",
     highlights: "14 Highlights",
-    desc: "Museen, historische Gebäude und die faszinierende Geschichte Rios — vom kolonialen Zentrum bis zur Praça Mauá.",
+    desc: "Museen, historische Gebäude und die faszinierende Geschichte Rios, vom kolonialen Zentrum bis zur Praça Mauá.",
     img: "/images/kultur-und-geschichte-bg.webp",
     alt: "Kultur und Geschichte Tour in Rio de Janeiro",
     link: "/touren/kultur-und-geschichte",
@@ -209,7 +209,7 @@ const tours = [
     title: "Karneval in Rio de Janeiro",
     duration: "Saisonale Tour",
     highlights: "3 Erlebnisse",
-    desc: "Sambódromo, Blocos de Rua und Samba-Ensaios — das größte Fest der Welt hautnah erleben.",
+    desc: "Sambódromo, Blocos de Rua und Samba-Ensaios, das größte Fest der Welt hautnah erleben.",
     img: "/images/bloco-background.webp",
     alt: "Karneval Tour in Rio de Janeiro",
     link: "/touren/karneval-tour",
@@ -218,7 +218,7 @@ const tours = [
     title: "Tagesausflüge ab Rio de Janeiro",
     duration: "Ganztägig",
     highlights: "5 Highlights",
-    desc: "Búzios, Ilha Grande, Paraty, Petrópolis und Arraial do Cabo — traumhafte Ausflüge rund um Rio.",
+    desc: "Búzios, Ilha Grande, Paraty, Petrópolis und Arraial do Cabo, traumhafte Ausflüge rund um Rio.",
     img: "/images/ilha-grande-bg.webp",
     alt: "Tagesausflüge ab Rio de Janeiro",
     link: "/touren/tagesausfluege",
@@ -289,7 +289,7 @@ export default async function Home() {
                   </h1>
 
                   <p className="text-lg lg:text-xl text-gray-200 max-w-xl font-light leading-relaxed">
-                    Dein deutschsprachiger Tourguide in Rio de Janeiro — für <Link href="/touren" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Citytouren</Link>, <Link href="/touren/klassiker" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Stadtrundfahrten</Link>, <Link href="/touren/tagesausfluege" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Ausflüge</Link> und persönliche <Link href="/kontakt" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Reiseleitung</Link>. Maßgeschneidert, sicher und unvergesslich.
+                    Dein deutschsprachiger Tourguide in Rio de Janeiro, für <Link href="/touren" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Citytouren</Link>, <Link href="/touren/klassiker" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Stadtrundfahrten</Link>, <Link href="/touren/tagesausfluege" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Ausflüge</Link> und persönliche <Link href="/kontakt" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">Reiseleitung</Link>. Maßgeschneidert, sicher und unvergesslich.
                   </p>
 
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -345,7 +345,7 @@ export default async function Home() {
                     { emoji: "🎯", content: <>100 % auf Rio de Janeiro spezialisiert</> },
                     { emoji: "🇩🇪", content: <>Deutschsprachige Begleitung durch einen <Link href="/ueber-will" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">echten Carioca</Link></> },
                     { emoji: "🚗", content: <>Eigene Fahrzeuge mit Fahrer für maximalen Komfort</> },
-                    { emoji: "🛡️", content: <><Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Sicherheit</Link> an erster Stelle – sichere Routen und beste Zeiten</> },
+                    { emoji: "🛡️", content: <><Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Sicherheit</Link> an erster Stelle: sichere Routen und beste Zeiten</> },
                     { emoji: "✨", content: <><Link href="/touren/individuell" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Individueller Service</Link>, von der Beratung bis zur Tour</> },
                     { emoji: "💬", content: <>Schnelle Erreichbarkeit per WhatsApp und E-Mail</> },
                   ].map((item, i) => (
@@ -465,7 +465,7 @@ export default async function Home() {
                   <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-rio-green/10 rounded-full blur-3xl"></div>
                   <Image
                     src="/images/rio-cristo.webp"
-                    alt="Christusstatue in Rio de Janeiro – Sicht aus der Nähe während einer Tour"
+                    alt="Christusstatue in Rio de Janeiro, Sicht aus der Nähe während einer Tour"
                     width={600}
                     height={600}
                     className="relative z-10 w-full aspect-square object-cover object-left rounded-tr-[80px] rounded-bl-[80px] rounded-tl-3xl rounded-br-3xl shadow-2xl"
@@ -482,7 +482,7 @@ export default async function Home() {
                     Geboren und aufgewachsen in Rio, habe ich an der Köln International School of Design studiert und spreche fließend Deutsch. Ich kenne beide Welten: die deutsche Mentalität und das Leben als Carioca. Und genau das macht den Unterschied.
                   </p>
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    In den meisten Fällen begleite ich dich persönlich. Wenn ich bereits mit einer Gruppe unterwegs bin, übernehmen erfahrene <Link href="/kontakt" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Partner-Guides</Link> meines Vertrauens – mit der gleichen Leidenschaft für Rio und dem gleichen Anspruch an Sicherheit.
+                    In den meisten Fällen begleite ich dich persönlich. Wenn ich bereits mit einer Gruppe unterwegs bin, übernehmen erfahrene <Link href="/kontakt" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Partner-Guides</Link> meines Vertrauens, mit der gleichen Leidenschaft für Rio und dem gleichen Anspruch an Sicherheit.
                   </p>
 
                   <blockquote className="border-l-4 border-rio-yellow pl-4 py-2 my-6">
@@ -515,7 +515,7 @@ export default async function Home() {
             <div className="max-w-4xl mx-auto px-5 lg:px-8">
               <FadeIn direction="up" className="text-center mb-14">
                 <h2 id="rio-erleben-heading" className="text-3xl md:text-4xl font-heading font-bold text-gray-900 leading-tight mb-4">
-                  Rio de Janeiro erleben –{" "}
+                  Rio de Janeiro erleben,{" "}
                   <span className="text-rio-green">sicher, authentisch und auf Deutsch</span>
                 </h2>
               </FadeIn>
@@ -529,25 +529,25 @@ export default async function Home() {
 
                 <FadeIn direction="up" delay={0.15}>
                   <p className="text-lg text-gray-700 leading-relaxed">
-                    Bei uns erlebst du Rio so, wie es nur ein Einheimischer zeigen kann – ob auf unserer <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Klassiker Tour</Link> zu den großen Sehenswürdigkeiten, einer <Link href="/touren/favela-tour" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela Tour</Link> mit echtem Einblick, einer Natur- und Strandtour zu den schönsten Küsten, einer Kultur- und Geschichtstour durch die Seele der Stadt, einer unvergesslichen Karneval Tour, beim Rio by Night oder bei einem Fußballerlebnis im Stadion. Du kannst aus unseren Touren wählen oder dir eine komplett individuelle Tour zusammenstellen – ganz nach deinen Wünschen.
+                    Bei uns erlebst du Rio so, wie es nur ein Einheimischer zeigen kann, ob auf unserer <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Klassiker Tour</Link> zu den großen Sehenswürdigkeiten, einer <Link href="/touren/favela-tour" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela Tour</Link> mit echtem Einblick, einer Natur- und Strandtour zu den schönsten Küsten, einer Kultur- und Geschichtstour durch die Seele der Stadt, einer unvergesslichen Karneval Tour, beim Rio by Night oder bei einem Fußballerlebnis im Stadion. Du kannst aus unseren Touren wählen oder dir eine komplett individuelle Tour zusammenstellen, ganz nach deinen Wünschen.
                   </p>
                 </FadeIn>
 
                 <FadeIn direction="up" delay={0.2}>
                   <p className="text-lg text-gray-700 leading-relaxed">
-                    Alle Touren finden in unseren eigenen Fahrzeugen mit Fahrer statt – bequem, sicher und ohne Stress. Wir bieten außerdem einen <Link href="/touren/flughafen-transfer" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Flughafen-Transfer</Link> direkt zu deiner Unterkunft an, damit deine Reise entspannt beginnt.
+                    Alle Touren finden in unseren eigenen Fahrzeugen mit Fahrer statt, bequem, sicher und ohne Stress. Wir bieten außerdem einen <Link href="/touren/flughafen-transfer" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Flughafen-Transfer</Link> direkt zu deiner Unterkunft an, damit deine Reise entspannt beginnt.
                   </p>
                 </FadeIn>
 
                 <FadeIn direction="up" delay={0.25}>
                   <p className="text-lg text-gray-700 leading-relaxed">
-                    Sicherheit ist uns besonders wichtig. Wir wissen, dass viele deutsche Reisende sich Sorgen machen, wenn es um Rio geht. Deshalb begleiten wir dich nicht nur vor Ort, sondern beraten dich auch vorab – zum Beispiel mit unserer persönlichen <Link href="/anfrage?von=site&thema=unterkunft" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Unterkunftsberatung</Link> per Videocall, damit du von Anfang an im richtigen und sicheren Viertel landest.
+                    Sicherheit ist uns besonders wichtig. Wir wissen, dass viele deutsche Reisende sich Sorgen machen, wenn es um Rio geht. Deshalb begleiten wir dich nicht nur vor Ort, sondern beraten dich auch vorab, zum Beispiel mit unserer persönlichen <Link href="/anfrage?von=site&thema=unterkunft" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Unterkunftsberatung</Link> per Videocall, damit du von Anfang an im richtigen und sicheren Viertel landest.
                   </p>
                 </FadeIn>
 
                 <FadeIn direction="up" delay={0.3}>
                   <p className="text-lg text-gray-700 leading-relaxed">
-                    In den meisten Fällen begleite ich dich persönlich. Wenn ich bereits mit einer Gruppe unterwegs bin, übernehmen erfahrene Partner-Guides meines Vertrauens – mit der gleichen Leidenschaft für Rio und dem gleichen Anspruch an Sicherheit.
+                    In den meisten Fällen begleite ich dich persönlich. Wenn ich bereits mit einer Gruppe unterwegs bin, übernehmen erfahrene Partner-Guides meines Vertrauens, mit der gleichen Leidenschaft für Rio und dem gleichen Anspruch an Sicherheit.
                   </p>
                 </FadeIn>
 
@@ -632,7 +632,7 @@ export default async function Home() {
               <FadeIn direction="up">
                 <h2 id="kontakt-heading" className="text-3xl md:text-5xl font-heading font-bold text-white mb-6">Lust auf Rio bekommen?</h2>
                 <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
-                  Erzähl mir, wann du kommst und was dich interessiert. Innerhalb von 24 Stunden bekommst du einen Vorschlag mit Ablauf und Preis — kostenlos und unverbindlich.
+                  Erzähl mir, wann du kommst und was dich interessiert. Innerhalb von 24 Stunden bekommst du einen Vorschlag mit Ablauf und Preis, kostenlos und unverbindlich.
                 </p>
                 {/* Invertido: era o guia grátis em primário e "Tour anfragen" apontando
                     para /kontakt. Quem chega ao fim da home leu tudo — é o momento de
