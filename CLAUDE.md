@@ -55,6 +55,47 @@ Never hardcode contact info anywhere in the app — it must always come from the
 - Usage pattern: call both in the Server Component/page (`const { whatsappHref, emailHref } = buildContactUrls(await getSettings())`), then pass the href down or use directly in JSX. Client components that need it (e.g. `Footer.tsx`) take `contact: ContactUrls` as a prop from a server wrapper (see `FooterServer.tsx`, `NavbarServer.tsx`) — they keep a `FALLBACK` constant only as a prop default, never as the primary source.
 - A hardcoded `wa.me/...` or `mailto:...` literal outside `src/lib/settings.ts` and the `FALLBACK` constants is a bug — this happened once already in `src/components/proposal/ProposalPage.tsx` (stale WhatsApp number/email baked into the JSX) and was fixed by wiring it to `getSettings()`/`buildContactUrls()` like everywhere else.
 
+### Texto em alemão (regras de escrita)
+
+**Nunca usar travessão (—) nem meia-risca (–) como traço de aposto** em texto
+alemão ou em qualquer mensagem para cliente (site, formulários, e-mails,
+templates do banco). Reescrever a pontuação: vírgula, ponto, dois pontos ou
+parênteses conforme o caso. Não trocar por hífen simples, que fica errado em
+alemão.
+
+O motivo não é tipográfico — em alemão o traço de aposto correto é até a
+meia-risca (Halbgeviertstrich), não o traço longo. O motivo é que esse ritmo de
+frase virou marca de texto gerado por IA, e o site vende justamente o oposto.
+
+Exceções, que ficam:
+- **Intervalos numéricos e de data:** `3–4 Stunden`, `{{chegada}} – {{saída}}`.
+  É o uso `von–bis`, correto e não-ambíguo.
+- **Marcadores de campo vazio:** `return '—'` em tabela ou proposta.
+- **Comentários de código** (são em português) e CSS.
+- **CONTEÚDO VINDO DO CLIENTE — nunca alterar.** Avaliações, depoimentos e
+  qualquer citação assinada mantêm a pontuação exata que a pessoa escreveu,
+  travessão incluído. A regra é sobre o texto que o Will escreve, não sobre o
+  que o cliente escreveu. Alterar citação é falsificá-la.
+
+Vale também para anglicismo solto em frase alemã: em 27/08/2026 havia seis
+casos de `over` no lugar de `über` e `with` no lugar de `mit`, resto de uma
+tradução automática. Para o leitor alemão isso lê como texto de máquina, que é
+o mesmo dano que o travessão, e pior.
+
+### Texto duplicado entre JSON-LD e visível
+
+Várias páginas guardam a mesma frase em dois lugares: o bloco JSON-LD (lido
+pelo Google e por IAs) e o JSX visível. Exemplos: a FAQ da home vive em
+`FaqAccordion.tsx` **e** num JSON-LD dentro de `page.tsx`; as descrições de tour
+vivem em `AndereTouren.tsx` **e** em `touren/page.tsx`; a FAQ da Rocinha vive em
+`RocinhaFaq.tsx` **e** na página.
+
+Editar uma cópia e esquecer a outra é silencioso: não quebra build nem `tsc`, e
+a tela continua certa enquanto o structured data serve o texto velho.
+
+**Ao mexer em copy, rode `npm run check:copy`.** Ele agrupa as strings alemãs
+longas ignorando a pontuação de junção e acusa quando duas cópias divergem.
+
 ### Review System
 
 - Public submission at `/bewertung-schreiben` with honeypot spam protection and optional photo upload

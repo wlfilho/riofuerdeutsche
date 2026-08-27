@@ -26,7 +26,7 @@ const faqSchema = {
             "name": "Sind die Touren auf Deutsch?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Ja, alle unsere Stadtführungen und Touren in Rio de Janeiro werden komplett auf Deutsch durchgeführt. Dein Reiseleiter ist ein gebürtiger Carioca, der fließend Deutsch spricht und vier Jahre in Köln gelebt hat. Du bekommst nicht nur Übersetzungen, sondern echte Erklärungen mit kulturellem Hintergrund — in deiner Muttersprache."
+                "text": "Ja, alle unsere Stadtführungen und Touren in Rio de Janeiro werden komplett auf Deutsch durchgeführt. Dein Reiseleiter ist ein gebürtiger Carioca, der fließend Deutsch spricht und vier Jahre in Köln gelebt hat. Du bekommst nicht nur Übersetzungen, sondern echte Erklärungen mit kulturellem Hintergrund, in deiner Muttersprache."
             }
         },
         {
@@ -34,7 +34,7 @@ const faqSchema = {
             "name": "Wie sicher sind die Touren?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Sicherheit hat bei uns oberste Priorität. Als Einheimischer kenne ich die sicheren Gebiete, die besten Routen und die Uhrzeiten, zu denen man bestimmte Viertel besuchen sollte. Alle Touren sind so geplant, dass du dich jederzeit wohlfühlst. Ich kümmere mich um Transport, Orientierung und alles, was du brauchst — du genießt einfach den Tag."
+                "text": "Sicherheit hat bei uns oberste Priorität. Als Einheimischer kenne ich die sicheren Gebiete, die besten Routen und die Uhrzeiten, zu denen man bestimmte Viertel besuchen sollte. Alle Touren sind so geplant, dass du dich jederzeit wohlfühlst. Ich kümmere mich um Transport, Orientierung und alles, was du brauchst. Du genießt einfach den Tag."
             }
         },
         {
@@ -42,7 +42,7 @@ const faqSchema = {
             "name": "Kann ich eine individuelle Tour zusammenstellen?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Natürlich! Neben unseren fertigen Touren bieten wir auch komplett individuelle Stadtführungen an. Sag mir einfach, was dich interessiert, wie viel Zeit du hast und mit wem du reist — und ich stelle ein maßgeschneidertes Programm für dich zusammen. Ob eine Mischung aus Kultur und Natur, ein Tag nur am Strand oder eine Kombination aus Sightseeing und Fußball — alles ist möglich."
+                "text": "Natürlich! Neben unseren fertigen Touren bieten wir auch komplett individuelle Stadtführungen an. Sag mir einfach, was dich interessiert, wie viel Zeit du hast und mit wem du reist, und ich stelle ein maßgeschneidertes Programm für dich zusammen. Ob eine Mischung aus Kultur und Natur, ein Tag nur am Strand oder eine Kombination aus Sightseeing und Fußball, alles ist möglich."
             }
         },
         {
@@ -50,7 +50,7 @@ const faqSchema = {
             "name": "Was kostet eine Tour in Rio de Janeiro?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Der Preis hängt von drei Dingen ab: wie lange ihr unterwegs seid, wie viele ihr seid und wohin es gehen soll. Eine Halbtagstour durch die Stadt lässt sich nicht mit einem Tagesausflug nach Búzios oder Ilha Grande vergleichen. Schick mir deine Anfrage mit deinen Wunschtagen und Interessen — du bekommst ein persönliches Angebot mit Ablauf und Preis, kostenlos und unverbindlich."
+                "text": "Der Preis hängt von drei Dingen ab: wie lange ihr unterwegs seid, wie viele ihr seid und wohin es gehen soll. Eine Halbtagstour durch die Stadt lässt sich nicht mit einem Tagesausflug nach Búzios oder Ilha Grande vergleichen. Schick mir deine Anfrage mit deinen Wunschtagen und Interessen. Du bekommst ein persönliches Angebot mit Ablauf und Preis, kostenlos und unverbindlich."
             }
         },
         {
@@ -58,7 +58,7 @@ const faqSchema = {
             "name": "Wie buche ich eine Tour?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Ganz einfach: Schreib mir per WhatsApp oder E-Mail mit deinen Wunschdaten und Interessen. Innerhalb von 24 Stunden bekommst du einen Vorschlag mit Ablauf und Preis — kostenlos und unverbindlich. Wenn alles passt, bestätigst du und wir legen los. Keine komplizierten Buchungssysteme, keine versteckten Kosten."
+                "text": "Ganz einfach: Schreib mir per WhatsApp oder E-Mail mit deinen Wunschdaten und Interessen. Innerhalb von 24 Stunden bekommst du einen Vorschlag mit Ablauf und Preis, kostenlos und unverbindlich. Wenn alles passt, bestätigst du und wir legen los. Keine komplizierten Buchungssysteme, keine versteckten Kosten."
             }
         },
         {
@@ -66,7 +66,7 @@ const faqSchema = {
             "name": "Für wen sind die Touren geeignet?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Unsere Touren sind für alle geeignet — Alleinreisende, Paare, Familien mit Kindern, Senioren und kleine Gruppen. Jede Tour wird individuell angepasst: Tempo, Schwierigkeitsgrad und Interessen bestimmst du. Wir haben auch barrierefreie Optionen und Touren speziell für Familien mit kleinen Kindern."
+                "text": "Unsere Touren sind für alle geeignet: Alleinreisende, Paare, Familien mit Kindern, Senioren und kleine Gruppen. Jede Tour wird individuell angepasst: Tempo, Schwierigkeitsgrad und Interessen bestimmst du. Wir haben auch barrierefreie Optionen und Touren speziell für Familien mit kleinen Kindern."
             }
         }
     ]
@@ -83,7 +83,7 @@ const itemListSchema = {
         { "@type": "ListItem", "position": 2, "url": "https://riofuerdeutsche.de/touren/natur-und-straende", "name": "Natur & Strände in Rio de Janeiro" },
         { "@type": "ListItem", "position": 3, "url": "https://riofuerdeutsche.de/touren/favela-tour", "name": "Favela Tour in Rio de Janeiro" },
         { "@type": "ListItem", "position": 4, "url": "https://riofuerdeutsche.de/touren/kultur-und-geschichte", "name": "Kultur & Geschichte in Rio de Janeiro" },
-        { "@type": "ListItem", "position": 5, "url": "https://riofuerdeutsche.de/touren/by-night", "name": "Rio by Night — Nachtleben in Rio de Janeiro" },
+        { "@type": "ListItem", "position": 5, "url": "https://riofuerdeutsche.de/touren/by-night", "name": "Rio by Night: Nachtleben in Rio de Janeiro" },
         { "@type": "ListItem", "position": 6, "url": "https://riofuerdeutsche.de/touren/karneval-tour", "name": "Karneval Tour in Rio de Janeiro" },
         { "@type": "ListItem", "position": 7, "url": "https://riofuerdeutsche.de/touren/fussball", "name": "Fußball Tour in Rio de Janeiro" },
         { "@type": "ListItem", "position": 8, "url": "https://riofuerdeutsche.de/touren/tagesausfluege", "name": "Tagesausflüge ab Rio de Janeiro" },
@@ -180,18 +180,18 @@ export default async function TourenPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Rio de Janeiro gehört zu den faszinierendsten Städten der Welt — aber ohne einen <Link href="/ueber-will" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">lokalen Guide</Link> verpasst du das Beste. Unsere deutschsprachigen Stadtführungen und Touren zeigen dir das echte Rio: <Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">sicher</Link>, authentisch und abseits der Touristenpfade.
+                                    Rio de Janeiro gehört zu den faszinierendsten Städten der Welt, aber ohne einen <Link href="/ueber-will" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">lokalen Guide</Link> verpasst du das Beste. Unsere deutschsprachigen Stadtführungen und Touren zeigen dir das echte Rio: <Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">sicher</Link>, authentisch und abseits der Touristenpfade.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
-                                        Ob du die <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">klassischen Sehenswürdigkeiten wie den Corcovado und den Zuckerhut</Link> erleben, die <Link href="/touren/natur-und-straende" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">wilde Natur des Tijuca-Regenwaldes</Link> entdecken oder das pulsierende <Link href="/touren/by-night" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Nachtleben von Lapa und Leblon</Link> genießen möchtest — wir haben die passende Tour für dich. Alle Touren werden von einem gebürtigen Carioca geleitet, der fließend Deutsch spricht und vier Jahre in Deutschland gelebt hat.
+                                        Ob du die <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">klassischen Sehenswürdigkeiten wie den Corcovado und den Zuckerhut</Link> erleben, die <Link href="/touren/natur-und-straende" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">wilde Natur des Tijuca-Regenwaldes</Link> entdecken oder das pulsierende <Link href="/touren/by-night" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Nachtleben von Lapa und Leblon</Link> genießen möchtest, wir haben die passende Tour für dich. Alle Touren werden von einem gebürtigen Carioca geleitet, der fließend Deutsch spricht und vier Jahre in Deutschland gelebt hat.
                                     </p>
                                     <p>
-                                        Was uns von anderen Anbietern unterscheidet: Jede Stadtführung ist privat und individuell. Kein Bus voller Touristen, keine starren Zeitpläne, keine Sprachbarrieren. Stattdessen ein persönlicher <Link href="/kontakt" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Reiseleiter</Link>, der sich ganz auf dich und deine Wünsche einstellt — ob du allein reist, als Paar, mit Familie oder in einer kleinen Gruppe.
+                                        Was uns von anderen Anbietern unterscheidet: Jede Stadtführung ist privat und individuell. Kein Bus voller Touristen, keine starren Zeitpläne, keine Sprachbarrieren. Stattdessen ein persönlicher <Link href="/kontakt" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Reiseleiter</Link>, der sich ganz auf dich und deine Wünsche einstellt, ob du allein reist, als Paar, mit Familie oder in einer kleinen Gruppe.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Entdecke unten unsere beliebtesten Touren in Rio de Janeiro oder schreib mir direkt per WhatsApp oder E-Mail — zusammen finden wir das perfekte Erlebnis für deine Reise.
+                                    Entdecke unten unsere beliebtesten Touren in Rio de Janeiro oder schreib mir direkt per WhatsApp oder E-Mail. Zusammen finden wir das perfekte Erlebnis für deine Reise.
                                 </p>
                             </div>
                         </FadeIn>
@@ -214,22 +214,22 @@ export default async function TourenPage() {
                                 {
                                     emoji: "🛡️",
                                     title: "Sicherheit an erster Stelle",
-                                    text: "Rio ist eine wunderschöne Stadt — aber man muss wissen, wo man sicher unterwegs ist. Als Einheimischer kenne ich jede Ecke und sorge dafür, dass du dich nie unsicher fühlst."
+                                    text: "Rio ist eine wunderschöne Stadt, aber man muss wissen, wo man sicher unterwegs ist. Als Einheimischer kenne ich jede Ecke und sorge dafür, dass du dich nie unsicher fühlst."
                                 },
                                 {
                                     emoji: "🇩🇪",
                                     title: "Komplett auf Deutsch",
-                                    text: "Ich habe in Deutschland gelebt und spreche fließend Deutsch. Keine Sprachbarrieren, keine Missverständnisse — du bekommst alle Insider-Tipps in deiner Muttersprache."
+                                    text: "Ich habe in Deutschland gelebt und spreche fließend Deutsch. Keine Sprachbarrieren, keine Missverständnisse, du bekommst alle Insider-Tipps in deiner Muttersprache."
                                 },
                                 {
                                     emoji: "💡",
                                     title: "Echtes Insider-Wissen",
-                                    text: "Vergiss die typischen Touristenfallen. Als gebürtiger Carioca zeige ich dir die Orte, die nur Einheimische kennen — von versteckten Aussichtspunkten bis zu den besten Restaurants."
+                                    text: "Vergiss die typischen Touristenfallen. Als gebürtiger Carioca zeige ich dir die Orte, die nur Einheimische kennen, von versteckten Aussichtspunkten bis zu den besten Restaurants."
                                 },
                                 {
                                     emoji: "🎯",
                                     title: "Flexibel & individuell",
-                                    text: "Jede Tour wird an deine Wünsche angepasst. Ob Tempo, Interessen oder spontane Änderungen — dein Tag, deine Regeln. Ich plane, du genießt."
+                                    text: "Jede Tour wird an deine Wünsche angepasst. Ob Tempo, Interessen oder spontane Änderungen: dein Tag, deine Regeln. Ich plane, du genießt."
                                 }
                             ].map((item, i) => (
                                 <FadeIn key={i} delay={0.15 * i} direction="up" className="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl group hover:bg-white/20 transition-all duration-300">
@@ -254,13 +254,13 @@ export default async function TourenPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-6 text-left text-lg text-gray-600 leading-relaxed">
                                 <p>
-                                    Rio de Janeiro ist eine Stadt, die man auf viele Arten erleben kann — aber mit einem deutschsprachigen Guide wird sie erst richtig lebendig. Statt nur die bekannten Postkartenmotive abzuhaken, tauchst du ein in die Geschichten hinter den Orten: Warum der <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Zuckerhut</Link> seinen Namen hat, welche Geheimnisse der <Link href="/touren/natur-und-straende" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Tijuca-Regenwald</Link> verbirgt und wo die Cariocas wirklich feiern, essen und leben.
+                                    Rio de Janeiro ist eine Stadt, die man auf viele Arten erleben kann, aber mit einem deutschsprachigen Guide wird sie erst richtig lebendig. Statt nur die bekannten Postkartenmotive abzuhaken, tauchst du ein in die Geschichten hinter den Orten: Warum der <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Zuckerhut</Link> seinen Namen hat, welche Geheimnisse der <Link href="/touren/natur-und-straende" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Tijuca-Regenwald</Link> verbirgt und wo die Cariocas wirklich feiern, essen und leben.
                                 </p>
                                 <p>
-                                    Unsere Reiseleitung in Rio de Janeiro umfasst nicht nur <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">klassische Stadtführungen</Link>, sondern auch <Link href="/touren/natur-und-straende" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Naturerlebnisse</Link>, <Link href="/touren/kultur-und-geschichte" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">kulturelle Entdeckungstouren</Link>, <Link href="/touren/favela-tour" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela-Besuche</Link>, <Link href="/touren/sport-und-abenteuer" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Sport und Abenteuer</Link> sowie das legendäre <Link href="/touren/by-night" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Nachtleben</Link> der Stadt. Jede Tour kann <Link href="/touren/individuell" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">individuell angepasst</Link> werden — von der Halbtags-Stadtführung bis zum mehrtägigen Programm.
+                                    Unsere Reiseleitung in Rio de Janeiro umfasst nicht nur <Link href="/touren/klassiker" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">klassische Stadtführungen</Link>, sondern auch <Link href="/touren/natur-und-straende" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Naturerlebnisse</Link>, <Link href="/touren/kultur-und-geschichte" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">kulturelle Entdeckungstouren</Link>, <Link href="/touren/favela-tour" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Favela-Besuche</Link>, <Link href="/touren/sport-und-abenteuer" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Sport und Abenteuer</Link> sowie das legendäre <Link href="/touren/by-night" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Nachtleben</Link> der Stadt. Jede Tour kann <Link href="/touren/individuell" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">individuell angepasst</Link> werden, von der Halbtags-Stadtführung bis zum mehrtägigen Programm.
                                 </p>
                                 <p>
-                                    Ob du zum ersten Mal nach Rio kommst oder die Stadt schon kennst und neue Ecken entdecken willst — mit einem lokalen Guide, der Deutsch spricht und die Stadt wie seine Westentasche kennt, wird deine Reise sicher, entspannt und unvergesslich.
+                                    Ob du zum ersten Mal nach Rio kommst oder die Stadt schon kennst und neue Ecken entdecken willst, mit einem lokalen Guide, der Deutsch spricht und die Stadt wie seine Westentasche kennt, wird deine Reise sicher, entspannt und unvergesslich.
                                 </p>
                             </div>
                         </FadeIn>
@@ -272,7 +272,7 @@ export default async function TourenPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Alle Touren & Ausflüge in Rio de Janeiro — <br className="hidden sm:block" />
+                                Alle Touren & Ausflüge in Rio de Janeiro, <br className="hidden sm:block" />
                                 <span className="text-rio-green">dein Überblick</span>
                             </h2>
                         </FadeIn>
@@ -285,7 +285,7 @@ export default async function TourenPage() {
                                     emoji: "🏔️",
                                     title: "Klassiker Tour in Rio de Janeiro",
                                     image: "/images/home-pao-de-acucar.webp",
-                                    desc: "Die schönsten Sehenswürdigkeiten Rios an einem Tag — von Corcovado über den Zuckerhut bis zum Sonnenuntergang am Arpoador. 12 Highlights, 6 fertige Tagesprogramme.",
+                                    desc: "Die schönsten Sehenswürdigkeiten Rios an einem Tag, von Corcovado über den Zuckerhut bis zum Sonnenuntergang am Arpoador. 12 Highlights, 6 fertige Tagesprogramme.",
                                     badges: ['~8 Stunden', '12 Highlights']
                                 },
                                 {
@@ -293,7 +293,7 @@ export default async function TourenPage() {
                                     emoji: "🌿",
                                     title: "Natur & Strände in Rio de Janeiro",
                                     image: "/images/natur-und-straende.webp",
-                                    desc: "Regenwald-Wanderungen, Gipfeltouren und versteckte Strände — Rios wilde Seite abseits der Touristenpfade. Von leicht bis anspruchsvoll.",
+                                    desc: "Regenwald-Wanderungen, Gipfeltouren und versteckte Strände, Rios wilde Seite abseits der Touristenpfade. Von leicht bis anspruchsvoll.",
                                     badges: ['3–8 Stunden', '9 Highlights']
                                 },
                                 {
@@ -301,7 +301,7 @@ export default async function TourenPage() {
                                     emoji: "🏘️",
                                     title: "Favela Tour in Rio de Janeiro",
                                     image: "/images/rio-favela.webp",
-                                    desc: "Ein respektvoller Einblick in die Kultur und den Alltag der Favelas — authentisch und sicher mit lokalem Guide. Besuche Rocinha und The Maze.",
+                                    desc: "Ein respektvoller Einblick in die Kultur und den Alltag der Favelas, authentisch und sicher mit lokalem Guide. Besuche Rocinha und The Maze.",
                                     badges: ['2–3 Stunden', '3 Highlights']
                                 },
                                 {
@@ -309,15 +309,15 @@ export default async function TourenPage() {
                                     emoji: "🏛️",
                                     title: "Kultur & Geschichte Tour in Rio de Janeiro",
                                     image: "/images/kultur-und-geschichte-bg.webp",
-                                    desc: "Museen, historische Gebäude und die faszinierende Geschichte Rios — vom kolonialen Zentrum bis zur modernen Praça Mauá.",
+                                    desc: "Museen, historische Gebäude und die faszinierende Geschichte Rios, vom kolonialen Zentrum bis zur modernen Praça Mauá.",
                                     badges: ["4–6 Stunden", "10 Highlights"]
                                 },
                                 {
                                     slug: "by-night",
                                     emoji: "🌙",
-                                    title: "Rio by Night — Nachtleben in Rio de Janeiro",
+                                    title: "Rio by Night: Nachtleben in Rio de Janeiro",
                                     image: "/images/lapa-by-night.webp",
-                                    desc: "Samba in Lapa, Cocktails in Leblon und das pulsierende Nachtleben Rios — erlebe die Stadt nach Sonnenuntergang.",
+                                    desc: "Samba in Lapa, Cocktails in Leblon und das pulsierende Nachtleben Rios. Erlebe die Stadt nach Sonnenuntergang.",
                                     badges: ["3–4 Stunden", "Nachtleben"]
                                 },
                                 {
@@ -325,7 +325,7 @@ export default async function TourenPage() {
                                     emoji: "🎉",
                                     title: "Karneval Tour in Rio de Janeiro",
                                     image: "/images/bloco-de-rua.webp",
-                                    desc: "Das größte Fest der Welt hautnah erleben — Sambódromo, Blocos de Rua und die beste Karnevalsstimmung mit einem echten Carioca.",
+                                    desc: "Das größte Fest der Welt hautnah erleben: Sambódromo, Blocos de Rua und die beste Karnevalsstimmung mit einem echten Carioca.",
                                     badges: ["Saisonal", "Karneval"]
                                 },
                                 {
@@ -333,7 +333,7 @@ export default async function TourenPage() {
                                     emoji: "⚽",
                                     title: "Fußball Tour in Rio de Janeiro",
                                     image: "/images/maracana-rio-de-janeiro.webp",
-                                    desc: "Maracanã, Fußball-Museen und echte Leidenschaft — erlebe Rio wie ein Fan und spüre die Begeisterung der Cariocas.",
+                                    desc: "Maracanã, Fußball-Museen und echte Leidenschaft. Erlebe Rio wie ein Fan und spüre die Begeisterung der Cariocas.",
                                     badges: ["3–4 Stunden", "Fußball"]
                                 },
                                 {
@@ -341,7 +341,7 @@ export default async function TourenPage() {
                                     emoji: "🗺️",
                                     title: "Tagesausflüge ab Rio de Janeiro",
                                     image: "/images/buzios.webp",
-                                    desc: "Búzios, Ilha Grande, Paraty, Petrópolis und mehr — traumhafte Ausflüge rund um Rio, perfekt für einen Extra-Tag.",
+                                    desc: "Búzios, Ilha Grande, Paraty, Petrópolis und mehr, traumhafte Ausflüge rund um Rio, perfekt für einen Extra-Tag.",
                                     badges: ["Ganztägig", "Ab Rio"]
                                 },
                                 {
@@ -365,7 +365,7 @@ export default async function TourenPage() {
                                     emoji: "🎯",
                                     title: "Individuelle Tour in Rio de Janeiro",
                                     image: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800&q=80",
-                                    desc: "Dein Wunschtag in Rio — du bestimmst die Orte und das Tempo, ich plane den perfekten Tag für dich.",
+                                    desc: "Dein Wunschtag in Rio: du bestimmst die Orte und das Tempo, ich plane den perfekten Tag für dich.",
                                     badges: ["Flexibel", "Auf Anfrage"]
                                 }
                             ].map((tour, i) => (
@@ -500,27 +500,27 @@ export default async function TourenPage() {
                                     {[
                                         {
                                             question: "Sind die Touren auf Deutsch?",
-                                            answer: "Ja, alle unsere Stadtführungen und Touren in Rio de Janeiro werden komplett auf Deutsch durchgeführt. Dein Reiseleiter ist ein gebürtiger Carioca, der fließend Deutsch spricht und vier Jahre in Köln gelebt hat. Du bekommst nicht nur Übersetzungen, sondern echte Erklärungen mit kulturellem Hintergrund — in deiner Muttersprache."
+                                            answer: "Ja, alle unsere Stadtführungen und Touren in Rio de Janeiro werden komplett auf Deutsch durchgeführt. Dein Reiseleiter ist ein gebürtiger Carioca, der fließend Deutsch spricht und vier Jahre in Köln gelebt hat. Du bekommst nicht nur Übersetzungen, sondern echte Erklärungen mit kulturellem Hintergrund, in deiner Muttersprache."
                                         },
                                         {
                                             question: "Wie sicher sind die Touren?",
-                                            answer: "Sicherheit hat bei uns oberste Priorität. Als Einheimischer kenne ich die sicheren Gebiete, die besten Routen und die Uhrzeiten, zu denen man bestimmte Viertel besuchen sollte. Alle Touren sind so geplant, dass du dich jederzeit wohlfühlst. Ich kümmere mich um Transport, Orientierung und alles, was du brauchst — du genießt einfach den Tag."
+                                            answer: "Sicherheit hat bei uns oberste Priorität. Als Einheimischer kenne ich die sicheren Gebiete, die besten Routen und die Uhrzeiten, zu denen man bestimmte Viertel besuchen sollte. Alle Touren sind so geplant, dass du dich jederzeit wohlfühlst. Ich kümmere mich um Transport, Orientierung und alles, was du brauchst. Du genießt einfach den Tag."
                                         },
                                         {
                                             question: "Kann ich eine individuelle Tour zusammenstellen?",
-                                            answer: "Natürlich! Neben unseren fertigen Touren bieten wir auch komplett individuelle Stadtführungen an. Sag mir einfach, was dich interessiert, wie viel Zeit du hast und mit wem du reist — und ich stelle ein maßgeschneidertes Programm für dich zusammen. Ob eine Mischung aus Kultur und Natur, ein Tag nur am Strand oder eine Kombination aus Sightseeing und Fußball — alles ist möglich."
+                                            answer: "Natürlich! Neben unseren fertigen Touren bieten wir auch komplett individuelle Stadtführungen an. Sag mir einfach, was dich interessiert, wie viel Zeit du hast und mit wem du reist, und ich stelle ein maßgeschneidertes Programm für dich zusammen. Ob eine Mischung aus Kultur und Natur, ein Tag nur am Strand oder eine Kombination aus Sightseeing und Fußball, alles ist möglich."
                                         },
                                         {
                                             question: "Was kostet eine Tour in Rio de Janeiro?",
-                                            answer: "Der Preis hängt von drei Dingen ab: wie lange ihr unterwegs seid, wie viele ihr seid und wohin es gehen soll. Eine Halbtagstour durch die Stadt lässt sich nicht mit einem Tagesausflug nach Búzios oder Ilha Grande vergleichen. Schick mir deine Anfrage mit deinen Wunschtagen und Interessen — du bekommst ein persönliches Angebot mit Ablauf und Preis, kostenlos und unverbindlich."
+                                            answer: "Der Preis hängt von drei Dingen ab: wie lange ihr unterwegs seid, wie viele ihr seid und wohin es gehen soll. Eine Halbtagstour durch die Stadt lässt sich nicht mit einem Tagesausflug nach Búzios oder Ilha Grande vergleichen. Schick mir deine Anfrage mit deinen Wunschtagen und Interessen. Du bekommst ein persönliches Angebot mit Ablauf und Preis, kostenlos und unverbindlich."
                                         },
                                         {
                                             question: "Wie buche ich eine Tour?",
-                                            answer: "Ganz einfach: Schreib mir per WhatsApp oder E-Mail mit deinen Wunschdaten und Interessen. Innerhalb von 24 Stunden bekommst du einen Vorschlag mit Ablauf und Preis — kostenlos und unverbindlich. Wenn alles passt, bestätigst du und wir legen los. Keine komplizierten Buchungssysteme, keine versteckten Kosten."
+                                            answer: "Ganz einfach: Schreib mir per WhatsApp oder E-Mail mit deinen Wunschdaten und Interessen. Innerhalb von 24 Stunden bekommst du einen Vorschlag mit Ablauf und Preis, kostenlos und unverbindlich. Wenn alles passt, bestätigst du und wir legen los. Keine komplizierten Buchungssysteme, keine versteckten Kosten."
                                         },
                                         {
                                             question: "Für wen sind die Touren geeignet?",
-                                            answer: "Unsere Touren sind für alle geeignet — Alleinreisende, Paare, Familien mit Kindern, Senioren und kleine Gruppen. Jede Tour wird individuell angepasst: Tempo, Schwierigkeitsgrad und Interessen bestimmst du. Wir haben auch barrierefreie Optionen und Touren speziell für Familien mit kleinen Kindern."
+                                            answer: "Unsere Touren sind für alle geeignet: Alleinreisende, Paare, Familien mit Kindern, Senioren und kleine Gruppen. Jede Tour wird individuell angepasst: Tempo, Schwierigkeitsgrad und Interessen bestimmst du. Wir haben auch barrierefreie Optionen und Touren speziell für Familien mit kleinen Kindern."
                                         }
                                     ].map((faq, i) => (
                                         <details key={i} className="group border border-gray-200 rounded-2xl overflow-hidden">
@@ -545,7 +545,7 @@ export default async function TourenPage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6">
-                                Dein Wunschtag in Rio — <br className="hidden sm:block" />
+                                Dein Wunschtag in Rio, <br className="hidden sm:block" />
                                 <span className="text-rio-yellow">ich plane ihn für dich.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
