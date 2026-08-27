@@ -30,7 +30,7 @@ export default function Footer({ contact = FALLBACK_CONTACT }: { contact?: Conta
                             <span>Rio<span className="text-rio-blue">FürDeutsche</span></span>
                         </Link>
                         <p className="text-sm mb-3">{t('tagline')}</p>
-                        <p className="text-sm mb-6 text-gray-500">RioFürDeutsche bietet deutschsprachige Reiseleitung, Citytouren und Ausflüge in Rio de Janeiro — geführt von einem echten Carioca, der fließend Deutsch spricht.</p>
+                        <p className="text-sm mb-6 text-gray-500">RioFürDeutsche bietet deutschsprachige Reiseleitung, Citytouren und Ausflüge in Rio de Janeiro, geführt von einem echten Carioca, der fließend Deutsch spricht.</p>
                         <div className="flex items-center gap-3">
                             {contact.instagramHref && (
                             <a

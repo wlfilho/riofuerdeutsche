@@ -535,7 +535,7 @@ export default async function ProposalPage({
                   <li key={i} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 text-[13px]">
                     <span className="text-amber-900/80">
                       <span className="font-medium">{c.activity}</span>
-                      <span className="text-amber-800/60"> – {c.description}</span>
+                      <span className="text-amber-800/60">: {c.description}</span>
                     </span>
                     <span className="tabular-nums whitespace-nowrap font-semibold text-amber-900">
                       {formatOnsiteCost(c)}

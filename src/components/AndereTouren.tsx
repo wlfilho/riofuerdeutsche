@@ -19,7 +19,7 @@ const allTours: Tour[] = [
         slug: "klassiker",
         emoji: "🏔️",
         title: "Klassiker Tour in Rio de Janeiro",
-        description: "Die schönsten Sehenswürdigkeiten Rios an einem Tag — von Corcovado bis Arpoador.",
+        description: "Die schönsten Sehenswürdigkeiten Rios an einem Tag, von Corcovado bis Arpoador.",
         badges: ["~8 Stunden", "12 Highlights"],
         link: "/touren/klassiker"
     },
@@ -27,7 +27,7 @@ const allTours: Tour[] = [
         slug: "natur-und-straende",
         emoji: "🌿",
         title: "Natur & Strände in Rio de Janeiro",
-        description: "Regenwald-Wanderungen, Gipfeltouren und versteckte Strände — Rios wilde Seite.",
+        description: "Regenwald-Wanderungen, Gipfeltouren und versteckte Strände, Rios wilde Seite.",
         badges: ["3–8 Stunden", "9 Highlights"],
         link: "/touren/natur-und-straende"
     },
@@ -35,7 +35,7 @@ const allTours: Tour[] = [
         slug: "favela-tour",
         emoji: "🏘️",
         title: "Favela Tour in Rio de Janeiro",
-        description: "Ein respektvoller Einblick in die Kultur der Favelas — authentisch und sicher.",
+        description: "Ein respektvoller Einblick in die Kultur der Favelas, authentisch und sicher.",
         badges: ["2–3 Stunden", "2 Highlights"],
         link: "/touren/favela-tour",
         isComingSoon: false
@@ -44,7 +44,7 @@ const allTours: Tour[] = [
         slug: "kultur-geschichte",
         emoji: "🏛️",
         title: "Kultur & Geschichte Tour in Rio de Janeiro",
-        description: "Museen, historische Gebäude und die faszinierende Geschichte Rios — vom kolonialen Zentrum bis Praça Mauá.",
+        description: "Museen, historische Gebäude und die faszinierende Geschichte Rios, vom kolonialen Zentrum bis Praça Mauá.",
         badges: ["4–6 Stunden", "10 Highlights"],
         link: "/touren/kultur-und-geschichte",
         isComingSoon: false
@@ -52,8 +52,8 @@ const allTours: Tour[] = [
     {
         slug: "night",
         emoji: "🌙",
-        title: "Rio by Night — Nachtleben in Rio de Janeiro",
-        description: "Samba, Lapa und das pulsierende Nachtleben Rios — erlebe die Stadt nach Sonnenuntergang.",
+        title: "Rio by Night: Nachtleben in Rio de Janeiro",
+        description: "Samba, Lapa und das pulsierende Nachtleben Rios. Erlebe die Stadt nach Sonnenuntergang.",
         badges: ["3–4 Stunden", "Nachtleben"],
         link: "/touren/by-night",
         isComingSoon: false
@@ -62,7 +62,7 @@ const allTours: Tour[] = [
         slug: "karneval",
         emoji: "🎉",
         title: "Karneval Tour in Rio de Janeiro",
-        description: "Das größte Fest der Welt hautnah erleben — ich zeige dir den echten Karneval von Rio.",
+        description: "Das größte Fest der Welt hautnah erleben. Ich zeige dir den echten Karneval von Rio.",
         badges: ["Saisonal", "Karneval"],
         link: "/touren/karneval-tour",
         isComingSoon: false
@@ -71,7 +71,7 @@ const allTours: Tour[] = [
         slug: "regentage",
         emoji: "☔",
         title: "Regentage in Rio de Janeiro",
-        description: "Regen in Rio? Kein Problem! Museen, Gastronomie, Indoor-Aktivitäten und kulturelle Erlebnisse — damit kein Tag verloren geht.",
+        description: "Regen in Rio? Kein Problem! Museen, Gastronomie, Indoor-Aktivitäten und kulturelle Erlebnisse, damit kein Tag verloren geht.",
         badges: ["Flexibel", "Indoor-Erlebnisse"],
         link: "/touren/regentage",
         isComingSoon: false
@@ -80,7 +80,7 @@ const allTours: Tour[] = [
         slug: "fussball",
         emoji: "⚽",
         title: "Fußball Tour in Rio de Janeiro",
-        description: "Maracanã, Museen und echte Fußball-Leidenschaft — erlebe Rio wie ein Fan.",
+        description: "Maracanã, Museen und echte Fußball-Leidenschaft. Erlebe Rio wie ein Fan.",
         badges: ["3–4 Stunden", "Fußball"],
         link: "/touren/fussball",
         isComingSoon: false
@@ -89,7 +89,7 @@ const allTours: Tour[] = [
         slug: "sport-und-abenteuer",
         emoji: "🧗",
         title: "Sport & Abenteuer in Rio de Janeiro",
-        description: "Surfen, Paragliding, Stand-up Paddle, Klettern und mehr — Rio de Janeiro ist ein Paradies für Abenteurer und Sportbegeisterte.",
+        description: "Surfen, Paragliding, Stand-up Paddle, Klettern und mehr. Rio de Janeiro ist ein Paradies für Abenteurer und Sportbegeisterte.",
         badges: ["3–8 Stunden", "Adrenalin & Natur"],
         link: "/touren/sport-und-abenteuer",
         isComingSoon: false
@@ -98,7 +98,7 @@ const allTours: Tour[] = [
         slug: "tagesausfluege",
         emoji: "🗺️",
         title: "Tagesausflüge ab Rio de Janeiro",
-        description: "Búzios, Ilha Grande, Paraty, Petrópolis und mehr — traumhafte Ausflüge rund um Rio.",
+        description: "Búzios, Ilha Grande, Paraty, Petrópolis und mehr, traumhafte Ausflüge rund um Rio.",
         badges: ["Ganztägig", "Ab Rio"],
         link: "/touren/tagesausfluege",
         isComingSoon: false
@@ -107,7 +107,7 @@ const allTours: Tour[] = [
         slug: "individuell",
         emoji: "🎯",
         title: "Individuelle Tour in Rio de Janeiro",
-        description: "Dein Wunschtag in Rio — du bestimmst die Orte, ich plane den perfekten Tag.",
+        description: "Dein Wunschtag in Rio: du bestimmst die Orte, ich plane den perfekten Tag.",
         badges: ["Flexibel", "Auf Anfrage"],
         link: "/touren/individuell",
         isComingSoon: false
@@ -134,7 +134,7 @@ export default function AndereTouren({
             <div className="max-w-7xl mx-auto px-5 lg:px-8">
                 <FadeIn direction="up" className="mb-10">
                     <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                        Rio de Janeiro Touren — entdecke mehr mit deinem lokalen Guide
+                        Rio de Janeiro Touren: entdecke mehr mit deinem lokalen Guide
                     </h2>
                 </FadeIn>
 

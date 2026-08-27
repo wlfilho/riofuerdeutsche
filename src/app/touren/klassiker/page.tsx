@@ -21,8 +21,8 @@ import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 
 export const metadata = {
-    title: "Klassiker Tour Rio de Janeiro — mit deutschem Guide",
-    description: "Entdecken Sie Rios schönste Sehenswürdigkeiten auf einer privaten Tagestour auf Deutsch. Corcovado, Zuckerhut, Escadaria Selarón und mehr — 8 Stunden, 3–4 Highlights, ein unvergesslicher Tag.",
+    title: "Klassiker Tour Rio de Janeiro mit deutschem Guide",
+    description: "Entdecken Sie Rios schönste Sehenswürdigkeiten auf einer privaten Tagestour auf Deutsch. Corcovado, Zuckerhut, Escadaria Selarón und mehr: 8 Stunden, 3–4 Highlights, ein unvergesslicher Tag.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/touren/klassiker",
     },
@@ -37,8 +37,8 @@ const attractions = [
     {
         name: "Christus-Erlöser (Corcovado)",
         time: "~2 Std.",
-        desc: "Das Wahrzeichen Rios thront auf 710 Metern über der Stadt. Von hier oben hast du einen 360°-Blick über die Strände, die Bucht und den Regenwald — ein Moment, den du nie vergisst.",
-        tip: "Früh am Morgen oder kurz vor Schließung sind die besten Zeiten — weniger Touristen, besseres Licht für Fotos.",
+        desc: "Das Wahrzeichen Rios thront auf 710 Metern über der Stadt. Von hier oben hast du einen 360°-Blick über die Strände, die Bucht und den Regenwald, ein Moment, den du nie vergisst.",
+        tip: "Früh am Morgen oder kurz vor Schließung sind die besten Zeiten: weniger Touristen, besseres Licht für Fotos.",
         effort: "Leicht",
         gradient: "from-blue-100 to-blue-200",
         image: "/images/cristo.webp",
@@ -48,7 +48,7 @@ const attractions = [
     {
         name: "Zuckerhut (Pão de Açúcar)",
         time: "~2,5 Std.",
-        desc: "Zwei Seilbahnfahrten bringen dich auf den legendären Zuckerhut. Der Blick auf die Guanabara-Bucht, den Corcovado und die Skyline von Rio ist atemberaubend — besonders zum Sonnenuntergang.",
+        desc: "Zwei Seilbahnfahrten bringen dich auf den legendären Zuckerhut. Der Blick auf die Guanabara-Bucht, den Corcovado und die Skyline von Rio ist atemberaubend, besonders zum Sonnenuntergang.",
         tip: "Der Sonnenuntergang vom Zuckerhut ist eines der schönsten Erlebnisse in Rio. Ich plane die Tour so, dass wir genau zur richtigen Zeit oben sind.",
         effort: "Leicht",
         gradient: "from-orange-100 to-orange-200",
@@ -58,8 +58,8 @@ const attractions = [
     {
         name: "Escadaria Selarón",
         time: "~45 Min.",
-        desc: "215 Stufen, bedeckt mit über 2.000 bunten Fliesen aus aller Welt — das Lebenswerk des chilenischen Künstlers Jorge Selarón. Eine der meistfotografierten Treppen der Welt, mitten im Herzen von Lapa.",
-        tip: "Frühmorgens hast du die Treppe fast für dich allein — perfekt für Fotos ohne Menschenmassen.",
+        desc: "215 Stufen, bedeckt mit über 2.000 bunten Fliesen aus aller Welt, das Lebenswerk des chilenischen Künstlers Jorge Selarón. Eine der meistfotografierten Treppen der Welt, mitten im Herzen von Lapa.",
+        tip: "Frühmorgens hast du die Treppe fast für dich allein, perfekt für Fotos ohne Menschenmassen.",
         effort: "Leicht",
         gradient: "from-red-100 to-red-200",
         image: "/images/selaron.webp",
@@ -69,7 +69,7 @@ const attractions = [
         name: "Santa Teresa",
         time: "~1,5 Std.",
         desc: "Das Künstlerviertel auf dem Hügel: kopfsteingepflasterte Gassen, bunte Häuser, Ateliers und ein Panoramablick über die Stadt. Santa Teresa zeigt dir das kreative, authentische Rio abseits der Touristenpfade.",
-        tip: "Wir kombinieren Santa Teresa ideal mit der Escadaria Selarón und den Arcos da Lapa — alles fußläufig erreichbar.",
+        tip: "Wir kombinieren Santa Teresa ideal mit der Escadaria Selarón und den Arcos da Lapa, alles fußläufig erreichbar.",
         effort: "Moderat",
         gradient: "from-yellow-100 to-yellow-200",
         image: "/images/santa-teresa.webp"
@@ -77,8 +77,8 @@ const attractions = [
     {
         name: "Mirante Dona Marta",
         time: "~1 Std.",
-        desc: "Der vielleicht beste Aussichtspunkt Rios — und kaum ein Tourist kennt ihn. Von hier siehst du den Christus, den Zuckerhut, die Lagoa und die Strände in einem einzigen, spektakulären Panorama.",
-        tip: "Dies ist mein persönlicher Lieblingsort in Rio. Der Blick von hier ist besser als vom Corcovado — und es gibt keine Warteschlangen.",
+        desc: "Der vielleicht beste Aussichtspunkt Rios, und kaum ein Tourist kennt ihn. Von hier siehst du den Christus, den Zuckerhut, die Lagoa und die Strände in einem einzigen, spektakulären Panorama.",
+        tip: "Dies ist mein persönlicher Lieblingsort in Rio. Der Blick von hier ist besser als vom Corcovado, und es gibt keine Warteschlangen.",
         effort: "Leicht",
         gradient: "from-green-100 to-green-200",
         image: "/images/dona-marta.webp"
@@ -86,7 +86,7 @@ const attractions = [
     {
         name: "Pedra do Arpoador",
         time: "~1 Std.",
-        desc: "Der Felsen zwischen Copacabana und Ipanema ist der Ort, an dem die Cariocas den Sonnenuntergang feiern — mit Applaus, wenn die Sonne im Meer versinkt. Ein magischer Moment und echtes Rio-Feeling.",
+        desc: "Der Felsen zwischen Copacabana und Ipanema ist der Ort, an dem die Cariocas den Sonnenuntergang feiern, mit Applaus, wenn die Sonne im Meer versinkt. Ein magischer Moment und echtes Rio-Feeling.",
         tip: "Am Abend klatschen die Einheimischen, wenn die Sonne untergeht. Diesen Moment erlebst du nirgendwo sonst auf der Welt.",
         effort: "Leicht",
         gradient: "from-teal-100 to-teal-200",
@@ -96,7 +96,7 @@ const attractions = [
     {
         name: "Tijuca-Regenwald",
         time: "~3 Std.",
-        desc: "Der größte urbane Regenwald der Welt — mitten in Rio. Wanderwege, Wasserfälle und eine unglaubliche Artenvielfalt erwarten dich, nur wenige Minuten vom Stadtzentrum entfernt.",
+        desc: "Der größte urbane Regenwald der Welt, mitten in Rio. Wanderwege, Wasserfälle und eine unglaubliche Artenvielfalt erwarten dich, nur wenige Minuten vom Stadtzentrum entfernt.",
         tip: "Ich kenne Wege und Wasserfälle, die in keinem Reiseführer stehen. Für Naturliebhaber ist die Tijuca ein absolutes Muss.",
         effort: "Moderat",
         gradient: "from-emerald-100 to-emerald-200",
@@ -124,7 +124,7 @@ const attractions = [
         name: "Lagoa Rodrigo de Freitas",
         time: "~1 Std.",
         desc: "Die Lagune im Herzen der Südzone, umgeben von Bergen und den Stadtvierteln Ipanema, Leblon und Jardim Botânico. Ideal zum Spazieren, Radfahren oder einfach die Aussicht genießen.",
-        tip: "Am späten Nachmittag spiegeln sich die Berge im Wasser — ein großartiger Zwischenstopp auf dem Weg zum Sonnenuntergang am Arpoador.",
+        tip: "Am späten Nachmittag spiegeln sich die Berge im Wasser, ein großartiger Zwischenstopp auf dem Weg zum Sonnenuntergang am Arpoador.",
         effort: "Leicht",
         gradient: "from-cyan-100 to-cyan-200",
         image: "/images/lagoa.webp"
@@ -132,8 +132,8 @@ const attractions = [
     {
         name: "Urca",
         time: "~1,5 Std.",
-        desc: "Das ruhigste Viertel Rios, direkt am Fuß des Zuckerhuts. Kleine Gassen, historische Häuser und die Mureta da Urca — eine Mauer am Meer, wo Einheimische bei Sonnenuntergang ein kühles Bier genießen.",
-        tip: "Die Mureta da Urca bei Sonnenuntergang ist das authentischste Rio-Erlebnis: Bier, Meerblick, Einheimische — kein Tourist weit und breit.",
+        desc: "Das ruhigste Viertel Rios, direkt am Fuß des Zuckerhuts. Kleine Gassen, historische Häuser und die Mureta da Urca, eine Mauer am Meer, wo Einheimische bei Sonnenuntergang ein kühles Bier genießen.",
+        tip: "Die Mureta da Urca bei Sonnenuntergang ist das authentischste Rio-Erlebnis: Bier, Meerblick, Einheimische, kein Tourist weit und breit.",
         effort: "Leicht",
         gradient: "from-sky-100 to-sky-200",
         image: "/images/urca.webp"
@@ -141,7 +141,7 @@ const attractions = [
     {
         name: "Arcos da Lapa",
         time: "~30 Min.",
-        desc: "Das imposante Aquädukt aus dem 18. Jahrhundert ist das Tor zum Stadtviertel Lapa — Rios Zentrum für Nachtleben, Samba und Straßenkunst. Tagsüber ein fotogenes Wahrzeichen, nachts voller Energie.",
+        desc: "Das imposante Aquädukt aus dem 18. Jahrhundert ist das Tor zum Stadtviertel Lapa, Rios Zentrum für Nachtleben, Samba und Straßenkunst. Tagsüber ein fotogenes Wahrzeichen, nachts voller Energie.",
         tip: "Perfekt als Ausgangspunkt: Von hier geht es zu Fuß zur Escadaria Selarón oder mit der historischen Straßenbahn hoch nach Santa Teresa.",
         effort: "Leicht",
         gradient: "from-indigo-100 to-indigo-200",
@@ -154,7 +154,7 @@ const programs = [
         icon: Eye,
         title: "Aussicht & Natur",
         thema: "aussicht-natur",
-        description: "Ein Tag für alle, die Rio von oben erleben wollen. Wir starten entspannt im Grünen und arbeiten uns zu den spektakulärsten Aussichtspunkten der Stadt vor — bis zum perfekten Sonnenuntergang am Meer.",
+        description: "Ein Tag für alle, die Rio von oben erleben wollen. Wir starten entspannt im Grünen und arbeiten uns zu den spektakulärsten Aussichtspunkten der Stadt vor, bis zum perfekten Sonnenuntergang am Meer.",
         schedule: [
             { time: "09:00", activity: "Parque Lage (Frühstück mit Blick auf den Christus)" },
             { time: "10:30", activity: "Christus-Erlöser (Corcovado)" },
@@ -166,7 +166,7 @@ const programs = [
         icon: Palette,
         title: "Kunst & Kultur",
         thema: "kunst-kultur",
-        description: "Das kreative, bunte Rio: Street Art, historische Viertel und tropische Gärten. Dieser Tag zeigt dir die Seele der Stadt — abseits der üblichen Touristenpfade.",
+        description: "Das kreative, bunte Rio: Street Art, historische Viertel und tropische Gärten. Dieser Tag zeigt dir die Seele der Stadt, abseits der üblichen Touristenpfade.",
         schedule: [
             { time: "09:00", activity: "Escadaria Selarón (die berühmte Fliesentreppe, morgens fast leer)" },
             { time: "10:00", activity: "Arcos da Lapa (historisches Aquädukt und Straßenkunst)" },
@@ -178,7 +178,7 @@ const programs = [
         icon: Camera,
         title: "Die Postkarten-Tour",
         thema: "postkarten-tour",
-        description: "Die Ikonen, die jeder kennen muss — aber mit einem Carioca, der dir die besten Zeiten, Blickwinkel und Geschichten hinter den Postkarten-Motiven zeigt.",
+        description: "Die Ikonen, die jeder kennen muss. Aber mit einem Carioca, der dir die besten Zeiten, Blickwinkel und Geschichten hinter den Postkarten-Motiven zeigt.",
         schedule: [
             { time: "08:30", activity: "Christus-Erlöser (Corcovado, früh = weniger Touristen)" },
             { time: "11:00", activity: "Zuckerhut (Seilbahn mit Blick auf die Bucht)" },
@@ -190,7 +190,7 @@ const programs = [
         icon: Mountain,
         title: "Berg & Meer",
         thema: "berg-meer",
-        description: "Vom dichten Regenwald über atemberaubende Aussichtspunkte bis zum Meer — dieser Tag vereint die dramatische Geografie Rios in einem einzigen, unvergesslichen Erlebnis.",
+        description: "Vom dichten Regenwald über atemberaubende Aussichtspunkte bis zum Meer. Dieser Tag vereint die dramatische Geografie Rios in einem einzigen, unvergesslichen Erlebnis.",
         schedule: [
             { time: "08:30", activity: "Tijuca-Regenwald (Wanderung, Wasserfälle, Natur pur)" },
             { time: "11:30", activity: "Mirante Dona Marta (Panorama als Belohnung)" },
@@ -214,7 +214,7 @@ const programs = [
         icon: Gem,
         title: "Geheimtipps",
         thema: "geheimtipps",
-        description: "Die Orte, die nur Einheimische kennen — kein Reiseführer, keine Warteschlangen, keine Touristenmassen. Nur du, ein Carioca und das echte Rio de Janeiro.",
+        description: "Die Orte, die nur Einheimische kennen: kein Reiseführer, keine Warteschlangen, keine Touristenmassen. Nur du, ein Carioca und das echte Rio de Janeiro.",
         schedule: [
             { time: "09:00", activity: "Urca (ruhige Gassen, Meerblick, lokales Frühstück)" },
             { time: "11:00", activity: "Mirante Dona Marta (der beste Aussichtspunkt, den Touristen nicht kennen)" },
@@ -303,18 +303,18 @@ export default async function KlassikerTourPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Rio de Janeiro ist eine der visuell beeindruckendsten Städte der Welt — eine Stadt, die man nicht einfach &bdquo;besucht&ldquo;, sondern die man erlebt.
+                                    Rio de Janeiro ist eine der visuell beeindruckendsten Städte der Welt. Eine Stadt, die man nicht einfach &bdquo;besucht&ldquo;, sondern die man erlebt.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>
                                         Der Corcovado mit dem Christus-Erlöser, der Zuckerhut, der Strand von Ipanema: Das sind die Postkarten-Bilder, die jeder kennt. Aber Rio hat noch viel mehr zu bieten.
                                     </p>
                                     <p>
-                                        Als geborener Carioca zeige ich dir nicht nur die klassischen Highlights, sondern auch die Orte, die du in keinem Reiseführer findest: den Aussichtspunkt Mirante Dona Marta mit dem besten Blick auf die Stadt, die farbenfrohe Escadaria Selarón im Herzen von Lapa, das romantische Künstlerviertel Santa Teresa — und noch einige mehr.
+                                        Als geborener Carioca zeige ich dir nicht nur die klassischen Highlights, sondern auch die Orte, die du in keinem Reiseführer findest: den Aussichtspunkt Mirante Dona Marta mit dem besten Blick auf die Stadt, die farbenfrohe Escadaria Selarón im Herzen von Lapa, das romantische Künstlerviertel Santa Teresa, und noch einige mehr.
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Unten findest du eine Auswahl der schönsten Sehenswürdigkeiten Rios — von weltbekannten Ikonen bis zu versteckten Geheimtipps, die nur Einheimische kennen.
+                                    Unten findest du eine Auswahl der schönsten Sehenswürdigkeiten Rios, von weltbekannten Ikonen bis zu versteckten Geheimtipps, die nur Einheimische kennen.
                                 </p>
                             </div>
                         </FadeIn>
@@ -326,7 +326,7 @@ export default async function KlassikerTourPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Die schönsten Sehenswürdigkeiten Rios —{" "}
+                                Die schönsten Sehenswürdigkeiten Rios,{" "}
                                 <span className="text-rio-green">auf einen Blick</span>
                             </h2>
                             <p className="text-gray-500 mt-3 text-lg">12 Highlights, von weltbekannten Ikonen bis zu versteckten Geheimtipps.</p>
@@ -398,15 +398,15 @@ export default async function KlassikerTourPage() {
                             </h2>
                             <div className="prose prose-lg prose-gray max-w-none text-gray-600 space-y-6 leading-relaxed">
                                 <p>
-                                    Ein guter Tag in Rio braucht kein vollgepacktes Programm — er braucht die richtigen Orte zur richtigen Zeit. In 8 Stunden zeige ich dir 3 bis 4 der schönsten Sehenswürdigkeiten der Stadt, abgestimmt auf deine Interessen, dein Tempo und den besten Tagesrhythmus Rios.
+                                    Ein guter Tag in Rio braucht kein vollgepacktes Programm. Er braucht die richtigen Orte zur richtigen Zeit. In 8 Stunden zeige ich dir 3 bis 4 der schönsten Sehenswürdigkeiten der Stadt, abgestimmt auf deine Interessen, dein Tempo und den besten Tagesrhythmus Rios.
                                 </p>
                                 <p>
-                                    Unten findest du einige fertige Tagesvorschläge, die ich aus Erfahrung zusammengestellt habe — jeder davon ist auf etwa 8 Stunden ausgelegt und zeigt dir einen anderen Charakter der Stadt.
+                                    Unten findest du einige fertige Tagesvorschläge, die ich aus Erfahrung zusammengestellt habe, jeder davon ist auf etwa 8 Stunden ausgelegt und zeigt dir einen anderen Charakter der Stadt.
                                 </p>
                                 <div className="bg-rio-sand/50 p-6 rounded-2xl border border-rio-yellow/30 mt-8 text-gray-800">
                                     <p className="font-semibold text-gray-900 mb-2">Du willst deinen eigenen Tag zusammenstellen?</p>
                                     <p>
-                                        Kein Problem. Wähle einfach aus der Liste unten die Orte, die dich am meisten interessieren, und ich plane einen maßgeschneiderten Tour nur für dich. Schreib mir — gemeinsam finden wir das perfekte Programm für deinen Rio-Tag.
+                                        Kein Problem. Wähle einfach aus der Liste unten die Orte, die dich am meisten interessieren, und ich plane einen maßgeschneiderten Tour nur für dich. Schreib mir, gemeinsam finden wir das perfekte Programm für deinen Rio-Tag.
                                     </p>
                                 </div>
                             </div>
@@ -419,10 +419,10 @@ export default async function KlassikerTourPage() {
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="mb-12">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                Tagesprogramme in Rio de Janeiro —{" "}
+                                Tagesprogramme in Rio de Janeiro,{" "}
                                 <span className="text-rio-green">direkt buchbar mit lokalem Guide</span>
                             </h2>
-                            <p className="text-gray-500 mt-3 text-lg">6 kuratierte Vorschläge für jeden Reisestil — oder ich stelle dir ein <Link href="/touren/individuell" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">individuelles Programm</Link> zusammen, perfekt abgestimmt auf deine Wünsche.</p>
+                            <p className="text-gray-500 mt-3 text-lg">6 kuratierte Vorschläge für jeden Reisestil, oder ich stelle dir ein <Link href="/touren/individuell" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">individuelles Programm</Link> zusammen, perfekt abgestimmt auf deine Wünsche.</p>
                         </FadeIn>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {programs.map((program, index) => (
@@ -488,7 +488,7 @@ export default async function KlassikerTourPage() {
                     <div className="relative max-w-4xl mx-auto px-5 text-center">
                         <FadeIn direction="up">
                             <h2 className="text-3xl lg:text-5xl font-heading font-black text-white mb-6">
-                                Dein Wunschtag in Rio — <br className="hidden sm:block" />
+                                Dein Wunschtag in Rio, <br className="hidden sm:block" />
                                 <span className="text-rio-yellow">ich plane ihn für dich.</span>
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
