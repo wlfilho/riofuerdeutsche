@@ -80,13 +80,20 @@ export default async function FlughafenTransferPage() {
                 {/* SEÇÃO A — Hero */}
                 <section className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden bg-gray-900 border-b-4 border-rio-yellow">
                     <div className="absolute inset-0 z-0">
+                        {/* WebP local, 1440px, q50 — 16 KB contra 118 KB do JPEG remoto
+                            do Unsplash. Céu e nuvens são gradiente suave, o melhor caso
+                            para WebP, por isso a economia é tão grande sem artefato
+                            visível. `sizes` declarado porque com `fill` o Next assume
+                            100vw: sem isso o celular baixaria a variante de desktop, que
+                            é justamente onde estão 67% do tráfego. */}
                         <Image
-                            src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1920&h=800&fit=crop&q=80"
+                            src="/images/flughafen-transfer-hero.webp"
                             alt="Ankunft in Rio de Janeiro"
                             fill
                             priority
                             fetchPriority="high"
-                            quality={90}
+                            sizes="100vw"
+                            quality={50}
                             className="object-cover object-center"
                         />
                         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>

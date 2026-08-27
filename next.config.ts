@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["lucide-react"],
   },
   images: {
+    // Next 16 ignora `quality` que não esteja nesta lista, caindo no default 75
+    // em silêncio — foi o que aconteceu com o quality={90} do herói do transfer,
+    // que nunca teve efeito. 50 é a qualidade usada no resto do projeto (mesma
+    // do pipeline de fotos de review).
+    qualities: [50, 75],
     remotePatterns: [
       {
         protocol: 'https',
