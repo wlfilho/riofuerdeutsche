@@ -22,6 +22,7 @@ import {
   Instagram,
   Clock,
   Loader2,
+  Mail,
   MapPin,
   Plus,
   ShieldCheck,
@@ -45,6 +46,7 @@ import {
   Stepper,
   WhatsAppCta,
   inputCls,
+  textareaCls,
   toInternationalPhone,
 } from '@/components/anfrage/FormUi';
 import { type PhoneCountry } from '@/lib/campaigns';
@@ -115,7 +117,6 @@ export default function AnfrageForm({
     'natur-und-straende': t('interesseNaturUndStraende'),
     'favela-tour': t('interesseFavelaTour'),
     'kultur-und-geschichte': t('interesseKulturUndGeschichte'),
-    'by-night': t('interesseByNight'),
     fussball: t('interesseFussball'),
     tagesausfluege: t('interesseTagesausfluege'),
     unentschlossen: t('interesseUnentschlossen'),
@@ -377,6 +378,24 @@ export default function AnfrageForm({
           steps={[t('successStep1'), t('successStep2'), t('successStep3')]}
         />
 
+        {/* Colado no passo que promete a resposta por e-mail, e antes do botão
+            de WhatsApp — que é justamente a saída para quem não quiser depender
+            de caixa de entrada. Âmbar e não vermelho: é um lembrete, não um
+            erro; a pessoa acabou de converter e não pode achar que algo falhou.
+            Enquanto a Fase 4 (SPF/DKIM/DMARC + provedor transacional) não
+            existir, a entregabilidade é frágil de verdade e o aviso se paga. */}
+        <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+          <Mail className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+          <div>
+            <p className="text-[15px] font-semibold text-amber-900 leading-snug">
+              {t('successSpamTitel')}
+            </p>
+            <p className="mt-0.5 text-[14px] text-amber-900/80 leading-relaxed">
+              {t('successSpamHinweis')}
+            </p>
+          </div>
+        </div>
+
         {whatsappHref && (
           <WhatsAppCta
             href={`${whatsappHref}?text=${waText}`}
@@ -415,21 +434,11 @@ export default function AnfrageForm({
           </div>
         )}
 
-        {/* Aviso discreto: a tela já entregou tudo que importa, então o e-mail
-            é cópia de segurança — mas quem espera confirmação precisa saber
-            onde procurar. */}
-        <p className="mt-6 text-center text-[13px] text-gray-400 leading-relaxed">
-          {t('successSpamHinweis')}
-        </p>
-
         <MeanwhileSection title={t('successMeanwhileTitle')}>
-          <LinkRow
-            href="/touren"
-            icon={<Compass className={`${ROW_ICON_CLS} text-blue-600`} />}
-          >
-            {t('successLinkTouren')}
-          </LinkRow>
-
+          {/* O link para /touren saiu: quem acabou de pedir uma tour não precisa
+              voltar a navegar o catálogo — isso reabre uma decisão que a pessoa
+              já tomou. Ficam o conteúdo de leitura e o Instagram, que são
+              espera e prova social, não uma segunda escolha. */}
           <LinkRow
             href="/ist-rio-gefaehrlich"
             icon={<ShieldCheck className={`${SHIELD_ICON_CLS} text-emerald-600`} />}
@@ -600,6 +609,13 @@ export default function AnfrageForm({
                     {t('interesseKlassikerHint')}
                   </span>
                 )}
+                {/* Sem esta linha, "Fußballspiel" excluiria quem quer conhecer o
+                    estádio sem jogo marcado — a tour cobre os dois casos. */}
+                {slug === 'fussball' && (
+                  <span className="block text-[13px] text-gray-500">
+                    {t('interesseFussballHint')}
+                  </span>
+                )}
               </OptionTile>
             ))}
 
@@ -624,7 +640,7 @@ export default function AnfrageForm({
                 onChange={e => setWunsch(e.target.value.slice(0, 500))}
                 rows={3}
                 placeholder={t('wunschPlaceholder')}
-                className={`${inputCls()} resize-none`}
+                className={`${textareaCls()} resize-none`}
               />
             </Field>
           </div>

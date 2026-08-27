@@ -9,6 +9,12 @@ import { type TourSlug } from './tours'
  * separam propostas — o primeiro é a ausência de tema, os outros três são
  * circunstância (chuva, época do ano) ou nicho.
  *
+ * 'by-night' saiu do formulário em 27/08/2026 por decisão do Will — a
+ * modalidade não é a que ele quer vender. A PÁGINA /touren/by-night continua
+ * existindo e linkada; o slug segue em TOUR_SLUGS, então quem chega de lá
+ * ainda grava tour_slug='by-night'. O que deixa de acontecer é só a
+ * pré-marcação do tema, que não teria mais tile correspondente.
+ *
  * Não listar pontos turísticos um a um é decisão de produto: 30 opções
  * paralisam e transferem ao cliente o trabalho de montar o roteiro, que é
  * justamente o serviço.
@@ -21,7 +27,6 @@ export const INTERESSE_TOURS = [
   'natur-und-straende',
   'favela-tour',
   'kultur-und-geschichte',
-  'by-night',
   'fussball',
   'tagesausfluege',
 ] as const satisfies readonly TourSlug[]

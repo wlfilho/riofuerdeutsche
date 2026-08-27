@@ -18,8 +18,21 @@ import { PHONE_COUNTRIES, type PhoneCountry } from '@/lib/campaigns';
 // text-base (16px) não é escolha estética: abaixo disso o Safari no iPhone dá
 // zoom no campo ao focar e o layout sai do lugar. h-12 mantém o alvo de toque
 // nos 48px recomendados.
-export const INPUT_CLS =
-  'w-full h-12 px-4 bg-white border rounded-xl text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent';
+const FIELD_BASE =
+  'w-full px-4 bg-white border rounded-xl text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent';
+
+export const INPUT_CLS = `${FIELD_BASE} h-12`;
+
+/**
+ * Textarea NÃO herda o `h-12` do input: altura fixa de uma linha anulava o
+ * `rows` e prendia o placeholder no topo da caixa. Aqui a altura vem do `rows`
+ * e o py-3 dá ao texto a mesma folga vertical que o input de uma linha tem.
+ *
+ * Não dá pra resolver acrescentando `h-auto` na string de classes: Tailwind
+ * decide pela ordem no CSS gerado, não pela ordem no atributo, então o `h-12`
+ * poderia continuar ganhando.
+ */
+export const TEXTAREA_CLS = `${FIELD_BASE} py-3 leading-relaxed`;
 
 export const LINK_ROW_CLS =
   'flex items-center gap-3 min-h-[52px] px-4 py-3 rounded-xl border border-gray-200 text-[15px] text-gray-800 hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors';
@@ -43,6 +56,12 @@ export function FormShell({ children }: { children: React.ReactNode }) {
       </div>
     </div>
   );
+}
+
+export function textareaCls(hasError?: boolean): string {
+  return `${TEXTAREA_CLS} ${
+    hasError ? 'border-red-400 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+  }`;
 }
 
 export function inputCls(hasError?: boolean): string {
