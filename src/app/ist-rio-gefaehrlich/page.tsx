@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Ist Rio de Janeiro gefährlich?",
     description:
-      "Die Wahrheit über Sicherheit in Rio — von einem Carioca der fließend Deutsch spricht.",
+      "Die Wahrheit über Sicherheit in Rio, von einem Carioca der fließend Deutsch spricht.",
   },
 };
 
@@ -131,7 +131,7 @@ export default function IstRioGefaehrlich() {
               </h1>
               
               <p className="text-xl md:text-2xl lg:text-3xl text-rio-yellow mb-10 md:mb-12 text-center md:text-left font-medium leading-snug text-balance max-w-3xl">
-                Die Wahrheit von einem Carioca — nicht von einer Zeitung
+                Die Wahrheit von einem Carioca, nicht von einer Zeitung
               </p>
               
               <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center md:justify-start gap-5 sm:gap-6 text-gray-300 border-t border-b border-white/10 py-6 mb-2">
@@ -169,14 +169,14 @@ export default function IstRioGefaehrlich() {
           <article className="max-w-3xl mx-auto px-5 lg:px-8 mt-12 md:mt-16 mb-16 text-[17px] md:text-lg leading-[1.75] text-gray-800 [&_p]:hyphens-auto [&_p]:break-words">
             <div className="text-lg md:text-xl text-gray-800 leading-[1.7] font-medium mb-12 md:mb-14">
               <p>
-                Hallo! Ich bin Will, geboren und aufgewachsen in Rio de Janeiro. Ich habe einige Jahre im Rheinland, genauer gesagt in Köln, gelebt und studiert. Ich kenne die deutsche Sicherheitsliebe und ich verstehe genau, warum die Frage nach der Sicherheit in Rio so oft gestellt wird. Hier bekommst du eine ehrliche Antwort — ganz ohne Panikmache, aber auch ohne Filter.
+                Hallo! Ich bin Will, geboren und aufgewachsen in Rio de Janeiro. Ich habe einige Jahre im Rheinland, genauer gesagt in Köln, gelebt und studiert. Ich kenne die deutsche Sicherheitsliebe und ich verstehe genau, warum die Frage nach der Sicherheit in Rio so oft gestellt wird. Hier bekommst du eine ehrliche Antwort, ganz ohne Panikmache, aber auch ohne Filter.
               </p>
             </div>
 
             {/* 2. QUICK ANSWER */}
             <div className="bg-[#0d1f15] text-white p-6 sm:p-8 md:p-10 rounded-3xl shadow-xl mb-14 md:mb-16">
               <p className="text-lg sm:text-xl md:text-2xl font-medium leading-[1.6] mb-0">
-                &ldquo;Rio ist für informierte Reisende sicher. Die Stadt hat Risiken — aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Wenn du weißt, was du tust, wirst du eine fantastische Zeit haben.&rdquo;
+                &ldquo;Rio ist für informierte Reisende sicher. Die Stadt hat Risiken, aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Wenn du weißt, was du tust, wirst du eine fantastische Zeit haben.&rdquo;
               </p>
             </div>
 
@@ -189,7 +189,7 @@ export default function IstRioGefaehrlich() {
                 Rund 2,1 Millionen ausländische Touristen besuchen Rio de Janeiro jedes Jahr. Die überwiegende Mehrheit dieser Besucher erlebt eine traumhafte, problemlose Reise ohne jegliche Sicherheitsprobleme.
               </p>
               <p>
-                Natürlich solltest du die Warnungen des Auswärtigen Amtes ernst nehmen, aber lass dich nicht durch sensationslüsterne TV-Berichte abschrecken. Rio ist kein Kriegsgebiet — es ist eine riesige, pulsierende Metropole. Genau wie in europäischen Großstädten, in Paris, Rom oder Berlin, gibt es Zonen, in denen Touristendiebstahl vorkommt. Der wesentliche Unterschied ist die ausgeprägte soziale Ungleichheit, die sich oft sehr stark zeigt.
+                Natürlich solltest du die Warnungen des Auswärtigen Amtes ernst nehmen, aber lass dich nicht durch sensationslüsterne TV-Berichte abschrecken. Rio ist kein Kriegsgebiet. Es ist eine riesige, pulsierende Metropole. Genau wie in europäischen Großstädten, in Paris, Rom oder Berlin, gibt es Zonen, in denen Touristendiebstahl vorkommt. Der wesentliche Unterschied ist die ausgeprägte soziale Ungleichheit, die sich oft sehr stark zeigt.
               </p>
               <p>
                 Sicherheit in Rio bedeutet nicht, dass du dich einschließen musst. Die touristischen Zonen der Stadt werden stark überwacht und sind hervorragend auf Besucher eingestellt. Es geht vielmehr um das Bewusstsein für die eigene Umgebung und die Vermeidung klassischer Touristenfehler.
@@ -208,7 +208,7 @@ export default function IstRioGefaehrlich() {
                     Du buchst in der falschen Gegend
                   </h3>
                   <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
-                    Lapa, Centro nachts, bestimmte Zonen der Zona Norte — das sind keine Wohnviertel für Touristen, egal wie günstig das Airbnb sein mag. Die Wahl deines Viertels ist die wichtigste Entscheidung noch vor dem Flug. Eine Fehlentscheidung hier erschwert deine gesamte Reise.
+                    Lapa, Centro nachts, bestimmte Zonen der Zona Norte: das sind keine Wohnviertel für Touristen, egal wie günstig das Airbnb sein mag. Die Wahl deines Viertels ist die wichtigste Entscheidung noch vor dem Flug. Eine Fehlentscheidung hier erschwert deine gesamte Reise.
                   </p>
                 </div>
 
@@ -218,7 +218,7 @@ export default function IstRioGefaehrlich() {
                     Du nutzt dein Handy falsch auf der Straße
                   </h3>
                   <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
-                    Ein neues Smartphone lässig in der Hand beim Spazierengehen am Gehsteig? Das ist das häufigste Ziel für Taschendiebe auf Fahrrädern. Es geht nicht darum, in Rio gar kein Handy dabei zu haben — es geht darum, <em>wann</em> und <em>wie</em> du es sicher benutzt.
+                    Ein neues Smartphone lässig in der Hand beim Spazierengehen am Gehsteig? Das ist das häufigste Ziel für Taschendiebe auf Fahrrädern. Es geht nicht darum, in Rio gar kein Handy dabei zu haben. Es geht darum, <em>wann</em> und <em>wie</em> du es sicher benutzt.
                   </p>
                 </div>
 
@@ -258,7 +258,7 @@ export default function IstRioGefaehrlich() {
                     Du zeigst Wohlstand
                   </h3>
                   <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
-                    Die dicke Spiegelreflexkamera um den Hals, eine teure Uhr, sichtbarer Schmuck — das sind klare Signale in einer Stadt, in der ein Großteil der Bevölkerung mit dem Mindestlohn kämpft. Rio hat leider eine extrem ausgeprägte soziale Ungleichheit, und Touristen, die Reichtum signalisieren, fallen sofort in das Raster aufmerksamer Augen.
+                    Die dicke Spiegelreflexkamera um den Hals, eine teure Uhr, sichtbarer Schmuck: das sind klare Signale in einer Stadt, in der ein Großteil der Bevölkerung mit dem Mindestlohn kämpft. Rio hat leider eine extrem ausgeprägte soziale Ungleichheit, und Touristen, die Reichtum signalisieren, fallen sofort in das Raster aufmerksamer Augen.
                   </p>
                 </div>
 
@@ -268,7 +268,7 @@ export default function IstRioGefaehrlich() {
                     Du bist nicht vorbereitet auf den Notfall
                   </h3>
                   <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
-                    Die meisten Reisenden kommen ohne vorbereitete Apps (Wie bestelle ich mir ein alternatives Taxi?), ohne gespeicherte lokale Notfallnummern, ohne gesicherte Dokumentenkopien und ohne einen Backup-Plan für ihre Kreditkarten. Wenn wirklich etwas passiert, kostet Vorbereitung keine einzige Sekunde — absolute Unvorbereitung kostet dich den Urlaub.
+                    Die meisten Reisenden kommen ohne vorbereitete Apps (Wie bestelle ich mir ein alternatives Taxi?), ohne gespeicherte lokale Notfallnummern, ohne gesicherte Dokumentenkopien und ohne einen Backup-Plan für ihre Kreditkarten. Wenn wirklich etwas passiert, kostet Vorbereitung keine einzige Sekunde, absolute Unvorbereitung kostet dich den Urlaub.
                   </p>
                 </div>
               </div>
@@ -390,7 +390,7 @@ export default function IstRioGefaehrlich() {
                 <div>
                   <strong className="text-gray-900 block mb-1">Wichtig:</strong>
                   <span className="text-gray-700 leading-[1.8]">
-                    Diese Liste ist nur ein Ausgangspunkt. Jedes Viertel hat Nuancen — eine Querstraße kann den Unterschied machen. Im vollständigen Guide erfährst du, worauf du genau achten musst, um deinen Aufenthalt absolut sicher zu genießen.
+                    Diese Liste ist nur ein Ausgangspunkt. Jedes Viertel hat Nuancen, eine Querstraße kann den Unterschied machen. Im vollständigen Guide erfährst du, worauf du genau achten musst, um deinen Aufenthalt absolut sicher zu genießen.
                   </span>
                 </div>
               </div>
@@ -424,7 +424,7 @@ export default function IstRioGefaehrlich() {
                   <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
                   <div className="leading-[1.8]">
                     <strong className="text-lg text-[#0d1f15] block mb-1.5 leading-snug">Deserte Straßen konsequent meiden</strong>
-                    Wenn du nachts in eine Straße schaust und dort sind keine Autos, keine Straßenhändler, keine Fußgänger, keine geöffneten Kioske — dann gehst du dort <em>nicht</em> hin. Wenn die Straße leer ist, gibt es in Rio fast immer einen guten Grund dafür.
+                    Wenn du nachts in eine Straße schaust und dort sind keine Autos, keine Straßenhändler, keine Fußgänger, keine geöffneten Kioske. Dann gehst du dort <em>nicht</em> hin. Wenn die Straße leer ist, gibt es in Rio fast immer einen guten Grund dafür.
                   </div>
                 </li>
                 <li className="flex gap-4 items-start">
@@ -444,7 +444,7 @@ export default function IstRioGefaehrlich() {
               </ul>
 
               <div className="mt-8 p-6 bg-white border border-gray-100 rounded-2xl shadow-sm italic text-gray-700">
-                Die anderen 10 essenziellen Regeln — sowie detaillierte Erklärungen, Beispiele auf der Straße, Maps mit Safe Zones und exklusive Geheimtipps — findest du im vollständigen und absolut kostenlosen Guide.
+                Die anderen 10 essenziellen Regeln, sowie detaillierte Erklärungen, Beispiele auf der Straße, Maps mit Safe Zones und exklusive Geheimtipps, findest du im vollständigen und absolut kostenlosen Guide.
               </div>
             </section>
 
@@ -491,7 +491,7 @@ export default function IstRioGefaehrlich() {
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Wie gefährlich ist Lapa in Rio?</h3>
                   <p className="text-gray-700 leading-[1.8]">
-                    Lapa, nahe am Zentrum, ist das Herzstück des Nachtlebens in Rio (Ausgehviertel). Freitagabends und am Wochenende platzt das Viertel aus allen Nähten, was dich vor der Leere der Nacht schützt. Dennoch rate ich: Fahre direkt mit einem Uber von A nach B ins Viertel hinein und direkt wieder hinaus — mach dort nachts keine Spaziergänge in dunkle Nebenstraßen. Gruppen sind besser.
+                    Lapa, nahe am Zentrum, ist das Herzstück des Nachtlebens in Rio (Ausgehviertel). Freitagabends und am Wochenende platzt das Viertel aus allen Nähten, was dich vor der Leere der Nacht schützt. Dennoch rate ich: Fahre direkt mit einem Uber von A nach B ins Viertel hinein und direkt wieder hinaus. Mach dort nachts keine Spaziergänge in dunkle Nebenstraßen. Gruppen sind besser.
                   </p>
                 </div>
 
@@ -525,7 +525,7 @@ export default function IstRioGefaehrlich() {
               <div>
                 <h3 className="text-2xl font-bold text-[#0d1f15] mb-2">Warum solltest du mir vertrauen?</h3>
                 <p className="text-gray-700 leading-[1.8] mb-4">
-                  Ich bin kein anonymer Redakteur hinter einem Schreibtisch. Ich bin ein Carioca. Ich besuche nicht bloß diese magische Stadt für Urlaube, sondern ich habe mein Leben hier gelernt, gelacht — und bin auch achtsam durch die schwierigen Ecken navigiert.
+                  Ich bin kein anonymer Redakteur hinter einem Schreibtisch. Ich bin ein Carioca. Ich besuche nicht bloß diese magische Stadt für Urlaube, sondern ich habe mein Leben hier gelernt, gelacht, und bin auch achtsam durch die schwierigen Ecken navigiert.
                 </p>
                 <p className="text-gray-700 leading-[1.8] font-medium">
                   Deutsche Schule im Rio, 4 Jahre Student in Köln, und nun hier als mehrsprachiger Guide: Ich kenne beide Welten. Ich kenne die deutsche Rationalität und das improvisierte Talent Brasiliens. Ich garantiere dir: Mit guter Vorbereitung fühlst du dich bei deiner <Link href="/touren" className="text-rio-green underline hover:text-[#0d1f15]">Tour durch Rio</Link> sicherer, als du dir gerade vorstellen kannst. Viel Spaß am Zuckerhut!
@@ -546,13 +546,13 @@ export default function IstRioGefaehrlich() {
             {/* 12. CTA TOURS */}
             <section className="bg-[#0d1f15] text-white p-6 sm:p-8 md:p-12 rounded-3xl shadow-xl mb-16">
               <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                Rio sicher erleben — mit einem Guide, der diese Regeln täglich lebt
+                Rio sicher erleben, mit einem Guide, der diese Regeln täglich lebt
               </h2>
               <p className="text-lg text-gray-300 leading-relaxed mb-4">
                 Das Wissen ist das eine. Die Erfahrung ist das andere.
               </p>
               <p className="text-lg text-gray-300 leading-relaxed mb-8">
-                Ich begleite dich persönlich durch Rio — mit denselben Regeln, die ich dir hier erklärt habe, als tägliche Praxis. Du weißt immer, wo du bist, was sicher ist und wie du das Beste aus deinem Tag machst.
+                Ich begleite dich persönlich durch Rio, mit denselben Regeln, die ich dir hier erklärt habe, als tägliche Praxis. Du weißt immer, wo du bist, was sicher ist und wie du das Beste aus deinem Tag machst.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link

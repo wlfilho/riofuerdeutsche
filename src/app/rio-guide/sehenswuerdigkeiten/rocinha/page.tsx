@@ -9,10 +9,10 @@ import { ChevronRight, Home, ArrowRight, Phone } from "lucide-react";
 
 export const metadata = {
     title: {
-        absolute: "Favela Tour Rocinha Rio de Janeiro auf Deutsch — mit echtem Carioca | Rio für Deutsche",
+        absolute: "Favela Tour Rocinha Rio de Janeiro auf Deutsch mit echtem Carioca | Rio für Deutsche",
     },
     description:
-        "Die Rocinha in Rio de Janeiro: Geschichte, Kultur und was du wirklich sehen solltest. Favela tour rio de janeiro — aber richtig, auf Deutsch, mit einem Carioca. Kein Touristen-Klischee.",
+        "Die Rocinha in Rio de Janeiro: Geschichte, Kultur und was du wirklich sehen solltest. Favela tour rio de janeiro, aber richtig, auf Deutsch, mit einem Carioca. Kein Touristen-Klischee.",
     keywords: [
         "Favela Tour Rocinha",
         "Rocinha besuchen",
@@ -23,9 +23,9 @@ export const metadata = {
         canonical: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/rocinha",
     },
     openGraph: {
-        title: "Rocinha Rio de Janeiro — Favela besuchen mit lokalem Guide",
+        title: "Rocinha Rio de Janeiro: Favela besuchen mit lokalem Guide",
         description:
-            "Größte Favela Brasiliens, echte Kultur, keine Klischees. Alles über die Rocinha in Rio — und wie man sie richtig besucht. Auf Deutsch.",
+            "Größte Favela Brasiliens, echte Kultur, keine Klischees. Alles über die Rocinha in Rio, und wie man sie richtig besucht. Auf Deutsch.",
         url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/rocinha",
     },
 };
@@ -35,7 +35,7 @@ const jsonLd = {
     "@type": "TouristAttraction",
     name: "Rocinha",
     description:
-        "Rocinha ist die größte Favela Brasiliens — eine lebendige Gemeinschaft mit über 100.000 Einwohnern zwischen São Conrado und Gávea in Rio de Janeiro.",
+        "Rocinha ist die größte Favela Brasiliens, eine lebendige Gemeinschaft mit über 100.000 Einwohnern zwischen São Conrado und Gávea in Rio de Janeiro.",
     url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten/rocinha",
     touristType: "Cultural tourism",
     isAccessibleForFree: true,
@@ -135,7 +135,7 @@ export default function RocinhaPage() {
                         {/* Background image */}
                         <Image
                             src="/images/rocinha.webp"
-                            alt="Rocinha — die größte Favela Brasiliens in Rio de Janeiro"
+                            alt="Rocinha, die größte Favela Brasiliens in Rio de Janeiro"
                             fill
                             className="object-cover object-center z-0"
                             priority
@@ -190,7 +190,7 @@ export default function RocinhaPage() {
 
                                     {/* Tagline */}
                                     <p className="text-xl lg:text-2xl text-white/70 font-medium leading-snug max-w-2xl mb-10">
-                                        Die größte Favela Brasiliens — und ein Ort,
+                                        Die größte Favela Brasiliens, und ein Ort,
                                         den du nicht aus dem Fenster eines Taxis
                                         sehen solltest
                                     </p>
@@ -252,7 +252,7 @@ export default function RocinhaPage() {
                                 <span className="text-2xl" role="img" aria-label="Geld">💰</span>
                                 <div>
                                     <p className="text-[11px] font-bold tracking-widest uppercase text-gray-400 mb-1">Eintritt</p>
-                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Kostenlos <span className="text-gray-400 font-normal">— Tour auf Anfrage</span></p>
+                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Kostenlos <span className="text-gray-400 font-normal">(Tour auf Anfrage)</span></p>
                                 </div>
                             </FadeIn>
 
@@ -270,7 +270,7 @@ export default function RocinhaPage() {
                                 <span className="text-2xl" role="img" aria-label="Standort">📍</span>
                                 <div>
                                     <p className="text-[11px] font-bold tracking-widest uppercase text-gray-400 mb-1">Lage</p>
-                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">São Conrado / Gávea <span className="text-gray-400 font-normal">— 15 min von Ipanema</span></p>
+                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">São Conrado / Gávea <span className="text-gray-400 font-normal">, 15 min von Ipanema</span></p>
                                 </div>
                             </FadeIn>
 
@@ -279,7 +279,7 @@ export default function RocinhaPage() {
                                 <span className="text-2xl" role="img" aria-label="Sprechen">🗣️</span>
                                 <div>
                                     <p className="text-[11px] font-bold tracking-widest uppercase text-rio-green mb-1">Sprache</p>
-                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Auf Deutsch erklärt — mit Lokalkenntnissen</p>
+                                    <p className="text-gray-900 font-semibold text-[15px] leading-snug">Auf Deutsch erklärt, mit Lokalkenntnissen</p>
                                 </div>
                             </FadeIn>
 
@@ -303,14 +303,14 @@ export default function RocinhaPage() {
 
                                     {/* Título */}
                                     <h2 className="text-xl lg:text-2xl font-heading font-bold text-white mb-4 leading-tight">
-                                        Favela Tour Rocinha — Tourismus, der der Gemeinschaft hilft
+                                        Favela Tour Rocinha: Tourismus, der der Gemeinschaft hilft
                                     </h2>
 
                                     {/* Texto */}
                                     <p className="text-white/75 text-base leading-relaxed">
                                         Tourismus ist heute ein wichtiger Teil der Wirtschaft in der
                                         Rocinha. Kleine Cafés, Bäckereien, Kunsthandwerker,
-                                        lokale Guides — sie alle profitieren direkt von Besuchern,
+                                        lokale Guides: sie alle profitieren direkt von Besuchern,
                                         die mit echtem Interesse kommen. Wenn du mit Will die Rocinha
                                         besuchst, kaufst du beim Bäcker um die Ecke, trinkst deinen
                                         Kaffee bei einer Familie, die sich Zeit für dich nimmt. Das
@@ -331,14 +331,14 @@ export default function RocinhaPage() {
                             <div className="max-w-[800px] mx-auto space-y-7 text-left">
 
                                 <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                    Die Rocinha besuchen — eine Stadt in der Stadt
+                                    Die Rocinha besuchen: eine Stadt in der Stadt
                                 </h2>
 
                                 {/* Parágrafo 1 — O primeiro contato */}
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
                                     Es gibt in Rio zwei Arten, die Rocinha zu sehen. Die erste:
                                     aus dem Taxi, beim Vorbeifahren auf der Autoestrada, ein
-                                    kurzer Blick auf die Hänge, vollgebaut bis ganz oben —
+                                    kurzer Blick auf die Hänge, vollgebaut bis ganz oben,
                                     und dann weiter. Die zweite: du gehst rein. Ich bin in Rio
                                     aufgewachsen, habe in Gávea Fußball gespielt und Freunde in
                                     der Rocinha gehabt, seit ich ein Kind war. Und ich kann dir
@@ -348,14 +348,14 @@ export default function RocinhaPage() {
                                 {/* Parágrafo 2 — O que é a Rocinha */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     Mehr als 100.000 Menschen leben auf einem einzigen Berghang
-                                    zwischen São Conrado und Gávea — die größte Favela Brasiliens,
+                                    zwischen São Conrado und Gávea, die größte Favela Brasiliens,
                                     vielleicht Südamerikas. Die Rocinha hat Supermärkte, Banken,
                                     Schulen, Apotheken, Restaurants. Bäckereien, die seit Generationen
                                     in der gleichen Familie sind. Friseure, Mechaniker, Schneider,
                                     Künstler. Eine eigene Gemeinschaftsradio. Eine Architektur, die
                                     über 80 Jahre gewachsen ist, Schicht für Schicht, mit Blick aufs
                                     Meer. Die <em>Favela Rocinha Rio de Janeiro</em> ist eine lebendige,
-                                    pulsierende Gemeinschaft — eine Stadt in der Stadt, voller
+                                    pulsierende Gemeinschaft, eine Stadt in der Stadt, voller
                                     Kreativität und Energie, die man von der ersten Minute an spürt.
                                 </p>
 
@@ -363,14 +363,14 @@ export default function RocinhaPage() {
                                 <p className="text-lg text-gray-600 leading-relaxed pt-2 border-t border-gray-100">
                                     Wenn ich mit meinen deutschen Gästen durch die Rocinha gehe,
                                     merke ich immer dasselbe: die Überraschung. Nicht weil es so
-                                    anders wäre — sondern weil es so voll ist. Voll von Menschen,
+                                    anders wäre, sondern weil es so voll ist. Voll von Menschen,
                                     die arbeiten, lachen, kochen, ihr Leben leben. Wir besuchen
                                     Familien, die mich seit Jahren kennen. Wir trinken Kaffee,
                                     schauen uns Aussichten von Terrassen an, die kein Reiseführer
                                     kennt, hören Geschichten, die man nirgendwo lesen kann. Die{" "}
                                     <Link href="/touren/favela-tour" className="text-[#2D6A4F] underline underline-offset-2 hover:text-[#1a4a35] transition-colors">Favela Tour auf Deutsch</Link>{" "}
                                     mit mir ist kein Ausflug in
-                                    eine fremde Welt — es ist ein Einblick in einen Teil von Rio,
+                                    eine fremde Welt. Es ist ein Einblick in einen Teil von Rio,
                                     der genauso zur Stadt gehört wie Ipanema und Copacabana.
                                 </p>
 
@@ -387,7 +387,7 @@ export default function RocinhaPage() {
                                 <div className="rounded-2xl overflow-hidden shadow-sm">
                                     <Image
                                         src="/images/rocinha-tour.webp"
-                                        alt="Blick auf die Rocinha — die größte Favela Brasiliens zwischen den Bergen und dem Meer von Rio de Janeiro"
+                                        alt="Blick auf die Rocinha, die größte Favela Brasiliens zwischen den Bergen und dem Meer von Rio de Janeiro"
                                         width={1200}
                                         height={800}
                                         className="w-full h-auto"
@@ -395,7 +395,7 @@ export default function RocinhaPage() {
                                     />
                                 </div>
                                 <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
-                                    Die Rocinha zwischen Pedra da Gávea und São Conrado — über 100.000 Menschen, eine eigene Wirtschaft, eine eigene Kultur. Alles auf einem einzigen Berghang.
+                                    Die Rocinha zwischen Pedra da Gávea und São Conrado: über 100.000 Menschen, eine eigene Wirtschaft, eine eigene Kultur. Alles auf einem einzigen Berghang.
                                 </figcaption>
                             </figure>
                         </FadeIn>
@@ -427,17 +427,17 @@ export default function RocinhaPage() {
 
                                         {/* Título */}
                                         <h2 className="text-2xl lg:text-3xl font-heading font-bold text-white mb-5 leading-tight">
-                                            Das Drohnen-Video in der Rocinha — der virale TikTok-Hype
+                                            Das Drohnen-Video in der Rocinha: der virale TikTok-Hype
                                         </h2>
 
                                         {/* Texto */}
                                         <div className="space-y-4 text-white/75 text-base leading-relaxed">
                                             <p>
                                                 Hast du diese Videos schon gesehen? Ein Tourist steht oben
-                                                auf einer Laje — einer Dachterrasse in der Rocinha. Eine
+                                                auf einer Laje, einer Dachterrasse in der Rocinha. Eine
                                                 Drohne filmt ihn aus der Nähe. Dann fährt sie zurück. Langsam,
                                                 Meter für Meter. Der Mensch wird kleiner. Kleiner. Und während
-                                                er kleiner wird, wächst die Rocinha — Haus für Haus, Gasse für
+                                                er kleiner wird, wächst die Rocinha, Haus für Haus, Gasse für
                                                 Gasse, Hügel für Hügel, bis der Blick die ganze Gemeinschaft
                                                 auf einmal erfasst. Ein kleiner Punkt in einem Meer aus
                                                 Ziegeln und Leben.
@@ -446,11 +446,11 @@ export default function RocinhaPage() {
                                                 Dann schwenkt die Drohne. Hinter der Rocinha: die Pedra da
                                                 Gávea, die Berge, der Regenwald, das Meer von São Conrado.
                                                 Brasilianische Musik im Hintergrund. Und der Moment, in dem
-                                                man begreift, wie dieser Ort wirklich aussieht — von oben,
+                                                man begreift, wie dieser Ort wirklich aussieht, von oben,
                                                 in seiner ganzen Dimension.
                                             </p>
                                             <p>
-                                                Diese Videos sind ein Hype — und das verdient die Rocinha.
+                                                Diese Videos sind ein Hype, und das verdient die Rocinha.
                                                 Was die meisten nicht wissen: Sie wurden von den Bewohnern
                                                 selbst erfunden. Locals mit Drohnen, die eine Idee hatten
                                                 und daraus ein Angebot gemacht haben. Heute stehen Touristen
@@ -459,7 +459,7 @@ export default function RocinhaPage() {
                                                 <span className="text-white font-semibold">
                                                     200 Reais pro Person
                                                 </span>{" "}
-                                                — und das Geld geht direkt an die Menschen, die hier leben
+                                                , und das Geld geht direkt an die Menschen, die hier leben
                                                 und arbeiten. Eine kreative Idee der Community, die der
                                                 Community nützt.
                                             </p>
@@ -474,7 +474,7 @@ export default function RocinhaPage() {
                                         <div className="pt-4 border-t border-white/10">
                                             <p className="text-white/50 text-sm italic">
                                                 💡 Mit Will erfährst du, wo und wann du das Video am besten
-                                                machen kannst — ohne zwei Stunden in der Schlange zu stehen.
+                                                machen kannst, ohne zwei Stunden in der Schlange zu stehen.
                                             </p>
                                         </div>
                                     </div>
@@ -490,7 +490,7 @@ export default function RocinhaPage() {
                         <FadeIn direction="up" className="mb-10">
                             <div className="max-w-[800px] mx-auto">
                                 <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                                    Favela Rocinha — Geschichte, Kultur und{" "}
+                                    Favela Rocinha: Geschichte, Kultur und{" "}
                                     <span className="text-rio-green">Wissenswertes</span>
                                 </h2>
                             </div>
@@ -502,15 +502,15 @@ export default function RocinhaPage() {
                                 {/* P1 — As origens */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     Die Rocinha begann in den 1930er Jahren als kleine ländliche
-                                    Siedlung — der Name kommt vom portugiesischen Wort{" "}
+                                    Siedlung, der Name kommt vom portugiesischen Wort{" "}
                                     <em>roça</em>, so viel wie Kleingarten oder Anbaufläche.
                                     Landwirte, die die wohlhabenden Viertel der Zona Sul mit
                                     Lebensmitteln versorgten, waren die Ersten, die sich hier
                                     ansiedelten. Mit dem explosiven Wachstum Rio de Janeiros
                                     in den 1940er und 1950er Jahren kamen Arbeiter aus dem
-                                    Nordosten Brasiliens — angezogen von den Baustellen der
+                                    Nordosten Brasiliens, angezogen von den Baustellen der
                                     Stadt und den Haushalten in São Conrado und Gávea. Die
-                                    Gemeinschaft wuchs mit der Stadt — selbstorganisiert,
+                                    Gemeinschaft wuchs mit der Stadt, selbstorganisiert,
                                     Schicht für Schicht, ohne staatliche Unterstützung.
                                 </p>
 
@@ -518,7 +518,7 @@ export default function RocinhaPage() {
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     In den 1970er und 1980er Jahren wurde die Rocinha zur
                                     größten Favela Brasiliens. Die genaue Einwohnerzahl war
-                                    dem Staat nie bekannt — offizielle Schätzungen schwankten
+                                    dem Staat nie bekannt: offizielle Schätzungen schwankten
                                     zwischen 70.000 und 180.000. Die Wahrheit liegt wohl
                                     irgendwo dazwischen. Was feststeht: Die{" "}
                                     <em>Rocinha Rio de Janeiro</em> ist eine Stadt in der Stadt,
@@ -531,14 +531,14 @@ export default function RocinhaPage() {
                                 {/* P3 — Resiliência e autoorganização */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     Was die Rocinha auszeichnet, ist die Kraft ihrer Gemeinschaft.
-                                    Was anderswo vom Staat gebaut wird — Wasserleitungen,
-                                    Stromversorgung, Straßen, Schulen — wurde hier von den
+                                    Was anderswo vom Staat gebaut wird (Wasserleitungen,
+                                    Stromversorgung, Straßen, Schulen) wurde hier von den
                                     Bewohnern selbst errichtet, Generation für Generation, mit
                                     den Mitteln, die vorhanden waren. Diese Fähigkeit zur
                                     Selbstorganisation ist bis heute spürbar: in den kleinen
                                     Geschäften, den Familienbetrieben, den Handwerkern und
                                     Unternehmern, die ihre eigene Wirtschaft aufgebaut haben.
-                                    Tourismus ist heute ein natürlicher Teil davon — und wenn
+                                    Tourismus ist heute ein natürlicher Teil davon, und wenn
                                     er mit Respekt betrieben wird, stärkt er genau diese
                                     lokale Wirtschaft direkt.
                                 </p>
@@ -546,14 +546,14 @@ export default function RocinhaPage() {
                                 {/* P4 — Cultura e identidade */}
                                 <p className="text-lg text-gray-600 leading-relaxed">
                                     Was viele Besucher nicht erwarten, ist die kulturelle Dichte.
-                                    Die Rocinha hat eine eigene Sambaschule — die GRES Unidos da
-                                    Rocinha — die beim{" "}
+                                    Die Rocinha hat eine eigene Sambaschule (die GRES Unidos da
+                                    Rocinha), die beim{" "}
                                     <Link href="/touren/karneval-tour" className="text-[#2D6A4F] underline underline-offset-2 hover:text-[#1a4a35] transition-colors"><em>Rocinha Karneval</em></Link> in Rio de Janeiro antritt. Es gibt
                                     Kinos, Gemeinschaftstheater, bildende Künstler, Musiker, die
                                     in der ganzen Stadt bekannt sind. Der Funk Carioca, der heute
                                     in Playlists weltweit zu finden ist, hat seine Wurzeln zu
                                     einem großen Teil hier. Die{" "}
-                                    <em>Rocinha Kultur</em> ist kein Randphänomen — sie ist ein
+                                    <em>Rocinha Kultur</em> ist kein Randphänomen. Sie ist ein
                                     zentraler Teil dessen, was Rio zu Rio macht.
                                 </p>
 
@@ -563,7 +563,7 @@ export default function RocinhaPage() {
                                     von der Rocinha ist außergewöhnlich. Von ganz oben, vom Gipfel
                                     der Gemeinschaft, sieht man São Conrado, die Lagoa Rodrigo de
                                     Freitas, den Dois Irmãos, und in der Ferne den{" "}
-                                    <Link href="/rio-guide/sehenswuerdigkeiten/christus-erloeser" className="text-[#2D6A4F] underline underline-offset-2 hover:text-[#1a4a35] transition-colors">Corcovado mit dem Christus</Link>. Es ist eine der besten Aussichten in Rio — und
+                                    <Link href="/rio-guide/sehenswuerdigkeiten/christus-erloeser" className="text-[#2D6A4F] underline underline-offset-2 hover:text-[#1a4a35] transition-colors">Corcovado mit dem Christus</Link>. Es ist eine der besten Aussichten in Rio, und
                                     sie gehört den Menschen, die ihre Häuser hier Stein für Stein
                                     über Jahrzehnte aufgebaut haben. Kein offizieller Aussichtspunkt,
                                     kein Eintrittsgeld. Nur die ganze Stadt, für den, der weiß,
@@ -593,7 +593,7 @@ export default function RocinhaPage() {
                                     </div>
                                 </div>
                                 <figcaption className="mt-3 text-sm text-gray-400 text-center leading-snug">
-                                    Zahlen &amp; Fakten zur Rocinha — die größte Favela Brasiliens, eine lebendige Gemeinschaft mit über 100.000 Einwohnern zwischen den Bergen und dem Meer von Rio de Janeiro.
+                                    Zahlen &amp; Fakten zur Rocinha: die größte Favela Brasiliens, eine lebendige Gemeinschaft mit über 100.000 Einwohnern zwischen den Bergen und dem Meer von Rio de Janeiro.
                                 </figcaption>
                             </figure>
                         </FadeIn>
@@ -630,19 +630,19 @@ export default function RocinhaPage() {
                                         {/* Texto */}
                                         <p className="text-white/75 text-lg leading-relaxed">
                                             Die meisten meiner deutschen Gäste kommen mit einer
-                                            Vorstellung von Favela im Kopf — geprägt von
+                                            Vorstellung von Favela im Kopf, geprägt von
                                             Nachrichtenbildern und Filmen wie{" "}
                                             <span className="text-white font-semibold italic">
                                                 Cidade de Deus
                                             </span>
                                             . Und fast alle gehen anders raus, als sie reinkommen.
-                                            Nicht weil es idyllischer ist, als sie dachten — sondern
+                                            Nicht weil es idyllischer ist, als sie dachten, sondern
                                             weil es menschlicher ist. Weil du Augen gesehen hast,
                                             eine Küche gerochen hast, eine Geschichte gehört hast.
                                             Mein Tipp: Lass dir nach dem Besuch Zeit. Setz dich ins
                                             Café am Mirante 360° in São Conrado, bestell einen
                                             Guaraná, und schau auf die Hänge. Du wirst die Stadt
-                                            danach anders sehen — versprochen.
+                                            danach anders sehen, versprochen.
                                         </p>
                                     </div>
                                 </div>
@@ -703,7 +703,7 @@ export default function RocinhaPage() {
                                     <div className="p-5 flex flex-col flex-grow">
                                         <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Christus Erlöser</h3>
                                         <p className="text-gray-500 text-sm leading-relaxed flex-grow">
-                                            Vom Gipfel des Corcovado siehst du die Rocinha von oben — ein völlig anderer Blickwinkel auf denselben Ort.
+                                            Vom Gipfel des Corcovado siehst du die Rocinha von oben, ein völlig anderer Blickwinkel auf denselben Ort.
                                         </p>
                                         <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
                                             Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -750,7 +750,7 @@ export default function RocinhaPage() {
                                     <div className="relative h-48 overflow-hidden">
                                         <Image
                                             src="/images/zuckerhut-pao-de-acucar-01.webp"
-                                            alt="Zuckerhut — Pão de Açúcar in Rio de Janeiro"
+                                            alt="Zuckerhut, Pão de Açúcar in Rio de Janeiro"
                                             fill
                                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
@@ -761,7 +761,7 @@ export default function RocinhaPage() {
                                     <div className="p-5 flex flex-col flex-grow">
                                         <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Zuckerhut</h3>
                                         <p className="text-gray-500 text-sm leading-relaxed flex-grow">
-                                            Zwei Seilbahnen, 396 Meter Höhe — und vom Gipfel aus siehst du die ganze Zona Sul auf einmal, von Ipanema bis zur Guanabara-Bucht.
+                                            Zwei Seilbahnen, 396 Meter Höhe, und vom Gipfel aus siehst du die ganze Zona Sul auf einmal, von Ipanema bis zur Guanabara-Bucht.
                                         </p>
                                         <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
                                             Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -786,7 +786,7 @@ export default function RocinhaPage() {
                                 <span className="text-rio-yellow">mit deutschsprachigem Guide besuchen</span>
                             </h2>
                             <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Ich zeige dir nicht die Armut — ich stelle dir die Menschen vor.
+                                Ich zeige dir nicht die Armut. Ich stelle dir die Menschen vor.
                                 Auf Deutsch, mit echten Lokalkenntnissen,
                                 mit Respekt für die Community.
                             </p>
