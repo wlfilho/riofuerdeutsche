@@ -58,7 +58,7 @@ const attractions = [
     {
         name: "Escadaria Selarón",
         time: "~45 Min.",
-        desc: "215 Stufen, bedeckt mit over 2.000 bunten Fliesen aus aller Welt — das Lebenswerk des chilenischen Künstlers Jorge Selarón. Eine der meistfotografierten Treppen der Welt, mitten im Herzen von Lapa.",
+        desc: "215 Stufen, bedeckt mit über 2.000 bunten Fliesen aus aller Welt — das Lebenswerk des chilenischen Künstlers Jorge Selarón. Eine der meistfotografierten Treppen der Welt, mitten im Herzen von Lapa.",
         tip: "Frühmorgens hast du die Treppe fast für dich allein — perfekt für Fotos ohne Menschenmassen.",
         effort: "Leicht",
         gradient: "from-red-100 to-red-200",
@@ -105,7 +105,7 @@ const attractions = [
     {
         name: "Botanischer Garten (Jardim Botânico)",
         time: "~1,5 Std.",
-        desc: "140 Hektar tropische Pracht: die berühmte Palmenallee, riesige Seerosen, Orchideen und over 6.500 Pflanzenarten. Ein Ort der Ruhe und Schönheit mitten in der pulsierenden Stadt.",
+        desc: "140 Hektar tropische Pracht: die berühmte Palmenallee, riesige Seerosen, Orchideen und über 6.500 Pflanzenarten. Ein Ort der Ruhe und Schönheit mitten in der pulsierenden Stadt.",
         tip: "Die Palmenallee am Eingang ist eines der schönsten Fotomotive Rios. Perfekt zum Kombinieren mit Parque Lage nebenan.",
         effort: "Leicht",
         gradient: "from-lime-100 to-lime-200",
@@ -181,7 +181,7 @@ const programs = [
         description: "Die Ikonen, die jeder kennen muss — aber mit einem Carioca, der dir die besten Zeiten, Blickwinkel und Geschichten hinter den Postkarten-Motiven zeigt.",
         schedule: [
             { time: "08:30", activity: "Christus-Erlöser (Corcovado, früh = weniger Touristen)" },
-            { time: "11:00", activity: "Zuckerhut (Seilbahn with Blick auf die Bucht)" },
+            { time: "11:00", activity: "Zuckerhut (Seilbahn mit Blick auf die Bucht)" },
             { time: "14:00", activity: "Copacabana (Strandpromenade und Mittagspause)" },
             { time: "16:00", activity: "Lagoa Rodrigo de Freitas (Spaziergang am See mit Bergpanorama)" }
         ]
@@ -190,7 +190,7 @@ const programs = [
         icon: Mountain,
         title: "Berg & Meer",
         thema: "berg-meer",
-        description: "Vom dichten Regenwald over atemberaubende Aussichtspunkte bis zum Meer — dieser Tag vereint die dramatische Geografie Rios in einem einzigen, unvergesslichen Erlebnis.",
+        description: "Vom dichten Regenwald über atemberaubende Aussichtspunkte bis zum Meer — dieser Tag vereint die dramatische Geografie Rios in einem einzigen, unvergesslichen Erlebnis.",
         schedule: [
             { time: "08:30", activity: "Tijuca-Regenwald (Wanderung, Wasserfälle, Natur pur)" },
             { time: "11:30", activity: "Mirante Dona Marta (Panorama als Belohnung)" },
@@ -219,7 +219,7 @@ const programs = [
             { time: "09:00", activity: "Urca (ruhige Gassen, Meerblick, lokales Frühstück)" },
             { time: "11:00", activity: "Mirante Dona Marta (der beste Aussichtspunkt, den Touristen nicht kennen)" },
             { time: "13:30", activity: "Parque Lage (verstecktes Juwel am Fuß des Corcovado)" },
-            { time: "15:30", activity: "Pedra do Arpoador (Sonnenuntergang with Applaus der Einheimischen)" }
+            { time: "15:30", activity: "Pedra do Arpoador (Sonnenuntergang mit Applaus der Einheimischen)" }
         ]
     }
 ];

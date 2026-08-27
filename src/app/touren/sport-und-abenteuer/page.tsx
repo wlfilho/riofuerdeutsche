@@ -53,7 +53,7 @@ const activities = [
     },
     {
         title: "Asa Delta — Drachenfliegen",
-        description: "Asa Delta ist das Original — Rio de Janeiro ist einer der wenigen Orte weltweit, wo man mitten over einer Millionenstadt Drachenfliegen kann. Der Start erfolgt von der gleichen Rampe wie beim Paragliding (Pedra Bonita), aber das Gefühl ist völlig anders: du liegst horizontal, spürst den Wind direkt und fliegst wie ein Vogel über die Stadt. Noch intensiver, noch freier, noch unvergesslicher.",
+        description: "Asa Delta ist das Original — Rio de Janeiro ist einer der wenigen Orte weltweit, wo man mitten über einer Millionenstadt Drachenfliegen kann. Der Start erfolgt von der gleichen Rampe wie beim Paragliding (Pedra Bonita), aber das Gefühl ist völlig anders: du liegst horizontal, spürst den Wind direkt und fliegst wie ein Vogel über die Stadt. Noch intensiver, noch freier, noch unvergesslicher.",
         tip: "Asa Delta ist nichts für schwache Nerven — aber mit einem erfahrenen Tandem-Piloten bist du in sicheren Händen. Der Flug dauert etwa 10-15 Minuten und endet mit einer sanften Landung am Strand von São Conrado.",
         image: "/images/drachen-fliegen-rio.webp",
         badges: [
