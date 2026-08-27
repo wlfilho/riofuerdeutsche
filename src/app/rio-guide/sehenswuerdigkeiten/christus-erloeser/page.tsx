@@ -594,7 +594,11 @@ export default function ChristusErloeserPage() {
                             </p>
                         </FadeIn>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Colunas seguem o número de cards. Eram 3 quando a seção linkava
+                            pontos que nunca foram construídos (urca, santa-teresa e outros:
+                            404 desde sempre). Ao criar essas páginas, devolver os cards e o
+                            md:grid-cols-3. */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
 
                             {/* Card 1 — Zuckerhut */}
                             <FadeIn delay={0} direction="up" className="flex">
@@ -626,62 +630,8 @@ export default function ChristusErloeserPage() {
                             </FadeIn>
 
                             {/* Card 2 — Mirante Dona Marta */}
-                            <FadeIn delay={0.08} direction="up" className="flex">
-                                <Link
-                                    href="/rio-guide/sehenswuerdigkeiten/mirante-dona-marta"
-                                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden w-full"
-                                >
-                                    <div className="relative h-48 overflow-hidden">
-                                        <Image
-                                            src="/images/dona-marta.webp"
-                                            alt="Mirante Dona Marta — Aussichtspunkt über Rio de Janeiro"
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green uppercase tracking-wider">
-                                            Insider-Tipp
-                                        </span>
-                                    </div>
-                                    <div className="p-5 flex flex-col flex-grow">
-                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Mirante Dona Marta</h3>
-                                        <p className="text-gray-500 text-sm leading-relaxed flex-grow">
-                                            Der beste Blick AUF den Christus — kostenlos, kaum Touristen, und du siehst ihn genau so, wie die Cariocas ihn kennen.
-                                        </p>
-                                        <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
-                                            Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                        </div>
-                                    </div>
-                                </Link>
-                            </FadeIn>
 
                             {/* Card 3 — Tijuca Regenwald */}
-                            <FadeIn delay={0.16} direction="up" className="flex">
-                                <Link
-                                    href="/rio-guide/sehenswuerdigkeiten/tijuca-regenwald"
-                                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden w-full"
-                                >
-                                    <div className="relative h-48 overflow-hidden">
-                                        <Image
-                                            src="/images/floresta-da-tijuca.webp"
-                                            alt="Floresta da Tijuca — der größte urbane Regenwald der Welt"
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green uppercase tracking-wider">
-                                            Natur
-                                        </span>
-                                    </div>
-                                    <div className="p-5 flex flex-col flex-grow">
-                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Tijuca Regenwald</h3>
-                                        <p className="text-gray-500 text-sm leading-relaxed flex-grow">
-                                            Der Christus steht mitten drin — der Tijuca ist der größte urbane Regenwald der Welt und beginnt direkt hinter der Statue.
-                                        </p>
-                                        <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
-                                            Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                        </div>
-                                    </div>
-                                </Link>
-                            </FadeIn>
 
                             {/* Card 4 — Rocinha */}
                             <FadeIn delay={0.24} direction="up" className="flex">

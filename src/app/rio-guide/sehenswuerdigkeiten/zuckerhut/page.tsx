@@ -526,7 +526,11 @@ export default function ZuckerhutPage() {
                             </p>
                         </FadeIn>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Colunas seguem o número de cards. Eram 3 quando a seção linkava
+                            pontos que nunca foram construídos (urca, santa-teresa e outros:
+                            404 desde sempre). Ao criar essas páginas, devolver os cards e o
+                            md:grid-cols-3. */}
+                        <div className="grid grid-cols-1 gap-6 max-w-md">
 
                             {/* Card 1 — Christus Erlöser */}
                             <FadeIn delay={0} direction="up" className="flex">
@@ -558,62 +562,8 @@ export default function ZuckerhutPage() {
                             </FadeIn>
 
                             {/* Card 2 — Urca */}
-                            <FadeIn delay={0.08} direction="up" className="flex">
-                                <Link
-                                    href="/rio-guide/sehenswuerdigkeiten/urca"
-                                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden w-full"
-                                >
-                                    <div className="relative h-48 overflow-hidden">
-                                        <Image
-                                            src="/images/urca.webp"
-                                            alt="Urca — das ruhigste Viertel am Fuß des Zuckerhuts"
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green uppercase tracking-wider">
-                                            Geheimtipp
-                                        </span>
-                                    </div>
-                                    <div className="p-5 flex flex-col flex-grow">
-                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Urca</h3>
-                                        <p className="text-gray-500 text-sm leading-relaxed flex-grow">
-                                            Das ruhigste Viertel Rios liegt direkt am Fuß des Zuckerhuts — perfekt für danach.
-                                        </p>
-                                        <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
-                                            Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                        </div>
-                                    </div>
-                                </Link>
-                            </FadeIn>
 
                             {/* Card 3 — Pedra do Arpoador */}
-                            <FadeIn delay={0.16} direction="up" className="flex">
-                                <Link
-                                    href="/rio-guide/sehenswuerdigkeiten/pedra-do-arpoador"
-                                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden w-full"
-                                >
-                                    <div className="relative h-48 overflow-hidden">
-                                        <Image
-                                            src="/images/arpoador-v2.webp"
-                                            alt="Pedra do Arpoador — Sonnenuntergang mit Blick auf den Zuckerhut"
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[9px] font-bold text-rio-green uppercase tracking-wider">
-                                            Sonnenuntergang
-                                        </span>
-                                    </div>
-                                    <div className="p-5 flex flex-col flex-grow">
-                                        <h3 className="text-lg font-bold font-heading text-gray-900 mb-2">Pedra do Arpoador</h3>
-                                        <p className="text-gray-500 text-sm leading-relaxed flex-grow">
-                                            Auch ein legendärer Sonnenuntergang — diesmal mit Blick auf den Zuckerhut.
-                                        </p>
-                                        <div className="flex items-center gap-1.5 text-sm font-bold text-rio-green group-hover:text-rio-yellow transition-colors mt-4">
-                                            Mehr erfahren <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                        </div>
-                                    </div>
-                                </Link>
-                            </FadeIn>
 
                         </div>
                     </div>
