@@ -9,7 +9,6 @@ import { getSettings, buildContactUrls } from "@/lib/settings";
 import {
   ArrowRight,
   MapPin,
-  Camera,
   Star,
   HeartHandshake,
   Phone,
@@ -54,7 +53,7 @@ const faqJsonLd = {
       name: "Wie buche ich eine Tour?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Schreib mir einfach auf WhatsApp oder per E-Mail — ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.",
+        text: "Am schnellsten über das Anfrageformular auf riofuerdeutsche.de/anfrage — dort stehen schon die Fragen, die ich sowieso stellen würde. Lieber direkt? Schreib mir auf WhatsApp oder per E-Mail — ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.",
       },
     },
     {
@@ -294,6 +293,16 @@ export default async function Home() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    {/* Primário do hero. O tráfego real desta home é fundo de funil —
+                        gente que já quer um tour — e o guia grátis, desenhado para topo
+                        de funil, ficava na frente do pedido. Ele continua na página,
+                        agora como terceiro caminho. */}
+                    <Link
+                      href="/anfrage?von=site"
+                      className="inline-flex items-center justify-center gap-1 px-5 py-4 sm:px-8 bg-rio-green text-white rounded-full font-bold text-base sm:text-lg hover:bg-green-700 hover:scale-[1.02] transition-all shadow-xl shadow-rio-green/25 whitespace-nowrap"
+                    >
+                      Tour anfragen
+                    </Link>
                     <Link
                       href="/ist-rio-gefaehrlich"
                       className="inline-flex items-center justify-center gap-1 px-5 py-4 sm:px-8 bg-rio-yellow text-gray-900 rounded-full font-semibold text-base sm:text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20 whitespace-nowrap"
@@ -349,12 +358,15 @@ export default async function Home() {
               </FadeIn>
 
               <FadeIn direction="up" delay={0.2}>
+                {/* O CTA do guia grátis saiu daqui: com o hero e o bloco final já
+                    apontando para /anfrage, repetir a isca de topo de funil no meio
+                    da página competia com o pedido em vez de somar. */}
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                   <Link
-                    href="/ist-rio-gefaehrlich"
+                    href="/anfrage?von=site"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-green text-white rounded-full font-bold text-base hover:bg-rio-green/90 hover:scale-[1.02] transition-all shadow-lg"
                   >
-                    Kostenlosen Rio-Guide sichern
+                    Tour anfragen
                   </Link>
                   <Link
                     href="#touren"
@@ -620,22 +632,26 @@ export default async function Home() {
               <FadeIn direction="up">
                 <h2 id="kontakt-heading" className="text-3xl md:text-5xl font-heading font-bold text-white mb-6">Lust auf Rio bekommen?</h2>
                 <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
-                  Bevor du buchst: Hol dir unseren kostenlosen Sicherheits-Guide für Rio. 7 Fehler, die deutsche Touristen machen — und wie du sie vermeidest. Kostenlos, sofort per E-Mail.
+                  Erzähl mir, wann du kommst und was dich interessiert. Innerhalb von 24 Stunden bekommst du einen Vorschlag mit Ablauf und Preis — kostenlos und unverbindlich.
                 </p>
+                {/* Invertido: era o guia grátis em primário e "Tour anfragen" apontando
+                    para /kontakt. Quem chega ao fim da home leu tudo — é o momento de
+                    pedir o pedido, não de oferecer material de leitura. */}
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                   <Link
-                    href="/ist-rio-gefaehrlich"
+                    href="/anfrage?von=site"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
-                  >
-                    <Camera className="w-5 h-5" />
-                    Kostenlosen Guide sichern
-                  </Link>
-                  <Link
-                    href="/kontakt"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                   >
                     Tour anfragen
                   </Link>
+                  <a
+                    href={c.whatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
+                  >
+                    WhatsApp an uns
+                  </a>
                 </div>
               </FadeIn>
             </div>

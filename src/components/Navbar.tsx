@@ -418,6 +418,16 @@ export default function Navbar({ contact: contactProp }: { contact?: ContactUrls
                         desktop deste bloco tem ~140px e, somada ao logo, empurrava
                         o hambúrguer para fora do viewport em telas < 430px. */}
                     <div className="hidden lg:flex items-center gap-4">
+                        {/* CTA primário do site. Antes da Fase 1 nenhuma das 26 páginas
+                            linkava a /anfrage: ela existia, respondia 200 e era
+                            inalcançável por navegação. O WhatsApp continua no menu e no
+                            rodapé — este botão soma um caminho, não substitui nenhum. */}
+                        <Link
+                            href="/anfrage?von=site"
+                            className="inline-flex items-center rounded-full bg-rio-green px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-green-700"
+                        >
+                            {t('tourAnfragen')}
+                        </Link>
                         <HeaderAuth />
                     </div>
 
@@ -548,6 +558,16 @@ export default function Navbar({ contact: contactProp }: { contact?: ContactUrls
 
                     {/* Rodapé fixo — zona de alcance do polegar */}
                     <div className="shrink-0 border-t border-gray-100 bg-white px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+                        {/* Primário acima do WhatsApp, ambos na zona do polegar: o
+                            handoff é explícito em nunca esconder o WhatsApp. */}
+                        <Link
+                            href="/anfrage?von=site"
+                            onClick={closeMenu}
+                            className="mb-3 flex h-14 w-full items-center justify-center rounded-2xl bg-rio-green text-base font-bold text-white shadow-lg shadow-rio-green/25 transition-transform active:scale-[0.99]"
+                        >
+                            {t('tourAnfragen')}
+                        </Link>
+
                         {contact.whatsappHref && (
                             <a
                                 href={contact.whatsappHref}

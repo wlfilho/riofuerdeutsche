@@ -758,11 +758,14 @@ export default function ChristusErloeserPage() {
                                     <Phone className="w-5 h-5" />
                                     Klassiker Tour anfragen
                                 </Link>
+                                    {/* Era "Kontakt aufnehmen" -> /kontakt. Estas 6 páginas são as de SEO e de
+                                        citação por IA: quem chega aqui pesquisou o ponto turístico, não a marca.
+                                        O pedido vai pra Anfrage já com tour=klassiker, o passeio que cobre este ponto. */}
                                 <Link
-                                    href="/kontakt"
+                                    href="/anfrage?von=site&tour=klassiker"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
-                                    Kontakt aufnehmen
+                                    Diese Sehenswürdigkeit anfragen
                                 </Link>
                             </div>
                         </FadeIn>

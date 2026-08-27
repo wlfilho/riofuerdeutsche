@@ -222,10 +222,10 @@ export default async function UeberWill() {
                   Touren entdecken
                 </Link>
                 <Link
-                  href="/kontakt"
+                  href="/anfrage?von=site"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/10 transition-all"
                 >
-                  Kontakt aufnehmen
+                  Tour anfragen
                 </Link>
               </div>
             </section>

@@ -561,8 +561,12 @@ export default function IstRioGefaehrlich() {
                 >
                   Touren ansehen
                 </Link>
+                {/* Única página do site onde o guia grátis segue como CTA primário:
+                    aqui o tráfego é de topo de funil de verdade — a pessoa pesquisou
+                    se o Rio é perigoso, não um passeio. Só este secundário sai do
+                    /kontakt para a Anfrage. */}
                 <Link
-                  href="/kontakt"
+                  href="/anfrage?von=site"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/10 transition-all"
                 >
                   Direkt anfragen

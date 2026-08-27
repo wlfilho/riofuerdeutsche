@@ -111,15 +111,24 @@ export default async function RioByNightPage() {
                                     Das beste Nachtleben mit einem echten Carioca
                                 </p>
 
-                                <div className="pt-6">
+                                <div className="pt-6 flex flex-col sm:flex-row gap-4">
+                                    {/* Primário passa a ser a Anfrage, com o slug da própria rota:
+                                        assim dá pra saber qual página de tour converte. O WhatsApp
+                                        continua visível ao lado, nunca escondido. */}
+                                    <Link
+                                        href="/anfrage?von=site&tour=by-night"
+                                        className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
+                                    >
+                                        Tour anfragen
+                                    </Link>
                                     <a
                                         href={`${whatsappLink}?text=${customWhatsappMsg}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
+                                        className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                     >
                                         <Phone className="w-5 h-5" />
-                                        Tour anfragen
+                                        Auf WhatsApp schreiben
                                     </a>
                                 </div>
                             </div>
@@ -226,20 +235,26 @@ export default async function RioByNightPage() {
                                 Schreib mir per WhatsApp oder E-Mail und ich plane den perfekten Abend für dich — von Samba bis Cocktails, immer sicher und mit Insider-Wissen.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                <Link
+                                    href="/anfrage?von=site&tour=by-night"
+                                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
+                                >
+                                    Tour anfragen
+                                </Link>
                                 <a
                                     href={`${whatsappLink}?text=${customWhatsappMsg}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
+                                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
                                     <Phone className="w-5 h-5" />
                                     WhatsApp an uns
                                 </a>
                                 <Link
                                     href="/kontakt"
-                                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
+                                    className="inline-flex items-center justify-center px-2 py-4 text-sm text-white/70 underline underline-offset-4 hover:text-white transition-colors"
                                 >
-                                    Kontakt per E-Mail
+                                    Lieber per E-Mail?
                                 </Link>
                             </div>
                         </FadeIn>

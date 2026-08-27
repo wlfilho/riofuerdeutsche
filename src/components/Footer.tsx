@@ -90,6 +90,9 @@ export default function Footer({ contact = FALLBACK_CONTACT }: { contact?: Conta
                     <div>
                         <h3 className="text-white font-bold mb-4">{t('quickLinks')}</h3>
                         <ul className="space-y-2 text-sm">
+                            {/* Primeiro da lista de propósito: é o CTA da Fase 1, e o
+                                footer é o único lugar que aparece em toda página. */}
+                            <li><Link href="/anfrage?von=site" className="font-semibold text-white hover:text-rio-yellow transition-colors">{t('tourAnfragen')}</Link></li>
                             <li><Link href="/touren" className="hover:text-white transition-colors">{t('tourenUndAusfluege')}</Link></li>
                             <li><Link href="/ueber-will" className="hover:text-white transition-colors">{t('ueberUns')}</Link></li>
                             <li><Link href="/rio-guide/sehenswuerdigkeiten" className="hover:text-white transition-colors">{t('rioGuide')}</Link></li>
