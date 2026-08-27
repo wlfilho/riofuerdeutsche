@@ -13,7 +13,7 @@ export async function generateMetadata() {
 }
 
 export type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'lost';
-export type LeadSource = 'calculator' | 'email' | 'whatsapp' | 'instagram' | 'referral' | 'other';
+export type LeadSource = 'calculator' | 'email' | 'whatsapp' | 'instagram' | 'referral' | 'other' | 'form';
 
 export interface CrmLead {
   id: string;

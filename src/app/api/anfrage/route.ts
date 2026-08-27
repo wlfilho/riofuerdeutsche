@@ -13,7 +13,12 @@ import {
   type PhoneCountry,
 } from '@/lib/campaigns';
 
-const VALID_SOURCES = ['whatsapp', 'email', 'instagram'] as const;
+/**
+ * Canais de CHEGADA aceitos no `?von=` da /anfrage — de onde a pessoa veio
+ * antes de preencher. Não confundir com o canal de SUBMISSÃO, que para tudo
+ * que passa por esta rota é sempre 'form'. Ver o comentário em leadFields.
+ */
+const VALID_ARRIVAL_CHANNELS = ['whatsapp', 'email', 'instagram'] as const;
 
 function isIsoDate(s: unknown): s is string {
   return (
@@ -98,9 +103,14 @@ export async function POST(request: NextRequest) {
   const pax = Number(body.pax);
   const children = body.children === undefined ? 0 : Number(body.children);
   const rawDays = Array.isArray(body.days) ? body.days : [];
-  const source = VALID_SOURCES.includes(body.source as typeof VALID_SOURCES[number])
+  // O formulário manda o `?von=` da URL neste campo. Vale como canal de
+  // chegada; valor desconhecido (ou ausente) vira null em vez de derrubar o
+  // envio — link velho ou parâmetro digitado errado não pode custar um lead.
+  const arrivalChannel = VALID_ARRIVAL_CHANNELS.includes(
+    body.source as typeof VALID_ARRIVAL_CHANNELS[number],
+  )
     ? (body.source as string)
-    : 'other';
+    : null;
 
   if (!name) {
     return NextResponse.json({ error: 'Bitte gib deinen Namen an.' }, { status: 400 });
@@ -140,7 +150,11 @@ export async function POST(request: NextRequest) {
   const { data: contact, error: contactError } = await supabase
     .from('contacts')
     .upsert(
-      { email, name, phone: phone || null, source },
+      // De propósito o canal de chegada, e não 'form': `contacts.source` conta
+      // por onde a PESSOA apareceu (WhatsApp, e-mail, Instagram) — é ficha de
+      // cadastro, não de pedido. Ver o comentário em leadFields sobre por que
+      // os dois campos divergem para o mesmo lead.
+      { email, name, phone: phone || null, source: arrivalChannel ?? 'other' },
       { onConflict: 'email' },
     )
     .select('id')
@@ -150,6 +164,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Etwas ist schiefgelaufen. Bitte versuche es später erneut.' }, { status: 500 });
   }
 
+  // ATENÇÃO — `price_leads.source` e `contacts.source` divergem de propósito
+  // para o mesmo lead, e isso não é bug. São perguntas diferentes:
+  //
+  //   price_leads.source = COMO o pedido chegou até o sistema (canal de
+  //     submissão). Tudo que passa por esta rota é 'form', sem exceção.
+  //     'other' fica reservado pro cadastro manual do Will no admin
+  //     (POST /api/admin/leads) — é o que torna a Fase 1 mensurável: antes
+  //     os dois caíam no mesmo balde e não dava pra separar um do outro.
+  //   price_leads.arrival_channel = DE ONDE a pessoa veio antes de preencher
+  //     (o `?von=` da URL). Quem clicou no link do WhatsApp e preencheu o
+  //     formulário é source='form' + arrival_channel='whatsapp'.
+  //   contacts.source = por onde a PESSOA apareceu pela primeira vez. Segue
+  //     o canal de chegada, não o de submissão — daí a divergência.
+  //
+  // Ou seja: um mesmo lead legitimamente termina com price_leads.source
+  // 'form' e contacts.source 'whatsapp'. Igualar os dois destruiria a
+  // distinção entre canal de aquisição e canal de conversão.
+  //
+  // Submissão de campanha (AIDA) também é 'form' — é formulário de verdade.
+  // Para medir só o funil da /anfrage, filtre `campaign is null`.
   const leadFields = {
     name,
     email,
@@ -158,7 +192,8 @@ export async function POST(request: NextRequest) {
     children,
     days: days.length,
     requested_days: days,
-    source,
+    source: 'form',
+    arrival_channel: arrivalChannel,
     contact_id: contact.id,
     campaign: campaign?.slug ?? null,
     campaign_data: campaignData,
@@ -321,7 +356,7 @@ export async function POST(request: NextRequest) {
           <strong>Telefone:</strong> ${escapeHtml(phone) || '—'}<br/>
           <strong>Adultos:</strong> ${pax}<br/>
           <strong>Crianças:</strong> ${children}<br/>
-          <strong>Origem:</strong> ${source}
+          <strong>Origem:</strong> formulário${arrivalChannel ? ` (via ${escapeHtml(arrivalChannel)})` : ''}
         </p>
         ${campaignHtml}
         <p><strong>Dias desejados:</strong></p>
