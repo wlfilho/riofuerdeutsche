@@ -80,6 +80,7 @@ export default function AnfrageForm({
   // dois — o script conta isso como "chave dinâmica ignorada".
   const themaLabels: Record<Thema, string> = {
     unterkunft: t('themaUnterkunft'),
+    transfer: t('themaTransfer'),
   };
   const themaLabel = isThema(thema) ? themaLabels[thema] : null;
 
