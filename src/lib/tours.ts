@@ -10,6 +10,11 @@
  *
  * Ao criar um tour novo em src/app/touren/, acrescente o slug aqui — senão o
  * ?tour= daquela página é ignorado e o lead perde a atribuição de origem.
+ *
+ * Cuidado: nem todo diretório em src/app/touren/ é um tour. 'flughafen-transfer'
+ * mora lá mas é serviço, não passeio — o CTA dele usa ?thema=transfer, e incluir
+ * o slug aqui misturaria upsell de transporte com atribuição de tour nos
+ * relatórios. A lista abaixo é curada, não um espelho do diretório.
  */
 export const TOUR_SLUGS = [
   'by-night',

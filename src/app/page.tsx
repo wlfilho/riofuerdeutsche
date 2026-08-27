@@ -523,12 +523,7 @@ export default async function Home() {
 
                 <FadeIn direction="up" delay={0.2}>
                   <p className="text-lg text-gray-700 leading-relaxed">
-                    {/* TAPA-BURACO: /touren/flughafen-transfer nunca existiu e devolvia
-                        404 aqui na home. Enquanto a página não nasce, o link vai pra
-                        /anfrage com thema=transfer — mesmo custo de manutenção e a
-                        demanda fica registrada no CRM em vez de se perder num 404.
-                        Quando a página existir, voltar o href pra /touren/flughafen-transfer. */}
-                    Alle Touren finden in unseren eigenen Fahrzeugen mit Fahrer statt – bequem, sicher und ohne Stress. Wir bieten außerdem einen <Link href="/anfrage?von=site&thema=transfer" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Flughafen-Transfer</Link> direkt zu deiner Unterkunft an, damit deine Reise entspannt beginnt.
+                    Alle Touren finden in unseren eigenen Fahrzeugen mit Fahrer statt – bequem, sicher und ohne Stress. Wir bieten außerdem einen <Link href="/touren/flughafen-transfer" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Flughafen-Transfer</Link> direkt zu deiner Unterkunft an, damit deine Reise entspannt beginnt.
                   </p>
                 </FadeIn>
 

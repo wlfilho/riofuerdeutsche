@@ -84,6 +84,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.8,
         },
         {
+            url: `${baseUrl}/touren/flughafen-transfer`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly' as const,
+            priority: 0.7,
+        },
+        {
             url: `${baseUrl}/frauen-wm-2027`,
             lastModified: today,
             changeFrequency: "monthly",
