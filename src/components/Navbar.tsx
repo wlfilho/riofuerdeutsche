@@ -18,6 +18,7 @@ import {
 import HeaderAuth from "./HeaderAuth";
 import WhatsAppIcon from "./icons/WhatsAppIcon";
 import type { ContactUrls } from "@/lib/settings";
+import { FALLBACK_CONTACT } from "@/lib/contactFallback";
 
 type SubLink = { href: string; label: string };
 
@@ -160,19 +161,6 @@ function splitEmoji(label: string): { emoji: string | null; text: string } {
     return match ? { emoji: match[1], text: label.slice(match[0].length) } : { emoji: null, text: label };
 }
 
-const NAVBAR_FALLBACK: ContactUrls = {
-  phone: '+55 21 97927-7472',
-  phoneHref: 'tel:+5521979277472',
-  whatsappHref: 'https://wa.me/5521979277472',
-  email: 'riofuerdeutsche@gmail.com',
-  emailHref: 'mailto:riofuerdeutsche@gmail.com',
-  instagramHref: 'https://instagram.com/riofuerdeutsche',
-  youtubeHref: 'https://youtube.com/@riofuerdeutsche',
-  facebookHref: '',
-  telegramHref: 'https://t.me/wlfilho',
-  telegram: 'wlfilho',
-  address: 'Rio de Janeiro, Brasilien',
-}
 
 const MOBILE_MENU_ID = "mobile-nav-panel";
 
@@ -184,19 +172,19 @@ export default function Navbar({ contact: contactProp }: { contact?: ContactUrls
 
     // Merge por campo: usa o valor do banco quando existir, senão o fallback.
     // Um default de parâmetro só valeria com `contact` undefined — um objeto com
-    // strings vazias (miss no banco) anularia o NAVBAR_FALLBACK inteiro.
+    // strings vazias (miss no banco) anularia o FALLBACK_CONTACT inteiro.
     const pick = (value: string | undefined, fallback: string) => value?.trim() || fallback;
     const contact: ContactUrls = {
-        ...NAVBAR_FALLBACK,
+        ...FALLBACK_CONTACT,
         ...contactProp,
-        phone: pick(contactProp?.phone, NAVBAR_FALLBACK.phone),
+        phone: pick(contactProp?.phone, FALLBACK_CONTACT.phone),
         phoneHref: contactProp?.phoneHref?.trim() && contactProp.phoneHref.trim() !== 'tel:'
             ? contactProp.phoneHref
-            : NAVBAR_FALLBACK.phoneHref,
-        whatsappHref: pick(contactProp?.whatsappHref, NAVBAR_FALLBACK.whatsappHref),
-        emailHref: pick(contactProp?.emailHref, NAVBAR_FALLBACK.emailHref),
-        instagramHref: pick(contactProp?.instagramHref, NAVBAR_FALLBACK.instagramHref),
-        youtubeHref: pick(contactProp?.youtubeHref, NAVBAR_FALLBACK.youtubeHref),
+            : FALLBACK_CONTACT.phoneHref,
+        whatsappHref: pick(contactProp?.whatsappHref, FALLBACK_CONTACT.whatsappHref),
+        emailHref: pick(contactProp?.emailHref, FALLBACK_CONTACT.emailHref),
+        instagramHref: pick(contactProp?.instagramHref, FALLBACK_CONTACT.instagramHref),
+        youtubeHref: pick(contactProp?.youtubeHref, FALLBACK_CONTACT.youtubeHref),
     };
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);

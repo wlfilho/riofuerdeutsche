@@ -378,7 +378,7 @@ export default async function Home() {
                   </p>
                 </FadeIn>
                 <FadeIn direction="right">
-                  <Link href="/touren/klassiker" className="group inline-flex items-center gap-2 text-rio-blue font-medium hover:text-rio-blue/80 transition-colors">
+                  <Link href="/touren" className="group inline-flex items-center gap-2 text-rio-blue font-medium hover:text-rio-blue/80 transition-colors">
                     Alle Touren ansehen
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>

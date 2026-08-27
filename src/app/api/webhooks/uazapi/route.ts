@@ -38,7 +38,7 @@ function extractPhone(p: Record<string, unknown>): string {
   ];
   for (const c of candidates) {
     if (typeof c !== 'string') continue;
-    // "5521967527243@s.whatsapp.net" -> "5521967527243"
+    // "5521999998888@s.whatsapp.net" -> "5521999998888"
     const d = digits(c.split('@')[0]);
     if (d.length >= 8) return d;
   }

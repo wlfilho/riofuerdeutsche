@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { MapPin, Instagram, Youtube, Mail, Send } from "lucide-react";
 import type { ContactUrls } from "@/lib/settings";
+import { FALLBACK_CONTACT } from "@/lib/contactFallback";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
     <svg 
@@ -16,21 +17,7 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const FALLBACK: ContactUrls = {
-  phone: '+55 21 97927-7472',
-  phoneHref: 'tel:+5521979277472',
-  whatsappHref: 'https://wa.me/5521979277472',
-  email: 'riofuerdeutsche@gmail.com',
-  emailHref: 'mailto:riofuerdeutsche@gmail.com',
-  instagramHref: 'https://instagram.com/riofuerdeutsche',
-  youtubeHref: 'https://youtube.com/@riofuerdeutsche',
-  facebookHref: '',
-  telegramHref: 'https://t.me/wlfilho',
-  telegram: 'wlfilho',
-  address: 'Rio de Janeiro, Brasilien',
-}
-
-export default function Footer({ contact = FALLBACK }: { contact?: ContactUrls }) {
+export default function Footer({ contact = FALLBACK_CONTACT }: { contact?: ContactUrls }) {
     const t = useTranslations('public.footer');
 
     return (

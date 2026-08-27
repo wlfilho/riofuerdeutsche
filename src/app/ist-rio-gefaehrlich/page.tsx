@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import MagicLinkForm from "@/components/MagicLinkForm";
 import { ShieldCheck, AlertTriangle, AlertCircle, XCircle, Info } from "lucide-react";
 
@@ -111,7 +111,7 @@ export default function IstRioGefaehrlich() {
       />
       
       <div className="flex flex-col min-h-screen bg-[#f8f5f0] font-sans">
-        <Navbar />
+        <NavbarServer />
 
         <main className="flex-grow pb-16">
           {/* 1. HERO SECTION FULL WIDTH */}
@@ -573,7 +573,7 @@ export default function IstRioGefaehrlich() {
           </article>
         </main>
         
-        <Footer />
+        <FooterServer />
       </div>
     </>
   );

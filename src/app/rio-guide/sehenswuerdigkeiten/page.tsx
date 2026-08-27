@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import { ChevronRight, MapPin, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
@@ -70,7 +70,7 @@ const sehenswuerdigkeiten = [
 export default function SehenswuerdigkeitenPage() {
     return (
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
-            <Navbar />
+            <NavbarServer />
 
             <main className="flex-grow">
                 {/* ── HERO ─────────────────────────────────────────── */}
@@ -156,7 +156,7 @@ export default function SehenswuerdigkeitenPage() {
                 </section>
             </main>
 
-            <Footer />
+            <FooterServer />
         </div>
     );
 }

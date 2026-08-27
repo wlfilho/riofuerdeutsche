@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import AndereTouren from "@/components/AndereTouren";
 import Faq from "@/components/Faq";
@@ -115,7 +115,7 @@ export default function SantaMartaPage() {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
             />
             <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
-                <Navbar />
+                <NavbarServer />
 
                 <main className="flex-grow">
                     {/* ── HERO ─────────────────────────────────────────── */}
@@ -577,7 +577,7 @@ export default function SantaMartaPage() {
 
                 </main>
 
-                <Footer />
+                <FooterServer />
             </div>
         </>
     );

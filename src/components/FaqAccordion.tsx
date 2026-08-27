@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
+import { FALLBACK_CONTACT } from "@/lib/contactFallback";
 
 type FaqItem = {
   q: string;
@@ -54,8 +55,8 @@ function buildItems(whatsappHref: string, emailHref: string): FaqItem[] {
 }
 
 export default function FaqAccordion({
-  whatsappHref = "https://wa.me/5521979277472",
-  emailHref = "mailto:riofuerdeutsche@gmail.com",
+  whatsappHref = FALLBACK_CONTACT.whatsappHref,
+  emailHref = FALLBACK_CONTACT.emailHref,
 }: {
   whatsappHref?: string;
   emailHref?: string;

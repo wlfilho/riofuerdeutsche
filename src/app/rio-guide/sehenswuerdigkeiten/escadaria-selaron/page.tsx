@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import NavbarServer from "@/components/NavbarServer";
+import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import AndereTouren from "@/components/AndereTouren";
 import { ChevronRight, Home, ArrowRight, Phone } from "lucide-react";
@@ -97,7 +97,7 @@ export default function EscadariaSelaronPage() {
             dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
-            <Navbar />
+            <NavbarServer />
 
             <main className="flex-grow">
                 {/* ── HERO ─────────────────────────────────────────── */}
@@ -176,7 +176,7 @@ export default function EscadariaSelaronPage() {
                                 <div className="flex flex-col sm:flex-row gap-4">
                                     {/* CTA primário */}
                                     <Link
-                                        href="/touren/klassiker-tour"
+                                        href="/touren/klassiker"
                                         className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-[#22a262] text-white rounded-full font-bold text-base hover:bg-[#1a8a52] hover:scale-[1.02] transition-all shadow-xl shadow-[#22a262]/25"
                                     >
                                         Klassiker Tour buchen
@@ -694,7 +694,7 @@ export default function EscadariaSelaronPage() {
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link
-                                    href="/touren/klassiker-tour"
+                                    href="/touren/klassiker"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
                                 >
                                     <Phone className="w-5 h-5" />
@@ -716,7 +716,7 @@ export default function EscadariaSelaronPage() {
 
             </main>
 
-            <Footer />
+            <FooterServer />
         </div>
         </>
     );
