@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { isThema, type Thema } from '@/lib/themen';
 import {
   ArrowLeft,
   CalendarDays,
@@ -68,6 +69,19 @@ export default function AnfrageForm({
   // Valor fora da lista é ignorado lá, sem quebrar o envio.
   const von = searchParams.get('von');
   const tour = searchParams.get('tour');
+  const thema = searchParams.get('thema');
+  // Só o thema é validado aqui, e não pra decidir o que enviar (a rota é quem
+  // valida) — é pra saber se dá pra mostrar um rótulo. Sem rótulo conhecido a
+  // linha some, em vez de ecoar na tela um valor vindo da URL.
+  //
+  // Record<Thema, ...> com chamadas literais de propósito: o compilador cobra
+  // um rótulo pra cada slug novo em THEMA_SLUGS, e o check:i18n consegue ver
+  // as chaves. Montar o nome da chave por interpolação passaria batido nos
+  // dois — o script conta isso como "chave dinâmica ignorada".
+  const themaLabels: Record<Thema, string> = {
+    unterkunft: t('themaUnterkunft'),
+  };
+  const themaLabel = isThema(thema) ? themaLabels[thema] : null;
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -139,6 +153,7 @@ export default function AnfrageForm({
           days,
           source: von,
           tour,
+          thema,
           website,
         }),
       });
@@ -250,6 +265,18 @@ export default function AnfrageForm({
           {t('title')}
         </h1>
       </header>
+
+      {/* Quem chega por um CTA de assunto específico (hoje só a consultoria de
+          hospedagem) precisa ver que o pedido dele chegou — senão cai num
+          formulário que só fala de tour, acha que errou de página e desiste.
+          Sem isso o teste de demanda mediria a fricção da tela, não o
+          interesse pelo serviço. */}
+      {themaLabel && (
+        <p className="mt-4 text-center text-sm text-gray-600">
+          {t('themaContext')}{' '}
+          <strong className="font-semibold text-gray-900">{themaLabel}</strong>
+        </p>
+      )}
 
       {/* O que a pessoa recebe em troca do formulário — antes do texto, porque é
           o que responde ao "por que eu preencheria isso?". */}

@@ -732,7 +732,7 @@ export default function Page() {
                                     <ArrowRight className="w-5 h-5" />
                                 </Link>
                                 <Link
-                                    href="/unterkunft/beratung"
+                                    href="/anfrage?von=site&thema=unterkunft"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
                                     Persönliche Reiseberatung anfragen

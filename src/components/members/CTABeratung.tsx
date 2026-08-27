@@ -86,7 +86,7 @@ export default function CTABeratung() {
         {/* Botões */}
         <div className="flex justify-center flex-wrap" style={{ gap: "16px" }}>
           <a
-            href="https://riofuerdeutsche.de/unterkunft/beratung"
+            href="https://riofuerdeutsche.de/anfrage?von=site&thema=unterkunft"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -102,24 +102,6 @@ export default function CTABeratung() {
             }}
           >
             {t("beratungBuchen")}
-          </a>
-          <a
-            href="https://riofuerdeutsche.de/unterkunft/beratung#details"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              background: "transparent",
-              color: "#0d1f15",
-              fontSize: "15px",
-              fontWeight: 600,
-              padding: "14px 28px",
-              borderRadius: "999px",
-              border: "1px solid #0d1f15",
-              textDecoration: "none",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {t("mehrErfahren")}
           </a>
         </div>
       </div>

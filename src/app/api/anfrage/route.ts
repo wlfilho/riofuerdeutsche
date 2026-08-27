@@ -13,6 +13,7 @@ import {
   type PhoneCountry,
 } from '@/lib/campaigns';
 import { isTourSlug } from '@/lib/tours';
+import { isThema } from '@/lib/themen';
 
 /**
  * Canais de CHEGADA aceitos no `?von=` da /anfrage — de onde a pessoa veio
@@ -124,6 +125,10 @@ export async function POST(request: NextRequest) {
   // só sem saber de que página veio.
   const tourSlug = isTourSlug(body.tour) ? body.tour : null;
 
+  // Mesma regra do tour: desconhecido vira null em silêncio. `thema` é o que a
+  // pessoa quer; `tour_slug` é de onde ela veio. Os dois podem coexistir.
+  const thema = isThema(body.thema) ? body.thema : null;
+
   if (!name) {
     return NextResponse.json({ error: 'Bitte gib deinen Namen an.' }, { status: 400 });
   }
@@ -207,6 +212,7 @@ export async function POST(request: NextRequest) {
     source: 'form',
     arrival_channel: arrivalChannel,
     tour_slug: tourSlug,
+    thema,
     contact_id: contact.id,
     campaign: campaign?.slug ?? null,
     campaign_data: campaignData,
@@ -370,7 +376,8 @@ export async function POST(request: NextRequest) {
           <strong>Adultos:</strong> ${pax}<br/>
           <strong>Crianças:</strong> ${children}<br/>
           <strong>Origem:</strong> formulário${arrivalChannel ? ` (via ${escapeHtml(arrivalChannel)})` : ''}<br/>
-          <strong>Página de tour:</strong> ${tourSlug ? escapeHtml(tourSlug) : '—'}
+          <strong>Página de tour:</strong> ${tourSlug ? escapeHtml(tourSlug) : '—'}<br/>
+          <strong>Assunto:</strong> ${thema ? escapeHtml(thema) : '—'}
         </p>
         ${campaignHtml}
         <p><strong>Dias desejados:</strong></p>

@@ -29,9 +29,12 @@ function buildCtaMap(t: (key: string) => string): Record<string, CTAConfig> {
       title: t('unterkunftTitle'),
       subtitle: '60 Minuten mit Will per Videocall — sichere Unterkunft finden, Routen planen und alle Fragen beantwortet. Von einem Carioca, der fließend Deutsch spricht.',
       buttonLabel: t('unterkunftButton'),
-      buttonHref: 'https://riofuerdeutsche.de/unterkunft/beratung',
-      secondaryLabel: t('mehrErfahren'),
-      secondaryHref: 'https://riofuerdeutsche.de/unterkunft/beratung#details',
+      // A página /unterkunft/beratung nunca existiu (404 desde sempre). Em vez
+      // de inventar uma, o CTA vira teste de demanda pela /anfrage. O
+      // "Mehr erfahren" saiu junto: apontava pra uma âncora #details de uma
+      // página inexistente, e "saiba mais" levando a formulário de pedido é
+      // promessa quebrada.
+      buttonHref: 'https://riofuerdeutsche.de/anfrage?von=site&thema=unterkunft',
     },
     transport: {
       icon: '✈️',

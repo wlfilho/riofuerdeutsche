@@ -529,7 +529,7 @@ export default async function Home() {
 
                 <FadeIn direction="up" delay={0.25}>
                   <p className="text-lg text-gray-700 leading-relaxed">
-                    Sicherheit ist uns besonders wichtig. Wir wissen, dass viele deutsche Reisende sich Sorgen machen, wenn es um Rio geht. Deshalb begleiten wir dich nicht nur vor Ort, sondern beraten dich auch vorab – zum Beispiel mit unserer persönlichen <Link href="/unterkunft/beratung" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Unterkunftsberatung</Link> per Videocall, damit du von Anfang an im richtigen und sicheren Viertel landest.
+                    Sicherheit ist uns besonders wichtig. Wir wissen, dass viele deutsche Reisende sich Sorgen machen, wenn es um Rio geht. Deshalb begleiten wir dich nicht nur vor Ort, sondern beraten dich auch vorab – zum Beispiel mit unserer persönlichen <Link href="/anfrage?von=site&thema=unterkunft" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Unterkunftsberatung</Link> per Videocall, damit du von Anfang an im richtigen und sicheren Viertel landest.
                   </p>
                 </FadeIn>
 
