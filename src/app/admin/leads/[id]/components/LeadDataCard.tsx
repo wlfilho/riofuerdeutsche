@@ -175,6 +175,25 @@ export default function LeadDataCard({ lead }: { lead: Lead & { groups: LeadGrou
           </Row>
         )}
 
+        {/* Confirmação automática ao cliente. A linha existe mesmo quando o
+            e-mail não saiu: é justamente esse caso que não pode passar
+            despercebido, senão o Will responde achando que a pessoa já foi
+            avisada. Leads antigos (anteriores à Fase 4) caem no "sem
+            confirmação", que é a verdade sobre eles. */}
+        <Row label={t('confirmacao')}>
+          {lead.confirmation_error ? (
+            <span className="text-red-700" title={lead.confirmation_error}>
+              ⚠️ {t('confirmacaoFalhou')}
+            </span>
+          ) : lead.confirmation_sent_at ? (
+            <span className="text-gray-800">
+              ✓ {t('confirmacaoEnviadaEm', { data: fmtDate(lead.confirmation_sent_at) })}
+            </span>
+          ) : (
+            <span className="text-gray-400 text-xs">{t('confirmacaoNaoEnviada')}</span>
+          )}
+        </Row>
+
         <Row label={t('criadoEm')}>{fmtDate(lead.created_at)}</Row>
 
         {(lead.estimated_min !== null || lead.estimated_max !== null) && (

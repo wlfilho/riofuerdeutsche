@@ -36,6 +36,12 @@ export interface Lead {
   wunsch: string | null;
   /** Origem declarada pelo visitante na página de sucesso. */
   found_via: string | null;
+  /** Quando a confirmação automática saiu. Null = nunca saiu. */
+  confirmation_sent_at: string | null;
+  /** Id da mensagem na Resend, ponte para o painel deles (entrega, bounce). */
+  confirmation_resend_id: string | null;
+  /** Preenchido só enquanto o último envio foi o que falhou. */
+  confirmation_error: string | null;
   status: LeadStatus;
   proposal_id: string | null;
   notes: string | null;

@@ -53,7 +53,7 @@ const faqJsonLd = {
       name: "Wie buche ich eine Tour?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Am schnellsten über das Anfrageformular auf riofuerdeutsche.de/anfrage. Dort stehen schon die Fragen, die ich sowieso stellen würde. Lieber direkt? Schreib mir auf WhatsApp oder per E-Mail. Ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.",
+        text: "Am schnellsten über das Anfrageformular auf riofuerdeutsche.de/anfrage. Dort stehen schon die Fragen, die ich sowieso stellen würde. Lieber direkt? Schreib mir auf WhatsApp oder per E-Mail. Ich antworte meistens innerhalb von 48 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.",
       },
     },
     {
@@ -632,7 +632,7 @@ export default async function Home() {
               <FadeIn direction="up">
                 <h2 id="kontakt-heading" className="text-3xl md:text-5xl font-heading font-bold text-white mb-6">Lust auf Rio bekommen?</h2>
                 <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto">
-                  Erzähl mir, wann du kommst und was dich interessiert. Innerhalb von 24 Stunden bekommst du einen Vorschlag mit Ablauf und Preis, kostenlos und unverbindlich.
+                  Erzähl mir, wann du kommst und was dich interessiert. Du bekommst meistens innerhalb von 48 Stunden einen Vorschlag mit Ablauf und Preis, kostenlos und unverbindlich.
                 </p>
                 {/* Invertido: era o guia grátis em primário e "Tour anfragen" apontando
                     para /kontakt. Quem chega ao fim da home leu tudo — é o momento de

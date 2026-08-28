@@ -34,6 +34,9 @@ export interface CrmLead {
   campaign: string | null;
   campaign_data: unknown;
   archived_at: string | null;
+  /** Confirmação automática ao cliente (ver src/lib/email/sendAnfrageBestaetigung.ts). */
+  confirmation_sent_at: string | null;
+  confirmation_error: string | null;
   created_at: string;
   updated_at: string;
 }

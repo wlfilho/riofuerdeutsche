@@ -58,7 +58,7 @@ const faqSchema = {
             "name": "Wie buche ich eine Tour?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Ganz einfach: Schreib mir per WhatsApp oder E-Mail mit deinen Wunschdaten und Interessen. Innerhalb von 24 Stunden bekommst du einen Vorschlag mit Ablauf und Preis, kostenlos und unverbindlich. Wenn alles passt, bestätigst du und wir legen los. Keine komplizierten Buchungssysteme, keine versteckten Kosten."
+                "text": "Ganz einfach: Schreib mir per WhatsApp oder E-Mail mit deinen Wunschdaten und Interessen. Meistens innerhalb von 48 Stunden bekommst du einen Vorschlag mit Ablauf und Preis, kostenlos und unverbindlich. Wenn alles passt, bestätigst du und wir legen los. Keine komplizierten Buchungssysteme, keine versteckten Kosten."
             }
         },
         {
@@ -516,7 +516,7 @@ export default async function TourenPage() {
                                         },
                                         {
                                             question: "Wie buche ich eine Tour?",
-                                            answer: "Ganz einfach: Schreib mir per WhatsApp oder E-Mail mit deinen Wunschdaten und Interessen. Innerhalb von 24 Stunden bekommst du einen Vorschlag mit Ablauf und Preis, kostenlos und unverbindlich. Wenn alles passt, bestätigst du und wir legen los. Keine komplizierten Buchungssysteme, keine versteckten Kosten."
+                                            answer: "Ganz einfach: Schreib mir per WhatsApp oder E-Mail mit deinen Wunschdaten und Interessen. Meistens innerhalb von 48 Stunden bekommst du einen Vorschlag mit Ablauf und Preis, kostenlos und unverbindlich. Wenn alles passt, bestätigst du und wir legen los. Keine komplizierten Buchungssysteme, keine versteckten Kosten."
                                         },
                                         {
                                             question: "Für wen sind die Touren geeignet?",

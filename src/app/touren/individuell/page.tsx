@@ -107,7 +107,7 @@ export default async function IndividuelleTourPage() {
                                     </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
-                                    Schreib mir einfach auf WhatsApp, was du dir vorstellst, und innerhalb von 24 Stunden bekommst du einen Vorschlag für deinen perfekten Tag in Rio.
+                                    Schreib mir einfach auf WhatsApp, was du dir vorstellst, und du bekommst meistens innerhalb von 48 Stunden einen Vorschlag für deinen perfekten Tag in Rio.
                                 </p>
                             </div>
                         </FadeIn>
@@ -135,7 +135,7 @@ export default async function IndividuelleTourPage() {
                                     num: "02",
                                     icon: "📋",
                                     title: "Ich plane deinen Tag",
-                                    desc: "Innerhalb von 24 Stunden bekommst du einen individuellen Vorschlag mit Ablauf, Highlights und Tipps, kostenlos und unverbindlich. Du entscheidest, ob und was du ändern möchtest."
+                                    desc: "Meistens innerhalb von 48 Stunden bekommst du einen individuellen Vorschlag mit Ablauf, Highlights und Tipps, kostenlos und unverbindlich. Du entscheidest, ob und was du ändern möchtest."
                                 },
                                 {
                                     num: "03",
@@ -205,7 +205,7 @@ export default async function IndividuelleTourPage() {
                                 Deine individuelle Tour in Rio de Janeiro, lass uns loslegen.
                             </h2>
                             <p className="text-lg text-rio-sand/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Schreib mir per WhatsApp oder E-Mail, was du dir vorstellst. Innerhalb von 24 Stunden hast du deinen persönlichen Tourenvorschlag, kostenlos und unverbindlich.
+                                Schreib mir per WhatsApp oder E-Mail, was du dir vorstellst. Deinen persönlichen Tourenvorschlag hast du meistens innerhalb von 48 Stunden, kostenlos und unverbindlich.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link

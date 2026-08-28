@@ -144,3 +144,48 @@ export function formatTourDetailsHtml(raw: string): string {
     .map((line) => `<span style="display:block;padding:3px 0;font-weight:normal;">• ${line}</span>`)
     .join('');
 }
+
+/**
+ * Versão em texto puro do corpo HTML, para o `text/plain` do multipart.
+ *
+ * Não é enfeite: e-mail que sai só em HTML é sinal negativo forte nos filtros
+ * do GMX, Web.de e T-Online, que é justamente o público alemão. Como o HTML
+ * dos templates é editável pelo Will no admin, gerar o texto a partir dele é a
+ * única forma de as duas versões nunca divergirem.
+ *
+ * O link vira "texto (url)" em vez de sumir: quem lê em texto puro precisa do
+ * endereço, e o botão do HTML não sobrevive à conversão.
+ */
+export function htmlToPlainText(html: string): string {
+  const text = html
+    // <head>, <style> e <script> não têm conteúdo de leitura nenhum.
+    .replace(/<(head|style|script)[\s\S]*?<\/\1>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    // Fim de bloco vira parágrafo; o excesso de linhas em branco cai depois.
+    .replace(/<\/(p|div|h[1-6]|li|tr|table|blockquote)>/gi, '\n\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    // Href primeiro, senão o texto do link ficaria sem o endereço.
+    .replace(
+      /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi,
+      (_, href: string, label: string) => {
+        const clean = label.replace(/<[^>]+>/g, '').trim();
+        if (!clean) return href;
+        // Link cujo texto já é a própria URL não vira "url (url)".
+        return clean === href ? href : `${clean} (${href})`;
+      },
+    )
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'");
+
+  return text
+    .split('\n')
+    .map(line => line.replace(/[ \t]+/g, ' ').trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}

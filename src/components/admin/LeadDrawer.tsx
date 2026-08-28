@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
 import { refreshArchiveReason } from '@/lib/leadArchive';
 import AnzahlungToggle, { type TourDateDeposit } from './AnzahlungToggle';
+import LeadFlagBadges from './LeadFlagBadges';
 import type { CrmLeadView, LeadGroup, LeadStatus } from '@/app/admin/crm/page';
 
 type Interaction = {
@@ -277,10 +278,11 @@ export default function LeadDrawer({
         <div className="flex items-start justify-between px-6 py-5 border-b border-gray-100">
           <div className="min-w-0 flex-1 pr-4">
             <h2 className="text-lg font-bold text-gray-900 leading-snug">{lead.name}</h2>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex flex-wrap items-center gap-2 mt-1">
               <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${statusInfo}`}>
                 {tStatus(lead.status)}
               </span>
+              <LeadFlagBadges lead={lead} />
               <span className="text-xs text-gray-400">{fmtDate(lead.created_at)}</span>
             </div>
             <div className="mt-2">

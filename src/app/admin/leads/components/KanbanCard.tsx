@@ -5,6 +5,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { useTranslations } from 'next-intl';
 import SourceBadge from './SourceBadge';
+import LeadFlagBadges from '@/components/admin/LeadFlagBadges';
 import GroupBadges from '@/components/admin/GroupBadges';
 import { fmtDate } from '@/lib/adminFormat';
 import type { LeadView } from '../page';
@@ -37,6 +38,8 @@ export function KanbanCardContent({ lead, isDragging = false }: { lead: LeadView
           <GroupBadges groups={lead.groups} />
         </div>
       </div>
+
+      <LeadFlagBadges lead={lead} className="mb-1.5" />
 
       {archived && (
         <span

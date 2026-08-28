@@ -43,7 +43,7 @@ function buildItems(whatsappHref: string, emailHref: string): FaqItem[] {
           <a href={emailHref} className={linkClass}>
             E-Mail
           </a>
-          . Ich antworte innerhalb von 24 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.
+          . Ich antworte meistens innerhalb von 48 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.
         </>
       ),
     },

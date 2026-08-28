@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("public.kontakt");
   return {
     title: t("metaTitle"),
-    description: "Schreib mir! Ich antworte auf Deutsch, meistens innerhalb von 24 Stunden. Kontaktiere mich per WhatsApp oder E-Mail für deine private Tour in Rio de Janeiro.",
+    description: "Schreib mir! Ich antworte auf Deutsch, meistens innerhalb von 48 Stunden. Kontaktiere mich per WhatsApp oder E-Mail für deine private Tour in Rio de Janeiro.",
     alternates: {
       canonical: "https://riofuerdeutsche.de/kontakt",
     },

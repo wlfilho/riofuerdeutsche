@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { ShortcodeKey } from '@/types/email-templates'
-import { getEmailTemplate, getRecipientLocale, renderTemplate } from './render'
+import { getEmailTemplate, getRecipientLocale, htmlToPlainText, renderTemplate } from './render'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -66,12 +66,19 @@ export async function sendTemplatedEmail({
     const rendered = renderTemplate(template.html_body, dataWithSignature)
     const html = transformHtml ? transformHtml(rendered) : rendered
 
+    // Sem `reply_to` de propósito: o `from` já É a caixa real do Will
+    // (riofuerdeutsche.de tem MX do Google), então responder devolve para
+    // alguém que lê. Um Reply-To num domínio diferente do From é justamente o
+    // tipo de divergência que os filtros alemães contam contra o remetente.
     const { data: resendData, error: sendError } = await resend.emails.send({
       from: 'Will · Rio für Deutsche <will@riofuerdeutsche.de>',
       to,
       ...(bcc ? { bcc } : {}),
       subject,
       html,
+      // Parte em texto puro em todo envio: só-HTML é sinal negativo nos
+      // provedores alemães (GMX, Web.de, T-Online), que são o público.
+      text: htmlToPlainText(html),
     })
 
     if (sendError) return { success: false, error: sendError.message, subject }

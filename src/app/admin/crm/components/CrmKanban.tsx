@@ -17,6 +17,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useTranslations } from 'next-intl';
 import TourDateKanbanFlow, { type KanbanStatusChange } from '@/components/admin/TourDateKanbanFlow';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
+import LeadFlagBadges from '@/components/admin/LeadFlagBadges';
 import { refreshArchiveReason } from '@/lib/leadArchive';
 import type { CrmLeadView, LeadStatus } from '../page';
 
@@ -81,6 +82,8 @@ function CardContent({ lead, isDragging = false }: { lead: CrmLeadView; isDraggi
           {tSource.has(lead.source) ? tSource(lead.source) : lead.source}
         </span>
       </div>
+
+      <LeadFlagBadges lead={lead} className="mb-1.5" />
 
       {archived && (
         <span

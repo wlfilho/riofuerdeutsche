@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import StatusBadge from './StatusBadge';
 import SourceBadge from './SourceBadge';
+import LeadFlagBadges from '@/components/admin/LeadFlagBadges';
 import GroupBadges from '@/components/admin/GroupBadges';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
 import type { LeadView } from '../page';
@@ -146,6 +147,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: LeadView[] 
                       >
                         {lead.name}
                       </Link>
+                      <LeadFlagBadges lead={lead} className="self-start" />
                       {lead.archiveReason && (
                         <span
                           className="self-start px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-gray-200 text-gray-600"

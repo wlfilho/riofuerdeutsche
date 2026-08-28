@@ -3,6 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { DEFAULT_EMAIL_LOCALE as EMAIL_LOCALE } from '@/lib/email/render';
 import { sendTemplatedEmail } from '@/lib/email/sendTemplatedEmail';
+import {
+  recordLeadConfirmation,
+  sendAnfrageBestaetigung,
+} from '@/lib/email/sendAnfrageBestaetigung';
+import { leadPriorityReasons, type PriorityReason } from '@/lib/leadPriority';
 import deMessages from '@/i18n/messages/de.json';
 import {
   getCampaign,
@@ -27,6 +32,13 @@ import { isInteresse, UNENTSCHLOSSEN } from '@/lib/interessen';
  * von=site e tour null; um da /touren/klassiker tem von=site e tour=klassiker.
  */
 const VALID_ARRIVAL_CHANNELS = ['whatsapp', 'email', 'instagram', 'site'] as const;
+
+/** Rótulos pt-BR dos motivos de prioridade — só o Will lê esta notificação. */
+const PRIORITY_LABELS: Record<PriorityReason, string> = {
+  grupo: 'grupo grande',
+  dias: 'muitos dias',
+  karneval: 'Carnaval',
+};
 
 function isIsoDate(s: unknown): s is string {
   return (
@@ -348,9 +360,36 @@ export async function POST(request: NextRequest) {
       if (!sent.success) {
         console.error('[anfrage] confirmação não enviada:', email, sent.error);
       }
+
+      // Mesmas colunas do lead da /anfrage: o template é outro, a pergunta
+      // "esta pessoa foi avisada?" é a mesma, e o admin mostra as duas juntas.
+      await recordLeadConfirmation(leadId!, sent);
     } catch (err) {
       console.error('[anfrage] confirmação falhou:', email, err);
     }
+  }
+
+  // Confirmação para quem preencheu a /anfrage (fora de campanha).
+  //
+  // NÃO é proposta: responde "chegou?", "o que acontece agora?" e "quando ele
+  // me responde?", sem preço nenhum. Quem sai da página de sucesso hoje fica no
+  // escuro até o Will responder, e isso é experiência do cliente, não
+  // eficiência interna.
+  //
+  // Roda DEPOIS de o lead estar gravado e nunca lança: e-mail que não sai não
+  // pode custar o pedido. A falha vai para `confirmation_error` no lead, que é
+  // o que o admin mostra.
+  if (!campaign) {
+    await sendAnfrageBestaetigung({
+      leadId: leadId!,
+      name,
+      email,
+      pax,
+      children,
+      days,
+      interessen: interessen.length > 0 ? interessen : null,
+      wunsch: wunsch || null,
+    });
   }
 
   // Best-effort admin notification; the lead is saved either way.
@@ -380,15 +419,28 @@ export async function POST(request: NextRequest) {
           : ''}`
       : '';
 
+    // Prioridade no ASSUNTO, não só no corpo: é o que decide a ordem em que o
+    // Will abre a caixa. Grupo grande, roteiro longo ou Carnaval não podem ficar
+    // atrás de curioso na fila. Ver src/lib/leadPriority.ts.
+    const priorities = leadPriorityReasons({ pax, children, requested_days: days });
+    const priorityFlag = priorities.length > 0 ? '⭐ ' : '';
+    const priorityHtml =
+      priorities.length > 0
+        ? `<p style="padding:12px;border-radius:8px;background:#ecfdf5;color:#065f46">
+            ⭐ <strong>Lead prioritário:</strong> ${priorities.map(r => PRIORITY_LABELS[r]).join(', ')}.
+          </p>`
+        : '';
+
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: 'Rio für Deutsche <will@riofuerdeutsche.de>',
       to,
       subject: campaign
         ? `🚢 ${campaign.label}: ${name} (${paxLabel})${outsideDach ? ' ⚠️ fora do DACH' : ''}`
-        : `🔔 Nova solicitação de tour: ${name} (${paxLabel}, ${days.length} dia${days.length !== 1 ? 's' : ''})`,
+        : `${priorityFlag}🔔 Nova solicitação de tour: ${name} (${paxLabel}, ${days.length} dia${days.length !== 1 ? 's' : ''})`,
       html: `
         <h2>${campaign ? `Novo interessado — ${escapeHtml(campaign.label)}` : 'Nova solicitação pelo formulário Anfrage'}</h2>
+        ${priorityHtml}
         <p>
           <strong>Nome:</strong> ${escapeHtml(name)}<br/>
           <strong>E-Mail:</strong> ${escapeHtml(email)}<br/>

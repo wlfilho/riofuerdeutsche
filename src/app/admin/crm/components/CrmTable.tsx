@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
 import GroupBadges from '@/components/admin/GroupBadges';
+import LeadFlagBadges from '@/components/admin/LeadFlagBadges';
 import type { CrmLeadView } from '../page';
 
 function formatEstimate(min: number | null, max: number | null) {
@@ -288,6 +289,7 @@ export default function CrmTable({
                         >
                           {lead.name}
                         </button>
+                        <LeadFlagBadges lead={lead} className="self-start" />
                         {lead.archiveReason && (
                           <span
                             className="self-start px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-gray-200 text-gray-600"

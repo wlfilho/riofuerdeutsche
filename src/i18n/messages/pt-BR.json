@@ -330,7 +330,17 @@
       "paginaDeTour": "Página de tour",
       "interessen": "Interesses",
       "wunsch": "Pedido do cliente",
-      "foundVia": "Como nos achou"
+      "foundVia": "Como nos achou",
+      "prioridade": "Prioritário",
+      "prioridadeMotivo": {
+        "grupo": "grupo grande",
+        "dias": "muitos dias de tour",
+        "karneval": "datas no Carnaval"
+      },
+      "confirmacao": "Confirmação",
+      "confirmacaoEnviadaEm": "Enviada em {data}",
+      "confirmacaoFalhou": "Confirmação falhou",
+      "confirmacaoNaoEnviada": "Sem confirmação automática"
     },
     "contatos": {
       "metaTitle": "Contatos — Admin",
@@ -1066,8 +1076,11 @@
       "editadoPrefixo": "Editado: ",
       "erroPrefixo": "Erro: {mensagem}",
       "categorias": {
+        "anfrage": "Anfrage",
+        "proposta": "Proposta",
         "reserva": "Reserva",
         "posTour": "Pós-tour",
+        "campanha": "Campanha",
         "membros": "Membros",
         "sistema": "Sistema"
       },

@@ -55,7 +55,7 @@ export default async function BewertungenPage() {
             Klingt nach deiner Art zu reisen?
           </h2>
           <p className="text-base sm:text-lg text-rio-sand/90 mb-8 leading-relaxed">
-            Erzähl mir, wann du kommst und was dich interessiert. Innerhalb von 24 Stunden bekommst du einen Vorschlag mit Ablauf und Preis, kostenlos und unverbindlich.
+            Erzähl mir, wann du kommst und was dich interessiert. Du bekommst meistens innerhalb von 48 Stunden einen Vorschlag mit Ablauf und Preis, kostenlos und unverbindlich.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link

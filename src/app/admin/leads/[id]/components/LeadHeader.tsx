@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getAdminTranslations } from '@/i18n/admin';
 import StatusBadge from '../../components/StatusBadge';
+import LeadFlagBadges from '@/components/admin/LeadFlagBadges';
 import type { Lead } from '../../page';
 
 export default async function LeadHeader({ lead }: { lead: Lead }) {
@@ -24,6 +25,8 @@ export default async function LeadHeader({ lead }: { lead: Lead }) {
       <span className="text-gray-300">/</span>
 
       <h1 className="text-xl font-bold text-gray-900 flex-1 min-w-0 truncate">{lead.name}</h1>
+
+      <LeadFlagBadges lead={lead} />
 
       <StatusBadge status={lead.status} />
     </div>

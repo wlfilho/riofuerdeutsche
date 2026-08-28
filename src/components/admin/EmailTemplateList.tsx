@@ -26,10 +26,25 @@ import { fmtDateTime } from '@/lib/adminFormat'
 
 // Valores gravados na coluna `category` do banco — o casamento é feito contra
 // eles, sem tradução. Só o rótulo exibido passa pelo catálogo, via `labelKey`.
-const CATEGORIES = ['Reserva', 'Pós-Tour', 'Membros', 'Sistema'] as const
+// Toda categoria gravada no banco precisa estar aqui: a lista renderiza por
+// categoria conhecida, e um valor de fora some da tela em silêncio. Foi o que
+// aconteceu com 'Proposta' e 'Campanha', que existiam no banco e o Will não via
+// (e não podia editar, que é a razão de os templates estarem no banco).
+const CATEGORIES = [
+  'Anfrage',
+  'Proposta',
+  'Reserva',
+  'Pós-Tour',
+  'Campanha',
+  'Membros',
+  'Sistema',
+] as const
 type Category = typeof CATEGORIES[number]
 
 const CATEGORY_LABEL_KEYS: Record<Category, string> = {
+  'Anfrage': 'anfrage',
+  'Proposta': 'proposta',
+  'Campanha': 'campanha',
   'Reserva': 'reserva',
   'Pós-Tour': 'posTour',
   'Membros': 'membros',
@@ -37,6 +52,9 @@ const CATEGORY_LABEL_KEYS: Record<Category, string> = {
 }
 
 const CATEGORY_COLORS: Record<Category, { bg: string; text: string; border: string }> = {
+  'Anfrage':   { bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200' },
+  'Proposta':  { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200'},
+  'Campanha':  { bg: 'bg-rose-50',   text: 'text-rose-700',   border: 'border-rose-200'  },
   'Reserva':   { bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-200' },
   'Pós-Tour':  { bg: 'bg-blue-50',   text: 'text-blue-700',   border: 'border-blue-200'  },
   'Membros':   { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200'},

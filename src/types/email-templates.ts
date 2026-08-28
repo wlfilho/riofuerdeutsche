@@ -25,6 +25,10 @@ export type ShortcodeKey =
   | 'termin'
   | 'pax'
   | 'interessen'
+  // Confirmação da /anfrage (ver src/lib/email/sendAnfrageBestaetigung.ts)
+  | 'tage'
+  | 'themenblock'
+  | 'whatsapp_url'
   // E-mail com o link da proposta (ver src/lib/email/sendProposalEmail.ts)
   | 'link'
   | 'eckdaten'
@@ -42,8 +46,19 @@ export const SHORTCODES: { key: ShortcodeKey; label: string; example: string }[]
   { key: 'betrag_total', label: 'Gesamtbetrag', example: '600€' },
   { key: 'assinatura', label: 'Assinatura', example: '<p>Bis bald in Rio!<br>Will</p>' },
   { key: 'termin', label: 'Termin (Gruppentour)', example: 'Samstag, 26. und Sonntag, 27. Februar 2028' },
-  { key: 'pax', label: 'Personen (Gruppentour)', example: '2 Erwachsene + 1 Kind' },
+  { key: 'pax', label: 'Personen', example: '2 Erwachsene + 1 Kind' },
   { key: 'interessen', label: 'Interessen (Gruppentour)', example: 'Sambódromo, Zuckerhut & Christusstatue' },
+  { key: 'tage', label: 'Wunschtage (Anfrage)', example: 'Montag, 04. Mai 2026<br/>Dienstag, 05. Mai 2026' },
+  // Bloco HTML condicional: temas marcados, o caso "noch unentschieden" e o
+  // aviso sobre o texto livre. Vazio quando a pessoa não marcou nada.
+  {
+    key: 'themenblock',
+    label: 'Interessen der Anfrage (Block)',
+    example:
+      '<p style="margin:0 0 16px;">Das interessiert euch:</p><p style="margin:0 0 16px;padding-left:16px;border-left:2px solid #dddddd;"><strong>Die Klassiker</strong><br/>Christus, Zuckerhut und die Selarón-Treppe.</p>',
+  },
+  // Vem de site_settings.business_whatsapp, como todo contato do site.
+  { key: 'whatsapp_url', label: 'WhatsApp (URL)', example: 'https://wa.me/5521999999999' },
   { key: 'link', label: 'Link zum Angebot', example: 'https://riofuerdeutsche.de/de/p/abc123' },
   // Bloco HTML pronto (datas, pessoas, preço, sinal, validade): o template não
   // tem condicional, então quem monta é o servidor — linha ausente não entra.
