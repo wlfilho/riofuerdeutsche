@@ -293,24 +293,15 @@ export default async function Home() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    {/* Primário do hero. O tráfego real desta home é fundo de funil —
-                        gente que já quer um tour — e o guia grátis, desenhado para topo
-                        de funil, ficava na frente do pedido. Ele continua na página,
-                        agora como terceiro caminho. */}
+                    {/* Primário do hero, em amarelo como o CTA do fim da página. O
+                        tráfego real desta home é fundo de funil: gente que já quer um
+                        tour. O guia grátis (/ist-rio-gefaehrlich) saiu daqui para não
+                        competir com o pedido; continua linkado no corpo da página. */}
                     <Link
                       href="/anfrage?von=site"
-                      className="inline-flex items-center justify-center gap-1 px-5 py-4 sm:px-8 bg-rio-green text-white rounded-full font-bold text-base sm:text-lg hover:bg-green-700 hover:scale-[1.02] transition-all shadow-xl shadow-rio-green/25 whitespace-nowrap"
+                      className="inline-flex items-center justify-center gap-1 px-5 py-4 sm:px-8 bg-rio-yellow text-gray-900 rounded-full font-bold text-base sm:text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20 whitespace-nowrap"
                     >
                       Tour anfragen
-                    </Link>
-                    <Link
-                      href="/ist-rio-gefaehrlich"
-                      className="inline-flex items-center justify-center gap-1 px-5 py-4 sm:px-8 bg-rio-yellow text-gray-900 rounded-full font-semibold text-base sm:text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20 whitespace-nowrap"
-                    >
-                      <svg className="w-5 h-5 shrink-0 inline-block align-middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                      </svg>
-                      Schlauer reisen als 90% der Touristen
                     </Link>
                     <Link
                       href="#touren"

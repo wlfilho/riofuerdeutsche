@@ -10,14 +10,14 @@ export const metadata: Metadata = {
         absolute: "Sehenswürdigkeiten Rio de Janeiro, Tipps vom Carioca auf Deutsch | Rio für Deutsche",
     },
     description:
-        "Die besten Sehenswürdigkeiten in Rio de Janeiro: Christus Erlöser, Zuckerhut, Escadaria Selarón und mehr. Insider-Tipps vom lokalen Guide, auf Deutsch.",
+        "Die besten Sehenswürdigkeiten in Rio de Janeiro: Christus Erlöser, Zuckerhut, Maracanã, Escadaria Selarón und mehr. Insider-Tipps vom lokalen Guide, auf Deutsch.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten",
     },
     openGraph: {
         title: "Sehenswürdigkeiten Rio de Janeiro: Tipps vom Carioca",
         description:
-            "Christus Erlöser, Zuckerhut, Escadaria Selarón und mehr: alle Infos auf Deutsch, von einem Carioca.",
+            "Christus Erlöser, Zuckerhut, Maracanã, Escadaria Selarón und mehr: alle Infos auf Deutsch, von einem Carioca.",
         url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten",
     },
 };
@@ -36,6 +36,13 @@ const sehenswuerdigkeiten = [
         tagline: "Zwei Seilbahnen, 396 Meter, und der schönste Sonnenuntergang Rios.",
         href: "/rio-guide/sehenswuerdigkeiten/zuckerhut",
         emoji: "🚡",
+    },
+    {
+        name: "Maracanã",
+        badge: "Fußball",
+        tagline: "Der Tempel des Fußballs, in dem Deutschland 2014 Weltmeister wurde.",
+        href: "/rio-guide/sehenswuerdigkeiten/maracana",
+        emoji: "⚽",
     },
     {
         name: "Escadaria Selarón",

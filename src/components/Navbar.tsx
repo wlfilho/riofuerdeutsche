@@ -68,6 +68,7 @@ function buildNavLinks(t: (key: string) => string): NavLink[] {
                 items: [
                     { href: "/rio-guide/sehenswuerdigkeiten/christus-erloeser", label: t("christusErloeser") },
                     { href: "/rio-guide/sehenswuerdigkeiten/zuckerhut", label: t("zuckerhut") },
+                    { href: "/rio-guide/sehenswuerdigkeiten/maracana", label: t("maracana") },
                     { href: "/rio-guide/sehenswuerdigkeiten/escadaria-selaron", label: t("escadariaSelaron") },
                     { href: "/rio-guide/sehenswuerdigkeiten/rocinha", label: t("rocinha") },
                     { href: "/rio-guide/sehenswuerdigkeiten/santa-marta", label: t("santaMarta") },

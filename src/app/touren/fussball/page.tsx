@@ -140,6 +140,17 @@ export default async function FussballTourPage() {
                                     <p>
                                         Bei meiner Fußball Tour nehme ich dich mit hinter die Kulissen: vom Maracanã, wo Pelé sein tausendstes Tor schoss, über das Museum des größten Clubs Brasiliens bis hin zu einem echten Spiel im Stadion, mit Tausenden leidenschaftlichen Fans um dich herum. Als Carioca und Fußballfan erkläre ich dir alles auf Deutsch: die Rivalitäten, die Gesänge, die Tradition.
                                     </p>
+                                    <p>
+                                        Mehr zum Stadion selbst, also Tickets, Öffnungszeiten, Anfahrt und
+                                        die Spiele der Frauen-WM 2027, findest du auf meiner Seite zum{" "}
+                                        <Link
+                                            href="/rio-guide/sehenswuerdigkeiten/maracana"
+                                            className="text-rio-green font-semibold underline underline-offset-4 hover:text-rio-yellow transition-colors"
+                                        >
+                                            Maracanã im Rio-Guide
+                                        </Link>
+                                        .
+                                    </p>
                                 </div>
                                 <p className="text-lg font-semibold text-gray-900 pt-8 border-t border-gray-200">
                                     Ob du das Maracanã besichtigen, die Geschichte von Flamengo entdecken oder ein Live-Spiel erleben möchtest. Schreib mir und ich organisiere dein Fußball-Erlebnis in Rio.

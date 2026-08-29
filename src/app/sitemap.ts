@@ -114,6 +114,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.8,
         },
         {
+            url: `${baseUrl}/rio-guide/sehenswuerdigkeiten/maracana`,
+            lastModified: today,
+            changeFrequency: "monthly",
+            priority: 0.8,
+        },
+        {
             url: `${baseUrl}/rio-guide/sehenswuerdigkeiten/escadaria-selaron`,
             lastModified: today,
             changeFrequency: "monthly",
@@ -121,6 +127,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
         {
             url: `${baseUrl}/rio-guide/sehenswuerdigkeiten/rocinha`,
+            lastModified: today,
+            changeFrequency: "monthly",
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/rio-guide/sehenswuerdigkeiten/santa-marta`,
+            lastModified: today,
+            changeFrequency: "monthly",
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/rio-guide/sehenswuerdigkeiten/the-maze`,
             lastModified: today,
             changeFrequency: "monthly",
             priority: 0.8,
