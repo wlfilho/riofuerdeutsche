@@ -34,6 +34,27 @@ export default function GoogleAnalytics() {
     }
   }, [])
 
+  // Listener delegado: o link do WhatsApp aparece em meia dúzia de componentes
+  // (Navbar, Footer, FAQ, Bewertungen, proposta, tela de sucesso do Anfrage).
+  // Ouvir no document pega todos, inclusive os que ainda vão existir.
+  useEffect(() => {
+    if (!enabled) return
+
+    const handleClick = (e: MouseEvent) => {
+      const link = (e.target as HTMLElement | null)?.closest?.(
+        'a[href*="wa.me"]'
+      ) as HTMLAnchorElement | null
+      if (!link) return
+      window.gtag?.('event', 'contact_whatsapp', {
+        link_url: link.href,
+        page_path: window.location.pathname,
+      })
+    }
+
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [enabled])
+
   if (!enabled) return null
 
   return (

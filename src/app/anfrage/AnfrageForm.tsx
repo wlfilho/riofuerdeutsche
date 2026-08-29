@@ -287,6 +287,12 @@ export default function AnfrageForm({
       }
       const novoLeadId = typeof data.leadId === 'string' ? data.leadId : null;
       trackAnfrage('submit', { leadId: novoLeadId });
+      // Conversão no GA4, separada da telemetria interna acima.
+      window.gtag?.('event', 'generate_lead', {
+        lead_id: novoLeadId,
+        source: von,
+        thema,
+      });
       setLeadId(novoLeadId);
       setSubmitted(true);
     } catch {
