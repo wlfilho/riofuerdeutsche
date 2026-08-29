@@ -427,13 +427,16 @@ export default function MaracanaPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto">
                                 <figure>
-                                    <img
-                                        src="/images/maracana-rio-de-janeiro.webp"
-                                        alt="Luftaufnahme des Maracanã-Stadions in Rio de Janeiro"
-                                        className="w-full rounded-2xl shadow-md"
+                                    <Image
+                                        src="/images/maracana-rio-de-janeiro-02.webp"
+                                        alt="Der Maracanã-Komplex aus der Luft, mit dem Maracanãzinho und den Sportanlagen daneben"
+                                        width={960}
+                                        height={540}
+                                        className="w-full h-auto rounded-2xl shadow-md"
+                                        loading="lazy"
                                     />
                                     <figcaption className="mt-3 text-sm text-gray-400 text-center">
-                                        Das Maracanã liegt mitten in der Zona Norte, umgeben von Wohnhäusern und der Metro-Station gleichen Namens.
+                                        Das Maracanã ist Teil eines ganzen Sportkomplexes: links die Rundhalle Maracanãzinho, rechts die Schwimmbecken, dahinter die Bahngleise und die Zona Norte.
                                     </figcaption>
                                 </figure>
                             </div>
@@ -621,10 +624,13 @@ export default function MaracanaPage() {
 
                                 {/* Foto 02 */}
                                 <figure className="my-2">
-                                    <img
+                                    <Image
                                         src="/images/spiel-am-maracana.webp"
                                         alt="Flamengo-Fans mit Fahnen auf den Rängen des Maracanã"
-                                        className="w-full rounded-2xl shadow-md"
+                                        width={960}
+                                        height={640}
+                                        className="w-full h-auto rounded-2xl shadow-md"
+                                        loading="lazy"
                                     />
                                     <figcaption className="mt-3 mb-6 text-sm text-gray-400 text-center">
                                         Die Torcida von Flamengo im Maracanã. Fahnen, Trommeln und 90 Minuten Gesang, das ist der Unterschied zur leeren Stadiontour.
