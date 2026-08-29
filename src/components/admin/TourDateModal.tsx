@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { TourDate, TourDateStatus } from '@/lib/tourDates';
-import { todayISO } from '@/lib/calendarDates';
+import { todayISO, parseISODate } from '@/lib/calendarDates';
 
 export interface TourDateLeadOption {
   id: string;
@@ -17,6 +17,23 @@ export function leadStatusToTourStatus(status: string): TourDateStatus {
 }
 
 type DateRow = { date: string; start_time: string };
+
+/**
+ * Dia já ocupado, devolvido pelo 409 da API. `source` separa "já está gravado no
+ * banco" de "você repetiu a linha aqui no formulário": a correção é diferente
+ * em cada caso, então o aviso não pode falar dos dois com a mesma frase.
+ */
+type DuplicateDate = {
+  date: string;
+  tour_name: string | null;
+  source: 'existente' | 'formulario';
+};
+
+/** "2026-09-18" → "18/09/2026" */
+function formatShortDate(iso: string): string {
+  const d = parseISODate(iso);
+  return d.toLocaleDateString('pt-BR');
+}
 
 /**
  * Create/edit modal for tour_dates. Two modes:
@@ -68,12 +85,21 @@ export default function TourDateModal({
   const [notes, setNotes] = useState(editing?.notes ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Preenchido quando a API responde 409: o cliente já tem tour nessas datas.
+  // Enquanto não for null, o botão de salvar reenvia com `force`.
+  const [duplicates, setDuplicates] = useState<DuplicateDate[] | null>(null);
 
   const isEdit = Boolean(editing);
   const needsLeadPicker = !fixedLead && !isEdit;
 
+  // Trocar cliente ou datas invalida o aviso de duplicata: ele foi calculado
+  // pra outra combinação, e mantê-lo deixaria o botão em modo "criar mesmo
+  // assim" sem que a API tenha reclamado desta.
+  const resetDuplicates = () => setDuplicates(null);
+
   const handleLeadChange = (id: string) => {
     setLeadId(id);
+    resetDuplicates();
     const lead = leadOptions.find(l => l.id === id);
     if (lead) {
       setStatus(leadStatusToTourStatus(lead.status));
@@ -82,10 +108,21 @@ export default function TourDateModal({
   };
 
   const updateRow = (i: number, patch: Partial<DateRow>) => {
+    resetDuplicates();
     setDateRows(rows => rows.map((r, idx) => idx === i ? { ...r, ...patch } : r));
   };
 
-  const handleSave = async () => {
+  const addRow = () => {
+    resetDuplicates();
+    setDateRows(rows => [...rows, { date: rows[rows.length - 1]?.date ?? todayISO(), start_time: '' }]);
+  };
+
+  const removeRow = (i: number) => {
+    resetDuplicates();
+    setDateRows(rows => rows.filter((_, idx) => idx !== i));
+  };
+
+  const handleSave = async (force = false) => {
     if (!leadId) { setError(t('selecioneCliente')); return; }
     if (dateRows.some(r => !r.date)) { setError(t('preenchaDatas')); return; }
 
@@ -119,6 +156,7 @@ export default function TourDateModal({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            force,
             dates: dateRows.map(r => ({
               ...common,
               lead_id: leadId,
@@ -129,6 +167,10 @@ export default function TourDateModal({
         });
       }
       const data = await res.json();
+      if (res.status === 409 && data.error === 'duplicate_dates') {
+        setDuplicates(data.duplicates ?? []);
+        return;
+      }
       if (!res.ok) {
         setError(data.error ?? t('falhaSalvar'));
         return;
@@ -217,7 +259,7 @@ export default function TourDateModal({
                   />
                   {!isEdit && dateRows.length > 1 && (
                     <button
-                      onClick={() => setDateRows(rows => rows.filter((_, idx) => idx !== i))}
+                      onClick={() => removeRow(i)}
                       className="text-gray-400 hover:text-red-600 p-1 shrink-0"
                       title={t('removerDia')}
                     >
@@ -229,7 +271,7 @@ export default function TourDateModal({
             </div>
             {!isEdit && (
               <button
-                onClick={() => setDateRows(rows => [...rows, { date: rows[rows.length - 1]?.date ?? todayISO(), start_time: '' }])}
+                onClick={addRow}
                 className="mt-2 text-xs font-medium text-green-700 hover:text-green-800"
               >
                 {t('adicionarOutroDia')}
@@ -283,6 +325,34 @@ export default function TourDateModal({
             />
           </div>
 
+          {duplicates && (
+            <div className="p-3 rounded-lg text-sm bg-amber-50 text-amber-900 border border-amber-200 space-y-2">
+              {(['existente', 'formulario'] as const).map(source => {
+                const list = duplicates.filter(d => d.source === source);
+                if (list.length === 0) return null;
+                return (
+                  <div key={source}>
+                    <p className="font-medium">
+                      {source === 'existente' ? t('duplicataTituloExistente') : t('duplicataTituloFormulario')}
+                    </p>
+                    <ul className="mt-1 list-disc list-inside space-y-0.5">
+                      {list.map((d, i) => (
+                        <li key={`${d.date}-${i}`}>
+                          {formatShortDate(d.date)}
+                          {d.tour_name ? `: ${d.tour_name}` : ''}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="mt-1">
+                      {source === 'existente' ? t('duplicataAjudaExistente') : t('duplicataAjudaFormulario')}
+                    </p>
+                  </div>
+                );
+              })}
+              <p className="pt-1 border-t border-amber-200">{t('duplicataPergunta')}</p>
+            </div>
+          )}
+
           {error && (
             <div className="p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200">{error}</div>
           )}
@@ -296,11 +366,16 @@ export default function TourDateModal({
             {tc('cancelar')}
           </button>
           <button
-            onClick={handleSave}
+            onClick={() => handleSave(duplicates !== null)}
             disabled={saving}
-            className="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+            className={`px-4 py-2 text-sm font-semibold text-white rounded-lg transition-colors disabled:opacity-50 ${
+              duplicates ? 'bg-amber-600 hover:bg-amber-700' : 'bg-green-600 hover:bg-green-700'
+            }`}
           >
-            {saving ? tc('salvando') : isEdit ? tc('salvarAlteracoes') : tc('adicionar')}
+            {saving ? tc('salvando')
+              : duplicates ? t('duplicataCriarMesmoAssim')
+              : isEdit ? tc('salvarAlteracoes')
+              : tc('adicionar')}
           </button>
         </div>
       </div>

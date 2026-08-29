@@ -927,7 +927,13 @@
       "removerDia": "Remover dia",
       "adicionarDataTourBotao": "Adicionar data de tour",
       "datasDeTour": "Datas de tour",
-      "leadSemDatasTour": "Nenhuma data de tour para este lead."
+      "leadSemDatasTour": "Nenhuma data de tour para este lead.",
+      "duplicataTituloExistente": "Este cliente já tem tour agendado nestes dias:",
+      "duplicataAjudaExistente": "Se você está recadastrando o mesmo pacote, cancele e edite os tours que já existem.",
+      "duplicataTituloFormulario": "Você repetiu o mesmo dia no formulário:",
+      "duplicataAjudaFormulario": "Corrija a data repetida nas linhas acima.",
+      "duplicataPergunta": "Só continue se forem passeios diferentes no mesmo dia.",
+      "duplicataCriarMesmoAssim": "Criar mesmo assim"
     },
     "avaliacoes": {
       "metaTitle": "Avaliações — Admin",

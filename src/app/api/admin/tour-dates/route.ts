@@ -17,6 +17,9 @@ async function verifyAdmin() {
 
 const VALID_STATUSES = ['proposta_enviada', 'fechado'];
 
+/** Dia já ocupado devolvido no 409. `source` diz de onde veio o choque. */
+type DuplicateDate = { date: string; tour_name: string | null; source: 'existente' | 'formulario' };
+
 export async function GET(request: NextRequest) {
   const { authorized, supabase } = await verifyAdmin();
   if (!authorized) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -68,6 +71,59 @@ export async function POST(request: NextRequest) {
       anzahlung_paid: Boolean(d.anzahlung_paid),
       notes: d.notes?.trim() || null,
     });
+  }
+
+  // Guarda contra dia dobrado: o mesmo cliente já ter tour na data que está
+  // sendo criada é quase sempre cadastro repetido (aconteceu com o Uwe-Jens
+  // Mey, 09/2026: o pacote de 5 dias entrou duas vezes e o calendário passou a
+  // mostrar dois cards por dia). Não dá pra barrar de vez — helicóptero de
+  // manhã + city tour à tarde no mesmo dia é legítimo — então avisa e só grava
+  // se o admin confirmar (`force`). Isso é distinto de
+  // findConflictingTourDates, que olha OUTROS leads no mesmo dia.
+  if (!body.force) {
+    const leadIds = [...new Set(rows.map(r => r.lead_id))];
+    const dateValues = [...new Set(rows.map(r => r.date))];
+    const { data: existing } = await supabase
+      .from('tour_dates')
+      .select('date, tour_name, lead_id')
+      .in('lead_id', leadIds)
+      .in('date', dateValues);
+
+    // `source` separa as duas origens porque a correção é diferente: 'existente'
+    // pede pra cancelar e editar o tour já gravado, 'formulario' pede só pra
+    // arrumar a linha repetida aqui mesmo. Mandar o conselho errado faz o admin
+    // procurar no calendário um tour que não existe.
+    const wanted = new Set(rows.map(r => `${r.lead_id}|${r.date}`));
+    const reported = new Set<string>();
+    const duplicates: DuplicateDate[] = [];
+
+    for (const e of existing ?? []) {
+      const key = `${e.lead_id}|${e.date}`;
+      if (!wanted.has(key) || reported.has(key)) continue;
+      reported.add(key);
+      duplicates.push({ date: e.date, tour_name: e.tour_name, source: 'existente' });
+    }
+
+    // O mesmo dia repetido dentro do próprio envio cai no mesmo caso, e nem
+    // chega a passar pelo banco: "Adicionar outro dia" já vem preenchido com a
+    // data da linha anterior, então dois cliques sem trocar o dia bastam pra
+    // gravar os dois cards iguais.
+    const seen = new Set<string>();
+    for (const r of rows) {
+      const key = `${r.lead_id}|${r.date}`;
+      if (seen.has(key) && !reported.has(key)) {
+        reported.add(key);
+        duplicates.push({ date: r.date, tour_name: r.tour_name, source: 'formulario' });
+      }
+      seen.add(key);
+    }
+
+    if (duplicates.length > 0) {
+      return NextResponse.json(
+        { error: 'duplicate_dates', duplicates },
+        { status: 409 },
+      );
+    }
   }
 
   const { data, error } = await supabase
