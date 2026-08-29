@@ -18,7 +18,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import type { TourDate } from '@/lib/tourDates';
-import { WEEKDAY_SHORT_PT, formatTime, parseISODate } from '@/lib/calendarDates';
+import { WEEKDAY_SHORT_PT, formatTime, isPastDay, parseISODate } from '@/lib/calendarDates';
 import { fmtEur } from '@/lib/adminFormat';
 
 function StatusBadge({ status }: { status: TourDate['status'] }) {
@@ -99,10 +99,17 @@ export default function TourCard({
   const pdfUrl = tour.lead?.proposal?.pdf_url;
   const d = parseISODate(tour.date);
   const day = tour.date.slice(8, 10);
+  // Tour que já aconteceu fica apagado para não se confundir com o que vem
+  // pela frente; o hover devolve a cor cheia para quando é preciso conferir.
+  const isPast = isPastDay(tour.date);
   return (
     <div
-      className={`relative rounded-xl border bg-white p-4 shadow-sm ${
-        hasConflict ? 'border-red-200 ring-1 ring-red-100' : 'border-gray-200'
+      className={`relative rounded-xl border p-4 shadow-sm transition-opacity ${
+        isPast
+          ? 'border-gray-200 bg-gray-50 opacity-70 hover:opacity-100'
+          : hasConflict
+            ? 'border-red-200 bg-white ring-1 ring-red-100'
+            : 'border-gray-200 bg-white'
       }`}
     >
       {/* Edit / delete pinned to the top-right corner */}
@@ -180,7 +187,7 @@ export default function TourCard({
           {tour.tour_name && <p className="text-sm text-gray-500 truncate mt-0.5">{tour.tour_name}</p>}
           <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
             <StatusBadge status={tour.status} />
-            {hasConflict && <ConflictBadge />}
+            {hasConflict && !isPast && <ConflictBadge />}
           </div>
         </div>
 

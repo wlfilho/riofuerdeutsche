@@ -59,3 +59,13 @@ export function formatTime(time: string | null): string | null {
   if (!time) return null;
   return time.slice(0, 5);
 }
+
+/** Dia já passou? Compara ISO com o dia de hoje — hoje NÃO conta como passado. */
+export function isPastDay(iso: string): boolean {
+  return iso < todayISO();
+}
+
+/** Mês já passou por inteiro? `iso` pode ser "YYYY-MM" ou "YYYY-MM-DD". */
+export function isPastMonth(iso: string): boolean {
+  return iso.slice(0, 7) < todayISO().slice(0, 7);
+}

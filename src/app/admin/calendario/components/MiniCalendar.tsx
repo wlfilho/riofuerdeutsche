@@ -7,6 +7,8 @@ import {
   addDays,
   daysInMonth,
   formatWeekRange,
+  isPastDay,
+  isPastMonth,
   startOfWeek,
   toISODate,
   todayISO,
@@ -42,7 +44,9 @@ export default function MiniCalendar({
     const tours = toursByDay.get(iso) ?? [];
     const hasFechado = tours.some(t => t.status === 'fechado');
     const hasProposta = tours.some(t => t.status === 'proposta_enviada');
-    const hasConflict = conflictDays.has(iso);
+    const isPast = isPastDay(iso);
+    // Conflito num dia que já passou não tem mais o que resolver: não alerta.
+    const hasConflict = !isPast && conflictDays.has(iso);
     const isSelected = iso === selectedDay;
     const isToday = iso === today;
 
@@ -58,15 +62,23 @@ export default function MiniCalendar({
             ? 'bg-gray-900 text-white font-semibold'
             : isToday
               ? 'bg-green-100 text-green-800 font-semibold hover:bg-green-200'
-              : 'text-gray-700 hover:bg-gray-100'
+              : isPast
+                ? 'text-gray-300 hover:bg-gray-50'
+                : 'text-gray-700 hover:bg-gray-100'
         }`}
       >
         <span className="leading-none">{day}</span>
         <span className="flex h-1 items-center gap-0.5 mt-1">
           {hasFechado && (
-            <span className={`h-1 w-1 rounded-full ${isSelected ? 'bg-green-400' : 'bg-green-600'}`} />
+            <span
+              className={`h-1 w-1 rounded-full ${
+                isSelected ? 'bg-green-400' : isPast ? 'bg-gray-200' : 'bg-green-600'
+              }`}
+            />
           )}
-          {hasProposta && <span className="h-1 w-1 rounded-full bg-amber-400" />}
+          {hasProposta && (
+            <span className={`h-1 w-1 rounded-full ${isPast ? 'bg-gray-200' : 'bg-amber-400'}`} />
+          )}
         </span>
       </button>
     );
@@ -92,7 +104,9 @@ export default function MiniCalendar({
         if (!iso.startsWith(prefix)) continue;
         if (tours.some(t => t.status === 'fechado')) hasFechado = true;
         if (tours.some(t => t.status === 'proposta_enviada')) hasProposta = true;
-        if (conflictDays.has(iso)) hasConflict = true;
+        // Só conflito ainda acionável conta: no mês corrente os dias já
+        // vividos não devem acender o alerta do mês inteiro.
+        if (conflictDays.has(iso) && !isPastDay(iso)) hasConflict = true;
       }
       return { hasFechado, hasProposta, hasConflict };
     };
@@ -106,8 +120,12 @@ export default function MiniCalendar({
         />
         <div className="grid grid-cols-3 gap-1">
           {MONTH_NAMES_PT.map((name, m) => {
-            const { hasFechado, hasProposta, hasConflict } = monthStatus(m);
-            const isCurrentMonth = today.startsWith(`${year}-${String(m + 1).padStart(2, '0')}`);
+            const monthISO = `${year}-${String(m + 1).padStart(2, '0')}`;
+            const status = monthStatus(m);
+            const { hasFechado, hasProposta } = status;
+            const isPast = isPastMonth(monthISO);
+            const hasConflict = status.hasConflict;
+            const isCurrentMonth = today.startsWith(monthISO);
             return (
               <button
                 key={m}
@@ -118,13 +136,19 @@ export default function MiniCalendar({
                 } ${
                   isCurrentMonth
                     ? 'bg-green-100 text-green-800 font-semibold hover:bg-green-200'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    : isPast
+                      ? 'text-gray-300 hover:bg-gray-50'
+                      : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <span className="leading-none">{name.slice(0, 3)}</span>
                 <span className="flex h-1 items-center gap-0.5 mt-1">
-                  {hasFechado && <span className="h-1 w-1 rounded-full bg-green-600" />}
-                  {hasProposta && <span className="h-1 w-1 rounded-full bg-amber-400" />}
+                  {hasFechado && (
+                    <span className={`h-1 w-1 rounded-full ${isPast ? 'bg-gray-200' : 'bg-green-600'}`} />
+                  )}
+                  {hasProposta && (
+                    <span className={`h-1 w-1 rounded-full ${isPast ? 'bg-gray-200' : 'bg-amber-400'}`} />
+                  )}
                 </span>
               </button>
             );
