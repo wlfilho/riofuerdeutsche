@@ -48,6 +48,7 @@ export default function MagicLinkForm({
       if (error) {
         setErrorMsg(error.message);
       } else {
+        window.gtag?.("event", "sign_up", { method: "magic_link", variant });
         setSuccess(true);
       }
     } catch (err: unknown) {

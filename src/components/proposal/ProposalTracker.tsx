@@ -212,6 +212,9 @@ export default function ProposalTracker({ token, locale }: { token: string; loca
           return;
         }
         ready = true;
+        // Conversão no GA4. Só aqui, nunca no .catch(): sem resposta do open
+        // não dá pra saber se é sessão de admin.
+        window.gtag?.('event', 'proposal_view', { token, locale });
         for (const [type, metadata] of queue.splice(0)) {
           send(type as 'ping' | 'section' | 'click', metadata);
         }
