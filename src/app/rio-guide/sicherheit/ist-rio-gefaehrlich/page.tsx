@@ -141,8 +141,8 @@ const jsonLd = [
   {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "Ist Rio de Janeiro gefährlich? Die Wahrheit von einem Carioca (2026)",
-    "description": "Ein Carioca, der in Deutschland lebte, erklärt die Wahrheit über Sicherheit in Rio. Welche Viertel sind sicher? Was musst du wissen? Alles hier.",
+    "headline": "Ist Rio de Janeiro gefährlich? Ehrliche Antwort vom Carioca",
+    "description": "Ein Carioca, der in Köln gelebt hat, erklärt ehrlich, wie sicher Rio wirklich ist: welche Viertel, welche typischen Fehler und welche Regeln zählen.",
     "author": {
       "@type": "Person",
       "name": "Will",
@@ -575,13 +575,13 @@ export default function IstRioGefaehrlich() {
               </div>
             </section>
 
-            {/* 7. 5 DER 15 GOLDENEN REGELN */}
+            {/* 7. AS REGRAS DE OURO */}
             <section className="mb-16">
               <h2 className="text-[26px] md:text-3xl font-bold text-[#0d1f15] leading-tight text-balance mb-4 md:mb-6">
-                Teaser: Einige der wichtigsten Überlebensregeln
+                Die wichtigsten Überlebensregeln
               </h2>
               <p className="text-lg text-gray-700 leading-[1.8] mb-8">
-                Über die Jahre habe ich 15 goldene Regeln zusammengestellt, die ich jedem meiner deutschen Touristen vorab in unserem Guide mitgebe. Sie sind pragmatisch, ehrlich und ohne Panik. Hier sind 5 davon für dich als Vorgeschmack:
+                Über die Jahre gebe ich jedem meiner deutschen Gäste dieselben Regeln mit. Sie sind pragmatisch, ehrlich und ohne Panik. Hier sind die fünf, die am meisten zählen:
               </p>
 
               <ul className="space-y-7 sm:space-y-8 list-none p-0 text-gray-800">
@@ -701,10 +701,6 @@ export default function IstRioGefaehrlich() {
                   </div>
                 </li>
               </ul>
-
-              <div className="mt-8 p-6 bg-white border border-gray-100 rounded-2xl shadow-sm italic text-gray-700">
-                Diese fünf Regeln tragen dich durch die meisten Situationen. Die restlichen zehn wachsen aus der Erfahrung vor Ort, nicht aus einer Liste.
-              </div>
             </section>
 
             {/* 8. CTA TOUR (era o form do lead magnet, trocado porque o guia
