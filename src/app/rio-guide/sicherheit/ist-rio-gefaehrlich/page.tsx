@@ -61,7 +61,7 @@ const jsonLd = [
         "name": "Ist Rio de Janeiro gefährlicher als São Paulo?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Rio hat spezifische Herausforderungen, oft im Zusammenhang mit Favelas auf Hügeln, was Kriminalität sichtbarer macht. Die Kriminalitätsraten variieren jedoch stark je nach Viertel. Mit gesundem Menschenverstand und den richtigen Verhaltensregeln ist das Risiko für Touristen in beiden Städten vergleichbar."
+          "text": "Rio hat spezifische Herausforderungen, oft im Zusammenhang mit Favelas auf Hügeln neben wohlhabenden Zonen, was Kriminalität sichtbarer machen kann. Die Kriminalitätsraten und die reale Gefahr für dich variieren jedoch stark je nach Stadtteil. Mit gesundem Menschenverstand ist das tägliche Risiko für informierte Touristen in beiden Mega-Städten absolut vergleichbar und handhabbar."
         }
       },
       {
@@ -69,7 +69,7 @@ const jsonLd = [
         "name": "Welche Viertel in Rio sind am sichersten für Touristen?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Die Südzone (Zona Sul) gilt als am sichersten. Dazu gehören Ipanema, Leblon, Urca, Jardim Botânico und Botafogo. Copacabana ist ebenfalls beliebt, erfordert aber besonders nachts etwas mehr Aufmerksamkeit."
+          "text": "Die Südzone (Zona Sul) gilt als der am stärksten gesicherte und sicherste Bereich für Urlauber und Expats. Dazu gehören neben Ipanema und Leblon auch Botafogo, Humaitá und Urca (die oft als die sicherste Nachbarschaft Rios gilt). Copacabana ist sehr beliebt, bedarf aber wegen der schieren Masse an Touristen in bestimmten Ecken nachts mehr Aufmerksamkeit für Taschendiebe."
         }
       },
       {
@@ -77,7 +77,7 @@ const jsonLd = [
         "name": "Kann man in Rio alleine reisen?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Ja, absolut. Wer sich an die lokalen Regeln hält, nicht nachts alleine durch einsame Straßen wandert und Apps wie Uber nutzt, kann die Stadt wunderbar alleine entdecken. Tausende Alleinreisende besuchen Rio jedes Jahr und haben eine sichere Reise."
+          "text": "Ja, absolut. Wer sich selbstbewusst bewegt, grundlegende Sicherheitsregeln verinnerlicht, abends nicht alleine durch schwach beleuchtete Gassen spaziert und sichere Fahr-Apps konsequent einsetzt, kann die Stadt alleine hervorragend und gefahrlos entdecken. Tausende Backpacker und Alleinreisende tun dies reibungslos jedes Jahr."
         }
       },
       {
@@ -85,7 +85,7 @@ const jsonLd = [
         "name": "Ist Copacabana sicher?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Tagsüber ist der Strand und die Promenade voll und sicher, auch wenn Taschendiebstahl passieren kann. Nachts sollte man die beleuchteten Hauptstraßen nutzen und dunkle Ecken oder den leeren Sandstrand meiden. Es ist ein lebendiges, sicheres Viertel bei richtiger Vorsicht."
+          "text": "Tagsüber ist der Strand oft voll, stark frequentiert, gut polizeilich überwacht und absolut sicher (dennoch: Sachen auf dem Sand nicht unbewacht lassen). Sobald es Nacht wird, solltest du dich auf den stark beleuchteten Hautpstraßen halten, das ruhige Sandareal direkt am Wasser meiden und dunklen Straßenecken aus dem Weg gehen."
         }
       },
       {
@@ -93,7 +93,7 @@ const jsonLd = [
         "name": "Wie gefährlich ist Lapa in Rio?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Lapa ist das Ausgehzentrum Rios. Es ist nachts sehr voll, was vor Taschendieben schützt, aber man sollte immer Uber für die Hin- und Rückfahrt nutzen und nicht durch dunkle Seitenstraßen laufen. Für eine sichere Erfahrung am besten am frühen Abend oder in Gruppen gehen."
+          "text": "Lapa, nahe am Zentrum, ist das Herzstück des Nachtlebens in Rio (Ausgehviertel). Freitagabends und am Wochenende platzt das Viertel aus allen Nähten, was dich vor der Leere der Nacht schützt. Dennoch rate ich: Fahre direkt mit einem Uber von A nach B ins Viertel hinein und direkt wieder hinaus. Mach dort nachts keine Spaziergänge in dunkle Nebenstraßen. Gruppen sind besser."
         }
       },
       {
@@ -101,7 +101,7 @@ const jsonLd = [
         "name": "Ist Rio sicher für Frauen allein?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Frauen können sicher alleine nach Rio reisen, sollten aber grundlegende Vorsichtsmaßnahmen beachten: Nimm ein Uber, lauf nachts nicht allein durch leere Straßen, trinke verantwortungsvoll und folge deinem Bauchgefühl. Sichere Viertel in der Südzone sind der beste Ausgangspunkt."
+          "text": "Frauen können sicher und problemlos alleine nach Rio reisen. Vorsicht ist jedoch geboten: Wie in fast jeder Metrople verlässt man sich besser auf geprüfte Uber anstatt Taxis zu winken, meidet unbelebte oder unbeleuchtete Strecken und schützt sein Getränk beim Feiern. Nutze primär sichere Viertel der Zona Sul als feste Basis. Brasilianische Frauen verhalten sich übrigens ähnlich achtsam in den Straßen. Vertraue deinem Bauchgefühl."
         }
       },
       {
@@ -109,7 +109,7 @@ const jsonLd = [
         "name": "Wie sicher ist Rio im Vergleich zu anderen Städten Südamerikas?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Rio liegt bei der Sicherheit im Mittelfeld der großen südamerikanischen Metropolen. Orte wie Buenos Aires oder Santiago gelten statistisch oft als sicherer, während andere Metropolen risikoreicher sind. Die meisten touristischen Zonen in Rio sind durch starke Polizeipräsenz gesichert."
+          "text": "Rio tendiert im Rahmen der großen südamerikanischen Metropolen ins Mittelfeld. Städte wie Buenos Aires (Argentinien) oder Santiago (Chile) gelten statistisch als etwas sicherer. Andere Metropolen im nördlichen Südamerika können deutlich heikler sein. In den touristenstarken und wirtschaftlichen Epizentren von Rio ist die Straßenpräsenz der Polizei enorm und bietet meist eine stabile Barriere gegen offene Bandenkriminalität für dich als Gast."
         }
       }
     ]
