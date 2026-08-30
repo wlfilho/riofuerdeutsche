@@ -180,7 +180,7 @@ export default async function TourenPage() {
                         <FadeIn direction="up">
                             <div className="max-w-[800px] mx-auto space-y-8 text-left">
                                 <p className="text-xl lg:text-2xl font-semibold text-gray-900 leading-snug">
-                                    Rio de Janeiro gehört zu den faszinierendsten Städten der Welt, aber ohne einen <Link href="/ueber-will" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">lokalen Guide</Link> verpasst du das Beste. Unsere deutschsprachigen Stadtführungen und Touren zeigen dir das echte Rio: <Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">sicher</Link>, authentisch und abseits der Touristenpfade.
+                                    Rio de Janeiro gehört zu den faszinierendsten Städten der Welt, aber ohne einen <Link href="/ueber-will" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">lokalen Guide</Link> verpasst du das Beste. Unsere deutschsprachigen Stadtführungen und Touren zeigen dir das echte Rio: <Link href="/rio-guide/sicherheit/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">sicher</Link>, authentisch und abseits der Touristenpfade.
                                 </p>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                                     <p>

@@ -42,6 +42,15 @@ const nextConfig: NextConfig = {
         destination: '/bewertung-schreiben',
         permanent: true,
       },
+      {
+        // A página de segurança nasceu na raiz e migrou para dentro do Rio
+        // Guide, para ficar no mesmo padrão de /rio-guide/sehenswuerdigkeiten.
+        // `permanent: true` emite 308 (não 301); o Google trata os dois como
+        // permanente e transfere a autoridade igual.
+        source: '/ist-rio-gefaehrlich',
+        destination: '/rio-guide/sicherheit/ist-rio-gefaehrlich',
+        permanent: true,
+      },
     ];
   },
 };

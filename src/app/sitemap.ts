@@ -96,6 +96,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.9,
         },
         {
+            url: `${baseUrl}/rio-guide`,
+            lastModified: today,
+            changeFrequency: "monthly",
+            priority: 0.8,
+        },
+        {
             url: `${baseUrl}/rio-guide/sehenswuerdigkeiten`,
             lastModified: today,
             changeFrequency: "monthly",
@@ -144,7 +150,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.8,
         },
         {
-            url: `${baseUrl}/ist-rio-gefaehrlich`,
+            url: `${baseUrl}/rio-guide/sicherheit/ist-rio-gefaehrlich`,
             lastModified: today,
             changeFrequency: "monthly",
             priority: 0.8,

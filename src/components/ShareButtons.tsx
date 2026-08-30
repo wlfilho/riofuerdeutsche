@@ -29,11 +29,28 @@ const XIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+export type ShareNetwork = 'whatsapp' | 'telegram' | 'facebook' | 'x' | 'instagram';
+
+const ALL_NETWORKS: ShareNetwork[] = ['whatsapp', 'telegram', 'facebook', 'x', 'instagram'];
+
 interface ShareButtonsProps {
     /** URL absoluta a ser compartilhada. */
     url: string;
     /** Texto que acompanha o link nos apps que suportam (WhatsApp, Telegram, X). */
     text: string;
+    /**
+     * Quais redes mostrar, na ordem dada. Omitido = todas as cinco, que é o
+     * comportamento de antes (bewertungen depende disso).
+     */
+    networks?: ShareNetwork[];
+    /** `sm` reduz os botões para caber em barras de metadados. */
+    size?: 'md' | 'sm';
+    /**
+     * `brand` = círculo na cor da rede (padrão, usado em bewertungen).
+     * `plain` = só o glifo, herdando a cor do texto — para fundos escuros onde
+     * cinco círculos coloridos competem com o conteúdo.
+     */
+    tone?: 'brand' | 'plain';
     className?: string;
 }
 
@@ -65,7 +82,7 @@ function isMobileDevice() {
  * disponível (mobile) e cai para "copiar link" (pra colar em Story/DM) no
  * desktop.
  */
-export default function ShareButtons({ url, text, className = '' }: ShareButtonsProps) {
+export default function ShareButtons({ url, text, networks = ALL_NETWORKS, size = 'md', tone = 'brand', className = '' }: ShareButtonsProps) {
     const t = useTranslations('public.bewertungen');
     const [copied, setCopied] = useState(false);
 
@@ -120,55 +137,82 @@ export default function ShareButtons({ url, text, className = '' }: ShareButtons
         await copyLinkFallback();
     };
 
-    const buttonBase = "w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full text-white transition-all duration-300 hover:scale-110 active:scale-95 shadow-md shrink-0";
+    const plain = tone === 'plain';
+    // No modo plain o glifo precisa ser maior: sem o círculo colorido atrás, um
+    // ícone de 13px de traço fino (WhatsApp, X) simplesmente some.
+    const sizeClass = plain
+        ? (size === 'sm' ? 'w-5 h-5' : 'w-6 h-6')
+        : (size === 'sm' ? 'w-7 h-7' : 'w-9 h-9 sm:w-10 sm:h-10');
+    const glyph = plain
+        ? (size === 'sm' ? 'w-[17px] h-[17px]' : 'w-5 h-5')
+        : (size === 'sm' ? 'w-[13px] h-[13px]' : '');
+    const buttonBase = plain
+        ? `${sizeClass} flex items-center justify-center transition-colors duration-200 shrink-0`
+        : `${sizeClass} flex items-center justify-center rounded-full text-white transition-all duration-300 hover:scale-110 active:scale-95 shadow-md shrink-0`;
+    const bg = (brandClass: string) => (plain ? '' : brandClass);
 
-    return (
-        <div className={`flex items-center justify-center flex-wrap gap-2 ${className}`}>
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+
+    const byNetwork: Record<ShareNetwork, React.ReactNode> = {
+        whatsapp: (
             <a
+                key="whatsapp"
                 href={`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={t('shareWhatsapp')}
                 title={t('shareWhatsapp')}
-                className={`${buttonBase} bg-[#25D366]`}
+                className={`${buttonBase} ${bg('bg-[#25D366]')}`}
             >
-                <WhatsAppIcon className="w-[17px] h-[17px]" />
+                <WhatsAppIcon className={glyph || 'w-[17px] h-[17px]'} />
             </a>
+        ),
+        telegram: (
             <a
+                key="telegram"
                 href={`https://telegram.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={t('shareTelegram')}
                 title={t('shareTelegram')}
-                className={`${buttonBase} bg-[#0088cc]`}
+                className={`${buttonBase} ${bg('bg-[#0088cc]')}`}
             >
-                <Send className="w-[16px] h-[16px]" />
+                <Send className={glyph || 'w-[16px] h-[16px]'} />
             </a>
+        ),
+        facebook: (
             <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`}
-                onClick={handleAppShareIntercept(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`)}
+                key="facebook"
+                href={fbUrl}
+                onClick={handleAppShareIntercept(fbUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={t('shareFacebook')}
                 title={t('shareFacebook')}
-                className={`${buttonBase} bg-[#1877F2]`}
+                className={`${buttonBase} ${bg('bg-[#1877F2]')}`}
             >
-                <Facebook className="w-[16px] h-[16px]" />
+                <Facebook className={glyph || 'w-[16px] h-[16px]'} />
             </a>
+        ),
+        x: (
             <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`}
-                onClick={handleAppShareIntercept(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`)}
+                key="x"
+                href={xUrl}
+                onClick={handleAppShareIntercept(xUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={t('shareTwitter')}
                 title={t('shareTwitter')}
-                className={`${buttonBase} bg-black`}
+                className={`${buttonBase} ${bg('bg-black')}`}
             >
-                <XIcon className="w-[15px] h-[15px]" />
+                <XIcon className={glyph || 'w-[15px] h-[15px]'} />
             </a>
-            <div className="relative">
-                <button type="button" onClick={handleInstagram} aria-label={t('shareInstagram')} title={t('shareInstagram')} className={`${buttonBase} bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888]`}>
-                    <Instagram className="w-[16px] h-[16px]" />
+        ),
+        instagram: (
+            <div key="instagram" className="relative">
+                <button type="button" onClick={handleInstagram} aria-label={t('shareInstagram')} title={t('shareInstagram')} className={`${buttonBase} ${bg('bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888]')}`}>
+                    <Instagram className={glyph || 'w-[16px] h-[16px]'} />
                 </button>
                 {copied && (
                     <span className="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/80 text-white text-[11px] px-2.5 py-1 rounded-full pointer-events-none">
@@ -176,6 +220,12 @@ export default function ShareButtons({ url, text, className = '' }: ShareButtons
                     </span>
                 )}
             </div>
+        ),
+    };
+
+    return (
+        <div className={`flex items-center justify-center flex-wrap gap-2 ${className}`}>
+            {networks.map((n) => byNetwork[n])}
         </div>
     );
 }

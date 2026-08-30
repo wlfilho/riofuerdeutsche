@@ -24,7 +24,7 @@ function buildItems(whatsappHref: string, emailHref: string): FaqItem[] {
       a: "Rio hat Risiken, aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben.",
       cta: {
         label: "Die 7 häufigsten Fehler und wie du sie vermeidest →",
-        href: "/ist-rio-gefaehrlich",
+        href: "/rio-guide/sicherheit/ist-rio-gefaehrlich",
       },
     },
     {

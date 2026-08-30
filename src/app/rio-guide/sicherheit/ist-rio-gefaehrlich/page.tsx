@@ -3,17 +3,51 @@ import Image from "next/image";
 import Link from "next/link";
 import NavbarServer from "@/components/NavbarServer";
 import FooterServer from "@/components/FooterServer";
-import MagicLinkForm from "@/components/MagicLinkForm";
-import { ShieldCheck, AlertTriangle, AlertCircle, XCircle, Info } from "lucide-react";
+import ShareButtons from "@/components/ShareButtons";
+import { ShieldCheck, AlertTriangle, AlertCircle, XCircle, Info, ChevronRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Ist Rio de Janeiro gefährlich? Die Wahrheit von einem Carioca (2026)",
+  // `absolute` para escapar do template "%s | Rio für Deutsche": com o sufixo
+  // o title ia a 87 caracteres e o Google cortava justamente o diferencial.
+  title: {
+    absolute: "Ist Rio de Janeiro gefährlich? Ehrliche Antwort vom Carioca",
+  },
   description:
-    "Ein Carioca, der in Deutschland lebte, erklärt die Wahrheit über Sicherheit in Rio. Welche Viertel sind sicher? Was musst du wissen? Alles hier.",
+    "Ein Carioca, der in Köln gelebt hat, erklärt ehrlich, wie sicher Rio wirklich ist: welche Viertel, welche typischen Fehler und welche Regeln zählen.",
+  // Depois da migração de /ist-rio-gefaehrlich para cá, o canonical é o que
+  // diz ao Google qual URL é a definitiva, junto com o 308 do next.config.
+  alternates: {
+    canonical: "https://riofuerdeutsche.de/rio-guide/sicherheit/ist-rio-gefaehrlich",
+  },
   openGraph: {
-    title: "Ist Rio de Janeiro gefährlich?",
+    // Declarar `openGraph` aqui substitui o objeto inteiro do layout raiz: o
+    // Next não faz merge campo a campo. Por isso type, locale, siteName, url e
+    // images precisam ser repetidos — sem eles a página saía com apenas
+    // og:title e og:description, e compartilhar o link não gerava imagem
+    // nenhuma. Mesma armadilha documentada em bewertungen/[id]/page.tsx.
+    type: "website",
+    locale: "de_DE",
+    siteName: "Rio für Deutsche",
+    url: "/rio-guide/sicherheit/ist-rio-gefaehrlich",
+    title: "Ist Rio de Janeiro gefährlich? Ehrliche Antwort vom Carioca",
     description:
-      "Die Wahrheit über Sicherheit in Rio, von einem Carioca der fließend Deutsch spricht.",
+      "Welche Viertel sind sicher, welche Fehler machen Touristen und was tust du im Ernstfall.",
+    images: [
+      {
+        // JPEG, não WebP: o WhatsApp não renderiza WebP no preview do link.
+        url: "/images/og-sicherheit.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Rio de Janeiro Panorama, Rio für Deutsche",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ist Rio de Janeiro gefährlich? Ehrliche Antwort vom Carioca",
+    description:
+      "Welche Viertel sind sicher, welche Fehler machen Touristen und was tust du im Ernstfall.",
+    images: ["/images/og-sicherheit.jpg"],
   },
 };
 
@@ -82,6 +116,30 @@ const jsonLd = [
   },
   {
     "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Startseite",
+        "item": "https://riofuerdeutsche.de/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Rio-Guide",
+        "item": "https://riofuerdeutsche.de/rio-guide"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Ist Rio gefährlich?",
+        "item": "https://riofuerdeutsche.de/rio-guide/sicherheit/ist-rio-gefaehrlich"
+      }
+    ]
+  },
+  {
+    "@context": "https://schema.org",
     "@type": "Article",
     "headline": "Ist Rio de Janeiro gefährlich? Die Wahrheit von einem Carioca (2026)",
     "description": "Ein Carioca, der in Deutschland lebte, erklärt die Wahrheit über Sicherheit in Rio. Welche Viertel sind sicher? Was musst du wissen? Alles hier.",
@@ -117,6 +175,14 @@ export default function IstRioGefaehrlich() {
           {/* 1. HERO SECTION FULL WIDTH */}
           <section className="w-full bg-[#0d1f15] pt-32 pb-20 px-5 lg:px-8 text-white">
             <div className="max-w-3xl mx-auto">
+              <nav className="flex items-center justify-center md:justify-start text-xs sm:text-sm font-medium text-white/60 mb-6" aria-label="Breadcrumb">
+                <Link href="/" className="hover:text-rio-yellow transition-colors">Startseite</Link>
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 mx-1.5 sm:mx-2 text-white/30 shrink-0" />
+                <Link href="/rio-guide" className="hover:text-rio-yellow transition-colors">Rio-Guide</Link>
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 mx-1.5 sm:mx-2 text-white/30 shrink-0" />
+                <span className="text-rio-yellow" aria-current="page">Ist Rio gefährlich?</span>
+              </nav>
+
               <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-8">
                 <span className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase">
                   Sicherheit
@@ -134,33 +200,67 @@ export default function IstRioGefaehrlich() {
                 Die Wahrheit von einem Carioca, nicht von einer Zeitung
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center md:justify-start gap-5 sm:gap-6 text-gray-300 border-t border-b border-white/10 py-6 mb-2">
+              {/* Mesmo arranjo em todas as larguras: três colunas separadas por
+                  barra vertical. No mobile ele só encolhe (avatar menor, texto
+                  menor, barras mais curtas) em vez de empilhar, o que economiza
+                  uns 160px de altura logo abaixo do título. */}
+              <div className="flex flex-row items-center justify-center md:justify-start gap-1.5 sm:gap-6 text-gray-300 border-t border-b border-white/10 py-4 sm:py-6 mb-2">
                 {/* Author Info */}
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full overflow-hidden relative bg-gray-800 border-2 border-rio-yellow shadow-sm shrink-0">
-                    <Image src="/images/rio-cristo.webp" alt="Will - Lokaler Guide" fill className="object-cover" />
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <div className="w-9 h-9 sm:w-14 sm:h-14 rounded-full overflow-hidden relative bg-gray-800 border-2 border-rio-yellow shadow-sm shrink-0">
+                    <Image src="/images/rio-cristo.webp" alt="Will - Rio Guide" fill className="object-cover" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-bold text-white text-base">Will</span>
-                    <Link href="/ueber-will" className="text-white/70 text-sm hover:text-white hover:underline transition-colors">Lokaler Guide</Link>
+                    <span className="font-bold text-white text-[13px] sm:text-base leading-tight">Will</span>
+                    <Link href="/ueber-will" className="text-white/70 text-[11px] sm:text-sm leading-tight hover:text-white hover:underline transition-colors whitespace-nowrap">Rio Guide</Link>
                   </div>
                 </div>
-                
-                <div className="hidden sm:block w-px h-14 bg-white/10 mx-2"></div>
-                
+
+                <div className="w-px h-10 sm:h-14 bg-white/10 sm:mx-2 shrink-0"></div>
+
                 {/* Post Date */}
-                <div className="flex flex-col items-center justify-center h-14">
-                  <span className="font-semibold text-white/60 text-sm mb-0.5">Veröffentlicht</span>
-                  <span className="text-white font-medium text-sm">24. März 2026</span>
+                <div className="flex flex-col items-center justify-center h-10 sm:h-14">
+                  <span className="font-semibold text-white/60 text-[10px] sm:text-sm mb-0.5 leading-tight whitespace-nowrap">Veröffentlicht</span>
+                  <span className="text-white font-medium text-[11px] sm:text-sm leading-tight whitespace-nowrap">03/2026</span>
                 </div>
-                
-                <div className="hidden sm:block w-px h-14 bg-white/10 mx-2"></div>
-                
+
+                <div className="w-px h-10 sm:h-14 bg-white/10 sm:mx-2 shrink-0"></div>
+
                 {/* Last Updated */}
-                <div className="flex flex-col items-center justify-center h-14">
-                  <span className="font-semibold text-white/60 text-sm mb-0.5">Zuletzt aktualisiert</span>
-                  <span className="text-white font-medium text-sm">März 2026</span>
+                <div className="flex flex-col items-center justify-center h-10 sm:h-14">
+                  {/* "Zuletzt aktualisiert" é o item mais largo da linha e
+                      estoura abaixo de 390px; no mobile fica só "Aktualisiert". */}
+                  <span className="font-semibold text-white/60 text-[10px] sm:text-sm mb-0.5 leading-tight whitespace-nowrap">
+                    <span className="sm:hidden">Aktualisiert</span>
+                    <span className="hidden sm:inline">Zuletzt aktualisiert</span>
+                  </span>
+                  <span className="text-white font-medium text-[11px] sm:text-sm leading-tight whitespace-nowrap">03/2026</span>
                 </div>
+                {/* Só no desktop: ocupa o vazio à direita da barra. No mobile a
+                    linha já está no limite da largura, então lá os ícones ficam
+                    na instância logo abaixo. */}
+                <div className="hidden sm:block w-px h-14 bg-white/10 mx-2 shrink-0"></div>
+
+                <div className="hidden sm:flex text-white/50 [&_a:hover]:text-white">
+                  <ShareButtons
+                    url="https://riofuerdeutsche.de/rio-guide/sicherheit/ist-rio-gefaehrlich"
+                    text="Ist Rio de Janeiro gefährlich? Die Wahrheit von einem Carioca"
+                    networks={['whatsapp', 'telegram', 'facebook', 'x']}
+                    tone="plain"
+                    className="gap-4"
+                  />
+                </div>
+              </div>
+
+              <div className="sm:hidden mt-3 text-white/50 [&_a:hover]:text-white">
+                <ShareButtons
+                  url="https://riofuerdeutsche.de/rio-guide/sicherheit/ist-rio-gefaehrlich"
+                  text="Ist Rio de Janeiro gefährlich? Die Wahrheit von einem Carioca"
+                  networks={['whatsapp', 'telegram', 'facebook', 'x']}
+                  size="sm"
+                  tone="plain"
+                  className="justify-center gap-4"
+                />
               </div>
 
             </div>
@@ -207,9 +307,21 @@ export default function IstRioGefaehrlich() {
                     <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">1</span>
                     Du buchst in der falschen Gegend
                   </h3>
-                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
+                  <div className="flex flex-col sm:flex-row gap-5 sm:gap-7 sm:items-start pl-0 sm:pl-11">
+                    <Image
+                      src="/images/sicherheit/fehler-1-viertel.webp"
+                      alt="Wohnhaus mit geschlossenen Rollläden bei Nacht neben derselben Straße mit beleuchtetem Café und Passanten"
+                      width={560}
+                      height={560}
+                      loading="lazy"
+                      quality={50}
+                      sizes="(min-width: 640px) 260px, 100vw"
+                      className="w-full sm:w-[260px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                    />
+                    <p className="text-gray-700 leading-[1.8] min-w-0">
                     Lapa, Centro nachts, bestimmte Zonen der Zona Norte: das sind keine Wohnviertel für Touristen, egal wie günstig das Airbnb sein mag. Die Wahl deines Viertels ist die wichtigste Entscheidung noch vor dem Flug. Eine Fehlentscheidung hier erschwert deine gesamte Reise.
-                  </p>
+                    </p>
+                  </div>
                 </div>
 
                 <div>
@@ -217,9 +329,21 @@ export default function IstRioGefaehrlich() {
                     <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">2</span>
                     Du nutzt dein Handy falsch auf der Straße
                   </h3>
-                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
+                  <div className="flex flex-col sm:flex-row-reverse gap-5 sm:gap-7 sm:items-start pl-0 sm:pl-11">
+                    <Image
+                      src="/images/sicherheit/fehler-2-handy.webp"
+                      alt="Reisender mit Handy offen in der Hand auf der Straße neben demselben Reisenden mit Handy in der Hosentasche"
+                      width={560}
+                      height={560}
+                      loading="lazy"
+                      quality={50}
+                      sizes="(min-width: 640px) 260px, 100vw"
+                      className="w-full sm:w-[260px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                    />
+                    <p className="text-gray-700 leading-[1.8] min-w-0">
                     Ein neues Smartphone lässig in der Hand beim Spazierengehen am Gehsteig? Das ist das häufigste Ziel für Taschendiebe auf Fahrrädern. Es geht nicht darum, in Rio gar kein Handy dabei zu haben. Es geht darum, <em>wann</em> und <em>wie</em> du es sicher benutzt.
-                  </p>
+                    </p>
+                  </div>
                 </div>
 
                 <div>
@@ -227,9 +351,21 @@ export default function IstRioGefaehrlich() {
                     <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">3</span>
                     Du fährst mit dem falschen Taxi
                   </h3>
-                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
+                  <div className="flex flex-col sm:flex-row gap-5 sm:gap-7 sm:items-start pl-0 sm:pl-11">
+                    <Image
+                      src="/images/sicherheit/fehler-3-taxi.webp"
+                      alt="Reisender winkt ein Taxi auf der Straße heran neben demselben Reisenden, der per App ein Auto am Bordstein bestellt"
+                      width={560}
+                      height={560}
+                      loading="lazy"
+                      quality={50}
+                      sizes="(min-width: 640px) 260px, 100vw"
+                      className="w-full sm:w-[260px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                    />
+                    <p className="text-gray-700 leading-[1.8] min-w-0">
                     Die gelben Taxis der Straße sind in Rio nicht so extrem reguliert wie in Deutschland. Einfach am Flughafen einsteigen? Lieber nicht. Es gibt deutlich bessere, sicherere und auch günstigere Alternativen für Touristen. Deine Transport-Apps solltest du schon zu Hause installieren.
-                  </p>
+                    </p>
+                  </div>
                 </div>
 
                 <div>
@@ -237,9 +373,21 @@ export default function IstRioGefaehrlich() {
                     <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">4</span>
                     Du gehst nachts zu Fuß
                   </h3>
-                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
+                  <div className="flex flex-col sm:flex-row-reverse gap-5 sm:gap-7 sm:items-start pl-0 sm:pl-11">
+                    <Image
+                      src="/images/sicherheit/fehler-4-nachts.webp"
+                      alt="Leere unbeleuchtete Straße bei Nacht neben derselben Straße mit geöffneten Läden, Kiosk und Passanten"
+                      width={560}
+                      height={560}
+                      loading="lazy"
+                      quality={50}
+                      sizes="(min-width: 640px) 260px, 100vw"
+                      className="w-full sm:w-[260px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                    />
+                    <p className="text-gray-700 leading-[1.8] min-w-0">
                     Was in Berlin, München oder Köln völlig normal ist, funktioniert in Rio in vielen Ecken einfach anders. Nach Einbruch der Dunkelheit zu Fuß durch unbekannte oder kaum beleuchtete Straßen zu navigieren, ist das Risikoverhalten Nummer eins von Fremden.
-                  </p>
+                    </p>
+                  </div>
                 </div>
 
                 <div>
@@ -247,9 +395,21 @@ export default function IstRioGefaehrlich() {
                     <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">5</span>
                     Du nimmst zu viel an den Strand mit
                   </h3>
-                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
+                  <div className="flex flex-col sm:flex-row gap-5 sm:gap-7 sm:items-start pl-0 sm:pl-11">
+                    <Image
+                      src="/images/sicherheit/fehler-5-strand.webp"
+                      alt="Strandtuch überladen mit Rucksack, Kamera und Portemonnaie neben demselben Tuch mit nur Handy, Sonnencreme und etwas Bargeld"
+                      width={560}
+                      height={560}
+                      loading="lazy"
+                      quality={50}
+                      sizes="(min-width: 640px) 260px, 100vw"
+                      className="w-full sm:w-[260px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                    />
+                    <p className="text-gray-700 leading-[1.8] min-w-0">
                     Rios Strände sind wunderschön und in den Touristenvierteln meistens sicher polizeilich überwacht. Aber der Sand ist riesig, es gibt viele Menschen, und kurz ins Wasser gehen mit dem Rucksack unbeaufsichtigt am Handtuch? Das ist fahrlässig. Was du an den Strand mitnimmst, bestimmt, ob du einen schönen oder sehr schlechten Tag hast.
-                  </p>
+                    </p>
+                  </div>
                 </div>
 
                 <div>
@@ -257,9 +417,21 @@ export default function IstRioGefaehrlich() {
                     <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">6</span>
                     Du zeigst Wohlstand
                   </h3>
-                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
+                  <div className="flex flex-col sm:flex-row-reverse gap-5 sm:gap-7 sm:items-start pl-0 sm:pl-11">
+                    <Image
+                      src="/images/sicherheit/fehler-6-wohlstand.webp"
+                      alt="Reisender mit Uhr, Kette und großer Kamera neben demselben Reisenden in einfachem T-Shirt ohne Schmuck"
+                      width={560}
+                      height={560}
+                      loading="lazy"
+                      quality={50}
+                      sizes="(min-width: 640px) 260px, 100vw"
+                      className="w-full sm:w-[260px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                    />
+                    <p className="text-gray-700 leading-[1.8] min-w-0">
                     Die dicke Spiegelreflexkamera um den Hals, eine teure Uhr, sichtbarer Schmuck: das sind klare Signale in einer Stadt, in der ein Großteil der Bevölkerung mit dem Mindestlohn kämpft. Rio hat leider eine extrem ausgeprägte soziale Ungleichheit, und Touristen, die Reichtum signalisieren, fallen sofort in das Raster aufmerksamer Augen.
-                  </p>
+                    </p>
+                  </div>
                 </div>
 
                 <div>
@@ -267,17 +439,24 @@ export default function IstRioGefaehrlich() {
                     <span className="flex items-center justify-center bg-gray-200 text-gray-800 rounded-full w-8 h-8 text-sm shrink-0 mt-0.5">7</span>
                     Du bist nicht vorbereitet auf den Notfall
                   </h3>
-                  <p className="text-gray-700 leading-[1.8] pl-0 sm:pl-11">
+                  <div className="flex flex-col sm:flex-row gap-5 sm:gap-7 sm:items-start pl-0 sm:pl-11">
+                    <Image
+                      src="/images/sicherheit/fehler-7-notfall.webp"
+                      alt="Handy ohne installierte Apps neben demselben Handy mit Fahr-Apps, Passkopie und Karte griffbereit"
+                      width={560}
+                      height={560}
+                      loading="lazy"
+                      quality={50}
+                      sizes="(min-width: 640px) 260px, 100vw"
+                      className="w-full sm:w-[260px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                    />
+                    <p className="text-gray-700 leading-[1.8] min-w-0">
                     Die meisten Reisenden kommen ohne vorbereitete Apps (Wie bestelle ich mir ein alternatives Taxi?), ohne gespeicherte lokale Notfallnummern, ohne gesicherte Dokumentenkopien und ohne einen Backup-Plan für ihre Kreditkarten. Wenn wirklich etwas passiert, kostet Vorbereitung keine einzige Sekunde, absolute Unvorbereitung kostet dich den Urlaub.
-                  </p>
+                    </p>
+                  </div>
                 </div>
               </div>
             </section>
-
-            {/* 5. FORM CARD #1 */}
-            <div className="my-16">
-              <MagicLinkForm variant="inline1" />
-            </div>
 
             {/* 6. DIE SICHEREN VIERTEL */}
             <section className="mb-16">
@@ -329,7 +508,7 @@ export default function IstRioGefaehrlich() {
                   
                   <div className="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100 mt-auto">
                     <p className="text-[#0d1f15] font-semibold text-[15px] leading-[1.7]">
-                      Copacabana, Flamengo, Laranjeiras, Catete, Glória.
+                      <Link href="/touren/klassiker" className="text-rio-green underline underline-offset-2 hover:text-[#1a4a35] transition-colors">Copacabana</Link>, Flamengo, Laranjeiras, Catete, Glória.
                     </p>
                   </div>
                 </div>
@@ -390,7 +569,7 @@ export default function IstRioGefaehrlich() {
                 <div>
                   <strong className="text-gray-900 block mb-1">Wichtig:</strong>
                   <span className="text-gray-700 leading-[1.8]">
-                    Diese Liste ist nur ein Ausgangspunkt. Jedes Viertel hat Nuancen, eine Querstraße kann den Unterschied machen. Im vollständigen Guide erfährst du, worauf du genau achten musst, um deinen Aufenthalt absolut sicher zu genießen.
+                    Diese Liste ist nur ein Ausgangspunkt. Jedes Viertel hat Nuancen, eine Querstraße kann den Unterschied machen. Wer die Stadt kennt, liest diese Unterschiede sofort.
                   </span>
                 </div>
               </div>
@@ -406,52 +585,152 @@ export default function IstRioGefaehrlich() {
               </p>
 
               <ul className="space-y-7 sm:space-y-8 list-none p-0 text-gray-800">
-                <li className="flex gap-4 items-start">
-                  <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
-                  <div className="leading-[1.8]">
-                    <strong className="text-lg text-[#0d1f15] block mb-1.5 leading-snug">Nicht ostentieren</strong>
-                    Trage keine Rolex, lass die offensichtlichen Ketten und Ringe im Safe in Deutschland, halte das iPhone in der Tasche, solange du es nicht brauchst. Je gewöhnlicher du aussiehst, desto langweiliger bist du für potenziellen Ärger.
+                <li>
+                  <div className="flex gap-4 items-start mb-3">
+                    <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
+                    <strong className="text-lg text-[#0d1f15] leading-snug">Nicht ostentieren</strong>
+                  </div>
+                  {/* pl-0 no mobile: imagem e texto vão até a margem, alinhados com o ✓,
+                      igual aos 7 erros. A partir do sm recuam para debaixo do título. */}
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 sm:items-start leading-[1.8] pl-0 sm:pl-10">
+                      <Image
+                        src="/images/sicherheit/regel-1-schmuck.webp"
+                        alt="Geöffneter Koffer, Uhr und Schmuck bleiben zu Hause daneben liegen"
+                        width={480}
+                        height={480}
+                        loading="lazy"
+                        quality={50}
+                        sizes="(min-width: 640px) 240px, 100vw"
+                        className="w-full sm:w-[240px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                      />
+                      <p className="min-w-0">
+                        Trage keine Rolex, lass die offensichtlichen Ketten und Ringe im Safe in Deutschland, halte das iPhone in der Tasche, solange du es nicht brauchst. Je gewöhnlicher du aussiehst, desto langweiliger bist du für potenziellen Ärger.
+                      </p>
                   </div>
                 </li>
-                <li className="flex gap-4 items-start">
-                  <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
-                  <div className="leading-[1.8]">
-                    <strong className="text-lg text-[#0d1f15] block mb-1.5 leading-snug">Uber und 99, immer</strong>
-                    Vergiss die normalen gelben Straßentaxis, insbesondere am Flughafen oder nachts nach einer Party. Nutzen per App fahrende private Fahrer gibt dir den exakten Preis, eine nachvollziehbare Route und absolute Datensicherheit. Punkt.
+                <li>
+                  <div className="flex gap-4 items-start mb-3">
+                    <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
+                    <strong className="text-lg text-[#0d1f15] leading-snug">Uber und 99, immer</strong>
+                  </div>
+                  {/* pl-0 no mobile: imagem e texto vão até a margem, alinhados com o ✓,
+                      igual aos 7 erros. A partir do sm recuam para debaixo do título. */}
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 sm:items-start leading-[1.8] pl-0 sm:pl-10">
+                      <Image
+                        src="/images/sicherheit/regel-2-app.webp"
+                        alt="Handy mit Fahr-App und eingezeichneter Route zum Ziel"
+                        width={480}
+                        height={480}
+                        loading="lazy"
+                        quality={50}
+                        sizes="(min-width: 640px) 240px, 100vw"
+                        className="w-full sm:w-[240px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                      />
+                      <p className="min-w-0">
+                        Vergiss die normalen gelben Straßentaxis, insbesondere am Flughafen oder nachts nach einer Party. Nutzen per App fahrende private Fahrer gibt dir den exakten Preis, eine nachvollziehbare Route und absolute Datensicherheit. Punkt.
+                      </p>
                   </div>
                 </li>
-                <li className="flex gap-4 items-start">
-                  <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
-                  <div className="leading-[1.8]">
-                    <strong className="text-lg text-[#0d1f15] block mb-1.5 leading-snug">Deserte Straßen konsequent meiden</strong>
-                    Wenn du nachts in eine Straße schaust und dort sind keine Autos, keine Straßenhändler, keine Fußgänger, keine geöffneten Kioske. Dann gehst du dort <em>nicht</em> hin. Wenn die Straße leer ist, gibt es in Rio fast immer einen guten Grund dafür.
+                <li>
+                  <div className="flex gap-4 items-start mb-3">
+                    <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
+                    <strong className="text-lg text-[#0d1f15] leading-snug">Deserte Straßen konsequent meiden</strong>
+                  </div>
+                  {/* pl-0 no mobile: imagem e texto vão até a margem, alinhados com o ✓,
+                      igual aos 7 erros. A partir do sm recuam para debaixo do título. */}
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 sm:items-start leading-[1.8] pl-0 sm:pl-10">
+                      <Image
+                        src="/images/sicherheit/regel-3-strasse.webp"
+                        alt="Straßenecke bei Nacht, beleuchtete belebte Seite und leere dunkle Gasse"
+                        width={480}
+                        height={480}
+                        loading="lazy"
+                        quality={50}
+                        sizes="(min-width: 640px) 240px, 100vw"
+                        className="w-full sm:w-[240px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                      />
+                      <p className="min-w-0">
+                        Wenn du nachts in eine Straße schaust und dort sind keine Autos, keine Straßenhändler, keine Fußgänger, keine geöffneten Kioske. Dann gehst du dort <em>nicht</em> hin. Wenn die Straße leer ist, gibt es in Rio fast immer einen guten Grund dafür.
+                      </p>
                   </div>
                 </li>
-                <li className="flex gap-4 items-start">
-                  <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
-                  <div className="leading-[1.8]">
-                    <strong className="text-lg text-[#0d1f15] block mb-1.5 leading-snug">Bei einem Überfall: Nicht reagieren</strong>
-                    Sollte das absolut Unwahrscheinliche eintreten und man zwingt dich zur Herausgabe deiner Wertsachen: Ruhig bleiben. Keine schnellen Handbewegungen. Augen nach unten. Keine Diskussion, kein Heldentum. Gebe alles sofort und widerstandslos heraus. Das Leben und die körperliche Unversehrtheit sind endlos viel mehr wert als jedes verdammte Smartphone.
+                <li>
+                  <div className="flex gap-4 items-start mb-3">
+                    <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
+                    <strong className="text-lg text-[#0d1f15] leading-snug">Bei einem Überfall: Nicht reagieren</strong>
+                  </div>
+                  {/* pl-0 no mobile: imagem e texto vão até a margem, alinhados com o ✓,
+                      igual aos 7 erros. A partir do sm recuam para debaixo do título. */}
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 sm:items-start leading-[1.8] pl-0 sm:pl-10">
+                      <Image
+                        src="/images/sicherheit/regel-4-ueberfall.webp"
+                        alt="Zwei geöffnete Hände, die ruhig Handy und Geld herausgeben"
+                        width={480}
+                        height={480}
+                        loading="lazy"
+                        quality={50}
+                        sizes="(min-width: 640px) 240px, 100vw"
+                        className="w-full sm:w-[240px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                      />
+                      <p className="min-w-0">
+                        Sollte das absolut Unwahrscheinliche eintreten und man zwingt dich zur Herausgabe deiner Wertsachen: Ruhig bleiben. Keine schnellen Handbewegungen. Augen nach unten. Keine Diskussion, kein Heldentum. Gebe alles sofort und widerstandslos heraus. Das Leben und die körperliche Unversehrtheit sind endlos viel mehr wert als jedes verdammte Smartphone.
+                      </p>
                   </div>
                 </li>
-                <li className="flex gap-4 items-start">
-                  <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
-                  <div className="leading-[1.8]">
-                    <strong className="text-lg text-[#0d1f15] block mb-1.5 leading-snug">Situational Awareness (Situationsbewusstsein)</strong>
-                    Habe die gleiche Aufmerksamkeit wie an einem Freitagabend um 2 Uhr nachts am Bahnhof von Frankfurt oder am Kölner Hauptbahnhof. Nicht mehr (wer paranoid ist, hat keinen Spaß), aber definitiv auch nicht weniger. Sei stets bewusst, wer und was sich um dich herum befindet.
+                <li>
+                  <div className="flex gap-4 items-start mb-3">
+                    <div className="bg-[#0d1f15] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 pb-[1px]">✓</div>
+                    <strong className="text-lg text-[#0d1f15] leading-snug">Situational Awareness (Situationsbewusstsein)</strong>
+                  </div>
+                  {/* pl-0 no mobile: imagem e texto vão até a margem, alinhados com o ✓,
+                      igual aos 7 erros. A partir do sm recuam para debaixo do título. */}
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 sm:items-start leading-[1.8] pl-0 sm:pl-10">
+                      <Image
+                        src="/images/sicherheit/regel-5-aufmerksamkeit.webp"
+                        alt="Person von oben mit Aufmerksamkeitsradius um sich herum"
+                        width={480}
+                        height={480}
+                        loading="lazy"
+                        quality={50}
+                        sizes="(min-width: 640px) 240px, 100vw"
+                        className="w-full sm:w-[240px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
+                      />
+                      <p className="min-w-0">
+                        Habe die gleiche Aufmerksamkeit wie an einem Freitagabend um 2 Uhr nachts am Bahnhof von Frankfurt oder am Kölner Hauptbahnhof. Nicht mehr (wer paranoid ist, hat keinen Spaß), aber definitiv auch nicht weniger. Sei stets bewusst, wer und was sich um dich herum befindet.
+                      </p>
                   </div>
                 </li>
               </ul>
 
               <div className="mt-8 p-6 bg-white border border-gray-100 rounded-2xl shadow-sm italic text-gray-700">
-                Die anderen 10 essenziellen Regeln, sowie detaillierte Erklärungen, Beispiele auf der Straße, Maps mit Safe Zones und exklusive Geheimtipps, findest du im vollständigen und absolut kostenlosen Guide.
+                Diese fünf Regeln tragen dich durch die meisten Situationen. Die restlichen zehn wachsen aus der Erfahrung vor Ort, nicht aus einer Liste.
               </div>
             </section>
 
-            {/* 8. FORM CARD #2 */}
-            <div className="my-16">
-              <MagicLinkForm variant="inline2" />
-            </div>
+            {/* 8. CTA TOUR (era o form do lead magnet, trocado porque o guia
+                gratuito prometido ali ainda nao existe) */}
+            <section className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6 sm:p-8 md:p-10 my-16">
+              <h2 className="text-[22px] sm:text-2xl md:text-3xl font-bold text-[#0d1f15] leading-snug text-balance mb-3">
+                Jede Straße hat ihre Nuancen
+              </h2>
+              <p className="text-lg text-gray-700 leading-[1.8] mb-8">
+                Welches Viertel für dich passt, hängt von deiner Reise ab. Als Carioca kenne ich die Unterschiede, die keine Karte zeigt.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/touren"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-green text-white rounded-full font-semibold text-lg hover:bg-rio-green/90 hover:scale-[1.02] transition-all shadow-xl shadow-rio-green/20"
+                >
+                  Touren ansehen
+                </Link>
+                <Link
+                  href="/anfrage?von=site"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-[#0d1f15]/20 text-[#0d1f15] rounded-full font-medium text-lg hover:bg-[#0d1f15]/5 transition-all"
+                >
+                  Direkt anfragen
+                </Link>
+              </div>
+            </section>
 
             {/* 9. FAQ SEO */}
             <section className="mb-16">
@@ -491,7 +770,7 @@ export default function IstRioGefaehrlich() {
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Wie gefährlich ist Lapa in Rio?</h3>
                   <p className="text-gray-700 leading-[1.8]">
-                    Lapa, nahe am Zentrum, ist das Herzstück des Nachtlebens in Rio (Ausgehviertel). Freitagabends und am Wochenende platzt das Viertel aus allen Nähten, was dich vor der Leere der Nacht schützt. Dennoch rate ich: Fahre direkt mit einem Uber von A nach B ins Viertel hinein und direkt wieder hinaus. Mach dort nachts keine Spaziergänge in dunkle Nebenstraßen. Gruppen sind besser.
+                    Lapa, nahe am Zentrum, ist das Herzstück des <Link href="/touren/by-night" className="text-rio-green underline hover:text-[#0d1f15]">Nachtlebens in Rio</Link> (Ausgehviertel). Freitagabends und am Wochenende platzt das Viertel aus allen Nähten, was dich vor der Leere der Nacht schützt. Dennoch rate ich: Fahre direkt mit einem Uber von A nach B ins Viertel hinein und direkt wieder hinaus. Mach dort nachts keine Spaziergänge in dunkle Nebenstraßen. Gruppen sind besser.
                   </p>
                 </div>
 
@@ -537,11 +816,6 @@ export default function IstRioGefaehrlich() {
                 </div>
               </div>
             </section>
-
-            {/* 11. FORM CARD FINAL */}
-            <div className="my-16">
-              <MagicLinkForm variant="final" />
-            </div>
 
             {/* 12. CTA TOURS */}
             <section className="bg-[#0d1f15] text-white p-6 sm:p-8 md:p-12 rounded-3xl shadow-xl mb-16">

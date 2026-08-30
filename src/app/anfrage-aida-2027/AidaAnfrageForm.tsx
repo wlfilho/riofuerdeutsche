@@ -193,7 +193,7 @@ export default function AidaAnfrageForm({
           )}
 
           <LinkRow
-            href="/ist-rio-gefaehrlich"
+            href="/rio-guide/sicherheit/ist-rio-gefaehrlich"
             icon={<ShieldCheck className={`${SHIELD_ICON_CLS} text-emerald-600`} />}
           >
             {t('successLinkSafety')}

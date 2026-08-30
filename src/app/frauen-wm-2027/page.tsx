@@ -504,7 +504,7 @@ export default function Page() {
                                         icon: ShieldCheck,
                                         title: "Sicherheit in Rio",
                                         desc: "Was du als deutscher Tourist wissen musst, bevor du anreist.",
-                                        link: "/ist-rio-gefaehrlich",
+                                        link: "/rio-guide/sicherheit/ist-rio-gefaehrlich",
                                     },
                                 ].map((card) => {
                                     const Icon = card.icon;
@@ -633,7 +633,7 @@ export default function Page() {
 
                         <FadeIn direction="up" className="mt-8 flex flex-col sm:flex-row gap-4">
                             <Link
-                                href="/ist-rio-gefaehrlich"
+                                href="/rio-guide/sicherheit/ist-rio-gefaehrlich"
                                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-900 rounded-full font-semibold hover:border-rio-green hover:text-rio-green transition-all"
                             >
                                 <ShieldCheck className="w-5 h-5 text-rio-green" />

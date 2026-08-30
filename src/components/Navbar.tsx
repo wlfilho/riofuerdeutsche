@@ -79,7 +79,7 @@ function buildNavLinks(t: (key: string) => string): NavLink[] {
             },
         ],
         directLinks: [
-            { href: "/ist-rio-gefaehrlich", label: t("sicherheit") },
+            { href: "/rio-guide/sicherheit/ist-rio-gefaehrlich", label: t("sicherheit") },
         ],
     },
     { href: "/ueber-will", label: t("ueberUns") },

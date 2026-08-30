@@ -428,7 +428,7 @@ export default function AnfrageForm({
               já tomou. Ficam o conteúdo de leitura e o Instagram, que são
               espera e prova social, não uma segunda escolha. */}
           <LinkRow
-            href="/ist-rio-gefaehrlich"
+            href="/rio-guide/sicherheit/ist-rio-gefaehrlich"
             icon={<ShieldCheck className={`${SHIELD_ICON_CLS} text-emerald-600`} />}
           >
             {t('successLinkSafety')}

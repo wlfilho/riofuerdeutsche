@@ -6,19 +6,44 @@ import { ChevronRight, MapPin, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+    // Sem o sufixo da marca: com ele o title ia a 83 caracteres e o Google
+    // cortava o final. 52 cabe inteiro no resultado de busca.
     title: {
-        absolute: "Sehenswürdigkeiten Rio de Janeiro, Tipps vom Carioca auf Deutsch | Rio für Deutsche",
+        absolute: "Sehenswürdigkeiten Rio de Janeiro: Tipps vom Carioca",
     },
     description:
-        "Die besten Sehenswürdigkeiten in Rio de Janeiro: Christus Erlöser, Zuckerhut, Maracanã, Escadaria Selarón und mehr. Insider-Tipps vom lokalen Guide, auf Deutsch.",
+        "Die besten Sehenswürdigkeiten in Rio de Janeiro, von Christus Erlöser bis Escadaria Selarón: Insider-Tipps von einem Carioca, auf Deutsch erklärt.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten",
     },
     openGraph: {
+        // Declarar `openGraph` aqui substitui o objeto inteiro do layout raiz: o
+        // Next não faz merge campo a campo. Sem repetir type, locale, siteName e
+        // images, a página saía só com og:title, og:description e og:url, e o
+        // link compartilhado não gerava imagem nenhuma.
+        type: "website",
+        locale: "de_DE",
+        siteName: "Rio für Deutsche",
         title: "Sehenswürdigkeiten Rio de Janeiro: Tipps vom Carioca",
         description:
             "Christus Erlöser, Zuckerhut, Maracanã, Escadaria Selarón und mehr: alle Infos auf Deutsch, von einem Carioca.",
         url: "https://riofuerdeutsche.de/rio-guide/sehenswuerdigkeiten",
+        images: [
+            {
+                // JPEG, não WebP: o WhatsApp não renderiza WebP no preview do link.
+                url: "/images/og-rio-guide.jpg",
+                width: 1200,
+                height: 630,
+                alt: "Christus Erlöser über Rio de Janeiro, Rio für Deutsche",
+            },
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Sehenswürdigkeiten Rio de Janeiro: Tipps vom Carioca",
+        description:
+            "Christus Erlöser, Zuckerhut, Maracanã, Escadaria Selarón und mehr: alle Infos auf Deutsch, von einem Carioca.",
+        images: ["/images/og-rio-guide.jpg"],
     },
 };
 
@@ -100,10 +125,9 @@ export default function SehenswuerdigkeitenPage() {
                                     Startseite
                                 </Link>
                                 <ChevronRight className="w-4 h-4 mx-2 text-white/25 shrink-0" />
-                                {/* Texto, não link: esta É a página do Rio-Guide, e um
-                                    breadcrumb que aponta pra si mesmo confunde leitor e
-                                    rastreador. */}
-                                <span className="text-white/60">Rio-Guide</span>
+                                <Link href="/rio-guide" className="hover:text-white transition-colors">
+                                    Rio-Guide
+                                </Link>
                                 <ChevronRight className="w-4 h-4 mx-2 text-white/25 shrink-0" />
                                 <span className="text-[#22a262] font-semibold">Sehenswürdigkeiten</span>
                             </nav>

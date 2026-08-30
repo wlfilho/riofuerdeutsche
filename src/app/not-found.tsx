@@ -85,7 +85,7 @@ export default function NotFound() {
             </Link>
 
             <Link
-              href="/ist-rio-gefaehrlich"
+              href="/rio-guide/sicherheit/ist-rio-gefaehrlich"
               className="flex items-center gap-3 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-green-600 hover:shadow-md transition group"
             >
               <ShieldCheck className="w-5 h-5 text-green-700 shrink-0" />

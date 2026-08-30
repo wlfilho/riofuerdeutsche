@@ -45,7 +45,7 @@ const faqJsonLd = {
       name: "Ist Rio de Janeiro wirklich so gefährlich?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Rio hat Risiken, aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben. Mehr dazu: riofuerdeutsche.de/ist-rio-gefaehrlich",
+        text: "Rio hat Risiken, aber die meisten Probleme passieren, weil Touristen einfache Fehler machen. Mit der richtigen Vorbereitung wirst du eine fantastische Zeit haben. Mehr dazu: riofuerdeutsche.de/rio-guide/sicherheit/ist-rio-gefaehrlich",
       },
     },
     {
@@ -295,7 +295,7 @@ export default async function Home() {
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
                     {/* Primário do hero, em amarelo como o CTA do fim da página. O
                         tráfego real desta home é fundo de funil: gente que já quer um
-                        tour. O guia grátis (/ist-rio-gefaehrlich) saiu daqui para não
+                        tour. O guia grátis (/rio-guide/sicherheit/ist-rio-gefaehrlich) saiu daqui para não
                         competir com o pedido; continua linkado no corpo da página. */}
                     <Link
                       href="/anfrage?von=site"
@@ -336,7 +336,7 @@ export default async function Home() {
                     { emoji: "🎯", content: <>100 % auf Rio de Janeiro spezialisiert</> },
                     { emoji: "🇩🇪", content: <>Deutschsprachige Begleitung durch einen <Link href="/ueber-will" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">echten Carioca</Link></> },
                     { emoji: "🚗", content: <>Eigene Fahrzeuge mit Fahrer für maximalen Komfort</> },
-                    { emoji: "🛡️", content: <><Link href="/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Sicherheit</Link> an erster Stelle: sichere Routen und beste Zeiten</> },
+                    { emoji: "🛡️", content: <><Link href="/rio-guide/sicherheit/ist-rio-gefaehrlich" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Sicherheit</Link> an erster Stelle: sichere Routen und beste Zeiten</> },
                     { emoji: "✨", content: <><Link href="/touren/individuell" className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors">Individueller Service</Link>, von der Beratung bis zur Tour</> },
                     { emoji: "💬", content: <>Schnelle Erreichbarkeit per WhatsApp und E-Mail</> },
                   ].map((item, i) => (
