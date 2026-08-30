@@ -298,7 +298,10 @@ export default function IstRioGefaehrlich() {
                 Rund 2,1 Millionen ausländische Touristen besuchen Rio de Janeiro jedes Jahr. Die überwiegende Mehrheit dieser Besucher erlebt eine traumhafte, problemlose Reise ohne jegliche Sicherheitsprobleme.
               </p>
               <p>
-                Natürlich solltest du die Warnungen des Auswärtigen Amtes ernst nehmen, aber lass dich nicht durch sensationslüsterne TV-Berichte abschrecken. Rio ist kein Kriegsgebiet. Es ist eine riesige, pulsierende Metropole. Genau wie in europäischen Großstädten, in Paris, Rom oder Berlin, gibt es Zonen, in denen Touristendiebstahl vorkommt. Der wesentliche Unterschied ist die ausgeprägte soziale Ungleichheit, die sich oft sehr stark zeigt.
+                Natürlich solltest du die Warnungen des Auswärtigen Amtes ernst nehmen, aber lass dich nicht durch sensationslüsterne TV-Berichte abschrecken. Rio ist kein Kriegsgebiet. Es ist eine riesige, pulsierende Metropole.
+              </p>
+              <p className="mt-4">
+                Genau wie in europäischen Großstädten, in Paris, Rom oder Berlin, gibt es Zonen, in denen Touristendiebstahl vorkommt. Der wesentliche Unterschied ist die ausgeprägte soziale Ungleichheit, die sich oft sehr stark zeigt.
               </p>
               <p>
                 Sicherheit in Rio bedeutet nicht, dass du dich einschließen musst. Die touristischen Zonen der Stadt werden stark überwacht und sind hervorragend auf Besucher eingestellt. Es geht vielmehr um das Bewusstsein für die eigene Umgebung und die Vermeidung klassischer Touristenfehler.
@@ -416,7 +419,10 @@ export default function IstRioGefaehrlich() {
                       className="w-full sm:w-[260px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
                     />
                     <p className="text-gray-700 leading-[1.8] min-w-0">
-                    Rios Strände sind wunderschön und in den Touristenvierteln meistens sicher polizeilich überwacht. Aber der Sand ist riesig, es gibt viele Menschen, und kurz ins Wasser gehen mit dem Rucksack unbeaufsichtigt am Handtuch? Das ist fahrlässig. Was du an den Strand mitnimmst, bestimmt, ob du einen schönen oder sehr schlechten Tag hast.
+                    Rios Strände sind wunderschön und in den Touristenvierteln meistens sicher polizeilich überwacht. Aber der Sand ist riesig, es gibt viele Menschen, und kurz ins Wasser gehen mit dem Rucksack unbeaufsichtigt am Handtuch?
+                    </p>
+                    <p className="text-gray-700 leading-[1.8] min-w-0 mt-4">
+                      Das ist fahrlässig. Was du an den Strand mitnimmst, bestimmt, ob du einen schönen oder sehr schlechten Tag hast.
                     </p>
                   </div>
                 </div>
@@ -438,7 +444,10 @@ export default function IstRioGefaehrlich() {
                       className="w-full sm:w-[260px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
                     />
                     <p className="text-gray-700 leading-[1.8] min-w-0">
-                    Die dicke Spiegelreflexkamera um den Hals, eine teure Uhr, sichtbarer Schmuck: das sind klare Signale in einer Stadt, in der ein Großteil der Bevölkerung mit dem Mindestlohn kämpft. Rio hat leider eine extrem ausgeprägte soziale Ungleichheit, und Touristen, die Reichtum signalisieren, fallen sofort in das Raster aufmerksamer Augen.
+                    Die dicke Spiegelreflexkamera um den Hals, eine teure Uhr, sichtbarer Schmuck: das sind klare Signale in einer Stadt, in der ein Großteil der Bevölkerung mit dem Mindestlohn kämpft.
+                    </p>
+                    <p className="text-gray-700 leading-[1.8] min-w-0 mt-4">
+                      Rio hat leider eine extrem ausgeprägte soziale Ungleichheit, und Touristen, die Reichtum signalisieren, fallen sofort in das Raster aufmerksamer Augen.
                     </p>
                   </div>
                 </div>
@@ -460,7 +469,10 @@ export default function IstRioGefaehrlich() {
                       className="w-full sm:w-[260px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
                     />
                     <p className="text-gray-700 leading-[1.8] min-w-0">
-                    Die meisten Reisenden kommen ohne vorbereitete Apps (Wie bestelle ich mir ein alternatives Taxi?), ohne gespeicherte lokale Notfallnummern, ohne gesicherte Dokumentenkopien und ohne einen Backup-Plan für ihre Kreditkarten. Wenn wirklich etwas passiert, kostet Vorbereitung keine einzige Sekunde, absolute Unvorbereitung kostet dich den Urlaub.
+                    Die meisten Reisenden kommen ohne vorbereitete Apps (Wie bestelle ich mir ein alternatives Taxi?), ohne gespeicherte lokale Notfallnummern, ohne gesicherte Dokumentenkopien und ohne einen Backup-Plan für ihre Kreditkarten.
+                    </p>
+                    <p className="text-gray-700 leading-[1.8] min-w-0 mt-4">
+                      Wenn wirklich etwas passiert, kostet Vorbereitung keine einzige Sekunde, absolute Unvorbereitung kostet dich den Urlaub.
                     </p>
                   </div>
                 </div>
@@ -682,7 +694,13 @@ export default function IstRioGefaehrlich() {
                         className="w-full sm:w-[240px] sm:shrink-0 h-auto rounded-2xl border border-gray-100 bg-white"
                       />
                       <p className="min-w-0">
-                        Sollte das absolut Unwahrscheinliche eintreten und man zwingt dich zur Herausgabe deiner Wertsachen: Ruhig bleiben. Keine schnellen Handbewegungen. Augen nach unten. Keine Diskussion, kein Heldentum. Gebe alles sofort und widerstandslos heraus. Das Leben und die körperliche Unversehrtheit sind endlos viel mehr wert als jedes verdammte Smartphone.
+                        Sollte das absolut Unwahrscheinliche eintreten und man zwingt dich zur Herausgabe deiner Wertsachen: Ruhig bleiben.
+                      </p>
+                      <p className="min-w-0 mt-4">
+                        Keine schnellen Handbewegungen. Augen nach unten. Keine Diskussion, kein Heldentum. Gebe alles sofort und widerstandslos heraus.
+                      </p>
+                      <p className="min-w-0 mt-4 mt-4">
+                        Das Leben und die körperliche Unversehrtheit sind endlos viel mehr wert als jedes verdammte Smartphone.
                       </p>
                   </div>
                 </li>
@@ -751,49 +769,70 @@ export default function IstRioGefaehrlich() {
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Ist Rio de Janeiro gefährlicher als São Paulo?</h3>
                   <p className="text-gray-700 leading-[1.8]">
-                    Rio hat spezifische Herausforderungen, oft im Zusammenhang mit <Link href="/touren/favela-tour" className="text-rio-green underline hover:text-[#0d1f15]">Favelas</Link> auf Hügeln neben wohlhabenden Zonen, was Kriminalität sichtbarer machen kann. Die Kriminalitätsraten und die reale Gefahr für dich variieren jedoch stark je nach Stadtteil. Mit gesundem Menschenverstand ist das tägliche Risiko für informierte Touristen in beiden Mega-Städten absolut vergleichbar und handhabbar.
+                    Rio hat spezifische Herausforderungen, oft im Zusammenhang mit <Link href="/touren/favela-tour" className="text-rio-green underline hover:text-[#0d1f15]">Favelas</Link> auf Hügeln neben wohlhabenden Zonen, was Kriminalität sichtbarer machen kann.
+                  </p>
+                  <p className="text-gray-700 leading-[1.8] mt-4">
+                    Die Kriminalitätsraten und die reale Gefahr für dich variieren jedoch stark je nach Stadtteil. Mit gesundem Menschenverstand ist das tägliche Risiko für informierte Touristen in beiden Mega-Städten absolut vergleichbar und handhabbar.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Welche Viertel in Rio sind am sichersten für Touristen?</h3>
                   <p className="text-gray-700 leading-[1.8]">
-                    Die Südzone (<span className="italic">Zona Sul</span>) gilt als der am stärksten gesicherte und sicherste Bereich für Urlauber und Expats. Dazu gehören neben Ipanema und Leblon auch Botafogo, Humaitá und Urca (die oft als die sicherste Nachbarschaft Rios gilt). Copacabana ist sehr beliebt, bedarf aber wegen der schieren Masse an Touristen in bestimmten Ecken nachts mehr Aufmerksamkeit für Taschendiebe.
+                    Die Südzone (<span className="italic">Zona Sul</span>) gilt als der am stärksten gesicherte und sicherste Bereich für Urlauber und Expats. Dazu gehören neben Ipanema und Leblon auch Botafogo, Humaitá und Urca (die oft als die sicherste Nachbarschaft Rios gilt).
+                  </p>
+                  <p className="text-gray-700 leading-[1.8] mt-4">
+                    Copacabana ist sehr beliebt, bedarf aber wegen der schieren Masse an Touristen in bestimmten Ecken nachts mehr Aufmerksamkeit für Taschendiebe.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Kann man in Rio alleine reisen?</h3>
                   <p className="text-gray-700 leading-[1.8]">
-                    Ja, absolut. Wer sich selbstbewusst bewegt, grundlegende Sicherheitsregeln verinnerlicht, abends nicht alleine durch schwach beleuchtete Gassen spaziert und sichere Fahr-Apps konsequent einsetzt, kann die Stadt alleine hervorragend und gefahrlos entdecken. Tausende Backpacker und Alleinreisende tun dies reibungslos jedes Jahr.
+                    Ja, absolut. Wer sich selbstbewusst bewegt, grundlegende Sicherheitsregeln verinnerlicht, abends nicht alleine durch schwach beleuchtete Gassen spaziert und sichere Fahr-Apps konsequent einsetzt, kann die Stadt alleine hervorragend und gefahrlos entdecken.
+                  </p>
+                  <p className="text-gray-700 leading-[1.8] mt-4">
+                    Tausende Backpacker und Alleinreisende tun dies reibungslos jedes Jahr.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Ist Copacabana sicher?</h3>
                   <p className="text-gray-700 leading-[1.8]">
-                    Tagsüber ist der Strand oft voll, stark frequentiert, gut polizeilich überwacht und absolut sicher (dennoch: Sachen auf dem Sand nicht unbewacht lassen). Sobald es Nacht wird, solltest du dich auf den stark beleuchteten Hautpstraßen halten, das ruhige Sandareal direkt am Wasser meiden und dunklen Straßenecken aus dem Weg gehen.
+                    Tagsüber ist der Strand oft voll, stark frequentiert, gut polizeilich überwacht und absolut sicher (dennoch: Sachen auf dem Sand nicht unbewacht lassen).
+                  </p>
+                  <p className="text-gray-700 leading-[1.8] mt-4">
+                    Sobald es Nacht wird, solltest du dich auf den stark beleuchteten Hautpstraßen halten, das ruhige Sandareal direkt am Wasser meiden und dunklen Straßenecken aus dem Weg gehen.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Wie gefährlich ist Lapa in Rio?</h3>
                   <p className="text-gray-700 leading-[1.8]">
-                    Lapa, nahe am Zentrum, ist das Herzstück des <Link href="/touren/by-night" className="text-rio-green underline hover:text-[#0d1f15]">Nachtlebens in Rio</Link> (Ausgehviertel). Freitagabends und am Wochenende platzt das Viertel aus allen Nähten, was dich vor der Leere der Nacht schützt. Dennoch rate ich: Fahre direkt mit einem Uber von A nach B ins Viertel hinein und direkt wieder hinaus. Mach dort nachts keine Spaziergänge in dunkle Nebenstraßen. Gruppen sind besser.
+                    Lapa, nahe am Zentrum, ist das Herzstück des <Link href="/touren/by-night" className="text-rio-green underline hover:text-[#0d1f15]">Nachtlebens in Rio</Link> (Ausgehviertel). Freitagabends und am Wochenende platzt das Viertel aus allen Nähten, was dich vor der Leere der Nacht schützt.
+                  </p>
+                  <p className="text-gray-700 leading-[1.8] mt-4">
+                    Dennoch rate ich: Fahre direkt mit einem Uber von A nach B ins Viertel hinein und direkt wieder hinaus. Mach dort nachts keine Spaziergänge in dunkle Nebenstraßen. Gruppen sind besser.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Ist Rio sicher für Frauen allein?</h3>
                   <p className="text-gray-700 leading-[1.8]">
-                    Frauen können sicher und problemlos alleine nach Rio reisen. Vorsicht ist jedoch geboten: Wie in fast jeder Metrople verlässt man sich besser auf geprüfte Uber anstatt Taxis zu winken, meidet unbelebte oder unbeleuchtete Strecken und schützt sein Getränk beim Feiern. Nutze primär sichere Viertel der <em>Zona Sul</em> als feste Basis. Brasilianische Frauen verhalten sich übrigens ähnlich achtsam in den Straßen. Vertraue deinem Bauchgefühl.
+                    Frauen können sicher und problemlos alleine nach Rio reisen. Vorsicht ist jedoch geboten: Wie in fast jeder Metrople verlässt man sich besser auf geprüfte Uber anstatt Taxis zu winken, meidet unbelebte oder unbeleuchtete Strecken und schützt sein Getränk beim Feiern.
+                  </p>
+                  <p className="text-gray-700 leading-[1.8] mt-4">
+                    Nutze primär sichere Viertel der <em>Zona Sul</em> als feste Basis. Brasilianische Frauen verhalten sich übrigens ähnlich achtsam in den Straßen. Vertraue deinem Bauchgefühl.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2.5 leading-snug">Wie sicher ist Rio im Vergleich zu anderen Städten Südamerikas?</h3>
                   <p className="text-gray-700 leading-[1.8]">
-                    Rio tendiert im Rahmen der großen südamerikanischen Metropolen ins Mittelfeld. Städte wie Buenos Aires (Argentinien) oder Santiago (Chile) gelten statistisch als etwas sicherer. Andere Metropolen im nördlichen Südamerika können deutlich heikler sein. In den touristenstarken und wirtschaftlichen Epizentren von Rio ist die Straßenpräsenz der Polizei enorm und bietet meist eine stabile Barriere gegen offene Bandenkriminalität für dich als Gast.
+                    Rio tendiert im Rahmen der großen südamerikanischen Metropolen ins Mittelfeld. Städte wie Buenos Aires (Argentinien) oder Santiago (Chile) gelten statistisch als etwas sicherer. Andere Metropolen im nördlichen Südamerika können deutlich heikler sein.
+                  </p>
+                  <p className="text-gray-700 leading-[1.8] mt-4">
+                    In den touristenstarken und wirtschaftlichen Epizentren von Rio ist die Straßenpräsenz der Polizei enorm und bietet meist eine stabile Barriere gegen offene Bandenkriminalität für dich als Gast.
                   </p>
                 </div>
               </div>
@@ -816,7 +855,10 @@ export default function IstRioGefaehrlich() {
                   Ich bin kein anonymer Redakteur hinter einem Schreibtisch. Ich bin ein Carioca. Ich besuche nicht bloß diese magische Stadt für Urlaube, sondern ich habe mein Leben hier gelernt, gelacht, und bin auch achtsam durch die schwierigen Ecken navigiert.
                 </p>
                 <p className="text-gray-700 leading-[1.8] font-medium">
-                  Deutsche Schule im Rio, 4 Jahre Student in Köln, und nun hier als mehrsprachiger Guide: Ich kenne beide Welten. Ich kenne die deutsche Rationalität und das improvisierte Talent Brasiliens. Ich garantiere dir: Mit guter Vorbereitung fühlst du dich bei deiner <Link href="/touren" className="text-rio-green underline hover:text-[#0d1f15]">Tour durch Rio</Link> sicherer, als du dir gerade vorstellen kannst. Viel Spaß am Zuckerhut!
+                  Deutsche Schule im Rio, 4 Jahre Student in Köln, und nun hier als mehrsprachiger Guide: Ich kenne beide Welten. Ich kenne die deutsche Rationalität und das improvisierte Talent Brasiliens.
+                </p>
+                <p className="text-gray-700 leading-[1.8] font-medium mt-4">
+                  Ich garantiere dir: Mit guter Vorbereitung fühlst du dich bei deiner <Link href="/touren" className="text-rio-green underline hover:text-[#0d1f15]">Tour durch Rio</Link> sicherer, als du dir gerade vorstellen kannst. Viel Spaß am Zuckerhut!
                 </p>
                 <div className="mt-4">
                   <Link href="/ueber-will" className="text-rio-blue font-bold hover:underline inline-flex items-center gap-1 group">
