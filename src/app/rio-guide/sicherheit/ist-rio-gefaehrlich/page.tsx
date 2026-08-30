@@ -142,6 +142,8 @@ const jsonLd = [
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "Ist Rio de Janeiro gefährlich? Ehrliche Antwort vom Carioca",
+    "datePublished": "2026-03-24",
+    "dateModified": "2026-08-30",
     "description": "Ein Carioca, der in Köln gelebt hat, erklärt ehrlich, wie sicher Rio wirklich ist: welche Viertel, welche typischen Fehler und welche Regeln zählen.",
     "author": {
       "@type": "Person",
@@ -221,7 +223,7 @@ export default function IstRioGefaehrlich() {
                 {/* Post Date */}
                 <div className="flex flex-col items-center justify-center h-10 sm:h-14">
                   <span className="font-semibold text-white/60 text-[10px] sm:text-sm mb-0.5 leading-tight whitespace-nowrap">Veröffentlicht</span>
-                  <span className="text-white font-medium text-[11px] sm:text-sm leading-tight whitespace-nowrap">03/2026</span>
+                  <time dateTime="2026-03-24" className="text-white font-medium text-[11px] sm:text-sm leading-tight whitespace-nowrap">24.03.2026</time>
                 </div>
 
                 <div className="w-px h-10 sm:h-14 bg-white/10 sm:mx-2 shrink-0"></div>
@@ -234,7 +236,7 @@ export default function IstRioGefaehrlich() {
                     <span className="sm:hidden">Aktualisiert</span>
                     <span className="hidden sm:inline">Zuletzt aktualisiert</span>
                   </span>
-                  <span className="text-white font-medium text-[11px] sm:text-sm leading-tight whitespace-nowrap">03/2026</span>
+                  <time dateTime="2026-08-30" className="text-white font-medium text-[11px] sm:text-sm leading-tight whitespace-nowrap">30.08.2026</time>
                 </div>
                 {/* Só no desktop: ocupa o vazio à direita da barra. No mobile a
                     linha já está no limite da largura, então lá os ícones ficam
