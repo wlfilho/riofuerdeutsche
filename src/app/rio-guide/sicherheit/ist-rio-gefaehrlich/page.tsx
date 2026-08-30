@@ -267,14 +267,17 @@ export default function IstRioGefaehrlich() {
           </section>
 
           <article className="max-w-3xl mx-auto px-5 lg:px-8 mt-12 md:mt-16 mb-16 text-[17px] md:text-lg leading-[1.75] text-gray-800 [&_p]:hyphens-auto [&_p]:break-words">
-            <div className="text-lg md:text-xl text-gray-800 leading-[1.7] font-medium mb-12 md:mb-14 [&>p+p]:mt-5">
+            {/* Margem direto no <p> em vez de um variant arbitrário no
+                container: é o que dá para verificar sem depender de quando o
+                dev regenerou o CSS. */}
+            <div className="text-lg md:text-xl text-gray-800 leading-[1.7] font-medium mb-12 md:mb-14">
               <p>
                 Hallo! Ich bin Will, geboren und aufgewachsen in Rio de Janeiro. Ich habe einige Jahre im Rheinland, genauer gesagt in Köln, gelebt und studiert.
               </p>
-              <p>
+              <p className="mt-5">
                 Ich kenne die deutsche Sicherheitsliebe und ich verstehe genau, warum die Frage nach der Sicherheit in Rio so oft gestellt wird.
               </p>
-              <p>
+              <p className="mt-5">
                 Hier bekommst du eine ehrliche Antwort, ganz ohne Panikmache, aber auch ohne Filter.
               </p>
             </div>
