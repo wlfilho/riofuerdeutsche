@@ -701,6 +701,10 @@ export default function IstRioGefaehrlich() {
                   </div>
                 </li>
               </ul>
+
+              <div className="mt-8 p-6 bg-white border border-gray-100 rounded-2xl shadow-sm italic text-gray-700">
+                Diese fünf tragen dich durch die allermeisten Situationen in Rio. Der Rest ist der gesunde Menschenverstand, den du zu Hause auch benutzt.
+              </div>
             </section>
 
             {/* 8. CTA TOUR (era o form do lead magnet, trocado porque o guia
