@@ -54,11 +54,14 @@ export async function GET(
 
   const leadIds = (leads ?? []).map(l => l.id);
   const clientIds = (tourClients ?? []).map(c => c.id);
+  const proposalIdsFromLeads = (leads ?? []).map(l => l.proposal_id).filter((pid): pid is string => !!pid);
 
   const [
     { count: pagesRead },
     { data: leadContacts },
     { data: emailLogs },
+    { data: proposalsFromLeads },
+    { data: proposalsByEmail },
   ] = await Promise.all([
     profile
       ? supabase
@@ -80,7 +83,17 @@ export async function GET(
           .in('client_id', clientIds)
           .order('scheduled_date', { ascending: true })
       : Promise.resolve({ data: [] }),
+    proposalIdsFromLeads.length > 0
+      ? supabase.from('proposals').select('*').in('id', proposalIdsFromLeads)
+      : Promise.resolve({ data: [] }),
+    // Pega também propostas "órfãs" (ex.: plano B duplicado) que não ficaram
+    // linkadas a nenhum lead mas foram feitas pro mesmo e-mail do contato.
+    supabase.from('proposals').select('*').eq('client_email', contact.email),
   ]);
+
+  const proposalsMap = new Map(
+    [...(proposalsFromLeads ?? []), ...(proposalsByEmail ?? [])].map(p => [p.id, p])
+  );
 
   return NextResponse.json({
     contact,
@@ -90,6 +103,7 @@ export async function GET(
     lead_contacts: leadContacts ?? [],
     tour_clients: tourClients ?? [],
     email_logs: emailLogs ?? [],
+    proposals: [...proposalsMap.values()].sort((a, b) => b.created_at.localeCompare(a.created_at)),
   });
 }
 
