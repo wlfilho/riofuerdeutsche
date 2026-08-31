@@ -30,15 +30,27 @@ export default function CookieBanner() {
     }
   }, [])
 
+  // O GA4 só existe depois do aceite, então quem recusa nunca aparece lá.
+  // Coleta paralela, fire-and-forget: o banner fecha mesmo se a rota falhar.
+  function registrarEscolha(choice: 'accepted' | 'rejected') {
+    fetch('/api/consent-events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ choice }),
+    }).catch(() => {})
+  }
+
   function handleAccept() {
     localStorage.setItem('cookie_consent', 'accepted')
     setVisible(false)
     window.dispatchEvent(new Event('cookie_consent_updated'))
+    registrarEscolha('accepted')
   }
 
   function handleReject() {
     localStorage.setItem('cookie_consent', 'rejected')
     setVisible(false)
+    registrarEscolha('rejected')
   }
 
   return (
