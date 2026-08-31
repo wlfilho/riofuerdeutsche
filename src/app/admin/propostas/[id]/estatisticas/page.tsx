@@ -5,11 +5,10 @@ import { getProposalById } from '@/lib/proposals';
 import {
   describeDevice,
   describeOrigin,
-  fmtDuration,
   getProposalSessionStats,
   type ProposalSessionStat,
 } from '@/lib/proposalAnalytics';
-import { fmtDateTime } from '@/lib/adminFormat';
+import { fmtDateTime, fmtDuration } from '@/lib/adminFormat';
 
 /**
  * Estatísticas de leitura da proposta pelo cliente: cada sessão do link

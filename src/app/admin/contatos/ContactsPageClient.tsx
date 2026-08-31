@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import ContactProfile from '@/components/admin/ContactProfile';
 import ContactForm from '@/components/admin/ContactForm';
@@ -15,22 +15,24 @@ export type ContactListItem = {
   created_at: string;
   guide_role?: 'user' | 'premium' | 'admin';
   lead_status?: 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'lost';
-  client_status?: 'active' | 'completed' | 'cancelled' | 'pending';
+  /**
+   * Fechou: lead `closed`, proposta `accepted` ou data `fechado` no calendário.
+   * Vem da view `clients_v` — definição única de cliente, ver contatos/page.tsx.
+   */
+  is_client?: boolean;
 };
 
-type Filter = 'all' | 'leads' | 'clients' | 'guide';
+type Stage = 'all' | 'leads' | 'clients' | 'lost';
 type PanelState = 'empty' | 'view' | 'edit' | 'new' | 'delete';
 
 type Translate = (key: string) => string;
 
 function getStatusDot(
   contact: ContactListItem,
-  tClient: Translate,
   tLead: Translate,
   tContatos: Translate,
 ): { color: string; title: string } {
-  if (contact.client_status === 'active') return { color: 'bg-green-500', title: tClient('active') };
-  if (contact.client_status === 'completed') return { color: 'bg-blue-500', title: tClient('completed') };
+  if (contact.is_client) return { color: 'bg-green-500', title: tContatos('clienteFechado') };
   if (contact.lead_status === 'proposal_sent') return { color: 'bg-amber-400', title: tLead('proposal_sent') };
   if (contact.lead_status === 'contacted') return { color: 'bg-amber-400', title: tLead('contacted') };
   if (contact.lead_status === 'closed') return { color: 'bg-green-500', title: tLead('closed') };
@@ -47,12 +49,37 @@ function getInitials(name: string | null, email: string): string {
   return email.slice(0, 2).toUpperCase();
 }
 
-const FILTER_KEYS: { key: Filter; labelKey: string }[] = [
+/**
+ * Etapas do funil, mutuamente exclusivas por precedência (ver `matchesStage`):
+ * quem fechou é cliente, mesmo tendo passado por proposta enviada. Viram opções
+ * de um <select> porque o painel tem 288px — cinco chips com contagem quebravam
+ * em duas linhas.
+ *
+ * "Guide" NÃO está aqui de propósito: ter login no site não é etapa de venda, é
+ * outro eixo. Como chip exclusivo, ele impedia a pergunta "quais clientes têm
+ * conta?" (são 3); como alternador em cima da etapa, a pergunta fica possível.
+ */
+const STAGE_KEYS: { key: Stage; labelKey: string }[] = [
   { key: 'all', labelKey: 'filtroTodos' },
   { key: 'leads', labelKey: 'filtroLeads' },
   { key: 'clients', labelKey: 'filtroClientes' },
-  { key: 'guide', labelKey: 'filtroGuide' },
+  { key: 'lost', labelKey: 'filtroPerdidos' },
 ];
+
+const LEAD_ABERTO: ContactListItem['lead_status'][] = ['new', 'contacted', 'proposal_sent'];
+
+/**
+ * Cliente ganha do lead: quem fechou sai de "Leads" e de "Perdidos", senão os
+ * chips se sobrepõem e a contagem de um inclui a do outro.
+ */
+function matchesStage(contact: ContactListItem, stage: Stage): boolean {
+  switch (stage) {
+    case 'all':     return true;
+    case 'clients': return !!contact.is_client;
+    case 'leads':   return !contact.is_client && LEAD_ABERTO.includes(contact.lead_status);
+    case 'lost':    return !contact.is_client && contact.lead_status === 'lost';
+  }
+}
 
 type ToastVariant = 'success' | 'error';
 type ToastState = { message: string; variant: ToastVariant };
@@ -73,7 +100,8 @@ function Toast({ toast, onDone }: { toast: ToastState; onDone: () => void }) {
 export default function ContactsPageClient({ contacts: initialContacts }: { contacts: ContactListItem[] }) {
   const [contacts, setContacts] = useState<ContactListItem[]>(initialContacts);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<Filter>('all');
+  const [stage, setStage] = useState<Stage>('all');
+  const [guideOnly, setGuideOnly] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [panel, setPanel] = useState<PanelState>('empty');
   const [prevPanel, setPrevPanel] = useState<PanelState>('empty');
@@ -82,23 +110,39 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
   const t = useTranslations('admin.contatos');
   const tCommon = useTranslations('admin.common');
   const tLead = useTranslations('admin.status.lead');
-  const tClient = useTranslations('admin.status.client');
 
   const selected = contacts.find(c => c.id === selectedId) ?? null;
 
-  const filtered = useMemo(() => {
-    let list = contacts;
-    if (filter === 'leads') list = list.filter(c => c.lead_status !== undefined);
-    else if (filter === 'clients') list = list.filter(c => c.client_status !== undefined);
-    else if (filter === 'guide') list = list.filter(c => c.guide_role !== undefined);
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter(
-        c => c.email.toLowerCase().includes(q) || (c.name ?? '').toLowerCase().includes(q)
-      );
-    }
-    return list;
-  }, [contacts, filter, search]);
+  // Busca antes do filtro: as contagens dos chips precisam refletir a busca
+  // ativa, senão um chip mostraria "12" e abriria uma lista vazia.
+  const searched = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return contacts;
+    return contacts.filter(
+      c => c.email.toLowerCase().includes(q) || (c.name ?? '').toLowerCase().includes(q)
+    );
+  }, [contacts, search]);
+
+  const filtered = useMemo(
+    () => searched.filter(
+      c => matchesStage(c, stage) && (!guideOnly || c.guide_role !== undefined),
+    ),
+    [searched, stage, guideOnly],
+  );
+
+  // Toda contagem exibida já considera os outros filtros ligados: o número tem
+  // de bater com o que aparece ao clicar, senão vira promessa falsa.
+  const stageCounts = useMemo(() => {
+    const base = guideOnly ? searched.filter(c => c.guide_role !== undefined) : searched;
+    const out = {} as Record<Stage, number>;
+    for (const s of STAGE_KEYS) out[s.key] = base.filter(c => matchesStage(c, s.key)).length;
+    return out;
+  }, [searched, guideOnly]);
+
+  const guideCount = useMemo(
+    () => searched.filter(c => matchesStage(c, stage) && c.guide_role !== undefined).length,
+    [searched, stage],
+  );
 
   const showToast = (message: string, variant: ToastVariant = 'success') =>
     setToast({ message, variant });
@@ -232,20 +276,36 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
           />
         </div>
 
-        <div className="px-4 py-3 border-b border-gray-100 flex flex-wrap gap-1.5">
-          {FILTER_KEYS.map(f => (
-            <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`px-2.5 py-1 text-xs font-medium rounded-full transition-colors ${
-                filter === f.key
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {t(f.labelKey)}
-            </button>
-          ))}
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+          <select
+            value={stage}
+            onChange={e => setStage(e.target.value as Stage)}
+            aria-label={t('filtrarPor')}
+            className="flex-1 min-w-0 px-2 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+          >
+            {STAGE_KEYS.map(s => (
+              <option key={s.key} value={s.key}>
+                {t(s.labelKey)} ({stageCounts[s.key]})
+              </option>
+            ))}
+          </select>
+
+          {/* Eixo próprio: cruza com a etapa em vez de substituí-la. */}
+          <button
+            onClick={() => setGuideOnly(v => !v)}
+            aria-pressed={guideOnly}
+            title={t('filtroGuideHint')}
+            className={`inline-flex items-center gap-1.5 flex-shrink-0 px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+              guideOnly
+                ? 'bg-green-600 border-green-600 text-white'
+                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            {t('filtroGuide')}
+            <span className={`tabular-nums ${guideOnly ? 'text-green-100' : 'text-gray-400'}`}>
+              {guideCount}
+            </span>
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -254,7 +314,7 @@ export default function ContactsPageClient({ contacts: initialContacts }: { cont
           ) : (
             <ul className="py-1">
               {filtered.map(contact => {
-                const dot = getStatusDot(contact, tClient, tLead, t);
+                const dot = getStatusDot(contact, tLead, t);
                 const isSelected = contact.id === selectedId;
 
                 return (

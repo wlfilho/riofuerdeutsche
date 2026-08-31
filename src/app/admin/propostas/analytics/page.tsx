@@ -2,11 +2,10 @@ import Link from 'next/link';
 import { getAdminTranslations } from '@/i18n/admin';
 import { getProposals, type Proposal, type ProposalStatus } from '@/lib/proposals';
 import {
-  fmtDuration,
   getProposalAnalyticsSummaries,
   type ProposalAnalyticsSummary,
 } from '@/lib/proposalAnalytics';
-import { fmtDateTime } from '@/lib/adminFormat';
+import { fmtDateTime, fmtDuration } from '@/lib/adminFormat';
 
 /**
  * Visão agregada dos analytics de leitura: funil de engajamento de todas as

@@ -53,9 +53,13 @@ function n(v: unknown): number {
   return Number(v ?? 0);
 }
 
-export async function getProposalAnalyticsSummaries(): Promise<Record<string, ProposalAnalyticsSummary>> {
+export async function getProposalAnalyticsSummaries(
+  proposalIds?: string[],
+): Promise<Record<string, ProposalAnalyticsSummary>> {
+  if (proposalIds && proposalIds.length === 0) return {};
   const supabase = await createClient();
-  const { data, error } = await supabase.from('proposal_analytics_summary').select('*');
+  const query = supabase.from('proposal_analytics_summary').select('*');
+  const { data, error } = await (proposalIds ? query.in('proposal_id', proposalIds) : query);
   if (error) throw new Error(error.message);
 
   const out: Record<string, ProposalAnalyticsSummary> = {};
@@ -239,12 +243,3 @@ export function describeOrigin(
   };
 }
 
-/** Duração legível pro admin: 45s, 3min, 1h12min. */
-export function fmtDuration(seconds: number): string {
-  const s = Math.round(seconds);
-  if (s < 60) return `${s}s`;
-  const min = Math.floor(s / 60);
-  if (min < 60) return s % 60 >= 30 ? `${min + 1}min` : `${min}min`;
-  const h = Math.floor(min / 60);
-  return `${h}h${String(min % 60).padStart(2, '0')}min`;
-}

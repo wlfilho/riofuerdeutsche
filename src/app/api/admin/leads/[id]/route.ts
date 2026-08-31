@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { syncTourDatesWithLeadStatus } from '@/lib/tourDates';
+import { startTourEmailSequence } from '@/lib/email/tourEmailSequence';
 import { NextRequest, NextResponse } from 'next/server';
 
 async function verifyAdmin() {
@@ -88,6 +89,10 @@ export async function PATCH(
   if (status !== undefined) {
     const syncError = await syncTourDatesWithLeadStatus(supabase, id, status);
     if (syncError) console.error('[leads PATCH] failed to sync tour_dates:', syncError);
+
+    // Fechou pelo kanban: abre a sequência pré-tour. Idempotente — se a
+    // proposta já tinha aberto, não agenda de novo nem reenvia nada.
+    if (status === 'closed') await startTourEmailSequence(supabase, id);
   }
 
   return NextResponse.json({ lead });

@@ -1,141 +1,37 @@
-import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
-import { calculateSchedule } from '@/lib/tour-email-scheduler'
-import { sendConfirmationEmail } from '@/lib/email/sendConfirmationEmail'
+import { createClient } from '@/utils/supabase/server';
+import { NextResponse } from 'next/server';
 
-async function verifyAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { authorized: false, supabase }
+/**
+ * Clientes para o seletor "Enviar para cliente" do editor de templates.
+ *
+ * Só GET: `tour_clients` foi aposentada em 31/08/2026 e com ela o CRUD que
+ * vivia aqui. Cliente deixou de ser uma linha criada à mão e passou a ser o
+ * lead que fechou — a mesma definição da view `clients_v` e do filtro da tela
+ * de contatos, agora no nível do lead, que é o que se pode enviar e-mail para.
+ */
+export async function GET() {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single()
-  return { authorized: profile?.role === 'admin', supabase }
-}
-
-// GET — Listar todos os clientes com contagem de emails
-export async function GET() {
-  const { authorized, supabase } = await verifyAdmin()
-  if (!authorized) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: clients, error } = await supabase
-    .from('tour_clients')
-    .select('id, name, email, phone, pax, arrival_date, departure_date, tour_details, status, total_amount, deposit_amount, internal_notes, created_at')
-    .order('arrival_date', { ascending: true })
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  // Buscar contagens de email para todos os clientes
-  const clientIds = (clients ?? []).map(c => c.id)
-
-  let emailCounts: { client_id: string; status: string }[] = []
-  if (clientIds.length > 0) {
-    const { data } = await supabase
-      .from('email_sequence_log')
-      .select('client_id, status')
-      .in('client_id', clientIds)
-    emailCounts = data ?? []
+    .single();
+  if (profile?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const result = (clients ?? []).map(client => {
-    const clientEmails = emailCounts.filter(e => e.client_id === client.id)
-    return {
-      ...client,
-      emails_sent: clientEmails.filter(e => e.status === 'sent').length,
-      emails_total: clientEmails.length,
-    }
-  })
+  const { data, error } = await supabase
+    .from('price_leads')
+    .select('id, name, email')
+    .eq('status', 'closed')
+    .not('email', 'is', null)
+    .order('created_at', { ascending: false });
 
-  return NextResponse.json({ clients: result })
-}
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-// POST — Criar novo cliente e agendar sequência de emails
-export async function POST(request: NextRequest) {
-  const { authorized, supabase } = await verifyAdmin()
-  if (!authorized) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const body = await request.json()
-  const { name, email, phone, pax, arrival_date, departure_date, tour_details, total_amount, deposit_amount, internal_notes } = body
-
-  if (!name || !email || !arrival_date || !departure_date) {
-    return NextResponse.json(
-      { error: 'name, email, arrival_date e departure_date são obrigatórios.' },
-      { status: 400 }
-    )
-  }
-
-  if (new Date(arrival_date) >= new Date(departure_date)) {
-    return NextResponse.json(
-      { error: 'arrival_date deve ser anterior a departure_date.' },
-      { status: 400 }
-    )
-  }
-
-  // Inserir cliente
-  const { data: client, error: clientError } = await supabase
-    .from('tour_clients')
-    .insert({
-      name, email,
-      phone: phone ?? null,
-      pax: pax ?? 1,
-      arrival_date, departure_date,
-      tour_details: tour_details ?? null,
-      total_amount: total_amount ?? null,
-      deposit_amount: deposit_amount ?? null,
-      internal_notes: internal_notes ?? null,
-    })
-    .select()
-    .single()
-
-  if (clientError) return NextResponse.json({ error: clientError.message }, { status: 500 })
-
-  // Calcular sequência de emails
-  const schedule = calculateSchedule(new Date(arrival_date))
-
-  const logRows = schedule.map(item => ({
-    client_id: client.id,
-    email_number: item.number,
-    email_name: item.name,
-    template_slug: item.slug,
-    phase: item.phase,
-    scheduled_date: item.date.toISOString().split('T')[0],
-    status: item.status,
-  }))
-
-  const { data: emailLogs, error: logError } = await supabase
-    .from('email_sequence_log')
-    .insert(logRows)
-    .select()
-
-  if (logError) return NextResponse.json({ error: logError.message }, { status: 500 })
-
-  // Disparar email #1 imediatamente via sendConfirmationEmail
-  const email1Log = emailLogs?.find(l => l.email_number === 1)
-
-  let resendId: string | null = null
-  let sendError: string | null = null
-
-  try {
-    const result = await sendConfirmationEmail(client.id)
-    resendId = result.id || null
-  } catch (error: any) {
-    sendError = error.message
-  }
-
-  // Atualizar log do email #1
-  if (email1Log) {
-    await supabase
-      .from('email_sequence_log')
-      .update({
-        status: sendError ? 'error' : 'sent',
-        sent_at: sendError ? null : new Date().toISOString(),
-        resend_id: resendId,
-        error_message: sendError,
-      })
-      .eq('id', email1Log.id)
-  }
-
-  return NextResponse.json({ client }, { status: 201 })
+  return NextResponse.json({ clients: data ?? [] });
 }

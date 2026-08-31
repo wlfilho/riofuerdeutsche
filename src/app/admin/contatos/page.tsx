@@ -14,7 +14,7 @@ export default async function ContatosPage() {
     { data: contacts },
     { data: profiles },
     { data: allLeads },
-    { data: allClients },
+    { data: clientRows },
   ] = await Promise.all([
     supabase
       .from('contacts')
@@ -27,10 +27,12 @@ export default async function ContatosPage() {
       .from('price_leads')
       .select('contact_id, status')
       .order('created_at', { ascending: false }),
+    // Quem fechou. A regra (lead closed / proposta accepted / data fechada) mora
+    // na view `clients_v`, não aqui: o cron da sequência de e-mails vai precisar
+    // da mesma definição, e duas cópias em TypeScript divergiriam.
     supabase
-      .from('tour_clients')
-      .select('contact_id, status')
-      .order('created_at', { ascending: false }),
+      .from('clients_v')
+      .select('contact_id'),
   ]);
 
   const profileByEmail = new Map((profiles ?? []).map(p => [p.email, p]));
@@ -42,12 +44,7 @@ export default async function ContatosPage() {
     }
   }
 
-  const clientStatusByContactId = new Map<string, string>();
-  for (const client of allClients ?? []) {
-    if (client.contact_id && !clientStatusByContactId.has(client.contact_id)) {
-      clientStatusByContactId.set(client.contact_id, client.status);
-    }
-  }
+  const clientContactIds = new Set((clientRows ?? []).map(r => r.contact_id as string));
 
   const unified: ContactListItem[] = (contacts ?? []).map(c => ({
     id: c.id,
@@ -58,7 +55,7 @@ export default async function ContatosPage() {
     created_at: c.created_at,
     guide_role: profileByEmail.get(c.email)?.role as ContactListItem['guide_role'],
     lead_status: leadStatusByContactId.get(c.id) as ContactListItem['lead_status'],
-    client_status: clientStatusByContactId.get(c.id) as ContactListItem['client_status'],
+    is_client: clientContactIds.has(c.id),
   }));
 
   return <ContactsPageClient contacts={unified} />;
