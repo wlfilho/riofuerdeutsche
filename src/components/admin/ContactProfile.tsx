@@ -2,8 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { Phone } from 'lucide-react';
+import { digitsOnly } from '@/lib/phone';
 import ContactCRMTab from '@/components/admin/ContactCRMTab';
-import ContactPropostaTab from '@/components/admin/ContactPropostaTab';
+import ContactPropostaTab, {
+  type ContactProposal,
+  type ContactTourDate,
+} from '@/components/admin/ContactPropostaTab';
+import type { ProposalAnalyticsSummary } from '@/lib/proposalAnalytics';
+// Só o tipo: o lib de e-mail (Resend, service role) fica fora do bundle.
+import type { ProposalEmailStatus } from '@/lib/email/sendProposalEmail';
 import { fmtDate, fmtDateTime, fmtEur } from '@/lib/adminFormat';
 
 type Tab = 'guide' | 'crm' | 'proposta' | 'emails' | 'dokumente';
@@ -36,6 +44,15 @@ interface Lead {
   claude_chat_url: string | null;
   created_at: string;
   updated_at: string;
+  // Campos do formulário da /anfrage; leads antigos ou criados à mão não têm.
+  phone?: string | null;
+  children?: number | null;
+  requested_days?: string[] | null;
+  interessen?: string[] | null;
+  wunsch?: string | null;
+  tour_slug?: string | null;
+  found_via?: string | null;
+  campaign?: string | null;
 }
 
 interface LeadContact {
@@ -49,36 +66,9 @@ interface LeadContact {
   created_at: string;
 }
 
-interface TourClient {
-  id: string;
-  name: string;
-  email: string;
-  pax: number;
-  arrival_date: string;
-  departure_date: string;
-  status: 'active' | 'completed' | 'cancelled' | 'pending';
-  total_amount: number | null;
-  deposit_amount: number | null;
-  internal_notes: string | null;
-  created_at: string;
-}
-
-interface Proposal {
-  id: string;
-  client_name: string;
-  internal_label: string | null;
-  pax: number;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected';
-  total_amount: number | null;
-  currency?: 'EUR' | 'BRL' | null;
-  valid_until: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
 interface EmailLog {
   id: string;
-  client_id: string;
+  lead_id: string;
   email_number: number;
   email_name: string;
   scheduled_date: string;
@@ -95,9 +85,11 @@ interface ContactData {
   pages_read: number;
   leads: Lead[];
   lead_contacts: LeadContact[];
-  tour_clients: TourClient[];
   email_logs: EmailLog[];
-  proposals: Proposal[];
+  proposals: ContactProposal[];
+  proposal_analytics: Record<string, ProposalAnalyticsSummary>;
+  proposal_emails: Record<string, ProposalEmailStatus>;
+  tour_dates: ContactTourDate[];
 }
 
 interface ContactProfileProps {
@@ -115,6 +107,19 @@ const ROLE_CLASS: Record<Profile['role'], string> = {
   premium: 'bg-amber-100 text-amber-700',
   user:    'bg-gray-100 text-gray-600',
 };
+
+/** Ícone do botão de copiar: vira um check por 2s depois da cópia. */
+function CopyGlyph({ copied }: { copied: boolean }) {
+  return copied ? (
+    <svg className="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
+  ) : (
+    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+    </svg>
+  );
+}
 
 function RoleBadge({ role }: { role: Profile['role'] }) {
   const t = useTranslations('admin.status.role');
@@ -403,22 +408,48 @@ function CrmTab({ leads, lead_contacts }: { leads: Lead[]; lead_contacts: LeadCo
 
 // ── Emails Tab ────────────────────────────────────────────────────────────────
 
-function EmailsTab({ tour_clients, email_logs }: { tour_clients: TourClient[]; email_logs: EmailLog[] }) {
-  const [selectedClientId, setSelectedClientId] = useState<string | null>(tour_clients[0]?.id ?? null);
+function EmailsTab({
+  leads,
+  proposals,
+  tour_dates,
+  email_logs,
+}: {
+  leads: Lead[];
+  proposals: ContactProposal[];
+  tour_dates: ContactTourDate[];
+  email_logs: EmailLog[];
+}) {
   const t = useTranslations('admin.contatos');
   const tCommon = useTranslations('admin.common');
   const tEmailStatus = useTranslations('admin.status.email');
-  const tClientStatus = useTranslations('admin.status.client');
-  const client = tour_clients.find(c => c.id === selectedClientId) ?? tour_clients[0] ?? null;
-  const logs = email_logs.filter(l => l.client_id === client?.id);
+  const tLeadStatus = useTranslations('admin.status.lead');
 
-  if (tour_clients.length === 0) {
+  // Só leads que fecharam (ou que já têm sequência agendada). A âncora deixou
+  // de ser `tour_clients`, aposentada em 31/08/2026: quem recebe a sequência é
+  // o lead, e os dados vêm do calendário e da proposta.
+  const leadsComSequencia = leads.filter(
+    l => l.status === 'closed' || email_logs.some(log => log.lead_id === l.id),
+  );
+
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(
+    leadsComSequencia[0]?.id ?? null,
+  );
+  const lead = leadsComSequencia.find(l => l.id === selectedLeadId) ?? leadsComSequencia[0] ?? null;
+
+  if (leadsComSequencia.length === 0) {
     return (
       <div className="p-6">
         <p className="text-sm text-gray-400 italic">{t('nenhumClienteTour')}</p>
       </div>
     );
   }
+
+  const logs = email_logs.filter(l => l.lead_id === lead?.id);
+  const datas = tour_dates
+    .filter(d => d.lead_id === lead?.id && d.status === 'fechado')
+    .map(d => d.date)
+    .sort();
+  const proposta = lead?.proposal_id ? proposals.find(p => p.id === lead.proposal_id) ?? null : null;
 
   const STATUS_BADGE_CLASS: Record<EmailLog['status'], string> = {
     sent:    'bg-green-100 text-green-700',
@@ -427,72 +458,75 @@ function EmailsTab({ tour_clients, email_logs }: { tour_clients: TourClient[]; e
     skipped: 'bg-gray-100 text-gray-400',
   };
 
-  const CLIENT_STATUS_CLASS: Record<TourClient['status'], string> = {
-    active:    'bg-green-100 text-green-700',
-    completed: 'bg-blue-100 text-blue-700',
-    cancelled: 'bg-gray-100 text-gray-500',
-    pending:   'bg-amber-100 text-amber-700',
-  };
-
   return (
     <div className="p-6 space-y-6">
-      {/* Client selector */}
-      {tour_clients.length > 1 && (
+      {/* Um lead por viagem: o mesmo contato pode fechar em anos diferentes. */}
+      {leadsComSequencia.length > 1 && (
         <div className="flex gap-2 flex-wrap">
-          {tour_clients.map(tc => (
-            <button
-              key={tc.id}
-              onClick={() => setSelectedClientId(tc.id)}
-              className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
-                tc.id === client?.id
-                  ? 'border-green-500 bg-green-50 text-green-700'
-                  : 'border-gray-200 text-gray-500 hover:border-gray-300'
-              }`}
-            >
-              {fmtDate(tc.arrival_date)}
-            </button>
-          ))}
+          {leadsComSequencia.map(l => {
+            const primeira = tour_dates
+              .filter(d => d.lead_id === l.id && d.status === 'fechado')
+              .map(d => d.date)
+              .sort()[0];
+            return (
+              <button
+                key={l.id}
+                onClick={() => setSelectedLeadId(l.id)}
+                className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
+                  l.id === lead?.id
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                }`}
+              >
+                {primeira ? fmtDate(primeira) : fmtDate(l.created_at)}
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {client && (
+      {lead && (
         <>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
             <div>
               <dt className="text-xs text-gray-400 uppercase font-medium">{tCommon('status')}</dt>
               <dd className="mt-0.5">
-                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${CLIENT_STATUS_CLASS[client.status]}`}>
-                  {tClientStatus(client.status)}
+                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
+                  lead.status === 'closed' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {tLeadStatus(lead.status)}
                 </span>
               </dd>
             </div>
             <div>
               <dt className="text-xs text-gray-400 uppercase font-medium">{tCommon('pax')}</dt>
-              <dd className="text-gray-800 mt-0.5">{client.pax}</dd>
+              <dd className="text-gray-800 mt-0.5">{lead.pax}</dd>
             </div>
             <div>
               <dt className="text-xs text-gray-400 uppercase font-medium">{t('chegada')}</dt>
-              <dd className="text-gray-800 mt-0.5">{fmtDate(client.arrival_date)}</dd>
+              <dd className="text-gray-800 mt-0.5">{datas.length > 0 ? fmtDate(datas[0]) : tCommon('vazio')}</dd>
             </div>
             <div>
               <dt className="text-xs text-gray-400 uppercase font-medium">{t('saida')}</dt>
-              <dd className="text-gray-800 mt-0.5">{fmtDate(client.departure_date)}</dd>
+              <dd className="text-gray-800 mt-0.5">
+                {datas.length > 0 ? fmtDate(datas[datas.length - 1]) : tCommon('vazio')}
+              </dd>
             </div>
-            {client.total_amount && (
+            {proposta?.total_amount != null && (
               <div>
                 <dt className="text-xs text-gray-400 uppercase font-medium">{tCommon('total')}</dt>
-                <dd className="text-gray-800 mt-0.5">{fmtEur(client.total_amount)}</dd>
+                <dd className="text-gray-800 mt-0.5">{fmtEur(proposta.total_amount)}</dd>
               </div>
             )}
-            {client.deposit_amount && (
+            {proposta?.deposit_amount != null && (
               <div>
                 <dt className="text-xs text-gray-400 uppercase font-medium">{t('sinal')}</dt>
-                <dd className="text-gray-800 mt-0.5">{fmtEur(client.deposit_amount)}</dd>
+                <dd className="text-gray-800 mt-0.5">{fmtEur(proposta.deposit_amount)}</dd>
               </div>
             )}
           </dl>
 
-          {/* Email sequence */}
+          {/* Sequência de e-mails */}
           {logs.length > 0 ? (
             <div>
               <p className="text-xs text-gray-400 uppercase font-medium mb-3">{t('sequenciaEmails')}</p>
@@ -875,14 +909,14 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
   const [data, setData] = useState<ContactData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copiedField, setCopiedField] = useState<'email' | 'phone' | null>(null);
   const t = useTranslations('admin.contatos');
   const tCommon = useTranslations('admin.common');
 
-  const copyEmail = () => {
-    navigator.clipboard.writeText(contactEmail).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+  const copyField = (field: 'email' | 'phone', value: string) => {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
     });
   };
 
@@ -902,6 +936,7 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
   }, [contactId]);
 
   const displayName = contactName || contactEmail;
+  const phone = data?.contact.phone?.trim() || null;
 
   return (
     <div className="flex flex-col min-h-full">
@@ -913,23 +948,40 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-lg font-bold text-gray-900 truncate">{displayName}</h2>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <p className="text-sm text-gray-500 truncate">{contactEmail}</p>
-              <button
-                onClick={copyEmail}
-                title={t('copiarEmail')}
-                className="flex-shrink-0 p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-              >
-                {copied ? (
-                  <svg className="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : (
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                )}
-              </button>
+            {/* Contato do cliente: fica no cabeçalho, então está à mão em
+                qualquer aba. O telefone só aparece quando existe em `contacts`. */}
+            <div className="flex items-center gap-x-3 gap-y-0.5 mt-0.5 flex-wrap">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <p className="text-sm text-gray-500 truncate">{contactEmail}</p>
+                <button
+                  onClick={() => copyField('email', contactEmail)}
+                  title={t('copiarEmail')}
+                  className="flex-shrink-0 p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                  <CopyGlyph copied={copiedField === 'email'} />
+                </button>
+              </div>
+              {phone && (
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <a
+                    href={`https://wa.me/${digitsOnly(phone)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={t('abrirWhatsapp')}
+                    className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-700 transition-colors truncate"
+                  >
+                    <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                    {phone}
+                  </a>
+                  <button
+                    onClick={() => copyField('phone', phone)}
+                    title={t('copiarTelefone')}
+                    className="flex-shrink-0 p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                  >
+                    <CopyGlyph copied={copiedField === 'phone'} />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -1009,13 +1061,19 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
                 )}
                 {tab === 'proposta' && (
                   <ContactPropostaTab
+                    contactName={data.contact.name ?? contactName}
                     leads={data.leads}
                     proposals={data.proposals}
+                    analytics={data.proposal_analytics ?? {}}
+                    emails={data.proposal_emails ?? {}}
+                    tourDates={data.tour_dates ?? []}
                   />
                 )}
                 {tab === 'emails' && (
                   <EmailsTab
-                    tour_clients={data.tour_clients}
+                    leads={data.leads}
+                    proposals={data.proposals}
+                    tour_dates={data.tour_dates}
                     email_logs={data.email_logs}
                   />
                 )}

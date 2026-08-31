@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { getServiceTranslation, getServicesWithTranslations } from '@/lib/services-i18n';
 import { syncTourDatesWithLeadStatus } from '@/lib/tourDates';
+import { startTourEmailSequence } from '@/lib/email/tourEmailSequence';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 
 export type ProposalServiceCategory = 'transfer' | 'tour' | 'extra' | 'atração';
@@ -602,6 +603,12 @@ export async function updateProposalStatus(id: string, status: ProposalStatus): 
     const syncError = await syncTourDatesWithLeadStatus(supabase, lead.id, leadStatus);
     if (syncError) {
       console.error('[updateProposalStatus] failed to sync tour_dates:', syncError);
+    }
+    // Depois do calendário, nunca antes: a sequência conta os dias a partir da
+    // primeira data com status 'fechado', que é justamente o que a linha acima
+    // acabou de gravar.
+    if (leadStatus === 'closed') {
+      await startTourEmailSequence(supabase, lead.id);
     }
   }
 }

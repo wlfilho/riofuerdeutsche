@@ -1,4 +1,3 @@
-import { createClient } from '@/utils/supabase/server'
 import { sendTemplatedEmail } from './sendTemplatedEmail'
 import {
   formatEmailCurrency,
@@ -6,6 +5,7 @@ import {
   formatTourDetailsHtml,
   getRecipientLocale,
 } from './render'
+import type { TourEmailRecipient } from './tourEmailSequence'
 
 function formatDate(dateStr: string, locale: string): string {
   if (!dateStr) return ''
@@ -14,37 +14,32 @@ function formatDate(dateStr: string, locale: string): string {
   return formatEmailDate(dateStr, locale) || dateStr
 }
 
-export async function sendConfirmationEmail(clientId: string) {
-  const supabase = await createClient()
+/**
+ * E-mail #1 da sequência: confirmação da reserva.
+ *
+ * Recebe o destinatário já montado (ver `getTourEmailRecipient`) em vez de um
+ * id para buscar: os dados vêm de quatro tabelas — lead, tour_dates, proposta e
+ * itens — e refazer essa leitura em cada caminho de envio só criaria uma
+ * segunda versão da mesma regra.
+ */
+export async function sendConfirmationEmail(recipient: TourEmailRecipient) {
+  const locale = await getRecipientLocale(recipient.email)
 
-  // Buscar dados do cliente
-  const { data: client, error: clientError } = await supabase
-    .from('tour_clients')
-    .select('*')
-    .eq('id', clientId)
-    .single()
-
-  if (clientError || !client) throw new Error('Cliente não encontrado')
-
-  const locale = await getRecipientLocale(client.email)
-
-  // Montar replacements
   const replacements = {
-    nome: client.name,
-    email: client.email,
-    data_chegada: formatDate(client.arrival_date, locale),
-    data_saida: formatDate(client.departure_date, locale),
-    anzahlung: formatEmailCurrency(client.deposit_amount, locale),
-    betrag_total: formatEmailCurrency(client.total_amount, locale),
-    tour: formatTourDetailsHtml(client.tour_details ?? ''),
+    nome: recipient.name,
+    email: recipient.email,
+    data_chegada: formatDate(recipient.arrival_date, locale),
+    data_saida: formatDate(recipient.departure_date, locale),
+    anzahlung: formatEmailCurrency(recipient.deposit_amount, locale),
+    betrag_total: formatEmailCurrency(recipient.total_amount, locale),
+    tour: formatTourDetailsHtml(recipient.tour_details ?? ''),
     assinatura: 'Viele Grüße aus Rio,',
   }
 
-  // Enviar via sendTemplatedEmail
   const result = await sendTemplatedEmail({
     slug: 'confirmacao_reserva',
-    to: client.email,
-    data: replacements as any,
+    to: recipient.email,
+    data: replacements as never,
     locale,
   })
 

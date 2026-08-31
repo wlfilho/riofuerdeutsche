@@ -1,4 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
+import { getProposalAnalyticsSummaries } from '@/lib/proposalAnalytics';
+import { getProposalEmailStatuses } from '@/lib/email/sendProposalEmail';
 import { NextRequest, NextResponse } from 'next/server';
 
 async function verifyAdmin() {
@@ -33,7 +35,6 @@ export async function GET(
   const [
     { data: profile },
     { data: leads },
-    { data: tourClients },
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -45,15 +46,9 @@ export async function GET(
       .select('*')
       .eq('contact_id', id)
       .order('created_at', { ascending: false }),
-    supabase
-      .from('tour_clients')
-      .select('*')
-      .eq('contact_id', id)
-      .order('created_at', { ascending: false }),
   ]);
 
   const leadIds = (leads ?? []).map(l => l.id);
-  const clientIds = (tourClients ?? []).map(c => c.id);
   const proposalIdsFromLeads = (leads ?? []).map(l => l.proposal_id).filter((pid): pid is string => !!pid);
 
   const [
@@ -76,11 +71,11 @@ export async function GET(
           .in('lead_id', leadIds)
           .order('created_at', { ascending: false })
       : Promise.resolve({ data: [] }),
-    clientIds.length > 0
+    leadIds.length > 0
       ? supabase
           .from('email_sequence_log')
           .select('*, email_templates(name, subject)')
-          .in('client_id', clientIds)
+          .in('lead_id', leadIds)
           .order('scheduled_date', { ascending: true })
       : Promise.resolve({ data: [] }),
     proposalIdsFromLeads.length > 0
@@ -94,6 +89,22 @@ export async function GET(
   const proposalsMap = new Map(
     [...(proposalsFromLeads ?? []), ...(proposalsByEmail ?? [])].map(p => [p.id, p])
   );
+  const proposalIds = [...proposalsMap.keys()];
+
+  // Contexto que a aba Propostas usa pra dizer o que aconteceu DEPOIS do envio:
+  // leitura do link público, envio por e-mail e datas já no calendário (com o
+  // sinal, que mora em tour_dates e não na proposta).
+  const [analytics, emailStatuses, { data: tourDates }] = await Promise.all([
+    getProposalAnalyticsSummaries(proposalIds).catch(() => ({})),
+    getProposalEmailStatuses(proposalIds),
+    leadIds.length > 0
+      ? supabase
+          .from('tour_dates')
+          .select('id, lead_id, date, start_time, status, anzahlung_paid, agreed_price')
+          .in('lead_id', leadIds)
+          .order('date', { ascending: true })
+      : Promise.resolve({ data: [] }),
+  ]);
 
   return NextResponse.json({
     contact,
@@ -101,9 +112,11 @@ export async function GET(
     pages_read: pagesRead ?? 0,
     leads: leads ?? [],
     lead_contacts: leadContacts ?? [],
-    tour_clients: tourClients ?? [],
     email_logs: emailLogs ?? [],
     proposals: [...proposalsMap.values()].sort((a, b) => b.created_at.localeCompare(a.created_at)),
+    proposal_analytics: analytics,
+    proposal_emails: emailStatuses,
+    tour_dates: tourDates ?? [],
   });
 }
 

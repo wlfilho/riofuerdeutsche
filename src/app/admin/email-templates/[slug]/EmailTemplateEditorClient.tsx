@@ -23,7 +23,7 @@ function SendToClientModal({
   sending,
 }: {
   onClose: () => void
-  onSend: (clientId: string) => void
+  onSend: (leadId: string) => void
   sending: boolean
 }) {
   const t = useTranslations('admin.emailTemplates')
@@ -129,9 +129,10 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
 
   const [showSendModal, setShowSendModal] = useState(false)
 
-  // "Enviar para cliente" monta os shortcodes a partir de tour_clients — não
-  // conhece {{link}}/{{eckdaten}}/{{reisezeitraum}}, que só a proposta preenche.
-  // O envio destes templates é pelo botão da própria proposta.
+  // "Enviar para cliente" monta os shortcodes a partir do lead que fechou
+  // (calendário + proposta) — não conhece {{link}}/{{eckdaten}}/{{reisezeitraum}},
+  // que só a proposta preenche. O envio destes templates é pelo botão da
+  // própria proposta.
   const isProposalTemplate = template.slug.startsWith('angebot_link')
   const [sendingToClient, setSendingToClient] = useState(false)
   const [clientSentToast, setClientSentToast] = useState<string | null>(null)
@@ -156,13 +157,13 @@ export default function EmailTemplateEditorClient({ template }: { template: Emai
     setTimeout(() => setCopiedKey(null), 1500)
   }
 
-  const handleSendToClient = async (clientId: string) => {
+  const handleSendToClient = async (leadId: string) => {
     setSendingToClient(true)
     try {
       const res = await fetch('/api/email-templates/send-to-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: template.slug, subject, htmlBody, clientId }),
+        body: JSON.stringify({ slug: template.slug, subject, htmlBody, leadId }),
       })
       const data = await res.json()
       if (data.success) {

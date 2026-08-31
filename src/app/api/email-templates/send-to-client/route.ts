@@ -4,10 +4,12 @@ import { createClient } from '@/utils/supabase/server'
 import {
   formatEmailCurrency,
   formatEmailDate,
+  formatTourDetailsHtml,
   getEmailTemplate,
   getRecipientLocale,
   renderTemplate,
 } from '@/lib/email/render'
+import { getTourEmailRecipient } from '@/lib/email/tourEmailSequence'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -28,21 +30,21 @@ export async function POST(request: Request) {
   if (!authorized) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const { slug, htmlBody, subject, clientId } = await request.json()
+    const { slug, htmlBody, subject, leadId } = await request.json()
 
-    if (!clientId) {
-      return NextResponse.json({ error: 'clientId é obrigatório.' }, { status: 400 })
+    if (!leadId) {
+      return NextResponse.json({ error: 'leadId é obrigatório.' }, { status: 400 })
     }
 
-    // Buscar dados do cliente
-    const { data: client, error: clientError } = await supabase
-      .from('tour_clients')
-      .select('name, email, arrival_date, departure_date, tour_details, total_amount, deposit_amount')
-      .eq('id', clientId)
-      .single()
+    // Mesmos dados que a sequência automática usa (lead + calendário + proposta),
+    // para o preview do editor não divergir do e-mail que sai de verdade.
+    const client = await getTourEmailRecipient(supabase, leadId)
 
-    if (clientError || !client) {
-      return NextResponse.json({ error: 'Cliente não encontrado.' }, { status: 404 })
+    if (!client) {
+      return NextResponse.json(
+        { error: 'Lead sem data fechada no calendário.' },
+        { status: 404 },
+      )
     }
 
     const locale = await getRecipientLocale(client.email)
@@ -73,7 +75,7 @@ export async function POST(request: Request) {
     const shortcodeData: Record<string, string> = {
       nome: client.name,
       email: client.email,
-      tour: client.tour_details ?? '',
+      tour: formatTourDetailsHtml(client.tour_details ?? ''),
       data_chegada: formatEmailDate(client.arrival_date, locale),
       data_saida: formatEmailDate(client.departure_date, locale),
       anzahlung: formatAmount(client.deposit_amount),
@@ -96,7 +98,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

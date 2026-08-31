@@ -94,3 +94,16 @@ export function fmtScore(value: number | null | undefined): string {
     maximumFractionDigits: 1,
   }).format(Number(value ?? 0));
 }
+
+/**
+ * Duração legível pro admin: 45s, 3min, 1h12min.
+ * Usada no tempo de leitura das propostas (analytics) e onde mais precisar.
+ */
+export function fmtDuration(seconds: number): string {
+  const s = Math.round(seconds);
+  if (s < 60) return `${s}s`;
+  const min = Math.floor(s / 60);
+  if (min < 60) return s % 60 >= 30 ? `${min + 1}min` : `${min}min`;
+  const h = Math.floor(min / 60);
+  return `${h}h${String(min % 60).padStart(2, '0')}min`;
+}

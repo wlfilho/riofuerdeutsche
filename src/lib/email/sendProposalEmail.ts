@@ -255,8 +255,12 @@ export type ProposalEmailStatus = {
  * Situação do envio por proposta, para a lista do admin marcar as propostas que
  * estão como "enviada" mas nunca saíram por e-mail.
  */
-export async function getProposalEmailStatuses(): Promise<Record<string, ProposalEmailStatus>> {
-  const { data, error } = await serviceClient().from('proposal_email_status').select('*');
+export async function getProposalEmailStatuses(
+  proposalIds?: string[],
+): Promise<Record<string, ProposalEmailStatus>> {
+  if (proposalIds && proposalIds.length === 0) return {};
+  const query = serviceClient().from('proposal_email_status').select('*');
+  const { data, error } = await (proposalIds ? query.in('proposal_id', proposalIds) : query);
 
   if (error) {
     console.error('[getProposalEmailStatuses]', error.message);

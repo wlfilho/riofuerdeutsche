@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { EMAIL_NUMBER_TO_SLUG, EMAIL_SEQUENCE, type SequenceEmailNumber } from '@/lib/tour-email-scheduler'
-import { sendTourSequenceEmail, type TourSequenceClient } from '@/lib/email/sendTourSequenceEmail'
+import { sendTourSequenceEmail } from '@/lib/email/sendTourSequenceEmail'
+import { getTourEmailRecipient, type TourEmailRecipient } from '@/lib/email/tourEmailSequence'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,27 +16,16 @@ export async function GET(request: Request) {
 
   const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
 
-  // Buscar emails pendentes com data <= hoje, apenas para clientes ativos
+  // Pendentes com data <= hoje, apenas de leads que continuam fechados. O
+  // `!inner` é o que garante isso: lead reaberto ou perdido some do resultado
+  // em vez de virar objeto nulo — mesmo papel que `tour_clients.status =
+  // 'active'` tinha antes de a tabela ser aposentada.
   const { data: pendingLogs, error: fetchError } = await supabaseAdmin
     .from('email_sequence_log')
-    .select(`
-      id,
-      email_number,
-      client_id,
-      tour_clients!inner (
-        name,
-        email,
-        arrival_date,
-        departure_date,
-        tour_details,
-        total_amount,
-        deposit_amount,
-        status
-      )
-    `)
+    .select('id, email_number, lead_id, price_leads!inner(status)')
     .eq('status', 'pending')
     .lte('scheduled_date', today)
-    .eq('tour_clients.status', 'active')
+    .eq('price_leads.status', 'closed')
 
   if (fetchError) {
     console.error('[cron] Fehler beim Laden der pendenten E-Mails:', fetchError.message)
@@ -45,31 +35,31 @@ export async function GET(request: Request) {
   const logs = pendingLogs ?? []
   let sent = 0
   let errors = 0
+  let skipped = 0
+
+  // Um lead pode ter mais de um e-mail vencido no mesmo dia (ex.: cron que não
+  // rodou ontem). Monta o destinatário uma vez por lead, não uma por e-mail.
+  const recipients = new Map<string, TourEmailRecipient | null>()
 
   for (const log of logs) {
-    const clientData = log.tour_clients as unknown as {
-      name: string
-      email: string
-      arrival_date: string
-      departure_date: string
-      tour_details: string | null
-      total_amount: number | null
-      deposit_amount: number | null
-      status: string
-    }
+    const leadId = log.lead_id as string
 
-    const client: TourSequenceClient = {
-      name: clientData.name,
-      email: clientData.email,
-      arrival_date: clientData.arrival_date,
-      departure_date: clientData.departure_date,
-      tour_details: clientData.tour_details ?? undefined,
-      total_amount: clientData.total_amount ?? null,
-      deposit_amount: clientData.deposit_amount ?? null,
+    if (!recipients.has(leadId)) {
+      recipients.set(leadId, await getTourEmailRecipient(supabaseAdmin, leadId))
+    }
+    const recipient = recipients.get(leadId) ?? null
+
+    // Sem data fechada no calendário não há tour a anunciar. Acontece se as
+    // datas forem apagadas depois do agendamento; o log fica pendente em vez
+    // de sair um e-mail sobre uma viagem que não existe mais.
+    if (!recipient) {
+      skipped++
+      console.warn(`[cron] Lead ${leadId} ohne bestätigtes Datum — E-Mail übersprungen.`)
+      continue
     }
 
     const emailNum = log.email_number as SequenceEmailNumber
-    const result = await sendTourSequenceEmail(emailNum, log.client_id, client)
+    const result = await sendTourSequenceEmail(emailNum, recipient)
 
     // Identidade do template gravada em todo caminho de envio — logs antigos
     // por número puro são o que o backfill teve que consertar.
@@ -78,7 +68,7 @@ export async function GET(request: Request) {
 
     if ('error' in result) {
       errors++
-      console.error(`[cron] Fehler bei E-Mail #${emailNum} für ${client.email}:`, result.error)
+      console.error(`[cron] Fehler bei E-Mail #${emailNum} für ${recipient.email}:`, result.error)
       await supabaseAdmin
         .from('email_sequence_log')
         .update({
@@ -90,7 +80,7 @@ export async function GET(request: Request) {
         .eq('id', log.id)
     } else {
       sent++
-      console.log(`[cron] E-Mail #${emailNum} gesendet an ${client.email} (resend_id: ${result.id})`)
+      console.log(`[cron] E-Mail #${emailNum} gesendet an ${recipient.email} (resend_id: ${result.id})`)
       await supabaseAdmin
         .from('email_sequence_log')
         .update({
@@ -105,7 +95,7 @@ export async function GET(request: Request) {
     }
   }
 
-  const summary = { processed: logs.length, sent, errors }
+  const summary = { processed: logs.length, sent, errors, skipped }
   console.log('[cron] Zusammenfassung:', summary)
 
   return Response.json(summary)
