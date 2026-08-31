@@ -92,6 +92,10 @@ export async function findConflictingTourDates(
   return (data ?? []) as unknown as ConflictingTourDate[];
 }
 
+// ATENÇÃO: esta lógica está duplicada no banco desde a migration
+// 20260831010000 (trigger price_leads_sync_tour_dates), que existe para cobrir
+// escrita direta no Postgres. Mudou aqui, mude lá também.
+//
 // Mantém o calendário coerente com o kanban: lead com proposta enviada/fechado
 // atualiza os tours vinculados (e cria as linhas que ainda não existirem, a
 // partir de requested_days — ver nota abaixo); lead perdido apaga as datas

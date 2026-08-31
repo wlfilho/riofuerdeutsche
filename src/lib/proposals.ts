@@ -581,6 +581,11 @@ export async function updateProposalStatus(id: string, status: ProposalStatus): 
 
   // Sincroniza o lead vinculado (best-effort: proposta sem lead é normal, e
   // uma falha aqui não deve derrubar a troca de status da proposta).
+  //
+  // Desde a migration 20260831010000 o trigger proposals_sync_lead_status faz
+  // o mesmo trabalho no banco, para cobrir quem escreve fora do app. As duas
+  // escritas são idempotentes, então isto aqui vira no-op — mas se mudar o
+  // mapa de status, mude nos DOIS lugares (o trigger não quebra build).
   const leadStatus = LEAD_STATUS_BY_PROPOSAL_STATUS[status];
   const { data: syncedLeads, error: leadError } = await supabase
     .from('price_leads')
