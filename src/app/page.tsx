@@ -3,13 +3,13 @@ import Image from "next/image";
 import NavbarServer from "@/components/NavbarServer";
 import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
+import ReviewCard from "@/components/ReviewCard";
 import FaqAccordion from "@/components/FaqAccordion";
 import { createClient } from "@/utils/supabase/server";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 import {
   ArrowRight,
   MapPin,
-  Star,
   HeartHandshake,
   Phone,
   User,
@@ -234,7 +234,7 @@ export default async function Home() {
 
   const { data: dbReviews } = await supabase
     .from('reviews')
-    .select('nickname, rating, body, photo_urls, will_photo_urls, consent_own_photos, consent_will_photos')
+    .select('id, created_at, nickname, rating, title, body, attractions, photo_urls, will_photo_urls, consent_own_photos, consent_will_photos')
     .eq('status', 'approved')
     .order('approved_at', { ascending: false })
     .limit(3);
@@ -559,33 +559,16 @@ export default async function Home() {
                 <p className="text-3xl md:text-4xl font-heading font-bold text-gray-900">Was unsere Gäste sagen</p>
               </FadeIn>
 
-              <div className="grid md:grid-cols-3 gap-8">
-                {reviews.map((review, i) => {
-                  const avatarUrl =
-                    (review.consent_will_photos && review.will_photo_urls?.[0]) ||
-                    (review.consent_own_photos && review.photo_urls?.[0]) ||
-                    null;
-                  return (
-                    <FadeIn key={i} delay={i * 0.15} direction="up" className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-full">
-                      <div className="flex gap-1 mb-4" aria-label={`${review.rating} von 5 Sternen`}>
-                        {[...Array(review.rating)].map((_, j) => (
-                          <Star key={j} className="w-5 h-5 fill-rio-yellow text-rio-yellow" />
-                        ))}
-                      </div>
-                      <p className="text-gray-600 mb-6 flex-grow italic">&ldquo;{review.body}&rdquo;</p>
-                      <div className="flex items-center gap-3 border-t border-gray-100 pt-4">
-                        {avatarUrl ? (
-                          <img src={avatarUrl} alt={review.nickname} className="w-10 h-10 rounded-full object-cover shrink-0" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-rio-green/10 flex items-center justify-center shrink-0">
-                            <span className="text-rio-green font-bold text-sm">{review.nickname?.charAt(0).toUpperCase()}</span>
-                          </div>
-                        )}
-                        <p className="font-bold text-gray-900">{review.nickname}</p>
-                      </div>
-                    </FadeIn>
-                  );
-                })}
+              {/* Mesmo card de /bewertungen, na variante 'compact': altura travada
+                  (line-clamp no texto), cabeçalho com nome/nota/data e rodapé com
+                  fotos e locais visitados. items-stretch pra que a linha inteira
+                  fique na mesma altura, com o rodapé de cada card no fim. */}
+              <div className="grid md:grid-cols-3 gap-8 items-stretch">
+                {reviews.map((review, i) => (
+                  <FadeIn key={review.id} delay={i * 0.15} direction="up" className="h-full">
+                    <ReviewCard review={review} layout="compact" />
+                  </FadeIn>
+                ))}
               </div>
 
               <FadeIn direction="up" className="text-center mt-10">

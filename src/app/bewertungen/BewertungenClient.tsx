@@ -49,7 +49,16 @@ export default function BewertungenClient({ whatsappHref, highlightId }: Bewertu
         const el = document.getElementById(`review-${highlightId}`);
         if (!el) return;
         const timer = setTimeout(() => {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // A review destacada abre com o texto inteiro (defaultExpanded), então
+            // pode ficar mais alta que a tela: centralizar aí jogaria o começo do
+            // texto pra fora do viewport. Nesse caso alinha pelo topo, com folga
+            // pra navbar fixa.
+            const rect = el.getBoundingClientRect();
+            if (rect.height > window.innerHeight - 120) {
+                window.scrollTo({ top: window.scrollY + rect.top - 100, behavior: 'smooth' });
+            } else {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             setHighlightedId(highlightId);
         }, 150);
         return () => clearTimeout(timer);
@@ -136,6 +145,7 @@ export default function BewertungenClient({ whatsappHref, highlightId }: Bewertu
                                 <ReviewCard
                                     review={review}
                                     layout="horizontal"
+                                    defaultExpanded={highlightId === review.id}
                                 />
                             </div>
                         ))}
