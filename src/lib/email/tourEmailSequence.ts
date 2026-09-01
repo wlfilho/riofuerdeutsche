@@ -117,6 +117,43 @@ export async function getTourEmailRecipient(
   };
 }
 
+export interface SequencePreviewEmail {
+  number: number;
+  name: string;
+  scheduled_date: string;
+  /** 'skipped' = a data já passou; esse e-mail não será enviado. */
+  status: string;
+}
+
+export interface SequencePreview {
+  recipient: TourEmailRecipient;
+  emails: SequencePreviewEmail[];
+}
+
+/**
+ * O que aconteceria se a sequência fosse iniciada agora — sem escrever nada.
+ *
+ * Existe porque o disparo pede confirmação: o Will precisa ver para quem vai, em
+ * que datas, e qual e-mail sai na hora, antes de autorizar.
+ */
+export async function previewTourEmailSequence(
+  supabase: SupabaseClient,
+  leadId: string,
+): Promise<SequencePreview | null> {
+  const recipient = await getTourEmailRecipient(supabase, leadId);
+  if (!recipient) return null;
+
+  return {
+    recipient,
+    emails: calculateSchedule(new Date(`${recipient.arrival_date}T12:00:00`)).map(item => ({
+      number: item.number,
+      name: item.name,
+      scheduled_date: item.date.toISOString().split('T')[0],
+      status: item.status,
+    })),
+  };
+}
+
 export type EnsureSequenceResult =
   | { scheduled: true; recipient: TourEmailRecipient }
   | { scheduled: false; reason: 'ja-agendada' | 'sem-data-fechada' | 'erro'; error?: string };
@@ -167,27 +204,29 @@ export async function ensureTourEmailSequence(
 export const CONFIRMATION_EMAIL_NUMBER = EMAIL_SEQUENCE[0].number;
 
 /**
- * Chamado quando um lead vira `closed` pelo app: agenda a sequência e dispara a
- * confirmação na hora, marcando o log conforme o resultado.
+ * Abre a sequência de um lead que fechou: agenda os quatro e-mails e dispara a
+ * confirmação na hora.
  *
- * Best-effort de propósito — falha de e-mail não pode derrubar o fechamento de
- * uma venda. Erros ficam no log da sequência e no console.
+ * SÓ roda por ação explícita do Will, no botão da aba E-mails do contato.
+ * Fechar um lead — pela proposta, pelo kanban ou por escrita direta no
+ * Postgres — não manda e-mail nenhum: o primeiro contato pós-venda é dele, e
+ * um disparo automático a partir de uma troca de status no kanban acerta a
+ * pessoa errada na hora errada com facilidade demais.
  *
- * NÃO roda no cron nem em trigger de banco: quem fechou antes de 31/08/2026 não
- * recebe e-mail retroativo (decisão registrada na nota do Obsidian). Fechamento
- * feito por escrita direta no Postgres, portanto, agenda nada — o kanban ou a
- * proposta é que abrem a sequência.
+ * Nem o cron chama isto, pelo mesmo motivo pelo qual não houve backfill: um
+ * agendamento automático dos leads já fechados mandaria e-mail retroativo para
+ * quem fechou meses atrás.
  */
 export async function startTourEmailSequence(
   supabase: SupabaseClient,
   leadId: string,
-): Promise<void> {
+): Promise<EnsureSequenceResult> {
   const result = await ensureTourEmailSequence(supabase, leadId);
   if (!result.scheduled) {
     if (result.reason === 'erro') {
       console.error('[startTourEmailSequence]', leadId, result.error);
     }
-    return;
+    return result;
   }
 
   // Import tardio: `sendConfirmationEmail` arrasta o cliente Resend, que não
@@ -207,5 +246,8 @@ export async function startTourEmailSequence(
 
   if ('error' in envio) {
     console.error('[startTourEmailSequence] confirmação falhou:', leadId, envio.error);
+    return { scheduled: false, reason: 'erro', error: envio.error };
   }
+
+  return result;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Phone } from 'lucide-react';
 import { digitsOnly } from '@/lib/phone';
@@ -408,16 +408,155 @@ function CrmTab({ leads, lead_contacts }: { leads: Lead[]; lead_contacts: LeadCo
 
 // ── Emails Tab ────────────────────────────────────────────────────────────────
 
+interface SequencePreview {
+  recipient: { name: string; email: string; arrival_date: string; departure_date: string; tour_details: string };
+  emails: { number: number; name: string; scheduled_date: string; status: string }[];
+}
+
+/**
+ * Lead fechado sem sequência: mostra o que seria enviado e pede confirmação.
+ *
+ * O disparo é manual de propósito. Fechar um lead não manda e-mail nenhum — o
+ * primeiro contato pós-venda é do Will, e um automático amarrado à troca de
+ * status no kanban erra a pessoa e a hora com facilidade demais.
+ */
+function StartSequencePanel({ leadId, onStarted }: { leadId: string; onStarted: () => void }) {
+  const t = useTranslations('admin.contatos');
+  const tCommon = useTranslations('admin.common');
+  const [preview, setPreview] = useState<SequencePreview | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [starting, setStarting] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch(`/api/admin/leads/${leadId}/email-sequence`)
+      .then(r => r.json())
+      .then(d => { if (!cancelled) setPreview(d.preview ?? null); })
+      .catch(() => { if (!cancelled) setPreview(null); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [leadId]);
+
+  const handleStart = async () => {
+    setStarting(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/leads/${leadId}/email-sequence`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail ?? data.error ?? tCommon('erroDesconhecido'));
+      onStarted();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      setConfirming(false);
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  if (loading) {
+    return <p className="text-sm text-gray-400">{tCommon('carregando')}</p>;
+  }
+
+  if (!preview) {
+    return (
+      <div className="p-4 rounded-xl bg-amber-50 border border-amber-100">
+        <p className="text-sm text-amber-800">{t('sequenciaSemData')}</p>
+      </div>
+    );
+  }
+
+  const imediato = preview.emails[0];
+  const agendados = preview.emails.filter(e => e.number !== imediato.number && e.status !== 'skipped');
+  const pulados = preview.emails.filter(e => e.status === 'skipped');
+
+  return (
+    <div className="rounded-xl border border-gray-200 overflow-hidden">
+      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+        <p className="text-sm font-semibold text-gray-800">{t('sequenciaNaoIniciada')}</p>
+        <p className="text-xs text-gray-500 mt-0.5">
+          {preview.recipient.email} · {fmtDate(preview.recipient.arrival_date)} – {fmtDate(preview.recipient.departure_date)}
+        </p>
+      </div>
+
+      <ul className="divide-y divide-gray-50">
+        <li className="flex items-center gap-3 px-4 py-2.5">
+          <span className="flex-shrink-0 px-2 py-0.5 text-[11px] font-semibold rounded-full bg-amber-100 text-amber-800">
+            {t('sequenciaAgora')}
+          </span>
+          <span className="flex-1 text-sm text-gray-800">{imediato.name}</span>
+        </li>
+        {agendados.map(e => (
+          <li key={e.number} className="flex items-center gap-3 px-4 py-2.5">
+            <span className="flex-shrink-0 w-16 text-[11px] text-gray-400 tabular-nums">
+              {fmtDate(e.scheduled_date)}
+            </span>
+            <span className="flex-1 text-sm text-gray-600">{e.name}</span>
+          </li>
+        ))}
+        {pulados.map(e => (
+          <li key={e.number} className="flex items-center gap-3 px-4 py-2.5">
+            <span className="flex-shrink-0 w-16 text-[11px] text-gray-300 tabular-nums">
+              {fmtDate(e.scheduled_date)}
+            </span>
+            <span className="flex-1 text-sm text-gray-400 line-through">{e.name}</span>
+            <span className="text-[11px] text-gray-400">{t('sequenciaDataPassou')}</span>
+          </li>
+        ))}
+      </ul>
+
+      {error && (
+        <p className="px-4 py-2 text-xs text-red-700 bg-red-50 border-t border-red-100">{error}</p>
+      )}
+
+      <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+        {confirming ? (
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="flex-1 min-w-0 text-xs text-gray-700">
+              {t('sequenciaConfirmar', { email: preview.recipient.email })}
+            </p>
+            <button
+              onClick={() => setConfirming(false)}
+              disabled={starting}
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+            >
+              {tCommon('cancelar')}
+            </button>
+            <button
+              onClick={handleStart}
+              disabled={starting}
+              className="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+            >
+              {starting ? tCommon('enviando') : t('sequenciaConfirmarBotao')}
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setConfirming(true)}
+            className="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            {t('sequenciaIniciar')}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function EmailsTab({
   leads,
   proposals,
   tour_dates,
   email_logs,
+  onSequenceStarted,
 }: {
   leads: Lead[];
   proposals: ContactProposal[];
   tour_dates: ContactTourDate[];
   email_logs: EmailLog[];
+  onSequenceStarted: () => void;
 }) {
   const t = useTranslations('admin.contatos');
   const tCommon = useTranslations('admin.common');
@@ -558,6 +697,8 @@ function EmailsTab({
                 })}
               </ul>
             </div>
+          ) : lead.status === 'closed' ? (
+            <StartSequencePanel leadId={lead.id} onStarted={onSequenceStarted} />
           ) : (
             <p className="text-sm text-gray-400 italic">{t('nenhumEmailSequencia')}</p>
           )}
@@ -920,6 +1061,9 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
     });
   };
 
+  const [reloadKey, setReloadKey] = useState(0);
+  const reload = useCallback(() => setReloadKey(k => k + 1), []);
+
   useEffect(() => {
     let cancelled = false;
     fetch(`/api/admin/contacts/${contactId}`)
@@ -933,7 +1077,7 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contactId]);
+  }, [contactId, reloadKey]);
 
   const displayName = contactName || contactEmail;
   const phone = data?.contact.phone?.trim() || null;
@@ -1075,6 +1219,7 @@ export default function ContactProfile({ contactId, contactEmail, contactName, o
                     proposals={data.proposals}
                     tour_dates={data.tour_dates}
                     email_logs={data.email_logs}
+                    onSequenceStarted={reload}
                   />
                 )}
               </>
