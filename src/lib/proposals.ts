@@ -122,6 +122,14 @@ export interface ProposalItem {
   price_override_eur?: number | null;
   // Snapshot: a atividade usa veículo próprio (transporte por faixa)?
   uses_vehicle?: boolean;
+  // Atração coringa: atividade digitada direto na proposta, sem linha no
+  // catálogo. Não há o que resolver em proposal_services, então o texto é
+  // intocável — nem o congelamento do envio nem a troca de idioma no builder
+  // mexem nele.
+  is_custom?: boolean;
+  // Só em itens coringa: slug do tipo de transporte escolhido, guardado para o
+  // editor reexibir a escolha; o efeito no preço já está em uses_vehicle.
+  transport_type_slug?: string | null;
   // Só em itens 'day_transport': horas de deslocamento cobradas do motorista.
   transport_hours?: number;
   // Só em itens 'day_transport': toggles do dia congelados na proposta.
@@ -473,6 +481,10 @@ const LEAD_STATUS_BY_PROPOSAL_STATUS: Record<ProposalStatus, string> = {
 // serviços, então não há tradução para resolver — a linha passa intacta.
 const DAY_TRANSPORT_SLUG = '__day_transport__';
 
+// Slug sintético das atrações coringa, pelo mesmo motivo: não existem em
+// proposal_services, então nada deve tentar resolvê-las contra o catálogo.
+const CUSTOM_SERVICE_SLUG = '__custom__';
+
 /**
  * Congela o conteúdo da proposta no momento do envio.
  *
@@ -518,6 +530,10 @@ async function freezeProposalOnSend(id: string): Promise<void> {
           (item) =>
             item.service_slug !== DAY_TRANSPORT_SLUG &&
             item.kind !== 'day_transport' &&
+            // Atração coringa: o texto foi digitado na proposta, no idioma
+            // dela. Não existe serviço de catálogo por trás para resolver.
+            !item.is_custom &&
+            item.service_slug !== CUSTOM_SERVICE_SLUG &&
             // Só o que está faltando: descrição já congelada é intocável.
             (item.service_description === undefined || item.service_description === null),
         )
