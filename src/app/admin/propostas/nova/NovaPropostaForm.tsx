@@ -25,6 +25,12 @@ import type {
 // lá sem acrescentar aqui não é erro de tipo, mas remover uma é.
 const CURRENCY_OPTIONS: ProposalCurrency[] = ['EUR', 'BRL'];
 
+// Slug sintético das atrações coringa (atividades montadas dentro da proposta,
+// que não existem no catálogo). Literal também em src/lib/proposals.ts, pelo
+// mesmo motivo da lista de moedas: importar valor de lá arrastaria o client
+// Supabase de servidor para o bundle do browser.
+const CUSTOM_SLUG = '__custom__';
+
 export type InitialLead = {
   id: string;
   name: string;
@@ -59,6 +65,13 @@ type EditableItem = {
   // A atividade usa veículo próprio (transporte por faixa)? Entra no custo
   // de transporte do dia (diária do carro + motorista por hora).
   uses_vehicle: boolean;
+  // Atração coringa: montada direto na proposta, sem serviço no catálogo. O
+  // texto foi digitado aqui, no idioma da proposta, então não é re-resolvido
+  // no envio nem invalidado ao trocar o idioma.
+  is_custom: boolean;
+  // Só em coringa: tipo de transporte escolhido, guardado para o modal
+  // reexibir a escolha; o efeito no preço já está em uses_vehicle.
+  transport_type_slug: string | null;
   // Preço manual do tour (EUR), por cima do calculado; null = segue o cálculo.
   price_override_eur: number | null;
   note: string;
@@ -184,9 +197,62 @@ function splitTransportCost(
   return { chargeableEur, embeddedEur: transport.costEur - chargeableEur };
 }
 
-function serviceUsesVehicle(service: ProposalService): boolean {
-  const t = service.transport_type;
+// Um tipo de transporte "por faixas" (carro + motorista terceirizados) é o
+// que faz as horas de deslocamento entrarem no custo do dia; a pé, transporte
+// manual ou já incluído, não.
+function transportUsesVehicle(t: ProposalTransportType | null | undefined): boolean {
   return !!t && !t.is_manual && !t.is_included && t.slug !== 'a-pe' && t.tiers.length > 0;
+}
+
+function serviceUsesVehicle(service: ProposalService): boolean {
+  return transportUsesVehicle(service.transport_type);
+}
+
+// Horas decimais ↔ "HH:MM" do <input type="time"> — mesmo par usado no
+// cadastro de atividades, para os dois formulários lerem igual.
+function hoursToTime(h: number | null | undefined): string {
+  if (h == null || isNaN(h)) return '';
+  const totalMin = Math.round(h * 60);
+  const hh = Math.floor(totalMin / 60);
+  const mm = totalMin % 60;
+  return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+}
+
+function timeToHours(s: string): number | null {
+  if (!s) return null;
+  const [hh, mm] = s.split(':').map(Number);
+  const total = (hh || 0) + (mm || 0) / 60;
+  return total > 0 ? Math.round(total * 1000) / 1000 : null;
+}
+
+// Insere o item no ponto pedido do dia: no começo, no fim, ou antes/depois de
+// uma atividade âncora. A ordem do array global define a ordem dentro do dia.
+function insertItem(
+  prev: EditableItem[],
+  newItem: EditableItem,
+  position: InsertPosition,
+): EditableItem[] {
+  if (position === 'start') {
+    const idx = prev.findIndex(i => i.day === newItem.day);
+    if (idx >= 0) {
+      const next = [...prev];
+      next.splice(idx, 0, newItem);
+      return next;
+    }
+  } else if (typeof position === 'object') {
+    const anchorId = 'after' in position ? position.after : position.before;
+    const idx = prev.findIndex(i => i._id === anchorId);
+    if (idx >= 0) {
+      const next = [...prev];
+      next.splice('after' in position ? idx + 1 : idx, 0, newItem);
+      return next;
+    }
+  }
+  return [...prev, newItem];
+}
+
+function randomId(): string {
+  return Math.random().toString(36).slice(2);
 }
 
 // Returns the total EUR per item, distributing the day's ceiled guide fee
@@ -393,6 +459,371 @@ function FallbackBadge({ service }: { service: ProposalService }) {
   );
 }
 
+// ─── CustomActivityModal (atração coringa) ────────────────────────────────────
+
+// Atração coringa: atividade montada dentro da proposta, sem passar pelo
+// catálogo de /admin/propostas/atividades. É para o passeio pontual e
+// exclusivo daquele grupo — o que se repete continua valendo cadastrar, para
+// ganhar tradução, grupo e reuso.
+//
+// Os campos são os mesmos do catálogo porque o preço é calculado igual: as
+// horas entram no honorário do guia do dia e as linhas de custo somam por
+// cima. A diferença é o alcance: nada disto sai da proposta.
+
+type CustomCostDraft = {
+  _id: string;
+  description: string;
+  // String (e não number) enquanto está no formulário: campo vazio é um
+  // estado válido de digitação, e 0 não é a mesma coisa que "ainda não sei".
+  base_price: string;
+  currency: 'EUR' | 'BRL';
+  price_type: 'fixed' | 'per_pax' | 'per_hour';
+  included: boolean;
+};
+
+type CustomActivityDraft = {
+  name: string;
+  description: string;
+  // "HH:MM" — o formulário fala em relógio, o item guarda horas decimais.
+  duration_hours: string;
+  transfer_hours_to: string;
+  transfer_hours_back: string;
+  transport_type_id: string;
+  costs: CustomCostDraft[];
+};
+
+// O que o modal define no item; o resto (dia, slug, nota, preço manual) é do
+// item do itinerário, não do formulário.
+type CustomItemFields = Pick<
+  EditableItem,
+  | 'service_name'
+  | 'service_description'
+  | 'duration_hours'
+  | 'transfer_hours_to'
+  | 'transfer_hours_back'
+  | 'costs'
+  | 'uses_vehicle'
+  | 'transport_type_slug'
+>;
+
+function emptyCustomDraft(): CustomActivityDraft {
+  return {
+    name: '',
+    description: '',
+    duration_hours: '',
+    transfer_hours_to: '',
+    transfer_hours_back: '',
+    transport_type_id: '',
+    costs: [],
+  };
+}
+
+function itemToCustomDraft(
+  item: EditableItem,
+  transportTypes: ProposalTransportType[],
+): CustomActivityDraft {
+  const transport = item.transport_type_slug
+    ? transportTypes.find(t => t.slug === item.transport_type_slug)
+    : undefined;
+  return {
+    name: item.service_name,
+    description: item.service_description ?? '',
+    duration_hours: hoursToTime(item.duration_hours),
+    transfer_hours_to: hoursToTime(item.transfer_hours_to),
+    transfer_hours_back: hoursToTime(item.transfer_hours_back),
+    transport_type_id: transport?.id ?? '',
+    costs: (item.costs ?? []).map(c => ({
+      _id: randomId(),
+      description: c.description,
+      base_price: String(c.base_price),
+      currency: c.currency,
+      price_type: c.price_type,
+      included: c.included,
+    })),
+  };
+}
+
+function customDraftToFields(
+  draft: CustomActivityDraft,
+  transportTypes: ProposalTransportType[],
+): CustomItemFields {
+  const transport = transportTypes.find(t => t.id === draft.transport_type_id);
+  return {
+    service_name: draft.name.trim(),
+    service_description: draft.description.trim() || null,
+    duration_hours: timeToHours(draft.duration_hours),
+    transfer_hours_to: timeToHours(draft.transfer_hours_to),
+    transfer_hours_back: timeToHours(draft.transfer_hours_back),
+    // Linha em branco (sem descrição e sem valor) é resto de digitação, não
+    // custo: some no salvamento em vez de virar "€0" na proposta.
+    costs: draft.costs
+      .filter(c => c.description.trim() !== '' || parseFloat(c.base_price) > 0)
+      .map(c => ({
+        description: c.description.trim(),
+        base_price: parseFloat(c.base_price) || 0,
+        currency: c.currency,
+        price_type: c.price_type,
+        included: c.included,
+      })),
+    uses_vehicle: transportUsesVehicle(transport),
+    transport_type_slug: transport?.slug ?? null,
+  };
+}
+
+function CustomActivityModal({
+  initial,
+  isEditing,
+  transportTypes,
+  onCancel,
+  onSave,
+}: {
+  initial: CustomActivityDraft;
+  isEditing: boolean;
+  transportTypes: ProposalTransportType[];
+  onCancel: () => void;
+  onSave: (draft: CustomActivityDraft) => void;
+}) {
+  const t = useTranslations('admin.propostas');
+  const tAtv = useTranslations('admin.atividades');
+  const tCommon = useTranslations('admin.common');
+  const [draft, setDraft] = useState<CustomActivityDraft>(initial);
+  const [error, setError] = useState<string | null>(null);
+
+  const set = <K extends keyof CustomActivityDraft>(key: K) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setDraft(d => ({ ...d, [key]: e.target.value }));
+
+  const updateCost = (id: string, patch: Partial<CustomCostDraft>) =>
+    setDraft(d => ({
+      ...d,
+      costs: d.costs.map(c => (c._id === id ? { ...c, ...patch } : c)),
+    }));
+
+  const addCost = () =>
+    setDraft(d => ({
+      ...d,
+      costs: [
+        ...d.costs,
+        {
+          _id: randomId(),
+          description: '',
+          base_price: '',
+          currency: 'BRL',
+          price_type: 'per_pax',
+          included: true,
+        },
+      ],
+    }));
+
+  const removeCost = (id: string) =>
+    setDraft(d => ({ ...d, costs: d.costs.filter(c => c._id !== id) }));
+
+  const totalHours =
+    (timeToHours(draft.transfer_hours_to) ?? 0)
+    + (timeToHours(draft.duration_hours) ?? 0)
+    + (timeToHours(draft.transfer_hours_back) ?? 0);
+
+  const usesVehicle = transportUsesVehicle(
+    transportTypes.find(tt => tt.id === draft.transport_type_id),
+  );
+
+  const handleSave = () => {
+    if (!draft.name.trim()) { setError(tCommon('nomeObrigatorio')); return; }
+    onSave(draft);
+  };
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
+      <div
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+        onKeyDown={e => { if (e.key === 'Escape') onCancel(); }}
+      >
+        <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">
+              {isEditing ? t('coringaEditarTitulo') : t('coringaTitulo')}
+            </h2>
+            <p className="text-xs text-gray-400 mt-0.5">{t('coringaSubtitulo')}</p>
+          </div>
+          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+        </div>
+
+        <div className="overflow-y-auto px-6 py-5 space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {tCommon('nome')} <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={draft.name}
+              onChange={set('name')}
+              autoFocus
+              placeholder={t('coringaNomePlaceholder')}
+              className={INPUT_CLS}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {tAtv('descricaoCurta')}{' '}
+              <span className="text-xs font-normal text-gray-400">{tCommon('opcional')}</span>
+            </label>
+            <textarea
+              value={draft.description}
+              onChange={set('description')}
+              rows={2}
+              placeholder={t('coringaDescricaoPlaceholder')}
+              className={`${INPUT_CLS} resize-none`}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{tAtv('tipoTransporte')}</label>
+            <select value={draft.transport_type_id} onChange={set('transport_type_id')} className={INPUT_CLS}>
+              <option value="">{tAtv('nenhumNaoDefinido')}</option>
+              {transportTypes.map(tt => (
+                <option key={tt.id} value={tt.id}>{tt.name}</option>
+              ))}
+            </select>
+            {usesVehicle && (
+              <p className="mt-1 text-xs text-blue-600">{t('coringaTransporteVeiculo')}</p>
+            )}
+          </div>
+
+          <div>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{tAtv('tempo')}</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{tAtv('duracao')}</label>
+                <input type="time" value={draft.duration_hours} onChange={set('duration_hours')} className={INPUT_CLS} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{tAtv('ida')}</label>
+                <input type="time" value={draft.transfer_hours_to} onChange={set('transfer_hours_to')} className={INPUT_CLS} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{tAtv('volta')}</label>
+                <input type="time" value={draft.transfer_hours_back} onChange={set('transfer_hours_back')} className={INPUT_CLS} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{tAtv('totalEstimado')}</label>
+                <div className={`${INPUT_CLS} bg-gray-50 text-gray-700 font-semibold pointer-events-none`}>
+                  {totalHours > 0 ? formatGroupHours(totalHours) : tCommon('vazio')}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{tAtv('itensCusto')}</h3>
+              <button
+                onClick={addCost}
+                className="text-xs font-semibold text-green-600 hover:text-green-800 transition-colors"
+              >
+                {tAtv('adicionarCusto')}
+              </button>
+            </div>
+            {draft.costs.length === 0 ? (
+              <p className="text-sm text-gray-400 italic">{tAtv('semCustosAdicionais')}</p>
+            ) : (
+              <div className="space-y-2">
+                <div className="grid grid-cols-[1fr_5.5rem_4.5rem_8rem_auto_2rem] gap-2">
+                  <span className="text-xs text-gray-400">{tAtv('descricao')}</span>
+                  <span className="text-xs text-gray-400">{tCommon('valor')}</span>
+                  <span className="text-xs text-gray-400">{tAtv('moeda')}</span>
+                  <span className="text-xs text-gray-400">{tAtv('tipo')}</span>
+                  <span />
+                  <span />
+                </div>
+                {draft.costs.map(cost => (
+                  <div key={cost._id} className="grid grid-cols-[1fr_5.5rem_4.5rem_8rem_auto_2rem] gap-2 items-center">
+                    <input
+                      type="text"
+                      value={cost.description}
+                      onChange={e => updateCost(cost._id, { description: e.target.value })}
+                      placeholder={tAtv('guiaPlaceholder')}
+                      className={INPUT_CLS}
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={cost.base_price}
+                      onChange={e => updateCost(cost._id, { base_price: e.target.value })}
+                      placeholder="0"
+                      className={INPUT_CLS}
+                    />
+                    <select
+                      value={cost.currency}
+                      onChange={e => updateCost(cost._id, { currency: e.target.value as CustomCostDraft['currency'] })}
+                      className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="EUR">EUR</option>
+                      <option value="BRL">BRL</option>
+                    </select>
+                    <select
+                      value={cost.price_type}
+                      onChange={e => updateCost(cost._id, { price_type: e.target.value as CustomCostDraft['price_type'] })}
+                      className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="fixed">{tAtv('tiposPreco.fixed')}</option>
+                      <option value="per_pax">{tAtv('tiposPreco.per_pax')}</option>
+                      <option value="per_hour">{tAtv('tiposPreco.per_hour')}</option>
+                    </select>
+                    <label
+                      className="flex items-center gap-1 cursor-pointer select-none"
+                      title={t('marcadoEntraPreco')}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={cost.included}
+                        onChange={e => updateCost(cost._id, { included: e.target.checked })}
+                        className="rounded"
+                      />
+                      <span className="text-xs text-gray-500 whitespace-nowrap">{tAtv('cobrar')}</span>
+                    </label>
+                    <button
+                      onClick={() => removeCost(cost._id)}
+                      className="p-1.5 text-gray-300 hover:text-red-500 transition-colors rounded"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {error && (
+            <div className="p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200">
+              {error}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            {tCommon('cancelar')}
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-5 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            {isEditing ? tCommon('salvar') : t('coringaAdicionar')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── ServicePickerPanel ───────────────────────────────────────────────────────
 
 // Minúsculas e sem acentos, para a busca tolerar "selaron" → "Selarón".
@@ -419,6 +850,7 @@ function ServicePickerPanel({
   open,
   onAdd,
   onAddGroup,
+  onAddCustom,
   onClose,
 }: {
   services: ProposalService[];
@@ -426,6 +858,8 @@ function ServicePickerPanel({
   open: boolean;
   onAdd: (service: ProposalService) => void;
   onAddGroup: (services: ProposalService[]) => void;
+  // Abre o modal da atração coringa na mesma posição de inserção do painel.
+  onAddCustom: () => void;
   onClose: () => void;
 }) {
   const t = useTranslations('admin.propostas');
@@ -509,6 +943,13 @@ function ServicePickerPanel({
               placeholder={t('buscarAtividade')}
               className={INPUT_CLS}
             />
+            <button
+              onClick={onAddCustom}
+              title={t('coringaHint')}
+              className="mt-2 w-full px-3 py-2 rounded-lg border border-dashed border-gray-300 text-xs font-semibold text-gray-500 hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-colors"
+            >
+              {t('coringaBotao')}
+            </button>
             <div className="flex gap-1.5 overflow-x-auto py-2.5">
               <button onClick={() => setCategory('all')} className={chipCls(category === 'all')}>
                 {t('todasCategorias')}
@@ -650,6 +1091,7 @@ function DayScheduleGrid({
   onMoveItem,
   onRequestAdd,
   onDropItem,
+  onEditCustom,
   getCatalogDuration,
 }: {
   segments: DaySegment[];
@@ -664,6 +1106,8 @@ function DayScheduleGrid({
   onMoveItem: (id: string, direction: -1 | 1) => void;
   onRequestAdd: (position: InsertPosition) => void;
   onDropItem: (draggedId: string, targetItemId?: string) => void;
+  // Reabre o modal da atração coringa para editar um item já no dia.
+  onEditCustom: (id: string) => void;
   // Duração cadastrada no catálogo (undefined = serviço não existe mais lá).
   getCatalogDuration: (slug: string) => number | null | undefined;
 }) {
@@ -762,6 +1206,17 @@ function DayScheduleGrid({
 
           const controls = (
             <div className="flex items-center gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
+              {item.is_custom && (
+                <button
+                  onClick={() => onEditCustom(item._id)}
+                  title={t('coringaEditar')}
+                  className="p-0.5 text-gray-300 hover:text-green-600 transition-colors rounded"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                  </svg>
+                </button>
+              )}
               <button
                 onClick={() => onMoveItem(item._id, -1)}
                 disabled={isFirst}
@@ -804,7 +1259,14 @@ function DayScheduleGrid({
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-800">{item.service_name}</p>
+                    <p className="text-sm font-semibold text-gray-800">
+                      {item.service_name}
+                      {item.is_custom && (
+                        <span className="ml-1.5 align-middle px-1 py-px rounded bg-amber-50 text-amber-600 text-[10px] font-medium tracking-wide">
+                          {t('coringaBadge')}
+                        </span>
+                      )}
+                    </p>
                     <p className="text-[11px] text-green-700 tabular-nums">
                       {minutesToLabel(seg.startMin)}–{minutesToLabel(seg.endMin)} · {formatHoursShort(seg.hours)}
                     </p>
@@ -959,6 +1421,7 @@ function DayScheduleGrid({
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-xs font-semibold text-green-900 leading-tight truncate">
+                    {item.is_custom && <span title={t('coringaBadge')}>✨ </span>}
                     {item.service_name}
                   </p>
                   {controls}
@@ -1019,6 +1482,7 @@ function DayBlock({
   items,
   services,
   groups,
+  transportTypes,
   pax,
   exchangeRate,
   guideRate,
@@ -1032,6 +1496,7 @@ function DayBlock({
   onChangeStartTime,
   onChangeEndTime,
   onAddItem,
+  onAddCustomItem,
   onUpdateItem,
   onRemoveItem,
   onMoveItem,
@@ -1044,6 +1509,8 @@ function DayBlock({
   items: EditableItem[];
   services: ProposalService[];
   groups: ResolvedServiceGroup[];
+  // Catálogo de tipos de transporte, para o modal da atração coringa.
+  transportTypes: ProposalTransportType[];
   pax: number;
   exchangeRate: number;
   guideRate: number;
@@ -1057,6 +1524,7 @@ function DayBlock({
   onChangeStartTime: (t: string) => void;
   onChangeEndTime: (t: string) => void;
   onAddItem: (day: string, service: ProposalService, position?: InsertPosition) => string;
+  onAddCustomItem: (day: string, fields: CustomItemFields, position?: InsertPosition) => string;
   onUpdateItem: (id: string, updates: Partial<EditableItem>) => void;
   onRemoveItem: (id: string) => void;
   onMoveItem: (id: string, direction: -1 | 1) => void;
@@ -1067,6 +1535,32 @@ function DayBlock({
 }) {
   const t = useTranslations('admin.propostas');
   const [pickerFor, setPickerFor] = useState<InsertPosition | null>(null);
+  // Atração coringa: 'create' carrega a posição de inserção que o painel
+  // estava usando; 'edit' carrega o item que está sendo reaberto.
+  const [customModal, setCustomModal] = useState<
+    | { mode: 'create'; position: InsertPosition }
+    | { mode: 'edit'; itemId: string }
+    | null
+  >(null);
+
+  const editingCustom = customModal?.mode === 'edit'
+    ? items.find(i => i._id === customModal.itemId) ?? null
+    : null;
+
+  // Salvar a coringa: cria o item no dia (herdando a posição do painel) ou
+  // atualiza o que já está lá. Como no picker, uma criação posicional deixa a
+  // âncora no item novo, para a próxima adição entrar em seguida.
+  const handleCustomSave = (draft: CustomActivityDraft) => {
+    const fields = customDraftToFields(draft, transportTypes);
+    if (customModal?.mode === 'edit') {
+      onUpdateItem(customModal.itemId, fields);
+    } else if (customModal?.mode === 'create') {
+      const { position } = customModal;
+      const newId = onAddCustomItem(day, fields, position);
+      if (position !== 'end') setPickerFor({ after: newId });
+    }
+    setCustomModal(null);
+  };
 
   // Multi-add com o painel aberto: em inserções posicionais ('start' ou
   // before/after via "+" do meio do dia), a âncora avança para o item
@@ -1219,6 +1713,7 @@ function DayBlock({
           open={pickerFor !== null}
           onAdd={handlePickerAdd}
           onAddGroup={handlePickerAddGroup}
+          onAddCustom={() => setCustomModal({ mode: 'create', position: pickerFor ?? 'end' })}
           onClose={() => setPickerFor(null)}
         />
       </div>
@@ -1237,10 +1732,20 @@ function DayBlock({
           onMoveItem={onMoveItem}
           onRequestAdd={setPickerFor}
           onDropItem={(draggedId, targetItemId) => onDropItem(draggedId, day, targetItemId)}
+          onEditCustom={id => setCustomModal({ mode: 'edit', itemId: id })}
           getCatalogDuration={slug => services.find(s => s.slug === slug)?.duration_hours}
         />
       </div>
 
+      {customModal && (customModal.mode === 'create' || editingCustom) && (
+        <CustomActivityModal
+          initial={editingCustom ? itemToCustomDraft(editingCustom, transportTypes) : emptyCustomDraft()}
+          isEditing={!!editingCustom}
+          transportTypes={transportTypes}
+          onCancel={() => setCustomModal(null)}
+          onSave={handleCustomSave}
+        />
+      )}
     </div>
   );
 }
@@ -1430,6 +1935,8 @@ export default function NovaPropostaForm({
           included: c.included ?? true,
         })),
         uses_vehicle: item.uses_vehicle ?? (service ? serviceUsesVehicle(service) : false),
+        is_custom: item.is_custom ?? false,
+        transport_type_slug: item.transport_type_slug ?? null,
         price_override_eur: item.price_override_eur ?? null,
         note: item.note,
       };
@@ -1685,9 +2192,13 @@ export default function NovaPropostaForm({
   // que é a única resolução que precisa estar certa para o cliente. O catálogo
   // exibido na barra lateral só acompanha depois de salvar e reabrir, já que
   // ele é resolvido no servidor.
+  //
+  // Atrações coringa ficam de fora: o texto delas foi digitado à mão, não veio
+  // do catálogo, e não há nada que o reescreva depois — apagá-lo perderia o
+  // trabalho do Will em vez de sincronizar idioma.
   const handleChangeLocale = useCallback((next: string) => {
     setLocale(next);
-    setItems(prev => prev.map(i => ({ ...i, service_description: null })));
+    setItems(prev => prev.map(i => (i.is_custom ? i : { ...i, service_description: null })));
   }, []);
 
   // Devolve o _id do item criado — o painel usa como âncora para a próxima
@@ -1710,28 +2221,33 @@ export default function NovaPropostaForm({
         included: c.include_in_price ?? true,
       })),
       uses_vehicle: serviceUsesVehicle(service),
+      is_custom: false,
+      transport_type_slug: service.transport_type?.slug ?? null,
       price_override_eur: null,
       note: '',
     };
-    setItems(prev => {
-      if (position === 'start') {
-        const idx = prev.findIndex(i => i.day === day);
-        if (idx >= 0) {
-          const next = [...prev];
-          next.splice(idx, 0, newItem);
-          return next;
-        }
-      } else if (typeof position === 'object') {
-        const anchorId = 'after' in position ? position.after : position.before;
-        const idx = prev.findIndex(i => i._id === anchorId);
-        if (idx >= 0) {
-          const next = [...prev];
-          next.splice('after' in position ? idx + 1 : idx, 0, newItem);
-          return next;
-        }
-      }
-      return [...prev, newItem];
-    });
+    setItems(prev => insertItem(prev, newItem, position));
+    return newItem._id;
+  }, []);
+
+  // Atração coringa: mesmo caminho de uma atividade do catálogo, só que os
+  // campos vêm do modal em vez de proposal_services. O item nasce completo e
+  // autônomo — daí em diante nada o resolve contra o catálogo.
+  const handleAddCustomItem = useCallback((
+    day: string,
+    fields: CustomItemFields,
+    position: InsertPosition = 'end',
+  ): string => {
+    const newItem: EditableItem = {
+      _id: randomId(),
+      day,
+      service_slug: CUSTOM_SLUG,
+      is_custom: true,
+      price_override_eur: null,
+      note: '',
+      ...fields,
+    };
+    setItems(prev => insertItem(prev, newItem, position));
     return newItem._id;
   }, []);
 
@@ -2316,6 +2832,7 @@ export default function NovaPropostaForm({
                 items={items.filter(i => i.day === day)}
                 services={services}
                 groups={resolvedGroups}
+                transportTypes={transportTypes}
                 pax={pax}
                 exchangeRate={exchangeRate}
                 guideRate={guideRate}
@@ -2329,6 +2846,7 @@ export default function NovaPropostaForm({
                 onChangeStartTime={t => handleChangeStartTime(day, t)}
                 onChangeEndTime={t => handleChangeEndTime(day, t)}
                 onAddItem={handleAddItem}
+                onAddCustomItem={handleAddCustomItem}
                 onUpdateItem={handleUpdateItem}
                 onRemoveItem={handleRemoveItem}
                 onMoveItem={handleMoveItem}
@@ -2393,6 +2911,7 @@ export default function NovaPropostaForm({
                         {formatDayHeader(item.day).split(',')[0]}
                       </span>
                       <span className="text-gray-700 truncate">
+                        {item.is_custom && <span title={t('coringaBadge')}>✨ </span>}
                         {displayItemName(item.service_name)}
                         {serviceBySlug.get(item.service_slug) && (
                           <FallbackBadge service={serviceBySlug.get(item.service_slug)!} />
