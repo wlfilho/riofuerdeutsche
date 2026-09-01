@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star, ChevronDown, ChevronUp, Images } from 'lucide-react';
+import { Star, ChevronDown, ChevronUp, Images, ArrowRight } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { getPublicReviewPhotos, getReviewAvatarUrl } from '@/lib/reviewPhotos';
 
@@ -43,12 +43,21 @@ export interface Review {
 
 interface ReviewCardProps {
     review: Review;
-    /** 'grid' = card vertical original (usado em grids 2 colunas). 'horizontal' = container largo (página /bewertungen). */
-    layout?: 'grid' | 'horizontal';
+    /** 'grid' = card vertical original (usado em grids 2 colunas). 'horizontal' = container largo (página /bewertungen). 'compact' = grid da home, altura limitada. */
+    layout?: 'grid' | 'horizontal' | 'compact';
+    /** Abre o texto já expandido. Usado em /bewertungen/[id]: quem chegou por um
+        link direto pra esta review veio pelo texto, não faz sentido pedir mais
+        um clique em "Mehr lesen". */
+    defaultExpanded?: boolean;
 }
 
-export default function ReviewCard({ review, layout = 'grid' }: ReviewCardProps) {
-    const [isExpanded, setIsExpanded] = useState(false);
+export default function ReviewCard({ review, layout = 'grid', defaultExpanded = false }: ReviewCardProps) {
+    const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+    // No layout 'compact' o corte é do CSS (line-clamp), então só dá pra saber
+    // se sobrou texto medindo o parágrafo: contar caracteres erraria, porque a
+    // mesma review cabe em 6 linhas numa coluna larga e estoura numa estreita.
+    const bodyRef = useRef<HTMLParagraphElement>(null);
+    const [isClamped, setIsClamped] = useState(false);
     const locale = useLocale();
     const t = useTranslations('public.bewertungen');
     const date = new Date(review.created_at);
@@ -59,9 +68,19 @@ export default function ReviewCard({ review, layout = 'grid' }: ReviewCardProps)
         year: 'numeric'
     }).format(date);
 
-    const truncateAt = layout === 'horizontal' ? 260 : 300;
+    const truncateAt = layout === 'grid' ? 300 : 260;
     const isLongText = review.body.length > truncateAt;
     const displayText = isExpanded ? review.body : review.body.slice(0, truncateAt);
+
+    useEffect(() => {
+        const el = bodyRef.current;
+        if (layout !== 'compact' || !el) return;
+        const check = () => setIsClamped(el.scrollHeight > el.clientHeight + 1);
+        check();
+        const observer = new ResizeObserver(check);
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [layout, review.body]);
 
     const publicPhotos = getPublicReviewPhotos(review);
     const avatarUrl = getReviewAvatarUrl(review);
@@ -69,14 +88,17 @@ export default function ReviewCard({ review, layout = 'grid' }: ReviewCardProps)
     // foto tem rota própria (/bewertungen/[id]/foto/[n]), com navegação entre
     // as fotos da mesma review a partir de lá.
     const firstPhotoHref = `/bewertungen/${review.id}/foto/1`;
+    // Card compacto não expande o texto no lugar (quebraria a altura igual):
+    // manda pra lista, que rola até esta review e a destaca.
+    const reviewHref = `/bewertungen/${review.id}`;
 
     // No layout horizontal o avatar acompanha a altura do bloco nome/data/estrelas
     // (~3 linhas) — do tamanho das miniaturas da galeria ele parecia repetir o
     // preview de fotos. No card 'grid' (menor, usado em /ueber-will) mantém o
     // tamanho original.
-    const avatarSize = layout === 'horizontal' ? 'w-16 h-16' : 'w-11 h-11';
-    const avatarPx = layout === 'horizontal' ? 64 : 44;
-    const avatarTextSize = layout === 'horizontal' ? 'text-xl' : 'text-sm';
+    const avatarSize = layout === 'horizontal' ? 'w-16 h-16' : layout === 'compact' ? 'w-14 h-14' : 'w-11 h-11';
+    const avatarPx = layout === 'horizontal' ? 64 : layout === 'compact' ? 56 : 44;
+    const avatarTextSize = layout === 'horizontal' ? 'text-xl' : layout === 'compact' ? 'text-lg' : 'text-sm';
 
     const avatar = avatarUrl ? (
         <Image
@@ -115,6 +137,116 @@ export default function ReviewCard({ review, layout = 'grid' }: ReviewCardProps)
             )}
         </button>
     );
+
+    if (layout === 'compact') {
+        // Card da home. Segue o mesmo desenho do card de /bewertungen no mobile
+        // (cabeçalho com pessoa/nota/data, texto, galeria, "Besucht" no rodapé),
+        // porque essa versão empilhada é a que cabe numa coluna de grid.
+        // Diferença: o texto é cortado por line-clamp em vez de "Mehr lesen"
+        // in-place, então os cards da linha ficam da mesma altura no desktop e
+        // no mobile nenhum deles vira um scroll longo. Texto inteiro em
+        // /bewertungen/[id], que abre a lista já rolada nesta review.
+        const allAttractions = review.attractions ?? [];
+        const visibleAttractions = allAttractions.slice(0, 4);
+        const hiddenAttractions = allAttractions.length - visibleAttractions.length;
+        const hasFooter = publicPhotos.length > 0 || allAttractions.length > 0;
+
+        return (
+            <article className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full overflow-hidden font-sans">
+                {/* Cabeçalho: quem escreveu, quando e quantas estrelas */}
+                <div className="flex items-center gap-4 px-6 py-5 bg-gray-50/70 border-b border-gray-100">
+                    {avatar}
+                    <div className="min-w-0">
+                        <p className="font-bold text-gray-900 text-lg leading-tight truncate">{review.nickname}</p>
+                        <p className="text-gray-400 text-sm mt-0.5">{formattedDate}</p>
+                        <div className="mt-2">{stars}</div>
+                    </div>
+                </div>
+
+                {/* Corpo: título e depoimento, com altura travada pelo line-clamp */}
+                <div className="flex-1 px-6 py-6">
+                    <h3 className="text-lg font-bold text-gray-900 leading-snug mb-2 line-clamp-2">
+                        {review.title}
+                    </h3>
+                    <p ref={bodyRef} className="text-gray-600 leading-relaxed whitespace-pre-line line-clamp-6">
+                        {review.body}
+                    </p>
+                    {isClamped && (
+                        <Link
+                            href={reviewHref}
+                            className="inline-flex items-center gap-1.5 mt-4 text-sm font-bold text-gray-500 hover:text-yellow-700 transition-colors group/more"
+                        >
+                            {t('readMore')}
+                            <ArrowRight className="w-3.5 h-3.5 group-hover/more:translate-x-0.5 transition-transform" />
+                        </Link>
+                    )}
+                </div>
+
+                {/* Rodapé: galeria e locais visitados, sempre colados no fim do card */}
+                {hasFooter && (
+                    <div className="px-6 pb-6 flex flex-col gap-4">
+                        {publicPhotos.length > 0 && (
+                            <div className="pt-4 border-t border-gray-100 flex items-center gap-3 flex-wrap">
+                                <Link
+                                    href={firstPhotoHref}
+                                    className="flex shrink-0 active:scale-95 transition-transform"
+                                    aria-label={t('viewPhotos', { count: publicPhotos.length })}
+                                >
+                                    {publicPhotos.slice(0, 4).map((url, i) => {
+                                        const isLast = i === 3 && publicPhotos.length > 4;
+                                        return (
+                                            <div
+                                                key={i}
+                                                className={`relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm ${i > 0 ? '-ml-3' : ''}`}
+                                                style={{ zIndex: 4 - i }}
+                                            >
+                                                <Image src={url} alt="" fill sizes="40px" className="object-cover" />
+                                                {isLast && (
+                                                    <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
+                                                        <span className="text-white text-[10px] font-bold">+{publicPhotos.length - 4}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </Link>
+                                <Link
+                                    href={firstPhotoHref}
+                                    className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-700 hover:text-yellow-700 transition-colors"
+                                >
+                                    <Images className="w-4 h-4" />
+                                    {t('viewPhotos', { count: publicPhotos.length })}
+                                </Link>
+                            </div>
+                        )}
+
+                        {allAttractions.length > 0 && (
+                            <div className="pt-4 border-t border-gray-100">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">
+                                    {t('visitedLabel')}
+                                </p>
+                                {/* -ml-2.5 alinha o texto do primeiro badge com o "BESUCHT" acima,
+                                    compensando o px-2.5 do badge. */}
+                                <div className="flex flex-wrap gap-1.5 -ml-2.5">
+                                    {visibleAttractions.map(att => (
+                                        <AttractionBadge key={att} name={att} />
+                                    ))}
+                                    {hiddenAttractions > 0 && (
+                                        <Link
+                                            href={reviewHref}
+                                            className="px-2.5 py-1 bg-gray-50 text-gray-500 text-[10px] font-bold rounded-full border border-gray-200 uppercase tracking-wide hover:bg-gray-100 transition-colors"
+                                        >
+                                            +{hiddenAttractions}
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </article>
+        );
+    }
 
     if (layout === 'horizontal') {
         return (
