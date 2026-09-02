@@ -111,7 +111,7 @@ export default function LeadTourDates({
                   {tour.with_partner && (
                     <span
                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                        tour.partner_name ? PARTNER_BADGE.definido : PARTNER_BADGE.pendente
+                        tour.partner_name ? PARTNER_BADGE.calmo : PARTNER_BADGE.pendente
                       }`}
                     >
                       {tour.partner_name ? (

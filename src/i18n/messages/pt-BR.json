@@ -1077,7 +1077,9 @@
       "nomeParceiroAjuda": "Pode deixar em branco agora e preencher quando fechar com alguém.",
       "parceiroADefinir": "Parceiro a definir",
       "parceiroADefinirDica": "Você decidiu passar este dia para um parceiro, mas ainda não fechou com ninguém.",
-      "guiaParceiroNome": "Guia: {nome}"
+      "guiaParceiroNome": "Guia: {nome}",
+      "soComParceiro": "Só com parceiro",
+      "diaDisputado": "Dia disputado"
     },
     "avaliacoes": {
       "metaTitle": "Avaliações — Admin",

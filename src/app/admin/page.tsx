@@ -305,7 +305,7 @@ export default async function DashboardPage() {
                         {tour.with_partner && (
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              tour.partner_name ? PARTNER_BADGE.definido : PARTNER_BADGE.pendente
+                              tour.partner_name ? PARTNER_BADGE.calmo : PARTNER_BADGE.pendente
                             }`}
                             title={tour.partner_name ?? undefined}
                           >
