@@ -78,7 +78,9 @@ export async function getTourEmailRecipient(
   const [{ data: lead }, { data: dates }] = await Promise.all([
     supabase
       .from('price_leads')
-      .select('id, name, email, proposal:proposals(items, total_amount, deposit_amount)')
+      // A FK precisa ser nomeada: proposals.lead_id criou uma segunda relação
+      // entre as tabelas, e aqui vale a proposta vinculada ao lead.
+      .select('id, name, email, proposal:proposals!price_leads_proposal_id_fkey(items, total_amount, deposit_amount)')
       .eq('id', leadId)
       .maybeSingle(),
     supabase
