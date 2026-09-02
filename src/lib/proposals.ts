@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { getServiceTranslation, getServicesWithTranslations } from '@/lib/services-i18n';
-import { syncTourDatesWithLeadStatus } from '@/lib/tourDates';
+import { syncTourDatesWithLeadStatus, syncTourDatesWithProposalDays } from '@/lib/tourDates';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 
 export type ProposalServiceCategory = 'transfer' | 'tour' | 'extra' | 'atração';
@@ -405,6 +405,17 @@ export async function updateProposal(id: string, formData: ProposalFormData): Pr
     .select()
     .single();
   if (error) throw new Error(error.message);
+
+  // O roteiro pode ganhar um dia depois que a proposta já foi enviada ou
+  // fechada, e aí o status não muda — que é o único gatilho da sincronia com o
+  // calendário. Sem este empurrão o dia novo fica só na proposta (Blank
+  // Jürgen, out/2026: Rocinha no dia 26 vendida e ausente da agenda).
+  // Best-effort: falha aqui não pode derrubar o salvamento da proposta.
+  const syncError = await syncTourDatesWithProposalDays(supabase, id);
+  if (syncError) {
+    console.error('[updateProposal] failed to sync tour_dates:', syncError);
+  }
+
   return data as Proposal;
 }
 
