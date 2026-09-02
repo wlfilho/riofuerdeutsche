@@ -42,6 +42,10 @@ export default function MiniCalendar({
   const month = anchor.getMonth();
   const today = todayISO();
 
+  // Anel POR DENTRO (inset-ring), nunca ring + ring-offset: o anel externo
+  // somava 3px de cada lado ao quadrado de 36px, estourava a coluna do grid de
+  // 7 e cortava o dia vizinho. Por dentro, o alerta não muda o tamanho da
+  // célula.
   const renderDay = (iso: string, day: number) => {
     const tours = toursByDay.get(iso) ?? [];
     const hasFechado = tours.some(t => t.status === 'fechado');
@@ -66,9 +70,9 @@ export default function MiniCalendar({
         }
         className={`mx-auto flex h-9 w-9 flex-col items-center justify-center rounded-lg text-xs transition-colors ${
           alert === 'empate'
-            ? 'ring-2 ring-red-400 ring-offset-1'
+            ? 'inset-ring-2 inset-ring-red-400'
             : alert === 'perdendo'
-              ? 'ring-2 ring-violet-300 ring-offset-1'
+              ? 'inset-ring-2 inset-ring-violet-400'
               : ''
         } ${
           isSelected
@@ -159,9 +163,9 @@ export default function MiniCalendar({
                 }
                 className={`flex flex-col items-center justify-center rounded-lg py-2 text-xs transition-colors ${
                   alert === 'empate'
-                    ? 'ring-2 ring-red-400 ring-offset-1'
+                    ? 'inset-ring-2 inset-ring-red-400'
                     : alert === 'perdendo'
-                      ? 'ring-2 ring-violet-300 ring-offset-1'
+                      ? 'inset-ring-2 inset-ring-violet-400'
                       : ''
                 } ${
                   isCurrentMonth
