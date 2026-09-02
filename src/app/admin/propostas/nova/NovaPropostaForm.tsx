@@ -395,6 +395,11 @@ function stepQuarterHour(hours: number, dir: 1 | -1): number {
   return Math.max(0, snapped + dir * 0.25);
 }
 
+// Janela padrão de um dia quando a proposta não traz horário salvo (proposta
+// nova, ou antiga de antes de o horário ser persistido).
+const DEFAULT_DAY_START = '08:00';
+const DEFAULT_DAY_END = '20:00';
+
 // Builds the visual day schedule. Transfers between two activities are merged
 // into a single block of (back + to) / 2 hours so the timeline total matches
 // calcDayHours (and therefore the priced guide hours).
@@ -1896,14 +1901,19 @@ export default function NovaPropostaForm({
   }, [transportTypes]);
 
   // Toggles por dia vêm congelados na linha 'day_transport' de cada dia;
-  // propostas antigas sem os campos contam como ambos ligados.
+  // propostas antigas sem os campos contam como ambos ligados. A janela de
+  // horário do dia viaja na mesma linha; sem ela, cai no default.
   const initialToggles: Record<string, DayToggles> = {};
+  const initialStartTimes: Record<string, string> = {};
+  const initialEndTimes: Record<string, string> = {};
   for (const item of initialData?.items ?? []) {
     if (item.kind === 'day_transport') {
       initialToggles[item.day] = {
         uses_driver: item.uses_driver ?? true,
         uses_rental_car: item.uses_rental_car ?? true,
       };
+      if (item.day_start_time) initialStartTimes[item.day] = item.day_start_time;
+      if (item.day_end_time) initialEndTimes[item.day] = item.day_end_time;
     }
   }
 
@@ -1978,8 +1988,8 @@ export default function NovaPropostaForm({
   // Remarcação recusada por data já ocupada: `from` diz em qual bloco mostrar o
   // aviso, `to` é a data recusada.
   const [dayConflict, setDayConflict] = useState<{ from: string; to: string } | null>(null);
-  const [dayStartTimes, setDayStartTimes] = useState<Record<string, string>>({});
-  const [dayEndTimes, setDayEndTimes] = useState<Record<string, string>>({});
+  const [dayStartTimes, setDayStartTimes] = useState<Record<string, string>>(initialStartTimes);
+  const [dayEndTimes, setDayEndTimes] = useState<Record<string, string>>(initialEndTimes);
   // Dias sem entrada usam o default (ambos ligados) — cenário atual do Will.
   const [dayToggles, setDayToggles] = useState<Record<string, DayToggles>>(initialToggles);
   // Tarifas de transporte da proposta: null = segue a faixa por pax.
@@ -2136,10 +2146,15 @@ export default function NovaPropostaForm({
     setDayConflict(prev => (prev?.from === date || prev?.to === date ? null : prev));
     setActiveDays(prev => prev.filter(d => d !== date));
     setItems(prev => prev.filter(i => i.day !== date));
-    setDayToggles(prev => {
+    const dropKey = <T,>(prev: Record<string, T>): Record<string, T> => {
       const { [date]: _removed, ...rest } = prev;
       return rest;
-    });
+    };
+    setDayToggles(dropKey);
+    // Sem isso, tirar um dia e recolocar a mesma data ressuscitaria o horário
+    // antigo em vez de voltar ao default.
+    setDayStartTimes(dropKey);
+    setDayEndTimes(dropKey);
   }, []);
 
   // Remarcar um dia: o itinerário, os horários e os toggles de transporte
@@ -2402,6 +2417,10 @@ export default function NovaPropostaForm({
           uses_vehicle: false,
           uses_driver: toggles.uses_driver,
           uses_rental_car: toggles.uses_rental_car,
+          // Grava o horário efetivo, não só o que foi mexido: assim reabrir a
+          // proposta devolve a mesma grade, sem depender do default do editor.
+          day_start_time: dayStartTimes[day] ?? DEFAULT_DAY_START,
+          day_end_time: dayEndTimes[day] ?? DEFAULT_DAY_END,
           car_daily_rate: transportRates.carRate,
           driver_price_per_hour: transportRates.driverRate,
           transport_currency: transportRates.currency,
@@ -2839,8 +2858,8 @@ export default function NovaPropostaForm({
                 transportRates={transportRates}
                 embed={embedFlags}
                 maxHoursPerDay={maxHoursPerDay}
-                startTime={dayStartTimes[day] ?? '08:00'}
-                endTime={dayEndTimes[day] ?? '20:00'}
+                startTime={dayStartTimes[day] ?? DEFAULT_DAY_START}
+                endTime={dayEndTimes[day] ?? DEFAULT_DAY_END}
                 toggles={getDayToggles(day)}
                 onChangeToggles={patch => handleChangeToggles(day, patch)}
                 onChangeStartTime={t => handleChangeStartTime(day, t)}

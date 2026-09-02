@@ -136,6 +136,11 @@ export interface ProposalItem {
   // Ausência (propostas antigas) equivale a ambos ligados.
   uses_driver?: boolean;
   uses_rental_car?: boolean;
+  // Só em itens 'day_transport': janela do dia ("HH:MM") que o editor usa como
+  // âncora da grade de horários. É planejamento interno, não sai pro cliente.
+  // Ausência (propostas antigas) cai no default do editor.
+  day_start_time?: string | null;
+  day_end_time?: string | null;
   // Só em 'day_transport': tarifas congeladas usadas no cálculo (default da
   // faixa ou customizadas na proposta), na moeda transport_currency.
   car_daily_rate?: number | null;
