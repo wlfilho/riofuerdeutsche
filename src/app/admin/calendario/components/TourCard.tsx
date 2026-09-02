@@ -19,7 +19,7 @@ import {
   Users,
   Wallet,
 } from 'lucide-react';
-import { TOUR_DATE_STATUS_BADGE, type DayConflict, type TourDate } from '@/lib/tourDates';
+import { PARTNER_BADGE, TOUR_DATE_STATUS_BADGE, type DayConflict, type TourDate } from '@/lib/tourDates';
 import { WEEKDAY_SHORT_PT, formatTime, isPastDay, parseISODate } from '@/lib/calendarDates';
 import { fmtEur } from '@/lib/adminFormat';
 
@@ -101,7 +101,7 @@ function ConflictBadge({ conflict }: { conflict: Exclude<DayConflict, { kind: 'n
   return (
     <span
       title={t('diaDeOutroDica')}
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[11px] font-semibold whitespace-nowrap"
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${PARTNER_BADGE.alerta}`}
     >
       <AlertTriangle className="w-3 h-3 shrink-0" />
       {texto}
@@ -116,14 +116,16 @@ function ConflictBadge({ conflict }: { conflict: Exclude<DayConflict, { kind: 'n
 function PartnerBadge({ name }: { name: string | null }) {
   const t = useTranslations('admin.calendario');
   return name ? (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-semibold whitespace-nowrap">
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${PARTNER_BADGE.definido}`}
+    >
       <UserCheck className="w-3 h-3 shrink-0" />
       {t('guiaParceiroNome', { nome: name })}
     </span>
   ) : (
     <span
       title={t('parceiroADefinirDica')}
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[11px] font-semibold whitespace-nowrap"
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${PARTNER_BADGE.pendente}`}
     >
       <UserSearch className="w-3 h-3 shrink-0" />
       {t('parceiroADefinir')}

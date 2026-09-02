@@ -903,7 +903,7 @@ export default function PropostaOutputClient({
                         title={parceiro !== undefined ? t('diaComParceiroDica') : undefined}
                         className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full tabular-nums ${
                           parceiro !== undefined
-                            ? 'bg-slate-100 text-slate-700'
+                            ? 'bg-violet-100 text-violet-800'
                             : 'bg-green-50 text-green-800'
                         }`}
                       >
@@ -920,7 +920,7 @@ export default function PropostaOutputClient({
             {partnerDays.length > 0 && (
               <div className="flex items-start gap-4">
                 <dt className="text-sm text-gray-400 w-28 shrink-0" />
-                <dd className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                <dd className="text-xs text-violet-800 bg-violet-50 border border-violet-200 rounded-lg px-3 py-2">
                   {t('avisoDiasComParceiro')}
                 </dd>
               </div>

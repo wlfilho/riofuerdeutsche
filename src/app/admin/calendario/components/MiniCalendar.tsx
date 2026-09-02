@@ -68,7 +68,7 @@ export default function MiniCalendar({
           alert === 'empate'
             ? 'ring-2 ring-red-400 ring-offset-1'
             : alert === 'perdendo'
-              ? 'ring-2 ring-amber-300 ring-offset-1'
+              ? 'ring-2 ring-violet-300 ring-offset-1'
               : ''
         } ${
           isSelected
@@ -161,7 +161,7 @@ export default function MiniCalendar({
                   alert === 'empate'
                     ? 'ring-2 ring-red-400 ring-offset-1'
                     : alert === 'perdendo'
-                      ? 'ring-2 ring-amber-300 ring-offset-1'
+                      ? 'ring-2 ring-violet-300 ring-offset-1'
                       : ''
                 } ${
                   isCurrentMonth
