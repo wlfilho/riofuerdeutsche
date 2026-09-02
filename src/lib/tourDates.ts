@@ -27,6 +27,26 @@ export const TOUR_DATE_STATUS_BADGE: Record<TourDateStatus, string> = {
   rascunho: 'bg-slate-100 text-slate-600',
 };
 
+/**
+ * Família "parceiro/dia disputado": violeta.
+ *
+ * Três cores, três significados, e nenhum deles se repete:
+ *  - verde/âmbar/cinza  → em que estágio está o negócio (StatusBadge);
+ *  - violeta            → tudo que fala de guia parceiro;
+ *  - vermelho           → empate de agenda, o único que exige decisão.
+ *
+ * Antes o aviso "só com parceiro" era âmbar, igual ao selo de "Proposta
+ * enviada", e os dois empilhados no mesmo card viravam uma mancha só.
+ */
+export const PARTNER_BADGE = {
+  /** "Dia fechado com X: só com parceiro" — aviso, ainda sem decisão tomada. */
+  alerta: 'bg-violet-50 text-violet-800 border border-violet-200',
+  /** "Parceiro a definir" — decidido, mas é tarefa aberta: o mais forte dos três. */
+  pendente: 'bg-violet-100 text-violet-900 border border-violet-300',
+  /** "Guia: João" — resolvido, vira registro: o mais calmo. */
+  definido: 'bg-violet-50 text-violet-700',
+} as const;
+
 /** Bolinha do mini calendário e da legenda. */
 export const TOUR_DATE_STATUS_DOT: Record<TourDateStatus, string> = {
   fechado: 'bg-green-600',

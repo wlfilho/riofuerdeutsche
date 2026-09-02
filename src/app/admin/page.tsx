@@ -10,7 +10,7 @@ import {
   WEEKDAY_SHORT_PT,
 } from '@/lib/calendarDates';
 import { fmtEur } from '@/lib/adminFormat';
-import { TOUR_DATE_STATUS_BADGE, type TourDateStatus } from '@/lib/tourDates';
+import { PARTNER_BADGE, TOUR_DATE_STATUS_BADGE, type TourDateStatus } from '@/lib/tourDates';
 import type { LeadStatus } from './crm/page';
 import type { ProposalStatus } from '@/lib/proposals';
 
@@ -305,9 +305,7 @@ export default async function DashboardPage() {
                         {tour.with_partner && (
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              tour.partner_name
-                                ? 'bg-slate-100 text-slate-600'
-                                : 'bg-amber-50 text-amber-800'
+                              tour.partner_name ? PARTNER_BADGE.definido : PARTNER_BADGE.pendente
                             }`}
                             title={tour.partner_name ?? undefined}
                           >
