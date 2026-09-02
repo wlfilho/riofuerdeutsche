@@ -57,10 +57,25 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const { status, claude_chat_url, notes, archived } = body;
+  const { status, claude_chat_url, notes, archived, proposal_id } = body;
 
   if (status !== undefined && !VALID_STATUSES.includes(status)) {
     return NextResponse.json({ error: 'Status inválido.' }, { status: 400 });
+  }
+
+  // Trocar a proposta que manda no calendário só vale para uma proposta que
+  // já é deste lead: sem isso, um id qualquer no corpo mudaria a agenda de
+  // outro cliente.
+  if (proposal_id !== undefined) {
+    const { data: candidate } = await supabase
+      .from('proposals')
+      .select('id')
+      .eq('id', proposal_id)
+      .eq('lead_id', id)
+      .maybeSingle();
+    if (!candidate) {
+      return NextResponse.json({ error: 'Proposta não pertence a este lead.' }, { status: 400 });
+    }
   }
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -70,6 +85,7 @@ export async function PATCH(
   // `archived` é booleano na API e timestamp na tabela: quem arquivou quer
   // saber quando, mas o cliente só precisa ligar/desligar.
   if (archived !== undefined) updates.archived_at = archived ? new Date().toISOString() : null;
+  if (proposal_id !== undefined) updates.proposal_id = proposal_id;
 
   if (Object.keys(updates).length === 1) {
     return NextResponse.json({ error: 'Nenhum campo para atualizar.' }, { status: 400 });
@@ -84,9 +100,11 @@ export async function PATCH(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Best-effort: falha na sincronização do calendário não derruba a troca de status.
-  if (status !== undefined) {
-    const syncError = await syncTourDatesWithLeadStatus(supabase, id, status);
+  // Best-effort: falha na sincronização do calendário não derruba a troca de
+  // status. Trocar a proposta que manda na agenda também precisa sincronizar,
+  // pra que os dias da proposta nova apareçam na hora.
+  if (status !== undefined || proposal_id !== undefined) {
+    const syncError = await syncTourDatesWithLeadStatus(supabase, id, lead.status);
     if (syncError) console.error('[leads PATCH] failed to sync tour_dates:', syncError);
   }
 

@@ -14,6 +14,12 @@ export async function generateMetadata() {
 const CALENDAR_TOUR_SELECT =
   '*, lead:price_leads!inner(id, name, email, phone, status, proposal:proposals(id, pdf_url))';
 
+// Tudo que não está perdido aparece na agenda. Antes o calendário só mostrava
+// proposal_sent/closed, e um dia montado numa proposta ainda em rascunho
+// simplesmente não existia aqui (Lea Schallmo, 09/2026). A diferença de
+// estágio vira cor no selo, não ausência.
+const CALENDAR_LEAD_STATUSES = ['new', 'contacted', 'proposal_sent', 'closed'];
+
 export default async function CalendarioPage() {
   const t = await getAdminTranslations('admin.calendario');
   const supabase = await createClient();
@@ -23,13 +29,13 @@ export default async function CalendarioPage() {
       .from('tour_dates')
       // Só mostra tours de leads ativos; lead perdido (kanban PERDIDO) some do calendário
       .select(CALENDAR_TOUR_SELECT)
-      .in('lead.status', ['proposal_sent', 'closed'])
+      .in('lead.status', CALENDAR_LEAD_STATUSES)
       .order('date', { ascending: true })
       .order('start_time', { ascending: true, nullsFirst: true }),
     supabase
       .from('price_leads')
       .select('id, name, status, pax')
-      .in('status', ['proposal_sent', 'closed'])
+      .in('status', CALENDAR_LEAD_STATUSES)
       .order('name', { ascending: true }),
   ]);
 

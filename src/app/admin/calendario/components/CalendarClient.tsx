@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
-import type { TourDate, TourDateStatus } from '@/lib/tourDates';
+import { TOUR_DATE_STATUS_DOT, type TourDate, type TourDateStatus } from '@/lib/tourDates';
 import { fmtDate } from '@/lib/adminFormat';
 import TourDateModal, { type TourDateLeadOption } from '@/components/admin/TourDateModal';
 import {
@@ -23,6 +23,13 @@ const VIEW_OPTIONS: { id: View; key: 'ano' | 'mes' | 'semana' }[] = [
   { id: 'ano', key: 'ano' },
   { id: 'mes', key: 'mes' },
   { id: 'semana', key: 'semana' },
+];
+
+// Legenda que também é filtro: toca pra filtrar, toca de novo pra limpar.
+const STATUS_CHIPS: { status: TourDateStatus; active: string }[] = [
+  { status: 'fechado', active: 'bg-green-50 border-green-300 text-green-800' },
+  { status: 'proposta_enviada', active: 'bg-amber-50 border-amber-300 text-amber-800' },
+  { status: 'rascunho', active: 'bg-slate-100 border-slate-300 text-slate-700' },
 ];
 
 export default function CalendarClient({
@@ -169,28 +176,20 @@ export default function CalendarClient({
             >
               {tc('todos')}
             </button>
-            <button
-              onClick={() => setStatusFilter(prev => (prev === 'fechado' ? null : 'fechado'))}
-              className={`inline-flex items-center whitespace-nowrap gap-1.5 px-2 py-1 text-[11px] font-medium rounded-full border transition-colors ${
-                statusFilter === 'fechado'
-                  ? 'bg-green-50 border-green-300 text-green-800'
-                  : 'border-transparent text-gray-500 hover:bg-gray-100'
-              }`}
-            >
-              <span className="h-2 w-2 rounded-full bg-green-600" />
-              {tStatus('fechado')}
-            </button>
-            <button
-              onClick={() => setStatusFilter(prev => (prev === 'proposta_enviada' ? null : 'proposta_enviada'))}
-              className={`inline-flex items-center whitespace-nowrap gap-1.5 px-2 py-1 text-[11px] font-medium rounded-full border transition-colors ${
-                statusFilter === 'proposta_enviada'
-                  ? 'bg-amber-50 border-amber-300 text-amber-800'
-                  : 'border-transparent text-gray-500 hover:bg-gray-100'
-              }`}
-            >
-              <span className="h-2 w-2 rounded-full bg-amber-400" />
-              {t('proposta')}
-            </button>
+            {STATUS_CHIPS.map(chip => (
+              <button
+                key={chip.status}
+                onClick={() => setStatusFilter(prev => (prev === chip.status ? null : chip.status))}
+                className={`inline-flex items-center whitespace-nowrap gap-1.5 px-2 py-1 text-[11px] font-medium rounded-full border transition-colors ${
+                  statusFilter === chip.status
+                    ? chip.active
+                    : 'border-transparent text-gray-500 hover:bg-gray-100'
+                }`}
+              >
+                <span className={`h-2 w-2 rounded-full ${TOUR_DATE_STATUS_DOT[chip.status]}`} />
+                {chip.status === 'proposta_enviada' ? t('proposta') : tStatus(chip.status)}
+              </button>
+            ))}
           </div>
         </div>
 

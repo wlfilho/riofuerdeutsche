@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import type { TourDate, TourDateStatus } from '@/lib/tourDates';
+import { TOUR_STATUS_BY_LEAD_STATUS, type TourDate, type TourDateStatus } from '@/lib/tourDates';
 import { todayISO, parseISODate } from '@/lib/calendarDates';
 
 export interface TourDateLeadOption {
@@ -13,7 +13,7 @@ export interface TourDateLeadOption {
 }
 
 export function leadStatusToTourStatus(status: string): TourDateStatus {
-  return status === 'closed' ? 'fechado' : 'proposta_enviada';
+  return TOUR_STATUS_BY_LEAD_STATUS[status] ?? 'proposta_enviada';
 }
 
 type DateRow = { date: string; start_time: string };
@@ -233,6 +233,7 @@ export default function TourDateModal({
             <div>
               <label className={labelClass}>{tc('status')}</label>
               <select value={status} onChange={e => setStatus(e.target.value as TourDateStatus)} className={inputClass}>
+                <option value="rascunho">{tStatus('rascunho')}</option>
                 <option value="proposta_enviada">{tStatus('proposta_enviada')}</option>
                 <option value="fechado">{tStatus('fechado')}</option>
               </select>

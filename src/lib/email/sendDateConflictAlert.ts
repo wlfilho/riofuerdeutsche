@@ -15,6 +15,7 @@ import type { TourDateStatus } from '@/lib/tourDates';
 const STATUS_LABEL_PT: Record<TourDateStatus, string> = {
   fechado: 'FECHADO',
   proposta_enviada: 'PROPOSTA ENVIADA',
+  rascunho: 'RASCUNHO',
 };
 
 function escapeHtml(s: string): string {

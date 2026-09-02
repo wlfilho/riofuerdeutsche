@@ -2,7 +2,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export type TourDateStatus = 'proposta_enviada' | 'fechado';
+export type TourDateStatus = 'rascunho' | 'proposta_enviada' | 'fechado';
 
 /**
  * @deprecated Rótulos de UI vivem no catálogo i18n (`admin.status.tourDate` e
@@ -13,6 +13,25 @@ export type TourDateStatus = 'proposta_enviada' | 'fechado';
 export const TOUR_DATE_STATUS_LABELS: Record<TourDateStatus, string> = {
   fechado: 'FECHADO',
   proposta_enviada: 'PROPOSTA ENVIADA',
+  rascunho: 'RASCUNHO',
+};
+
+/**
+ * Selo de status, igual no calendário, no dashboard e na página do lead.
+ * Rascunho é deliberadamente apagado: ele existe pra você não esquecer o dia,
+ * não pra competir com o que já está vendido.
+ */
+export const TOUR_DATE_STATUS_BADGE: Record<TourDateStatus, string> = {
+  fechado: 'bg-green-50 text-green-700',
+  proposta_enviada: 'bg-amber-50 text-amber-700',
+  rascunho: 'bg-slate-100 text-slate-600',
+};
+
+/** Bolinha do mini calendário e da legenda. */
+export const TOUR_DATE_STATUS_DOT: Record<TourDateStatus, string> = {
+  fechado: 'bg-green-600',
+  proposta_enviada: 'bg-amber-400',
+  rascunho: 'bg-slate-400',
 };
 
 export interface TourDateLead {
@@ -96,10 +115,22 @@ export async function findConflictingTourDates(
 // 20260831010000 (trigger price_leads_sync_tour_dates), que existe para cobrir
 // escrita direta no Postgres. Mudou aqui, mude lá também.
 //
-// Mantém o calendário coerente com o kanban: lead com proposta enviada/fechado
-// atualiza os tours vinculados (e cria as linhas que ainda não existirem, a
-// partir dos dias vendidos — ver leadTourDays abaixo); lead perdido apaga as datas
-// pra liberar o dia pra outro cliente. new/contacted não mexem no calendário.
+// Mantém o calendário coerente com o kanban: todo lead que não está perdido
+// atualiza os tours vinculados e cria as linhas que faltarem (ver leadTourDays
+// abaixo); lead perdido apaga as datas pra liberar o dia pra outro cliente.
+export const TOUR_STATUS_BY_LEAD_STATUS: Record<string, TourDateStatus> = {
+  closed: 'fechado',
+  proposal_sent: 'proposta_enviada',
+  // Lead ainda em conversa: se já existe proposta montada, os dias dela vão
+  // pro calendário como RASCUNHO. Um dia que só existe no rascunho continua
+  // sendo um dia que você combinou com alguém, e some da agenda é o pior
+  // resultado possível (Lea Schallmo, 09/2026: link mandado por WhatsApp,
+  // cliente abriu duas vezes da Alemanha, proposta seguiu 'draft' e os dias
+  // 17 e 19/10 não existiam no calendário).
+  contacted: 'rascunho',
+  new: 'rascunho',
+};
+
 export async function syncTourDatesWithLeadStatus(
   supabase: SupabaseClient,
   leadId: string,
@@ -110,10 +141,7 @@ export async function syncTourDatesWithLeadStatus(
     return error?.message ?? null;
   }
 
-  const tourStatus: TourDateStatus | null =
-    leadStatus === 'closed' ? 'fechado'
-    : leadStatus === 'proposal_sent' ? 'proposta_enviada'
-    : null;
+  const tourStatus = TOUR_STATUS_BY_LEAD_STATUS[leadStatus] ?? null;
   if (!tourStatus) return null;
 
   const { error: updateError } = await supabase
@@ -146,7 +174,12 @@ async function createMissingTourDates(
     .single();
   if (leadError) return leadError.message;
 
-  const wantedDays = await leadTourDays(supabase, lead ?? null);
+  // Dia pedido na Anfrage só bloqueia a agenda depois que existe proposta
+  // enviada ou fechada. Antes disso é intenção do cliente, não compromisso
+  // seu: no rascunho vale só o que você montou de fato na proposta.
+  const wantedDays = await leadTourDays(supabase, lead ?? null, {
+    includeRequested: tourStatus !== 'rascunho',
+  });
   if (wantedDays.length === 0) return null;
 
   const { data: existing, error: existingError } = await supabase
@@ -176,8 +209,9 @@ async function createMissingTourDates(
   return insertError?.message ?? null;
 }
 
-// Dias que o calendário precisa cobrir: o que o cliente pediu no formulário
-// (requested_days) MAIS o que a proposta realmente vendeu (items[].day).
+// Dias que o calendário precisa cobrir: o que a proposta realmente vendeu
+// (items[].day) e, para lead já com proposta enviada ou fechada, também o que
+// o cliente pediu no formulário (requested_days).
 //
 // Os dois divergem toda vez que o roteiro cresce depois da Anfrage, e
 // requested_days nunca é reescrito — é o registro do pedido original, não do
@@ -187,8 +221,9 @@ async function createMissingTourDates(
 async function leadTourDays(
   supabase: SupabaseClient,
   lead: { requested_days?: string[] | null; proposal_id?: string | null } | null,
+  { includeRequested }: { includeRequested: boolean },
 ): Promise<string[]> {
-  const days = new Set<string>(lead?.requested_days ?? []);
+  const days = new Set<string>(includeRequested ? lead?.requested_days ?? [] : []);
 
   if (lead?.proposal_id) {
     const { data: proposal, error } = await supabase

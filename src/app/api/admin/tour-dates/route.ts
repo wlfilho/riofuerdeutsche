@@ -15,7 +15,7 @@ async function verifyAdmin() {
   return { authorized: profile?.role === 'admin', supabase };
 }
 
-const VALID_STATUSES = ['proposta_enviada', 'fechado'];
+const VALID_STATUSES = ['rascunho', 'proposta_enviada', 'fechado'];
 
 /** Dia já ocupado devolvido no 409. `source` diz de onde veio o choque. */
 type DuplicateDate = { date: string; tour_name: string | null; source: 'existente' | 'formulario' };

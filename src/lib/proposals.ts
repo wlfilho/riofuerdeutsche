@@ -156,6 +156,10 @@ export interface ProposalItem {
 
 export interface Proposal {
   id: string;
+  // De quem é esta proposta. Distinto de price_leads.proposal_id, que aponta a
+  // proposta que manda no calendário: um lead pode ter várias propostas, mas
+  // só uma comanda a agenda. Ver a migration 20260902130000.
+  lead_id: string | null;
   client_name: string;
   // Rótulo interno (ex.: "Plano chuva") pra diferenciar propostas do mesmo
   // cliente no admin; nunca aparece pro cliente.
@@ -419,7 +423,10 @@ export async function updateProposal(id: string, formData: ProposalFormData): Pr
   return data as Proposal;
 }
 
-export async function createProposal(formData: ProposalFormData): Promise<Proposal> {
+export async function createProposal(
+  formData: ProposalFormData,
+  leadId?: string | null,
+): Promise<Proposal> {
   const supabase = await createClient();
 
   const total_amount = formData.total_override_amount
@@ -429,6 +436,7 @@ export async function createProposal(formData: ProposalFormData): Promise<Propos
     .from('proposals')
     .insert({
       ...formData,
+      lead_id: leadId ?? null,
       total_amount,
       status: 'draft' satisfies ProposalStatus,
     })
@@ -452,6 +460,9 @@ export async function duplicateProposal(id: string): Promise<Proposal> {
   const { data, error } = await supabase
     .from('proposals')
     .insert({
+      // A cópia é do mesmo cliente, então herda o lead. Quem manda no
+      // calendário continua sendo price_leads.proposal_id, que não muda aqui.
+      lead_id: original.lead_id,
       client_name: original.client_name,
       internal_label: original.internal_label
         ? `${original.internal_label} (Kopie)`

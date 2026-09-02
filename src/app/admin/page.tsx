@@ -10,7 +10,7 @@ import {
   WEEKDAY_SHORT_PT,
 } from '@/lib/calendarDates';
 import { fmtEur } from '@/lib/adminFormat';
-import type { TourDateStatus } from '@/lib/tourDates';
+import { TOUR_DATE_STATUS_BADGE, type TourDateStatus } from '@/lib/tourDates';
 import type { LeadStatus } from './crm/page';
 import type { ProposalStatus } from '@/lib/proposals';
 
@@ -299,11 +299,7 @@ export default async function DashboardPage() {
                         )}
                       </div>
                       <span
-                        className={`flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          tour.status === 'fechado'
-                            ? 'bg-green-50 text-green-700'
-                            : 'bg-amber-50 text-amber-700'
-                        }`}
+                        className={`flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${TOUR_DATE_STATUS_BADGE[tour.status]}`}
                       >
                         {tTourStatus(tour.status)}
                       </span>
