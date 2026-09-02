@@ -98,7 +98,7 @@ export async function findConflictingTourDates(
 //
 // Mantém o calendário coerente com o kanban: lead com proposta enviada/fechado
 // atualiza os tours vinculados (e cria as linhas que ainda não existirem, a
-// partir de requested_days — ver nota abaixo); lead perdido apaga as datas
+// partir dos dias vendidos — ver leadTourDays abaixo); lead perdido apaga as datas
 // pra liberar o dia pra outro cliente. new/contacted não mexem no calendário.
 export async function syncTourDatesWithLeadStatus(
   supabase: SupabaseClient,
@@ -131,7 +131,7 @@ export async function syncTourDatesWithLeadStatus(
 // de encontro. Isso deixava a porta aberta pra um lead virar proposal_sent/
 // closed sem NUNCA ganhar uma linha em tour_dates, sumindo do calendário mesmo
 // com a venda fechada (foi o caso do Joachim Tilg, 09/2026). Aqui garantimos
-// que todo dia pedido tenha pelo menos uma linha assim que o lead entra em
+// que todo dia vendido tenha pelo menos uma linha assim que o lead entra em
 // proposal_sent/closed — tour_name fica null (é detalhe, já está na
 // proposta; o que não pode faltar no calendário é a data + o cliente).
 async function createMissingTourDates(
@@ -141,13 +141,13 @@ async function createMissingTourDates(
 ): Promise<string | null> {
   const { data: lead, error: leadError } = await supabase
     .from('price_leads')
-    .select('requested_days, pax')
+    .select('requested_days, pax, proposal_id')
     .eq('id', leadId)
     .single();
   if (leadError) return leadError.message;
 
-  const requestedDays: string[] = lead?.requested_days ?? [];
-  if (requestedDays.length === 0) return null;
+  const wantedDays = await leadTourDays(supabase, lead ?? null);
+  if (wantedDays.length === 0) return null;
 
   const { data: existing, error: existingError } = await supabase
     .from('tour_dates')
@@ -156,7 +156,7 @@ async function createMissingTourDates(
   if (existingError) return existingError.message;
 
   const existingDates = new Set((existing ?? []).map(d => d.date));
-  const missingDays = requestedDays.filter(date => !existingDates.has(date));
+  const missingDays = wantedDays.filter(date => !existingDates.has(date));
   if (missingDays.length === 0) return null;
 
   const rows: TourDateInput[] = missingDays.map(date => ({
@@ -174,4 +174,68 @@ async function createMissingTourDates(
 
   const { error: insertError } = await supabase.from('tour_dates').insert(rows);
   return insertError?.message ?? null;
+}
+
+// Dias que o calendário precisa cobrir: o que o cliente pediu no formulário
+// (requested_days) MAIS o que a proposta realmente vendeu (items[].day).
+//
+// Os dois divergem toda vez que o roteiro cresce depois da Anfrage, e
+// requested_days nunca é reescrito — é o registro do pedido original, não do
+// que foi vendido. Foi assim que o Blank Jürgen (out/2026) pediu só 25/10, a
+// proposta fechou Maracanã no 25 e Rocinha no 26, e o dia 26 nunca apareceu no
+// calendário. Quem manda na agenda é a proposta.
+async function leadTourDays(
+  supabase: SupabaseClient,
+  lead: { requested_days?: string[] | null; proposal_id?: string | null } | null,
+): Promise<string[]> {
+  const days = new Set<string>(lead?.requested_days ?? []);
+
+  if (lead?.proposal_id) {
+    const { data: proposal, error } = await supabase
+      .from('proposals')
+      .select('items')
+      .eq('id', lead.proposal_id)
+      .single();
+
+    if (error) {
+      // Best-effort: proposta ilegível não pode impedir que os dias pedidos
+      // entrem no calendário.
+      console.error('[leadTourDays]', error.message);
+    } else {
+      for (const item of (proposal?.items ?? []) as { day?: string | null }[]) {
+        if (item?.day) days.add(item.day);
+      }
+    }
+  }
+
+  return [...days].sort();
+}
+
+/**
+ * Reaplica a sincronia do calendário para os leads de uma proposta.
+ *
+ * syncTourDatesWithLeadStatus só é chamado quando o STATUS muda, mas os dias
+ * do roteiro mudam na edição da proposta, com o status parado em
+ * sent/accepted. Sem isto, um dia acrescentado depois do envio não chega
+ * nunca ao calendário.
+ *
+ * Só acrescenta: dia removido do roteiro mantém a linha em tour_dates, que
+ * pode já carregar horário, ponto de encontro e sinal pago. Apagar isso
+ * sozinho seria pior que a linha sobrando.
+ */
+export async function syncTourDatesWithProposalDays(
+  supabase: SupabaseClient,
+  proposalId: string,
+): Promise<string | null> {
+  const { data: leads, error } = await supabase
+    .from('price_leads')
+    .select('id, status')
+    .eq('proposal_id', proposalId);
+  if (error) return error.message;
+
+  for (const lead of leads ?? []) {
+    const syncError = await syncTourDatesWithLeadStatus(supabase, lead.id, lead.status);
+    if (syncError) return syncError;
+  }
+  return null;
 }
