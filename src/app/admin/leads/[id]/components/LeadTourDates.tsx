@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { CheckCircle2, Clock, FileText, MapPin, Pencil, Send, Trash2, Users, Wallet } from 'lucide-react';
+import { CheckCircle2, Clock, FileText, MapPin, Pencil, Send, Trash2, UserCheck, UserSearch, Users, Wallet } from 'lucide-react';
 import { TOUR_DATE_STATUS_BADGE, type TourDate } from '@/lib/tourDates';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
 import { formatTime } from '@/lib/calendarDates';
@@ -108,6 +108,22 @@ export default function LeadTourDates({
                     )}
                     {tStatus(tour.status)}
                   </span>
+                  {tour.with_partner && (
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                        tour.partner_name ? 'bg-slate-100 text-slate-700' : 'bg-amber-50 text-amber-800'
+                      }`}
+                    >
+                      {tour.partner_name ? (
+                        <UserCheck className="w-3 h-3 shrink-0" />
+                      ) : (
+                        <UserSearch className="w-3 h-3 shrink-0" />
+                      )}
+                      {tour.partner_name
+                        ? t('guiaParceiroNome', { nome: tour.partner_name })
+                        : t('parceiroADefinir')}
+                    </span>
+                  )}
                 </div>
 
                 {tour.tour_name && <p className="text-sm text-gray-600 mt-0.5 truncate">{tour.tour_name}</p>}

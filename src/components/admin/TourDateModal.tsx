@@ -82,6 +82,10 @@ export default function TourDateModal({
     editing?.agreed_price != null ? String(editing.agreed_price) : ''
   );
   const [anzahlungPaid, setAnzahlungPaid] = useState(editing?.anzahlung_paid ?? false);
+  // Duas etapas: primeiro a decisão de passar o dia a um parceiro, depois (às
+  // vezes só dias depois) o nome de quem fechou.
+  const [withPartner, setWithPartner] = useState(editing?.with_partner ?? false);
+  const [partnerName, setPartnerName] = useState(editing?.partner_name ?? '');
   const [notes, setNotes] = useState(editing?.notes ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -136,6 +140,10 @@ export default function TourDateModal({
       meeting_point: meetingPoint.trim() || null,
       agreed_price: agreedPrice ? Number(agreedPrice) : null,
       anzahlung_paid: anzahlungPaid,
+      with_partner: withPartner,
+      // Desmarcar "vai com parceiro" limpa o nome: guardar o nome de um
+      // parceiro num dia que voltou a ser seu só confunde depois.
+      partner_name: withPartner ? partnerName.trim() || null : null,
       notes: notes.trim() || null,
     };
 
@@ -314,6 +322,35 @@ export default function TourDateModal({
             />
             {t('sinalPago')}
           </label>
+
+          {/* Guia parceiro — disponível sempre, com ou sem conflito de agenda */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={withPartner}
+                onChange={e => {
+                  setWithPartner(e.target.checked);
+                  if (!e.target.checked) setPartnerName('');
+                }}
+                className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+              />
+              {t('vaiComParceiro')}
+            </label>
+            {withPartner && (
+              <div>
+                <label className={labelClass}>{t('nomeParceiro')}</label>
+                <input
+                  type="text"
+                  value={partnerName}
+                  onChange={e => setPartnerName(e.target.value)}
+                  placeholder={t('nomeParceiroPlaceholder')}
+                  className={inputClass}
+                />
+                <p className="mt-1 text-xs text-gray-400">{t('nomeParceiroAjuda')}</p>
+              </div>
+            )}
+          </div>
 
           {/* Observações */}
           <div>

@@ -605,12 +605,15 @@ export default function PropostaOutputClient({
   bank,
   emailLog: initialEmailLog,
   tourDates,
+  partnerDays = [],
   calendarOwner,
 }: {
   proposal: Proposal;
   bank: DepositBankInfo;
   emailLog: ProposalEmailLogEntry[];
   tourDates: TourDateDeposit[];
+  /** Dias que vão com guia parceiro. Só admin: nunca entra no texto do cliente. */
+  partnerDays?: { date: string; partner_name: string | null }[];
   calendarOwner?: CalendarOwner | null;
 }) {
   const router = useRouter();
@@ -651,6 +654,11 @@ export default function PropostaOutputClient({
   );
 
   const shownItems = useMemo(() => visibleItems(initial.items), [initial.items]);
+
+  const partnerByDay = useMemo(
+    () => new Map(partnerDays.map(d => [d.date, d.partner_name ?? ''])),
+    [partnerDays]
+  );
 
   const sortedDays = useMemo(
     () => [...new Set(shownItems.map(i => i.day))].sort(),
@@ -887,17 +895,36 @@ export default function PropostaOutputClient({
                 {sortedDays.length === 0 ? (
                   <span className="text-sm font-medium text-gray-800">{tCommon('vazio')}</span>
                 ) : (
-                  sortedDays.map(day => (
-                    <span
-                      key={day}
-                      className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-50 text-green-800 tabular-nums"
-                    >
-                      {abbrGermanDay(day)}
-                    </span>
-                  ))
+                  sortedDays.map(day => {
+                    const parceiro = partnerByDay.get(day);
+                    return (
+                      <span
+                        key={day}
+                        title={parceiro !== undefined ? t('diaComParceiroDica') : undefined}
+                        className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full tabular-nums ${
+                          parceiro !== undefined
+                            ? 'bg-slate-100 text-slate-700'
+                            : 'bg-green-50 text-green-800'
+                        }`}
+                      >
+                        {abbrGermanDay(day)}
+                        {parceiro !== undefined && ` · ${parceiro || t('parceiroADefinirCurto')}`}
+                      </span>
+                    );
+                  })
                 )}
               </dd>
             </div>
+
+            {/* Aviso interno: nesses dias quem guia é outra pessoa */}
+            {partnerDays.length > 0 && (
+              <div className="flex items-start gap-4">
+                <dt className="text-sm text-gray-400 w-28 shrink-0" />
+                <dd className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                  {t('avisoDiasComParceiro')}
+                </dd>
+              </div>
+            )}
 
             {/* Status — inline editable */}
             <div className="flex items-center gap-4">

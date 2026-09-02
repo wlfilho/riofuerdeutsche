@@ -21,7 +21,7 @@ export default function MiniCalendar({
   view,
   anchor,
   toursByDay,
-  conflictDays,
+  dayAlerts,
   selectedDay,
   onDayClick,
   onNavigate,
@@ -30,7 +30,9 @@ export default function MiniCalendar({
   view: CalendarView;
   anchor: Date;
   toursByDay: Map<string, TourDate[]>;
-  conflictDays: Set<string>;
+  // Vermelho é empate de verdade; âmbar é alguém disputando um dia que já tem
+  // dono (ver dayConflictFor em @/lib/tourDates).
+  dayAlerts: Map<string, 'empate' | 'perdendo'>;
   selectedDay: string | null;
   onDayClick: (iso: string) => void;
   onNavigate: (anchorISO: string) => void;
@@ -47,7 +49,7 @@ export default function MiniCalendar({
     const hasRascunho = tours.some(t => t.status === 'rascunho');
     const isPast = isPastDay(iso);
     // Conflito num dia que já passou não tem mais o que resolver: não alerta.
-    const hasConflict = !isPast && conflictDays.has(iso);
+    const alert = isPast ? undefined : dayAlerts.get(iso);
     const isSelected = iso === selectedDay;
     const isToday = iso === today;
 
@@ -55,9 +57,19 @@ export default function MiniCalendar({
       <button
         key={iso}
         onClick={() => onDayClick(iso)}
-        title={hasConflict ? 'Conflito de agenda: mais de um cliente neste dia' : undefined}
+        title={
+          alert === 'empate'
+            ? 'Conflito de agenda: dois compromissos do mesmo peso neste dia'
+            : alert === 'perdendo'
+              ? 'Dia já tem dono: o outro cliente só acontece com parceiro'
+              : undefined
+        }
         className={`mx-auto flex h-9 w-9 flex-col items-center justify-center rounded-lg text-xs transition-colors ${
-          hasConflict ? 'ring-2 ring-red-400 ring-offset-1' : ''
+          alert === 'empate'
+            ? 'ring-2 ring-red-400 ring-offset-1'
+            : alert === 'perdendo'
+              ? 'ring-2 ring-amber-300 ring-offset-1'
+              : ''
         } ${
           isSelected
             ? 'bg-gray-900 text-white font-semibold'
@@ -104,7 +116,7 @@ export default function MiniCalendar({
       let hasFechado = false;
       let hasProposta = false;
       let hasRascunho = false;
-      let hasConflict = false;
+      let alert: 'empate' | 'perdendo' | undefined;
       for (const [iso, tours] of toursByDay) {
         if (!iso.startsWith(prefix)) continue;
         if (tours.some(t => t.status === 'fechado')) hasFechado = true;
@@ -112,9 +124,11 @@ export default function MiniCalendar({
         if (tours.some(t => t.status === 'rascunho')) hasRascunho = true;
         // Só conflito ainda acionável conta: no mês corrente os dias já
         // vividos não devem acender o alerta do mês inteiro.
-        if (conflictDays.has(iso) && !isPastDay(iso)) hasConflict = true;
+        const dayAlert = isPastDay(iso) ? undefined : dayAlerts.get(iso);
+        if (dayAlert === 'empate') alert = 'empate';
+        else if (dayAlert === 'perdendo' && !alert) alert = 'perdendo';
       }
-      return { hasFechado, hasProposta, hasRascunho, hasConflict };
+      return { hasFechado, hasProposta, hasRascunho, alert };
     };
 
     return (
@@ -130,15 +144,25 @@ export default function MiniCalendar({
             const status = monthStatus(m);
             const { hasFechado, hasProposta, hasRascunho } = status;
             const isPast = isPastMonth(monthISO);
-            const hasConflict = status.hasConflict;
+            const alert = status.alert;
             const isCurrentMonth = today.startsWith(monthISO);
             return (
               <button
                 key={m}
                 onClick={() => onMonthClick(toISODate(new Date(year, m, 1)))}
-                title={hasConflict ? 'Conflito de agenda neste mês' : undefined}
+                title={
+                  alert === 'empate'
+                    ? 'Conflito de agenda neste mês'
+                    : alert === 'perdendo'
+                      ? 'Mês com dia disputado'
+                      : undefined
+                }
                 className={`flex flex-col items-center justify-center rounded-lg py-2 text-xs transition-colors ${
-                  hasConflict ? 'ring-2 ring-red-400 ring-offset-1' : ''
+                  alert === 'empate'
+                    ? 'ring-2 ring-red-400 ring-offset-1'
+                    : alert === 'perdendo'
+                      ? 'ring-2 ring-amber-300 ring-offset-1'
+                      : ''
                 } ${
                   isCurrentMonth
                     ? 'bg-green-100 text-green-800 font-semibold hover:bg-green-200'

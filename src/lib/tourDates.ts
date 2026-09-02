@@ -56,6 +56,11 @@ export interface TourDate {
   meeting_point: string | null;
   agreed_price: number | null;
   anzahlung_paid: boolean;
+  // Dia entregue a um guia parceiro. `with_partner` sozinho é a decisão
+  // ("não vou ser eu"), ainda sem saber quem; `partner_name` chega depois,
+  // quando você fecha com alguém. Ver a migration 20260902140000.
+  with_partner: boolean;
+  partner_name: string | null;
   notes: string | null;
   created_at: string;
   lead: TourDateLead | null;
@@ -71,6 +76,8 @@ export interface TourDateInput {
   meeting_point: string | null;
   agreed_price: number | null;
   anzahlung_paid: boolean;
+  with_partner: boolean;
+  partner_name: string | null;
   notes: string | null;
 }
 
@@ -81,18 +88,84 @@ export interface TourDateInput {
 export const TOUR_DATE_SELECT =
   '*, lead:price_leads(id, name, email, phone, proposal:proposals!price_leads_proposal_id_fkey(id, pdf_url))';
 
+// ── Hierarquia do dia ────────────────────────────────────────────────────────
+//
+// Dois clientes no mesmo dia não são um empate automático: o que já está
+// fechado pesa mais que uma proposta enviada, que pesa mais que um rascunho.
+// Quem tem o dia não precisa de alerta nenhum (não há o que decidir), e quem
+// está abaixo precisa saber com quem está disputando.
+//
+// Alarme vermelho fica reservado ao empate no topo — dois fechados, ou duas
+// propostas enviadas sem nenhum fechado. Esse é o único caso que exige decisão.
+// Espalhar vermelho pelo que já está resolvido só ensina a ignorar vermelho.
+const TOUR_DATE_WEIGHT: Record<TourDateStatus, number> = {
+  rascunho: 1,
+  proposta_enviada: 2,
+  fechado: 3,
+};
+
+export type DayConflict =
+  /** Nada a resolver: dia livre, dia seu, ou dia já entregue a um parceiro. */
+  | { kind: 'nenhum' }
+  /** Empate no topo: dois compromissos do mesmo peso brigando pelo dia. */
+  | { kind: 'empate' }
+  /** O dia é de outro cliente; este aqui só acontece com parceiro. */
+  | { kind: 'perdendo'; ownerName: string; ownerStatus: TourDateStatus };
+
+type ConflictCandidate = {
+  lead_id: string;
+  status: TourDateStatus;
+  with_partner: boolean;
+  lead?: { name: string } | null;
+};
+
+/**
+ * Situação de UM tour dentro do seu dia. `sameDay` são todos os tours daquela
+ * data, incluindo o próprio.
+ *
+ * Dia coberto por parceiro sai da conta dos dois lados: não recebe alerta (a
+ * decisão já foi tomada) e não consome a sua agenda, então deixa de disputar o
+ * dia com os outros clientes.
+ */
+export function dayConflictFor(
+  tour: ConflictCandidate,
+  sameDay: ConflictCandidate[],
+): DayConflict {
+  if (tour.with_partner) return { kind: 'nenhum' };
+
+  // Vários dias do mesmo cliente não competem entre si.
+  const rivals = sameDay.filter(o => o.lead_id !== tour.lead_id && !o.with_partner);
+  if (rivals.length === 0) return { kind: 'nenhum' };
+
+  const owner = rivals.reduce((top, r) =>
+    TOUR_DATE_WEIGHT[r.status] > TOUR_DATE_WEIGHT[top.status] ? r : top,
+  );
+  const ownerWeight = TOUR_DATE_WEIGHT[owner.status];
+  const myWeight = TOUR_DATE_WEIGHT[tour.status];
+
+  if (ownerWeight > myWeight) {
+    return { kind: 'perdendo', ownerName: owner.lead?.name ?? '', ownerStatus: owner.status };
+  }
+  if (ownerWeight === myWeight) return { kind: 'empate' };
+  return { kind: 'nenhum' };
+}
+
 export interface ConflictingTourDate {
   id: string;
   tour_name: string | null;
   status: TourDateStatus;
+  with_partner: boolean;
+  partner_name: string | null;
   lead: { id: string; name: string } | null;
 }
 
 /**
- * Outros tours (de leads diferentes) já agendados no mesmo dia. Um guia só dá
- * conta de um pack por dia, então isso é sempre um conflito de agenda —
- * independente de horário ou de status (proposta x fechado): dois clientes
- * "querendo" o mesmo dia já é sinal pra separar guias.
+ * Outros tours (de leads diferentes) já agendados no mesmo dia.
+ *
+ * Devolve TODOS, inclusive os já entregues a um parceiro: quem decide o que é
+ * alerta é o chamador (dia coberto por parceiro não consome a agenda do Will,
+ * então não deve disparar e-mail, mas serve de contexto quando o e-mail sai).
+ * Ver dayConflictFor acima para a hierarquia usada na tela.
  *
  * tour_dates só existe para leads ativos (proposal_sent/closed — ver
  * syncTourDatesWithLeadStatus, que apaga as linhas quando o lead vira
@@ -105,7 +178,7 @@ export async function findConflictingTourDates(
 ): Promise<ConflictingTourDate[]> {
   const { data, error } = await supabase
     .from('tour_dates')
-    .select('id, tour_name, status, lead:price_leads(id, name)')
+    .select('id, tour_name, status, with_partner, partner_name, lead:price_leads(id, name)')
     .eq('date', date)
     .neq('lead_id', excludeLeadId);
 
@@ -207,6 +280,8 @@ async function createMissingTourDates(
     meeting_point: null,
     agreed_price: null,
     anzahlung_paid: false,
+    with_partner: false,
+    partner_name: null,
     notes: null,
   }));
 

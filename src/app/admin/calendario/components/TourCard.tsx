@@ -14,10 +14,12 @@ import {
   Pencil,
   Send,
   Trash2,
+  UserCheck,
+  UserSearch,
   Users,
   Wallet,
 } from 'lucide-react';
-import { TOUR_DATE_STATUS_BADGE, type TourDate } from '@/lib/tourDates';
+import { TOUR_DATE_STATUS_BADGE, type DayConflict, type TourDate } from '@/lib/tourDates';
 import { WEEKDAY_SHORT_PT, formatTime, isPastDay, parseISODate } from '@/lib/calendarDates';
 import { fmtEur } from '@/lib/adminFormat';
 
@@ -71,15 +73,60 @@ function InfoItem({
 const INLINE_ACTION_BTN =
   'inline-flex items-center justify-center p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0';
 
-function ConflictBadge() {
+/**
+ * Vermelho só no empate de verdade (dois compromissos do mesmo peso). Perder o
+ * dia para um cliente mais adiantado é âmbar e vem com a saída junto: o dia
+ * ainda é seu se você chamar um parceiro.
+ */
+function ConflictBadge({ conflict }: { conflict: Exclude<DayConflict, { kind: 'nenhum' }> }) {
   const t = useTranslations('admin.calendario');
+
+  if (conflict.kind === 'empate') {
+    return (
+      <span
+        title={t('conflitoAgendaDica')}
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-[11px] font-semibold whitespace-nowrap"
+      >
+        <AlertTriangle className="w-3 h-3 shrink-0" />
+        {t('conflitoAgenda')}
+      </span>
+    );
+  }
+
+  const texto =
+    conflict.ownerStatus === 'fechado'
+      ? t('diaDeOutroFechado', { cliente: conflict.ownerName })
+      : t('diaDeOutroProposta', { cliente: conflict.ownerName });
+
   return (
     <span
-      title={t('conflitoAgendaDica')}
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-[11px] font-semibold whitespace-nowrap"
+      title={t('diaDeOutroDica')}
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[11px] font-semibold whitespace-nowrap"
     >
       <AlertTriangle className="w-3 h-3 shrink-0" />
-      {t('conflitoAgenda')}
+      {texto}
+    </span>
+  );
+}
+
+/**
+ * Dia entregue a um parceiro. Sem nome ainda, é tarefa aberta (âmbar); com
+ * nome, vira registro (neutro).
+ */
+function PartnerBadge({ name }: { name: string | null }) {
+  const t = useTranslations('admin.calendario');
+  return name ? (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-semibold whitespace-nowrap">
+      <UserCheck className="w-3 h-3 shrink-0" />
+      {t('guiaParceiroNome', { nome: name })}
+    </span>
+  ) : (
+    <span
+      title={t('parceiroADefinirDica')}
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[11px] font-semibold whitespace-nowrap"
+    >
+      <UserSearch className="w-3 h-3 shrink-0" />
+      {t('parceiroADefinir')}
     </span>
   );
 }
@@ -87,12 +134,12 @@ function ConflictBadge() {
 /** Full-width row card used in the tour list. */
 export default function TourCard({
   tour,
-  hasConflict = false,
+  conflict,
   onEdit,
   onDelete,
 }: {
   tour: TourDate;
-  hasConflict?: boolean;
+  conflict?: DayConflict;
   onEdit: (tour: TourDate) => void;
   onDelete: (tour: TourDate) => void;
 }) {
@@ -111,7 +158,7 @@ export default function TourCard({
       className={`relative rounded-xl border p-4 shadow-sm transition-opacity ${
         isPast
           ? 'border-gray-200 bg-gray-50 opacity-70 hover:opacity-100'
-          : hasConflict
+          : conflict?.kind === 'empate'
             ? 'border-red-200 bg-white ring-1 ring-red-100'
             : 'border-gray-200 bg-white'
       }`}
@@ -191,7 +238,10 @@ export default function TourCard({
           {tour.tour_name && <p className="text-sm text-gray-500 truncate mt-0.5">{tour.tour_name}</p>}
           <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
             <StatusBadge status={tour.status} />
-            {hasConflict && !isPast && <ConflictBadge />}
+            {tour.with_partner && <PartnerBadge name={tour.partner_name} />}
+            {conflict && conflict.kind !== 'nenhum' && !isPast && (
+              <ConflictBadge conflict={conflict} />
+            )}
           </div>
         </div>
 

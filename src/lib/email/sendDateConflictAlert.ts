@@ -10,6 +10,10 @@ import type { TourDateStatus } from '@/lib/tourDates';
  * calendário. Por isso dispara direto pelo Resend (mesmo padrão de
  * api/anfrage/route.ts), sem passar pelo sistema de templates, que é pra
  * e-mail multilíngue de cliente.
+ *
+ * Dia já entregue a um parceiro não dispara nada: a decisão já foi tomada e
+ * aquele dia não consome mais a agenda do Will. Ele só aparece listado como
+ * contexto quando o e-mail sai por outro motivo.
  */
 
 const STATUS_LABEL_PT: Record<TourDateStatus, string> = {
@@ -30,6 +34,10 @@ export interface ConflictTourSummary {
   lead_name: string;
   tour_name: string | null;
   status: TourDateStatus;
+  // Dia já entregue a um guia parceiro: entra no e-mail como contexto, mas
+  // não é o que dispara o alerta (quem decide isso é o chamador).
+  with_partner?: boolean;
+  partner_name?: string | null;
 }
 
 export interface ConflictDateGroup {
@@ -60,7 +68,12 @@ export async function sendDateConflictAlert(groups: ConflictDateGroup[]): Promis
       .map(group => {
         const rows = group.tours
           .map(
-            t => `<li>${escapeHtml(t.lead_name)}${t.tour_name ? ` — ${escapeHtml(t.tour_name)}` : ''} <em>(${STATUS_LABEL_PT[t.status]})</em></li>`,
+            t => {
+              const parceiro = t.with_partner
+                ? ` <em>— com parceiro${t.partner_name ? `: ${escapeHtml(t.partner_name)}` : ' (a definir)'}</em>`
+                : '';
+              return `<li>${escapeHtml(t.lead_name)}${t.tour_name ? ` — ${escapeHtml(t.tour_name)}` : ''} <em>(${STATUS_LABEL_PT[t.status]})</em>${parceiro}</li>`;
+            },
           )
           .join('');
         return `
