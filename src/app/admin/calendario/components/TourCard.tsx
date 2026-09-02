@@ -17,21 +17,25 @@ import {
   Users,
   Wallet,
 } from 'lucide-react';
-import type { TourDate } from '@/lib/tourDates';
+import { TOUR_DATE_STATUS_BADGE, type TourDate } from '@/lib/tourDates';
 import { WEEKDAY_SHORT_PT, formatTime, isPastDay, parseISODate } from '@/lib/calendarDates';
 import { fmtEur } from '@/lib/adminFormat';
 
+const STATUS_ICON = {
+  fechado: CheckCircle2,
+  proposta_enviada: Send,
+  rascunho: FileText,
+} as const;
+
 function StatusBadge({ status }: { status: TourDate['status'] }) {
   const tStatus = useTranslations('admin.status.tourDate');
-  return status === 'fechado' ? (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[11px] font-semibold whitespace-nowrap">
-      <CheckCircle2 className="w-3 h-3 shrink-0" />
-      {tStatus('fechado')}
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[11px] font-semibold whitespace-nowrap">
-      <Send className="w-3 h-3 shrink-0" />
-      {tStatus('proposta_enviada')}
+  const Icon = STATUS_ICON[status];
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${TOUR_DATE_STATUS_BADGE[status]}`}
+    >
+      <Icon className="w-3 h-3 shrink-0" />
+      {tStatus(status)}
     </span>
   );
 }

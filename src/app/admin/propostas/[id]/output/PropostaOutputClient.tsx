@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { fmtDate, fmtDateTime, fmtEur } from '@/lib/adminFormat';
 import { resolveDayTransportKey } from '@/lib/dayTransportLabel';
@@ -589,17 +590,30 @@ async function downloadPDF(proposal: Proposal, bank: DepositBankInfo): Promise<v
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
+/**
+ * Lead cujo calendário está apontado para OUTRA proposta (ou para nenhuma).
+ * null quando esta proposta é a que manda na agenda, que é o caso normal.
+ */
+export interface CalendarOwner {
+  leadId: string;
+  leadName: string;
+  activeProposalId: string | null;
+}
+
 export default function PropostaOutputClient({
   proposal: initial,
   bank,
   emailLog: initialEmailLog,
   tourDates,
+  calendarOwner,
 }: {
   proposal: Proposal;
   bank: DepositBankInfo;
   emailLog: ProposalEmailLogEntry[];
   tourDates: TourDateDeposit[];
+  calendarOwner?: CalendarOwner | null;
 }) {
+  const router = useRouter();
   const t = useTranslations('admin.propostas');
   const tCommon = useTranslations('admin.common');
   const tStatus = useTranslations('admin.status.proposal');
@@ -608,6 +622,8 @@ export default function PropostaOutputClient({
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [calendarSaving, setCalendarSaving] = useState(false);
+  const [calendarError, setCalendarError] = useState<string | null>(null);
   // ── Envio por e-mail ──
   // O e-mail é o arquivo permanente do cliente (o WhatsApp some quando a conta
   // cai). Envio sempre explícito; a troca de status só PERGUNTA, nunca dispara.
@@ -741,9 +757,61 @@ export default function PropostaOutputClient({
     }
   };
 
+  // Aponta o calendário do lead para ESTA proposta. Nunca acontece sozinho:
+  // trocar a agenda de um cliente é decisão sua, não efeito colateral de
+  // duplicar uma proposta.
+  const handleUseInCalendar = async () => {
+    if (!calendarOwner) return;
+    setCalendarSaving(true);
+    setCalendarError(null);
+    try {
+      const res = await fetch(`/api/admin/leads/${calendarOwner.leadId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proposal_id: initial.id }),
+      });
+      if (!res.ok) throw new Error('PATCH_FAILED');
+      router.refresh();
+    } catch {
+      setCalendarError(t('calendarioFalhaTrocar'));
+    } finally {
+      setCalendarSaving(false);
+    }
+  };
+
   return (
     <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-3xl space-y-6">
+
+        {/* ── Aviso: os dias desta proposta não estão no calendário */}
+        {calendarOwner && (
+          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
+            <p className="text-sm font-semibold text-amber-900">{t('calendarioOutraTitulo')}</p>
+            <p className="text-sm text-amber-800 mt-1">
+              {calendarOwner.activeProposalId
+                ? t('calendarioOutraTexto', { cliente: calendarOwner.leadName })
+                : t('calendarioNenhumaTexto', { cliente: calendarOwner.leadName })}
+            </p>
+            <div className="flex flex-wrap items-center gap-3 mt-3">
+              <button
+                onClick={handleUseInCalendar}
+                disabled={calendarSaving}
+                className="px-3 py-1.5 text-sm font-semibold bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
+              >
+                {calendarSaving ? tCommon('salvando') : t('calendarioUsarEsta')}
+              </button>
+              {calendarOwner.activeProposalId && (
+                <Link
+                  href={`/admin/propostas/${calendarOwner.activeProposalId}/output`}
+                  className="text-sm font-medium text-amber-800 underline hover:text-amber-900"
+                >
+                  {t('calendarioVerAtual')}
+                </Link>
+              )}
+              {calendarError && <span className="text-sm text-red-700">{calendarError}</span>}
+            </div>
+          </div>
+        )}
 
         {/* ── Header */}
         <div className="flex items-center justify-between gap-4">

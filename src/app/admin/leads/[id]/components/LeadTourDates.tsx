@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { CheckCircle2, Clock, MapPin, Pencil, Send, Trash2, Users, Wallet } from 'lucide-react';
-import type { TourDate } from '@/lib/tourDates';
+import { CheckCircle2, Clock, FileText, MapPin, Pencil, Send, Trash2, Users, Wallet } from 'lucide-react';
+import { TOUR_DATE_STATUS_BADGE, type TourDate } from '@/lib/tourDates';
 import { fmtDate, fmtEur } from '@/lib/adminFormat';
 import { formatTime } from '@/lib/calendarDates';
 import TourDateModal from '@/components/admin/TourDateModal';
@@ -96,17 +96,18 @@ export default function LeadTourDates({
                     <Clock className="w-3 h-3 shrink-0" />
                     {formatTime(tour.start_time) ?? tc('vazio')}
                   </span>
-                  {tour.status === 'fechado' ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[11px] font-semibold">
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${TOUR_DATE_STATUS_BADGE[tour.status]}`}
+                  >
+                    {tour.status === 'fechado' ? (
                       <CheckCircle2 className="w-3 h-3 shrink-0" />
-                      {tStatus('fechado')}
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[11px] font-semibold">
+                    ) : tour.status === 'rascunho' ? (
+                      <FileText className="w-3 h-3 shrink-0" />
+                    ) : (
                       <Send className="w-3 h-3 shrink-0" />
-                      {tStatus('proposta_enviada')}
-                    </span>
-                  )}
+                    )}
+                    {tStatus(tour.status)}
+                  </span>
                 </div>
 
                 {tour.tour_name && <p className="text-sm text-gray-600 mt-0.5 truncate">{tour.tour_name}</p>}

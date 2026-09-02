@@ -44,6 +44,7 @@ export default function MiniCalendar({
     const tours = toursByDay.get(iso) ?? [];
     const hasFechado = tours.some(t => t.status === 'fechado');
     const hasProposta = tours.some(t => t.status === 'proposta_enviada');
+    const hasRascunho = tours.some(t => t.status === 'rascunho');
     const isPast = isPastDay(iso);
     // Conflito num dia que já passou não tem mais o que resolver: não alerta.
     const hasConflict = !isPast && conflictDays.has(iso);
@@ -79,6 +80,9 @@ export default function MiniCalendar({
           {hasProposta && (
             <span className={`h-1 w-1 rounded-full ${isPast ? 'bg-gray-200' : 'bg-amber-400'}`} />
           )}
+          {hasRascunho && (
+            <span className={`h-1 w-1 rounded-full ${isPast ? 'bg-gray-200' : 'bg-slate-400'}`} />
+          )}
         </span>
       </button>
     );
@@ -99,16 +103,18 @@ export default function MiniCalendar({
       const prefix = `${year}-${String(m + 1).padStart(2, '0')}`;
       let hasFechado = false;
       let hasProposta = false;
+      let hasRascunho = false;
       let hasConflict = false;
       for (const [iso, tours] of toursByDay) {
         if (!iso.startsWith(prefix)) continue;
         if (tours.some(t => t.status === 'fechado')) hasFechado = true;
         if (tours.some(t => t.status === 'proposta_enviada')) hasProposta = true;
+        if (tours.some(t => t.status === 'rascunho')) hasRascunho = true;
         // Só conflito ainda acionável conta: no mês corrente os dias já
         // vividos não devem acender o alerta do mês inteiro.
         if (conflictDays.has(iso) && !isPastDay(iso)) hasConflict = true;
       }
-      return { hasFechado, hasProposta, hasConflict };
+      return { hasFechado, hasProposta, hasRascunho, hasConflict };
     };
 
     return (
@@ -122,7 +128,7 @@ export default function MiniCalendar({
           {MONTH_NAMES_PT.map((name, m) => {
             const monthISO = `${year}-${String(m + 1).padStart(2, '0')}`;
             const status = monthStatus(m);
-            const { hasFechado, hasProposta } = status;
+            const { hasFechado, hasProposta, hasRascunho } = status;
             const isPast = isPastMonth(monthISO);
             const hasConflict = status.hasConflict;
             const isCurrentMonth = today.startsWith(monthISO);
@@ -148,6 +154,9 @@ export default function MiniCalendar({
                   )}
                   {hasProposta && (
                     <span className={`h-1 w-1 rounded-full ${isPast ? 'bg-gray-200' : 'bg-amber-400'}`} />
+                  )}
+                  {hasRascunho && (
+                    <span className={`h-1 w-1 rounded-full ${isPast ? 'bg-gray-200' : 'bg-slate-400'}`} />
                   )}
                 </span>
               </button>

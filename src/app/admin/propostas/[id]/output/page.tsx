@@ -29,12 +29,30 @@ export default async function PropostaOutputPage({
     ? await supabase.from('tour_dates').select('id, date, anzahlung_paid').in('lead_id', leadIds)
     : { data: [] };
 
+  // Um lead pode ter várias propostas (plano B, versão revisada, cópia), mas
+  // só uma manda no calendário: a que está em price_leads.proposal_id. Quando
+  // esta não é ela, os dias daqui NÃO estão na agenda, e isso precisa aparecer
+  // na tela — foi silencioso até 09/2026.
+  const { data: ownerLead } = proposal.lead_id
+    ? await supabase
+        .from('price_leads')
+        .select('id, name, proposal_id')
+        .eq('id', proposal.lead_id)
+        .maybeSingle()
+    : { data: null };
+
+  const calendarOwner =
+    ownerLead && ownerLead.proposal_id !== proposal.id
+      ? { leadId: ownerLead.id, leadName: ownerLead.name, activeProposalId: ownerLead.proposal_id }
+      : null;
+
   return (
     <PropostaOutputClient
       proposal={proposal}
       bank={bank}
       emailLog={emailLog}
       tourDates={tourDates ?? []}
+      calendarOwner={calendarOwner}
     />
   );
 }

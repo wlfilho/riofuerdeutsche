@@ -23,9 +23,13 @@ export async function POST(request: NextRequest) {
   const { lead_id, ...formData } = body;
 
   try {
-    const proposal = await createProposal(formData);
+    // A proposta sempre sabe de quem ela é (proposals.lead_id).
+    const proposal = await createProposal(formData, lead_id ?? null);
 
-    // Link the CRM lead to the proposal it originated (best-effort).
+    // Já quem manda no calendário (price_leads.proposal_id) só é definido
+    // quando o lead ainda não tem proposta: uma segunda proposta do mesmo
+    // cliente não sequestra a agenda da primeira sozinha. A divergência vira
+    // aviso na tela da proposta, com botão pra você decidir.
     if (lead_id) {
       const supabase = await createClient();
       await supabase

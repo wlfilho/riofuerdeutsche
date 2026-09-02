@@ -15,7 +15,7 @@ async function verifyAdmin() {
   return { authorized: profile?.role === 'admin', supabase };
 }
 
-const VALID_STATUSES = ['proposta_enviada', 'fechado'];
+const VALID_STATUSES = ['rascunho', 'proposta_enviada', 'fechado'];
 
 export async function PATCH(
   request: NextRequest,
