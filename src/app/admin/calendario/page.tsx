@@ -11,8 +11,12 @@ export async function generateMetadata() {
 
 // !inner: filtro por lead.status exclui a linha inteira (tours de lead PERDIDO
 // somem do calendário), em vez de só anular o objeto lead.
+// !price_leads_proposal_id_fkey: desde que proposals ganhou lead_id existem
+// DUAS relações entre as tabelas (proposta → lead e lead → proposta), e o
+// PostgREST recusa o embed ambíguo. Aqui queremos sempre a proposta que manda
+// no calendário, que é price_leads.proposal_id.
 const CALENDAR_TOUR_SELECT =
-  '*, lead:price_leads!inner(id, name, email, phone, status, proposal:proposals(id, pdf_url))';
+  '*, lead:price_leads!inner(id, name, email, phone, status, proposal:proposals!price_leads_proposal_id_fkey(id, pdf_url))';
 
 // Tudo que não está perdido aparece na agenda. Antes o calendário só mostrava
 // proposal_sent/closed, e um dia montado numa proposta ainda em rascunho

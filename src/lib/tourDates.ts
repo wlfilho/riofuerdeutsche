@@ -74,7 +74,12 @@ export interface TourDateInput {
   notes: string | null;
 }
 
-export const TOUR_DATE_SELECT = '*, lead:price_leads(id, name, email, phone, proposal:proposals(id, pdf_url))';
+// !price_leads_proposal_id_fkey: desde que proposals ganhou lead_id existem
+// DUAS relações entre as tabelas (proposta → lead e lead → proposta), e o
+// PostgREST recusa o embed ambíguo. Aqui queremos sempre a proposta que manda
+// no calendário, que é price_leads.proposal_id.
+export const TOUR_DATE_SELECT =
+  '*, lead:price_leads(id, name, email, phone, proposal:proposals!price_leads_proposal_id_fkey(id, pdf_url))';
 
 export interface ConflictingTourDate {
   id: string;
