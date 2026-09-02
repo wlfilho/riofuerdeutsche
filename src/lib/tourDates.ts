@@ -39,12 +39,15 @@ export const TOUR_DATE_STATUS_BADGE: Record<TourDateStatus, string> = {
  * enviada", e os dois empilhados no mesmo card viravam uma mancha só.
  */
 export const PARTNER_BADGE = {
-  /** "Dia fechado com X: só com parceiro" — aviso, ainda sem decisão tomada. */
-  alerta: 'bg-violet-50 text-violet-800 border border-violet-200',
-  /** "Parceiro a definir" — decidido, mas é tarefa aberta: o mais forte dos três. */
+  /**
+   * Violeta calmo: o aviso "Só com parceiro" e o registro "Guia: João". Não é
+   * a mesma informação, mas nunca aparecem juntos — um dia com parceiro
+   * definido já não está em disputa (ver dayConflictFor) — e os dois pedem o
+   * mesmo peso na tela: presença sem alarme.
+   */
+  calmo: 'bg-violet-50 text-violet-700',
+  /** "Parceiro a definir": tarefa aberta, o único dos três que pede ação. */
   pendente: 'bg-violet-100 text-violet-900 border border-violet-300',
-  /** "Guia: João" — resolvido, vira registro: o mais calmo. */
-  definido: 'bg-violet-50 text-violet-700',
 } as const;
 
 /** Bolinha do mini calendário e da legenda. */

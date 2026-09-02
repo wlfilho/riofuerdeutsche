@@ -74,36 +74,45 @@ const INLINE_ACTION_BTN =
   'inline-flex items-center justify-center p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0';
 
 /**
- * O aviso de agenda é uma FRASE, não um rótulo: dentro da fila de chips ele
- * estourava a coluna do cliente (208px fixos) e empurrava as colunas da
- * direita, que truncavam. Por isso vive numa faixa própria no rodapé do card,
- * onde cabe inteiro e sempre no mesmo lugar em todos os cards.
+ * Selo curto; a frase inteira, com o nome de quem tem o dia, fica no tooltip.
+ *
+ * A frase já foi um chip de linha inteira e estourava a coluna do cliente
+ * (208px fixos), empurrando as colunas da direita até truncarem. Quem é o
+ * outro cliente também está visível sem o tooltip: a lista é ordenada por
+ * data, então o card dele fica coloado neste.
  *
  * Vermelho só no empate de verdade (dois compromissos do mesmo peso). Perder o
  * dia para um cliente mais adiantado é violeta e vem com a saída junto: o dia
  * ainda é seu se você chamar um parceiro.
  */
-function ConflictNote({ conflict }: { conflict: Exclude<DayConflict, { kind: 'nenhum' }> }) {
+function ConflictBadge({ conflict }: { conflict: Exclude<DayConflict, { kind: 'nenhum' }> }) {
   const t = useTranslations('admin.calendario');
 
-  const empate = conflict.kind === 'empate';
-  const texto = empate
-    ? t('conflitoAgendaDica')
-    : conflict.ownerStatus === 'fechado'
-      ? t('diaDeOutroFechado', { cliente: conflict.ownerName })
-      : t('diaDeOutroProposta', { cliente: conflict.ownerName });
+  if (conflict.kind === 'empate') {
+    return (
+      <span
+        title={t('conflitoAgendaDica')}
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-[11px] font-semibold whitespace-nowrap"
+      >
+        <AlertTriangle className="w-3 h-3 shrink-0" />
+        {t('conflitoAgenda')}
+      </span>
+    );
+  }
 
+  const fechado = conflict.ownerStatus === 'fechado';
   return (
-    <p
-      className={`mt-3 inline-flex max-w-full items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium ${
-        empate
-          ? 'bg-red-50 border-red-200 text-red-800'
-          : PARTNER_BADGE.alerta
-      }`}
+    <span
+      title={
+        fechado
+          ? t('diaDeOutroFechado', { cliente: conflict.ownerName })
+          : t('diaDeOutroProposta', { cliente: conflict.ownerName })
+      }
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${PARTNER_BADGE.calmo}`}
     >
-      <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-px" />
-      <span className="min-w-0">{texto}</span>
-    </p>
+      <AlertTriangle className="w-3 h-3 shrink-0" />
+      {fechado ? t('soComParceiro') : t('diaDisputado')}
+    </span>
   );
 }
 
@@ -115,7 +124,7 @@ function PartnerBadge({ name }: { name: string | null }) {
   const t = useTranslations('admin.calendario');
   return name ? (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${PARTNER_BADGE.definido}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${PARTNER_BADGE.calmo}`}
     >
       <UserCheck className="w-3 h-3 shrink-0" />
       {t('guiaParceiroNome', { nome: name })}
@@ -239,6 +248,9 @@ export default function TourCard({
           <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
             <StatusBadge status={tour.status} />
             {tour.with_partner && <PartnerBadge name={tour.partner_name} />}
+            {conflict && conflict.kind !== 'nenhum' && !isPast && (
+              <ConflictBadge conflict={conflict} />
+            )}
           </div>
         </div>
 
@@ -265,8 +277,6 @@ export default function TourCard({
         </div>
 
       </div>
-
-      {conflict && conflict.kind !== 'nenhum' && !isPast && <ConflictNote conflict={conflict} />}
 
       {tour.notes && (
         <p className="mt-3 pt-3 border-t border-gray-100 text-sm text-gray-500 italic">{tour.notes}</p>
