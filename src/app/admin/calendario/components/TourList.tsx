@@ -1,19 +1,21 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import type { TourDate } from '@/lib/tourDates';
+import type { DayConflict, TourDate } from '@/lib/tourDates';
 import { MONTH_NAMES_PT } from '@/lib/calendarDates';
 import TourCard from './TourCard';
 
 export default function TourList({
   tours,
-  conflictDays,
+  conflictByTour,
   groupByMonth = false,
   onEdit,
   onDelete,
 }: {
   tours: TourDate[];
-  conflictDays?: Set<string>;
+  // Situação por TOUR, não por dia: no mesmo dia, o cliente fechado e a
+  // proposta em rascunho veem coisas diferentes.
+  conflictByTour?: Map<string, DayConflict>;
   groupByMonth?: boolean;
   onEdit: (tour: TourDate) => void;
   onDelete: (tour: TourDate) => void;
@@ -27,7 +29,7 @@ export default function TourList({
           <TourCard
             key={tour.id}
             tour={tour}
-            hasConflict={conflictDays?.has(tour.date) ?? false}
+            conflict={conflictByTour?.get(tour.id)}
             onEdit={onEdit}
             onDelete={onDelete}
           />
@@ -62,7 +64,7 @@ export default function TourList({
               <TourCard
                 key={tour.id}
                 tour={tour}
-                hasConflict={conflictDays?.has(tour.date) ?? false}
+                conflict={conflictByTour?.get(tour.id)}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />

@@ -26,8 +26,18 @@ export default async function PropostaOutputPage({
     .eq('proposal_id', id);
   const leadIds = (proposalLeads ?? []).map(l => l.id);
   const { data: tourDates } = leadIds.length > 0
-    ? await supabase.from('tour_dates').select('id, date, anzahlung_paid').in('lead_id', leadIds)
+    ? await supabase
+        .from('tour_dates')
+        .select('id, date, anzahlung_paid, with_partner, partner_name')
+        .in('lead_id', leadIds)
     : { data: [] };
+
+  // Dia que vai com guia parceiro. Informação interna: serve pra você lembrar
+  // de avisar o PAX que naquele dia quem conduz é outra pessoa. Nada disso
+  // entra no texto de WhatsApp nem no PDF do cliente.
+  const partnerDays = (tourDates ?? [])
+    .filter(d => d.with_partner)
+    .map(d => ({ date: d.date as string, partner_name: (d.partner_name as string | null) ?? null }));
 
   // Um lead pode ter várias propostas (plano B, versão revisada, cópia), mas
   // só uma manda no calendário: a que está em price_leads.proposal_id. Quando
@@ -52,6 +62,7 @@ export default async function PropostaOutputPage({
       bank={bank}
       emailLog={emailLog}
       tourDates={tourDates ?? []}
+      partnerDays={partnerDays}
       calendarOwner={calendarOwner}
     />
   );

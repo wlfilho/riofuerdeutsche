@@ -39,6 +39,11 @@ export async function PATCH(
   if (body.meeting_point !== undefined) updates.meeting_point = body.meeting_point?.trim() || null;
   if (body.agreed_price !== undefined) updates.agreed_price = body.agreed_price ?? null;
   if (body.anzahlung_paid !== undefined) updates.anzahlung_paid = Boolean(body.anzahlung_paid);
+  if (body.with_partner !== undefined) updates.with_partner = Boolean(body.with_partner);
+  // Nome só existe com a marca de parceiro (o banco também garante isso).
+  if (body.with_partner !== undefined || body.partner_name !== undefined) {
+    updates.partner_name = body.with_partner ? body.partner_name?.trim() || null : null;
+  }
   if (body.notes !== undefined) updates.notes = body.notes?.trim() || null;
 
   if (Object.keys(updates).length === 0) {
@@ -63,14 +68,22 @@ export async function PATCH(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const updated = data as unknown as TourDate;
-  if (updates.date !== undefined && updates.date !== oldDate) {
+  if (updates.date !== undefined && updates.date !== oldDate && !updated.with_partner) {
     const others = await findConflictingTourDates(supabase, updated.date, updated.lead_id);
-    if (others.length > 0) {
+    // Só alerta se sobrar alguém disputando de verdade: dia do outro cliente
+    // já coberto por parceiro não briga por esta data.
+    if (others.some(o => !o.with_partner)) {
       await sendDateConflictAlert([{
         date: updated.date,
         tours: [
           { lead_name: updated.lead?.name ?? '—', tour_name: updated.tour_name, status: updated.status },
-          ...others.map(o => ({ lead_name: o.lead?.name ?? '—', tour_name: o.tour_name, status: o.status })),
+          ...others.map(o => ({
+            lead_name: o.lead?.name ?? '—',
+            tour_name: o.tour_name,
+            status: o.status,
+            with_partner: o.with_partner,
+            partner_name: o.partner_name,
+          })),
         ],
       }]);
     }

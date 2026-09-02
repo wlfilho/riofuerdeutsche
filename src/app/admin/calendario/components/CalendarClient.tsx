@@ -3,7 +3,13 @@
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
-import { TOUR_DATE_STATUS_DOT, type TourDate, type TourDateStatus } from '@/lib/tourDates';
+import {
+  TOUR_DATE_STATUS_DOT,
+  dayConflictFor,
+  type DayConflict,
+  type TourDate,
+  type TourDateStatus,
+} from '@/lib/tourDates';
 import { fmtDate } from '@/lib/adminFormat';
 import TourDateModal, { type TourDateLeadOption } from '@/components/admin/TourDateModal';
 import {
@@ -67,22 +73,36 @@ export default function CalendarClient({
     return map;
   }, [visibleTours]);
 
-  // Dias com tours de 2+ clientes diferentes: um guia só cobre um pack por
-  // dia, então isso é sempre um alerta — independente do filtro de status,
-  // por isso usa `tours` (todos) e não `visibleTours`.
-  const conflictDays = useMemo(() => {
-    const leadsByDay = new Map<string, Set<string>>();
+  // Situação de cada tour dentro do seu dia. Não é uma propriedade do DIA: no
+  // mesmo 16/10, o cliente com tour fechado não tem nada a decidir, enquanto a
+  // proposta em rascunho precisa saber que só acontece com parceiro. Usa
+  // `tours` (todos) e não `visibleTours`, para o filtro de status não apagar
+  // um concorrente e fazer o dia parecer livre.
+  const conflictByTour = useMemo(() => {
+    const byDay = new Map<string, TourDate[]>();
     for (const t of tours) {
-      const set = leadsByDay.get(t.date) ?? new Set<string>();
-      set.add(t.lead_id);
-      leadsByDay.set(t.date, set);
+      const list = byDay.get(t.date) ?? [];
+      list.push(t);
+      byDay.set(t.date, list);
     }
-    const days = new Set<string>();
-    for (const [date, leads] of leadsByDay) {
-      if (leads.size > 1) days.add(date);
+    const map = new Map<string, DayConflict>();
+    for (const sameDay of byDay.values()) {
+      for (const t of sameDay) map.set(t.id, dayConflictFor(t, sameDay));
     }
-    return days;
+    return map;
   }, [tours]);
+
+  // Alerta do mini calendário, agregado por dia: vermelho só onde há empate de
+  // verdade; âmbar onde alguém está disputando um dia que já tem dono.
+  const dayAlerts = useMemo(() => {
+    const map = new Map<string, 'empate' | 'perdendo'>();
+    for (const t of tours) {
+      const c = conflictByTour.get(t.id);
+      if (!c || c.kind === 'nenhum') continue;
+      if (c.kind === 'empate' || !map.has(t.date)) map.set(t.date, c.kind);
+    }
+    return map;
+  }, [tours, conflictByTour]);
 
   // Tours in the active range: selected day > current view around the anchor
   const { listTours, listTitle } = useMemo(() => {
@@ -155,7 +175,7 @@ export default function CalendarClient({
             view={view}
             anchor={anchor}
             toursByDay={toursByDay}
-            conflictDays={conflictDays}
+            dayAlerts={dayAlerts}
             selectedDay={selectedDay}
             onDayClick={toggleDay}
             onNavigate={setAnchorISO}
@@ -250,7 +270,7 @@ export default function CalendarClient({
         ) : (
           <TourList
             tours={listTours}
-            conflictDays={conflictDays}
+            conflictByTour={conflictByTour}
             groupByMonth={view === 'ano' && !selectedDay}
             onEdit={tour => setModal({ editing: tour })}
             onDelete={handleDelete}

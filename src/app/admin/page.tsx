@@ -29,6 +29,8 @@ interface DashboardTour {
   pax: number | null;
   agreed_price: number | null;
   anzahlung_paid: boolean;
+  with_partner: boolean;
+  partner_name: string | null;
   lead: { name: string } | null;
 }
 
@@ -68,6 +70,7 @@ export default async function DashboardPage() {
   const tLeadStatus = await getAdminTranslations('admin.status.leadPlural');
   const tProposalStatus = await getAdminTranslations('admin.status.proposal');
   const tTourStatus = await getAdminTranslations('admin.status.tourDateShort');
+  const tCalendario = await getAdminTranslations('admin.calendario');
   const supabase = await createClient();
 
   const today = todayISO();
@@ -80,7 +83,7 @@ export default async function DashboardPage() {
       supabase.from('price_leads').select('status, created_at'),
       supabase
         .from('tour_dates')
-        .select('id, lead_id, date, start_time, tour_name, status, pax, agreed_price, anzahlung_paid, lead:price_leads(name)')
+        .select('id, lead_id, date, start_time, tour_name, status, pax, agreed_price, anzahlung_paid, with_partner, partner_name, lead:price_leads(name)')
         .gte('date', monthStart)
         .order('date', { ascending: true })
         .order('start_time', { ascending: true, nullsFirst: true }),
@@ -298,11 +301,27 @@ export default async function DashboardPage() {
                           <p className="text-xs text-gray-500 truncate">{details.join(' · ')}</p>
                         )}
                       </div>
-                      <span
-                        className={`flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${TOUR_DATE_STATUS_BADGE[tour.status]}`}
-                      >
-                        {tTourStatus(tour.status)}
-                      </span>
+                      <div className="flex-shrink-0 flex items-center gap-1">
+                        {tour.with_partner && (
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              tour.partner_name
+                                ? 'bg-slate-100 text-slate-600'
+                                : 'bg-amber-50 text-amber-800'
+                            }`}
+                            title={tour.partner_name ?? undefined}
+                          >
+                            {tour.partner_name
+                              ? tCalendario('guiaParceiroNome', { nome: tour.partner_name })
+                              : tCalendario('parceiroADefinir')}
+                          </span>
+                        )}
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${TOUR_DATE_STATUS_BADGE[tour.status]}`}
+                        >
+                          {tTourStatus(tour.status)}
+                        </span>
+                      </div>
                     </li>
                   );
                 })}

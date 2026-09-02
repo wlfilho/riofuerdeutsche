@@ -69,6 +69,8 @@ export async function POST(request: NextRequest) {
       meeting_point: d.meeting_point?.trim() || null,
       agreed_price: d.agreed_price ?? null,
       anzahlung_paid: Boolean(d.anzahlung_paid),
+      with_partner: Boolean(d.with_partner),
+      partner_name: d.with_partner ? d.partner_name?.trim() || null : null,
       notes: d.notes?.trim() || null,
     });
   }
@@ -140,15 +142,22 @@ export async function POST(request: NextRequest) {
   const conflictGroups: ConflictDateGroup[] = [];
   for (const row of inserted) {
     const others = await findConflictingTourDates(supabase, row.date, row.lead_id);
-    if (others.length > 0) {
-      conflictGroups.push({
-        date: row.date,
-        tours: [
-          { lead_name: row.lead?.name ?? '—', tour_name: row.tour_name, status: row.status },
-          ...others.map(o => ({ lead_name: o.lead?.name ?? '—', tour_name: o.tour_name, status: o.status })),
-        ],
-      });
-    }
+    // Dia entregue a parceiro não disputa agenda: nem quando é o tour novo que
+    // já nasce com parceiro, nem quando é o outro cliente que já está coberto.
+    if (row.with_partner || !others.some(o => !o.with_partner)) continue;
+    conflictGroups.push({
+      date: row.date,
+      tours: [
+        { lead_name: row.lead?.name ?? '—', tour_name: row.tour_name, status: row.status },
+        ...others.map(o => ({
+          lead_name: o.lead?.name ?? '—',
+          tour_name: o.tour_name,
+          status: o.status,
+          with_partner: o.with_partner,
+          partner_name: o.partner_name,
+        })),
+      ],
+    });
   }
   if (conflictGroups.length > 0) {
     await sendDateConflictAlert(conflictGroups);

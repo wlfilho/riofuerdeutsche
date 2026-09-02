@@ -835,7 +835,10 @@
       "calendarioNenhumaTexto": "O lead de {cliente} não está apontado para nenhuma proposta, então nenhum dia daqui chega ao calendário.",
       "calendarioUsarEsta": "Usar esta proposta no calendário",
       "calendarioVerAtual": "Ver a proposta que está valendo",
-      "calendarioFalhaTrocar": "Não foi possível trocar. Tente de novo."
+      "calendarioFalhaTrocar": "Não foi possível trocar. Tente de novo.",
+      "diaComParceiroDica": "Neste dia quem conduz é um guia parceiro. Avise o cliente.",
+      "parceiroADefinirCurto": "parceiro",
+      "avisoDiasComParceiro": "Os dias em cinza vão com guia parceiro. Lembre de avisar o cliente que naquele dia quem conduz não é você."
     },
     "atividades": {
       "breadcrumb": "Atividades",
@@ -1009,7 +1012,7 @@
       "subtitulo": "Tours fechados e propostas enviadas",
       "erroCarregarTours": "Erro ao carregar tours: ",
       "conflitoAgenda": "Conflito de agenda",
-      "conflitoAgendaDica": "Outro cliente também tem tour marcado neste dia — separe guias ou reagende.",
+      "conflitoAgendaDica": "Dois compromissos do mesmo peso neste dia: separe guias ou reagende com um dos clientes.",
       "ano": "Ano",
       "mes": "Mês",
       "semana": "Semana",
@@ -1065,7 +1068,17 @@
       "duplicataTituloFormulario": "Você repetiu o mesmo dia no formulário:",
       "duplicataAjudaFormulario": "Corrija a data repetida nas linhas acima.",
       "duplicataPergunta": "Só continue se forem passeios diferentes no mesmo dia.",
-      "duplicataCriarMesmoAssim": "Criar mesmo assim"
+      "duplicataCriarMesmoAssim": "Criar mesmo assim",
+      "diaDeOutroFechado": "Dia fechado com {cliente}: só com parceiro",
+      "diaDeOutroProposta": "Dia disputado com {cliente}",
+      "diaDeOutroDica": "Outro cliente já tem este dia. Você ainda pode aceitar se passar o tour para um guia parceiro.",
+      "vaiComParceiro": "Este dia vai com guia parceiro",
+      "nomeParceiro": "Guia parceiro",
+      "nomeParceiroPlaceholder": "Ex.: João Silva",
+      "nomeParceiroAjuda": "Pode deixar em branco agora e preencher quando fechar com alguém.",
+      "parceiroADefinir": "Parceiro a definir",
+      "parceiroADefinirDica": "Você decidiu passar este dia para um parceiro, mas ainda não fechou com ninguém.",
+      "guiaParceiroNome": "Guia: {nome}"
     },
     "avaliacoes": {
       "metaTitle": "Avaliações — Admin",
