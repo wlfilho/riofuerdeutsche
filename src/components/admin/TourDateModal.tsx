@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { TOUR_STATUS_BY_LEAD_STATUS, type TourDate, type TourDateStatus } from '@/lib/tourDates';
 import { todayISO, parseISODate } from '@/lib/calendarDates';
@@ -86,6 +86,9 @@ export default function TourDateModal({
   // vezes só dias depois) o nome de quem fechou.
   const [withPartner, setWithPartner] = useState(editing?.with_partner ?? false);
   const [partnerName, setPartnerName] = useState(editing?.partner_name ?? '');
+  const [driverId, setDriverId] = useState<string>(editing?.driver_id ?? '');
+  // Motoristas cadastrados (profiles com role='driver'), pro select de escala.
+  const [drivers, setDrivers] = useState<{ id: string; first_name: string | null; email: string }[]>([]);
   const [notes, setNotes] = useState(editing?.notes ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -95,6 +98,15 @@ export default function TourDateModal({
 
   const isEdit = Boolean(editing);
   const needsLeadPicker = !fixedLead && !isEdit;
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/admin/users?role=driver')
+      .then(res => (res.ok ? res.json() : { users: [] }))
+      .then(data => { if (!cancelled) setDrivers(data.users ?? []); })
+      .catch(() => { /* sem lista, o select fica só com "sem motorista" */ });
+    return () => { cancelled = true; };
+  }, []);
 
   // Trocar cliente ou datas invalida o aviso de duplicata: ele foi calculado
   // pra outra combinação, e mantê-lo deixaria o botão em modo "criar mesmo
@@ -144,6 +156,7 @@ export default function TourDateModal({
       // Desmarcar "vai com parceiro" limpa o nome: guardar o nome de um
       // parceiro num dia que voltou a ser seu só confunde depois.
       partner_name: withPartner ? partnerName.trim() || null : null,
+      driver_id: driverId || null,
       notes: notes.trim() || null,
     };
 
@@ -350,6 +363,18 @@ export default function TourDateModal({
                 <p className="mt-1 text-xs text-gray-400">{t('nomeParceiroAjuda')}</p>
               </div>
             )}
+          </div>
+
+          {/* Motorista escalado — ganha acesso de leitura ao dia em /motorista */}
+          <div>
+            <label className={labelClass}>{t('motorista')}</label>
+            <select value={driverId} onChange={e => setDriverId(e.target.value)} className={inputClass}>
+              <option value="">{t('semMotorista')}</option>
+              {drivers.map(d => (
+                <option key={d.id} value={d.id}>{d.first_name || d.email}</option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-400">{t('motoristaAjuda')}</p>
           </div>
 
           {/* Observações */}

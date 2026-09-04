@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import {
   AlertTriangle,
+  Car,
   CheckCircle2,
   Clock,
   ExternalLink,
@@ -140,6 +141,21 @@ function PartnerBadge({ name }: { name: string | null }) {
   );
 }
 
+/**
+ * Motorista escalado no dia. Azul: não compete com as cores de estágio
+ * (verde/âmbar/cinza) nem com a família do parceiro (violeta) — é logística,
+ * não estágio do negócio.
+ */
+function DriverBadge({ driver }: { driver: NonNullable<TourDate['driver']> }) {
+  const t = useTranslations('admin.calendario');
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap bg-sky-50 text-sky-700">
+      <Car className="w-3 h-3 shrink-0" />
+      {t('motoristaNome', { nome: driver.first_name || driver.email })}
+    </span>
+  );
+}
+
 /** Full-width row card used in the tour list. */
 export default function TourCard({
   tour,
@@ -248,6 +264,7 @@ export default function TourCard({
           <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
             <StatusBadge status={tour.status} />
             {tour.with_partner && <PartnerBadge name={tour.partner_name} />}
+            {tour.driver && <DriverBadge driver={tour.driver} />}
             {conflict && conflict.kind !== 'nenhum' && !isPast && (
               <ConflictBadge conflict={conflict} />
             )}
