@@ -364,6 +364,27 @@ async function leadTourDays(
 }
 
 /**
+ * Dias que o sistema conhece para um lead: os vendidos na proposta e os
+ * pedidos na Anfrage. As rotas de tour_dates usam isto pra avisar quando o
+ * admin grava uma data que não pertence ao cliente — o tour fantasma do
+ * Stefan Hülsdell (09/2026) nasceu assim: modal aberto pelo fluxo do kanban,
+ * data pré-preenchida com o dia corrente, e nenhuma checagem contra os dias
+ * que o lead de fato tinha (o tour real era 07/02/2027).
+ */
+export async function knownLeadDays(
+  supabase: SupabaseClient,
+  leadId: string,
+): Promise<string[]> {
+  const { data: lead, error } = await supabase
+    .from('price_leads')
+    .select('requested_days, proposal_id')
+    .eq('id', leadId)
+    .single();
+  if (error || !lead) return [];
+  return leadTourDays(supabase, lead, { includeRequested: true });
+}
+
+/**
  * Reaplica a sincronia do calendário para os leads de uma proposta.
  *
  * syncTourDatesWithLeadStatus só é chamado quando o STATUS muda, mas os dias

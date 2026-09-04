@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { findConflictingTourDates, TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
+import { findConflictingTourDates, knownLeadDays, TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
 import { sendDateConflictAlert } from '@/lib/email/sendDateConflictAlert';
 
 async function verifyAdmin() {
@@ -70,8 +70,45 @@ export async function PATCH(
   // reenviar a mesma data (ex.: editando só o preço) não deve re-alertar.
   let oldDate: string | null = null;
   if (updates.date !== undefined) {
-    const { data: current } = await supabase.from('tour_dates').select('date').eq('id', id).single();
+    const { data: current } = await supabase
+      .from('tour_dates')
+      .select('date, lead_id, with_partner')
+      .eq('id', id)
+      .single();
     oldDate = current?.date ?? null;
+
+    // Mesma guarda do POST, agora na troca de data: se o novo dia colide com
+    // tour de outro cliente, devolve 409 e só grava com `force` (confirmação
+    // explícita no modal), em vez de gravar e avisar por e-mail depois.
+    const withPartner = updates.with_partner !== undefined
+      ? Boolean(updates.with_partner)
+      : Boolean(current?.with_partner);
+    if (!body.force && current && updates.date !== oldDate) {
+      const newDate = String(updates.date);
+      const conflicts = withPartner
+        ? []
+        : (await findConflictingTourDates(supabase, newDate, current.lead_id))
+            .filter(o => !o.with_partner)
+            .map(o => ({
+              date: newDate,
+              lead_name: o.lead?.name ?? null,
+              tour_name: o.tour_name,
+              status: o.status,
+            }));
+
+      // Mesmo aviso do POST pra dia que o lead não tem na proposta/Anfrage.
+      const known = await knownLeadDays(supabase, current.lead_id);
+      const outside = known.length > 0 && !known.includes(newDate)
+        ? [{ date: newDate, known_days: known }]
+        : [];
+
+      if (conflicts.length > 0 || outside.length > 0) {
+        return NextResponse.json(
+          { error: 'duplicate_dates', duplicates: [], conflicts, outside },
+          { status: 409 },
+        );
+      }
+    }
   }
 
   const { data, error } = await supabase
