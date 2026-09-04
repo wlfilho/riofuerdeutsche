@@ -51,8 +51,31 @@ export async function updateSession(request: NextRequest) {
 
         let redirectTo = "/dashboard";
         if (profile?.role === "admin") redirectTo = "/admin";
+        if (profile?.role === "driver") redirectTo = "/motorista";
 
         return NextResponse.redirect(new URL(redirectTo, request.url));
+    }
+
+    // --- ROTA /motorista: área do motorista escalado nos tours ---
+    if (pathname.startsWith("/motorista")) {
+        if (!user) {
+            const url = request.nextUrl.clone();
+            url.pathname = "/login";
+            url.searchParams.set("redirect", pathname);
+            return NextResponse.redirect(url);
+        }
+
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+        // Admin entra para conferir o que o motorista vê; membro comum não
+        // tem nada aqui e volta pro hub dele.
+        if (profile?.role !== "driver" && profile?.role !== "admin") {
+            return NextResponse.redirect(new URL("/dashboard", request.url));
+        }
     }
 
     // --- ROTA /dashboard: hub da área de membros (qualquer membro autenticado) ---

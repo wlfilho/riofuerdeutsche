@@ -71,8 +71,24 @@ export async function POST(request: NextRequest) {
       anzahlung_paid: Boolean(d.anzahlung_paid),
       with_partner: Boolean(d.with_partner),
       partner_name: d.with_partner ? d.partner_name?.trim() || null : null,
+      driver_id: d.driver_id || null,
       notes: d.notes?.trim() || null,
     });
+  }
+
+  // driver_id precisa apontar pra um profile com role='driver': o FK sozinho
+  // aceitaria qualquer usuário, e um membro comum escalado por engano ganharia
+  // acesso ao dia em /motorista.
+  const driverIds = [...new Set(rows.map(r => r.driver_id).filter(Boolean))] as string[];
+  if (driverIds.length > 0) {
+    const { data: drivers } = await supabase
+      .from('profiles')
+      .select('id')
+      .in('id', driverIds)
+      .eq('role', 'driver');
+    if ((drivers ?? []).length !== driverIds.length) {
+      return NextResponse.json({ error: 'Motorista inválido.' }, { status: 400 });
+    }
   }
 
   // Guarda contra dia dobrado: o mesmo cliente já ter tour na data que está

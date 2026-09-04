@@ -1,6 +1,8 @@
 // src/types/membership.ts
 
-export type UserRole = 'user' | 'premium' | 'admin';
+// 'driver' é o motorista escalado nos tours: não é membro do Guide — o login
+// dele leva para /motorista, não para /dashboard.
+export type UserRole = 'user' | 'premium' | 'admin' | 'driver';
 
 export interface UserProfile {
   id: string;

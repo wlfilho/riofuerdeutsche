@@ -44,6 +44,22 @@ export async function PATCH(
   if (body.with_partner !== undefined || body.partner_name !== undefined) {
     updates.partner_name = body.with_partner ? body.partner_name?.trim() || null : null;
   }
+  if (body.driver_id !== undefined) {
+    const driverId = body.driver_id || null;
+    // Só profile com role='driver' pode ser escalado (mesma guarda do POST).
+    if (driverId) {
+      const { data: driver } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', driverId)
+        .eq('role', 'driver')
+        .maybeSingle();
+      if (!driver) {
+        return NextResponse.json({ error: 'Motorista inválido.' }, { status: 400 });
+      }
+    }
+    updates.driver_id = driverId;
+  }
   if (body.notes !== undefined) updates.notes = body.notes?.trim() || null;
 
   if (Object.keys(updates).length === 0) {
