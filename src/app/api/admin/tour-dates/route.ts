@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { findConflictingTourDates, TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
+import { findConflictingTourDates, knownLeadDays, TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
 import { sendDateConflictAlert, type ConflictDateGroup } from '@/lib/email/sendDateConflictAlert';
 
 async function verifyAdmin() {
@@ -19,6 +19,14 @@ const VALID_STATUSES = ['rascunho', 'proposta_enviada', 'fechado'];
 
 /** Dia já ocupado devolvido no 409. `source` diz de onde veio o choque. */
 type DuplicateDate = { date: string; tour_name: string | null; source: 'existente' | 'formulario' };
+
+/** Tour de OUTRO cliente no mesmo dia, também devolvido no 409. */
+type ConflictDate = {
+  date: string;
+  lead_name: string | null;
+  tour_name: string | null;
+  status: string;
+};
 
 export async function GET(request: NextRequest) {
   const { authorized, supabase } = await verifyAdmin();
@@ -136,9 +144,48 @@ export async function POST(request: NextRequest) {
       seen.add(key);
     }
 
-    if (duplicates.length > 0) {
+    // Choque com OUTRO cliente entra no mesmo aviso-e-confirma: criar um dia
+    // em cima de um dia já vendido de outro lead é quase sempre data errada no
+    // formulário (Stefan Hülsdell, 09/2026: modal aberto só pra registrar o
+    // sinal, a data veio pré-preenchida com o dia corrente e nasceu um tour
+    // fantasma em cima do dia fechado do Joachim Tilg). O e-mail de conflito
+    // já existia, mas só saía DEPOIS de gravar; aqui o admin decide antes.
+    const conflicts: ConflictDate[] = [];
+    for (const r of rows) {
+      // Dia entregue a parceiro não consome a sua agenda (ver dayConflictFor).
+      if (r.with_partner) continue;
+      const others = await findConflictingTourDates(supabase, r.date, r.lead_id);
+      for (const o of others) {
+        if (o.with_partner) continue;
+        conflicts.push({
+          date: r.date,
+          lead_name: o.lead?.name ?? null,
+          tour_name: o.tour_name,
+          status: o.status,
+        });
+      }
+    }
+
+    // Dia que o lead simplesmente NÃO tem — nem na proposta, nem na Anfrage.
+    // Sem esta checagem, o tour fantasma só era pego se por acaso outro
+    // cliente ocupasse o mesmo dia; num dia livre ele entrava calado e virava
+    // um "fechado" falso no calendário. Lead sem nenhum dia conhecido (criado
+    // à mão, sem proposta) fica de fora: não há contra o que validar.
+    const outside: { date: string; known_days: string[] }[] = [];
+    const knownByLead = new Map<string, string[]>();
+    for (const leadId of leadIds) {
+      knownByLead.set(leadId, await knownLeadDays(supabase, leadId));
+    }
+    for (const r of rows) {
+      const known = knownByLead.get(r.lead_id) ?? [];
+      if (known.length > 0 && !known.includes(r.date)) {
+        outside.push({ date: r.date, known_days: known });
+      }
+    }
+
+    if (duplicates.length > 0 || conflicts.length > 0 || outside.length > 0) {
       return NextResponse.json(
-        { error: 'duplicate_dates', duplicates },
+        { error: 'duplicate_dates', duplicates, conflicts, outside },
         { status: 409 },
       );
     }

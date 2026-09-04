@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { TOUR_STATUS_BY_LEAD_STATUS, type TourDate, type TourDateStatus } from '@/lib/tourDates';
-import { todayISO, parseISODate } from '@/lib/calendarDates';
+import { parseISODate } from '@/lib/calendarDates';
 
 export interface TourDateLeadOption {
   id: string;
@@ -28,6 +28,25 @@ type DuplicateDate = {
   tour_name: string | null;
   source: 'existente' | 'formulario';
 };
+
+/**
+ * Tour de OUTRO cliente no mesmo dia, também devolvido no 409. Diferente da
+ * duplicata (mesmo cliente), aqui o risco é gravar por engano em cima de um
+ * dia já vendido — quase sempre é data errada no formulário.
+ */
+type ConflictDate = {
+  date: string;
+  lead_name: string | null;
+  tour_name: string | null;
+  status: TourDateStatus;
+};
+
+/**
+ * Dia que não está nem na proposta nem na Anfrage do lead, também do 409.
+ * Pode ser legítimo (dia extra combinado por WhatsApp), mas é a assinatura do
+ * tour fantasma — então só grava depois que o admin confirmar.
+ */
+type OutsideDate = { date: string; known_days: string[] };
 
 /** "2026-09-18" → "18/09/2026" */
 function formatShortDate(iso: string): string {
@@ -68,9 +87,13 @@ export default function TourDateModal({
   const [status, setStatus] = useState<TourDateStatus>(
     editing?.status ?? (fixedLead ? leadStatusToTourStatus(fixedLead.status) : 'proposta_enviada')
   );
+  // Sem fallback pra "hoje": data pré-preenchida com o dia corrente foi o que
+  // gravou o tour fantasma do Stefan Hülsdell (09/2026) em cima do dia do
+  // Joachim Tilg. Ou a data veio de um clique num dia do calendário
+  // (`defaultDate`), ou o campo começa vazio e o admin escolhe de propósito.
   const [dateRows, setDateRows] = useState<DateRow[]>([
     {
-      date: editing?.date ?? defaultDate ?? todayISO(),
+      date: editing?.date ?? defaultDate ?? '',
       start_time: editing?.start_time?.slice(0, 5) ?? '',
     },
   ]);
@@ -92,12 +115,16 @@ export default function TourDateModal({
   const [notes, setNotes] = useState(editing?.notes ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Preenchido quando a API responde 409: o cliente já tem tour nessas datas.
-  // Enquanto não for null, o botão de salvar reenvia com `force`.
+  // Preenchidos quando a API responde 409: o cliente já tem tour nessas datas
+  // (duplicates) e/ou outro cliente já ocupa o dia (conflicts). Enquanto um
+  // dos dois não for null, o botão de salvar reenvia com `force`.
   const [duplicates, setDuplicates] = useState<DuplicateDate[] | null>(null);
+  const [conflicts, setConflicts] = useState<ConflictDate[] | null>(null);
+  const [outside, setOutside] = useState<OutsideDate[] | null>(null);
 
   const isEdit = Boolean(editing);
   const needsLeadPicker = !fixedLead && !isEdit;
+  const hasWarning = duplicates !== null || conflicts !== null || outside !== null;
 
   useEffect(() => {
     let cancelled = false;
@@ -111,7 +138,11 @@ export default function TourDateModal({
   // Trocar cliente ou datas invalida o aviso de duplicata: ele foi calculado
   // pra outra combinação, e mantê-lo deixaria o botão em modo "criar mesmo
   // assim" sem que a API tenha reclamado desta.
-  const resetDuplicates = () => setDuplicates(null);
+  const resetDuplicates = () => {
+    setDuplicates(null);
+    setConflicts(null);
+    setOutside(null);
+  };
 
   const handleLeadChange = (id: string) => {
     setLeadId(id);
@@ -130,7 +161,7 @@ export default function TourDateModal({
 
   const addRow = () => {
     resetDuplicates();
-    setDateRows(rows => [...rows, { date: rows[rows.length - 1]?.date ?? todayISO(), start_time: '' }]);
+    setDateRows(rows => [...rows, { date: rows[rows.length - 1]?.date ?? '', start_time: '' }]);
   };
 
   const removeRow = (i: number) => {
@@ -168,6 +199,7 @@ export default function TourDateModal({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             ...common,
+            force,
             date: dateRows[0].date,
             start_time: dateRows[0].start_time || null,
           }),
@@ -189,7 +221,15 @@ export default function TourDateModal({
       }
       const data = await res.json();
       if (res.status === 409 && data.error === 'duplicate_dates') {
-        setDuplicates(data.duplicates ?? []);
+        const dup = (data.duplicates ?? []) as DuplicateDate[];
+        const conf = (data.conflicts ?? []) as ConflictDate[];
+        const out = (data.outside ?? []) as OutsideDate[];
+        // Pelo menos uma das listas precisa ficar não-nula, senão o botão
+        // nunca entra no modo "mesmo assim" e o 409 vira beco sem saída.
+        const anyOther = conf.length > 0 || out.length > 0;
+        setDuplicates(dup.length > 0 || !anyOther ? dup : null);
+        setConflicts(conf.length > 0 ? conf : null);
+        setOutside(out.length > 0 ? out : null);
         return;
       }
       if (!res.ok) {
@@ -388,6 +428,37 @@ export default function TourDateModal({
             />
           </div>
 
+          {outside && (
+            <div className="p-3 rounded-lg text-sm bg-amber-50 text-amber-900 border border-amber-200 space-y-1">
+              <p className="font-medium">{t('foraPropostaTitulo')}</p>
+              <ul className="mt-1 list-disc list-inside space-y-0.5">
+                {outside.map((o, i) => (
+                  <li key={`${o.date}-${i}`}>
+                    {formatShortDate(o.date)}
+                    {o.known_days.length > 0 &&
+                      ` (${t('foraPropostaDiasCliente')}: ${o.known_days.map(formatShortDate).join(', ')})`}
+                  </li>
+                ))}
+              </ul>
+              <p>{t('foraPropostaAjuda')}</p>
+            </div>
+          )}
+
+          {conflicts && (
+            <div className="p-3 rounded-lg text-sm bg-red-50 text-red-900 border border-red-200 space-y-1">
+              <p className="font-medium">{t('conflitoOutroClienteTitulo')}</p>
+              <ul className="mt-1 list-disc list-inside space-y-0.5">
+                {conflicts.map((c, i) => (
+                  <li key={`${c.date}-${i}`}>
+                    {formatShortDate(c.date)}: {c.lead_name ?? tc('vazio')} ({tStatus(c.status)})
+                    {c.tour_name ? ` · ${c.tour_name}` : ''}
+                  </li>
+                ))}
+              </ul>
+              <p>{t('conflitoOutroClienteAjuda')}</p>
+            </div>
+          )}
+
           {duplicates && (
             <div className="p-3 rounded-lg text-sm bg-amber-50 text-amber-900 border border-amber-200 space-y-2">
               {(['existente', 'formulario'] as const).map(source => {
@@ -429,14 +500,14 @@ export default function TourDateModal({
             {tc('cancelar')}
           </button>
           <button
-            onClick={() => handleSave(duplicates !== null)}
+            onClick={() => handleSave(hasWarning)}
             disabled={saving}
             className={`px-4 py-2 text-sm font-semibold text-white rounded-lg transition-colors disabled:opacity-50 ${
-              duplicates ? 'bg-amber-600 hover:bg-amber-700' : 'bg-green-600 hover:bg-green-700'
+              hasWarning ? 'bg-amber-600 hover:bg-amber-700' : 'bg-green-600 hover:bg-green-700'
             }`}
           >
             {saving ? tc('salvando')
-              : duplicates ? t('duplicataCriarMesmoAssim')
+              : hasWarning ? (isEdit ? t('salvarMesmoAssim') : t('duplicataCriarMesmoAssim'))
               : isEdit ? tc('salvarAlteracoes')
               : tc('adicionar')}
           </button>
