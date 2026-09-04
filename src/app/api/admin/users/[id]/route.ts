@@ -57,7 +57,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const { role, premium_until, guide_edition, payment_id, first_name } = body;
+  const { role, premium_until, guide_edition, payment_id, first_name, email, password } = body;
 
   // Prevenir auto-rebaixamento
   if (id === userId && role && role !== 'admin') {
@@ -67,8 +67,35 @@ export async function PATCH(
     );
   }
 
+  // E-mail e senha vivem no Supabase Auth, não em profiles — vão pela admin
+  // API. Rodam ANTES do update do profile: se o auth recusar (e-mail já em
+  // uso, senha curta), nada muda em lugar nenhum.
+  const newEmail = typeof email === 'string' ? email.trim().toLowerCase() : undefined;
+  const newPassword = typeof password === 'string' && password.length > 0 ? password : undefined;
+
+  if (newPassword && newPassword.length < 6) {
+    return NextResponse.json(
+      { error: 'A senha precisa de pelo menos 6 caracteres.' },
+      { status: 400 }
+    );
+  }
+
+  if (newEmail || newPassword) {
+    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(id, {
+      ...(newEmail ? { email: newEmail, email_confirm: true } : {}),
+      ...(newPassword ? { password: newPassword } : {}),
+    });
+    if (authError) {
+      return NextResponse.json({ error: authError.message }, { status: 500 });
+    }
+  }
+
   // Montar dados de update
   const updateData: Record<string, unknown> = {};
+
+  // profiles.email é uma cópia do auth (UNIQUE) e só é sincronizada no signup;
+  // trocar lá e não aqui deixaria a listagem mostrando o e-mail velho.
+  if (newEmail) updateData.email = newEmail;
 
   if (role !== undefined) {
     updateData.role = role;
@@ -90,6 +117,17 @@ export async function PATCH(
   if (guide_edition !== undefined) updateData.guide_edition = guide_edition;
   if (payment_id !== undefined) updateData.payment_id = payment_id;
   if (first_name !== undefined) updateData.first_name = first_name || null;
+
+  // Troca só de senha não mexe no profile — .update({}) vazio é erro no
+  // PostgREST, então nesse caso apenas devolve o profile atual.
+  if (Object.keys(updateData).length === 0) {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select()
+      .eq('id', id)
+      .single();
+    return NextResponse.json({ user: profile });
+  }
 
   const { data: profile, error } = await supabaseAdmin
     .from('profiles')

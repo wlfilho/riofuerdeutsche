@@ -65,6 +65,13 @@ export interface TourDateLead {
   proposal: { id: string; pdf_url: string | null } | null;
 }
 
+/** Motorista escalado no dia: profile com role='driver'. */
+export interface TourDateDriver {
+  id: string;
+  first_name: string | null;
+  email: string;
+}
+
 export interface TourDate {
   id: string;
   lead_id: string;
@@ -84,9 +91,14 @@ export interface TourDate {
   // quando você fecha com alguém. Ver a migration 20260902140000.
   with_partner: boolean;
   partner_name: string | null;
+  // Motorista escalado para dirigir neste dia. Diferente do parceiro (que
+  // SUBSTITUI o Will como guia), o motorista soma-se ao tour e ganha acesso
+  // de leitura ao próprio dia em /motorista.
+  driver_id: string | null;
   notes: string | null;
   created_at: string;
   lead: TourDateLead | null;
+  driver: TourDateDriver | null;
 }
 
 export interface TourDateInput {
@@ -101,6 +113,7 @@ export interface TourDateInput {
   anzahlung_paid: boolean;
   with_partner: boolean;
   partner_name: string | null;
+  driver_id: string | null;
   notes: string | null;
 }
 
@@ -109,7 +122,7 @@ export interface TourDateInput {
 // PostgREST recusa o embed ambíguo. Aqui queremos sempre a proposta que manda
 // no calendário, que é price_leads.proposal_id.
 export const TOUR_DATE_SELECT =
-  '*, lead:price_leads(id, name, email, phone, proposal:proposals!price_leads_proposal_id_fkey(id, pdf_url))';
+  '*, lead:price_leads(id, name, email, phone, proposal:proposals!price_leads_proposal_id_fkey(id, pdf_url)), driver:profiles!tour_dates_driver_id_fkey(id, first_name, email)';
 
 // ── Hierarquia do dia ────────────────────────────────────────────────────────
 //
@@ -305,6 +318,7 @@ async function createMissingTourDates(
     anzahlung_paid: false,
     with_partner: false,
     partner_name: null,
+    driver_id: null,
     notes: null,
   }));
 

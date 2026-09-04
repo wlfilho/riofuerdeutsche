@@ -76,6 +76,9 @@ export default function LoginPage() {
                         case 'admin':
                             router.push('/admin');
                             break;
+                        case 'driver':
+                            router.push('/motorista');
+                            break;
                         case 'premium':
                             router.push('/dashboard');
                             break;
