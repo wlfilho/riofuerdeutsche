@@ -69,6 +69,11 @@ const navItems: NavItem[] = [
     icon: '🧭',
   },
   {
+    labelKey: 'usuarios',
+    href: '/admin/users',
+    icon: '👤',
+  },
+  {
     labelKey: 'configuracoes',
     href: '/admin/configuracoes',
     icon: '⚙️',

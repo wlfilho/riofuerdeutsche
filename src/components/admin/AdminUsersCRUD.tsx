@@ -3,13 +3,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { Eye, EyeOff } from 'lucide-react';
 import { fmtDate, fmtDateTime, fmtEur } from '@/lib/adminFormat';
 
 interface UserProfile {
   id: string;
   email: string;
   first_name: string | null;
-  role: 'user' | 'premium' | 'admin';
+  role: 'user' | 'premium' | 'admin' | 'driver';
   created_at: string;
   premium_since: string | null;
   premium_until: string | null;
@@ -44,7 +45,10 @@ export default function AdminUsersCRUD() {
   const [formFirstName, setFormFirstName] = useState('');
   const [formEmail, setFormEmail] = useState('');
   const [formPassword, setFormPassword] = useState('');
-  const [formRole, setFormRole] = useState<'user' | 'premium' | 'admin'>('user');
+  // Oculta por padrão (alguém pode estar olhando a tela); o olho revela para
+  // conferir antes de mandar a senha ao usuário.
+  const [showPassword, setShowPassword] = useState(false);
+  const [formRole, setFormRole] = useState<'user' | 'premium' | 'admin' | 'driver'>('user');
   const [formEdition, setFormEdition] = useState(1);
   const [formPremiumUntil, setFormPremiumUntil] = useState('');
   const [formPaymentId, setFormPaymentId] = useState('');
@@ -88,6 +92,7 @@ export default function AdminUsersCRUD() {
     setFormFirstName('');
     setFormEmail('');
     setFormPassword('');
+    setShowPassword(false);
     setFormRole('user');
     setFormEdition(1);
     setFormPremiumUntil('');
@@ -101,6 +106,9 @@ export default function AdminUsersCRUD() {
     setSelectedUser(user);
     setFormFirstName(user.first_name || '');
     setFormEmail(user.email);
+    // Em branco = manter a senha atual; só é enviada se algo for digitado.
+    setFormPassword('');
+    setShowPassword(false);
     setFormRole(user.role);
     setFormEdition(user.guide_edition || 1);
     setFormPremiumUntil(
@@ -127,6 +135,12 @@ export default function AdminUsersCRUD() {
 
   // CRIAR usuário
   const handleCreate = async () => {
+    // Mesma régua do Supabase Auth: menos de 6 caracteres é recusado lá,
+    // melhor avisar antes do round-trip.
+    if (formPassword.length < 6) {
+      setMessage({ type: 'error', text: t('senhaCurta') });
+      return;
+    }
     setActionLoading(true);
     setMessage(null);
 
@@ -162,6 +176,10 @@ export default function AdminUsersCRUD() {
   // ATUALIZAR usuário
   const handleUpdate = async () => {
     if (!selectedUser) return;
+    if (formPassword && formPassword.length < 6) {
+      setMessage({ type: 'error', text: t('senhaCurta') });
+      return;
+    }
     setActionLoading(true);
     setMessage(null);
 
@@ -171,6 +189,12 @@ export default function AdminUsersCRUD() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           first_name: formFirstName,
+          // E-mail só entra se mudou; senha só se foi digitada (em branco =
+          // manter a atual).
+          ...(formEmail.trim().toLowerCase() !== selectedUser.email.toLowerCase()
+            ? { email: formEmail.trim() }
+            : {}),
+          ...(formPassword ? { password: formPassword } : {}),
           role: formRole,
           guide_edition: formRole === 'premium' ? formEdition : null,
           premium_until: formPremiumUntil
@@ -268,6 +292,12 @@ export default function AdminUsersCRUD() {
             {t('papelPremium')}
           </span>
         );
+      case 'driver':
+        return (
+          <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-sky-100 text-sky-700">
+            {t('papelMotorista')}
+          </span>
+        );
       default:
         return (
           <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">
@@ -357,6 +387,7 @@ export default function AdminUsersCRUD() {
             <option value="all">{t('todosPapeis')}</option>
             <option value="user">{tRole('user')}</option>
             <option value="premium">{tRole('premium')}</option>
+            <option value="driver">{tRole('driver')}</option>
             <option value="admin">{tRole('admin')}</option>
           </select>
         </div>
@@ -619,25 +650,38 @@ export default function AdminUsersCRUD() {
                       type="email"
                       value={formEmail}
                       onChange={(e) => setFormEmail(e.target.value)}
-                      disabled={modalMode === 'edit'}
                       placeholder="name@example.com"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm disabled:bg-gray-50 disabled:text-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     />
+                    {modalMode === 'edit' && (
+                      <p className="mt-1 text-xs text-gray-400">{t('emailEditHint')}</p>
+                    )}
                   </div>
 
-                  {/* Password (só na criação) */}
-                  {modalMode === 'create' && (
+                  {/* Password: obrigatória na criação; na edição, em branco = manter */}
+                  {(modalMode === 'create' || modalMode === 'edit') && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {t('senha')}
+                        {modalMode === 'edit' ? t('novaSenha') : t('senha')}
                       </label>
-                      <input
-                        type="text"
-                        value={formPassword}
-                        onChange={(e) => setFormPassword(e.target.value)}
-                        placeholder={t('senhaHint')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={formPassword}
+                          onChange={(e) => setFormPassword(e.target.value)}
+                          placeholder={modalMode === 'edit' ? t('novaSenhaHint') : t('senhaHint')}
+                          autoComplete="new-password"
+                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          title={showPassword ? t('ocultarSenha') : t('mostrarSenha')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -649,12 +693,13 @@ export default function AdminUsersCRUD() {
                     <select
                       value={formRole}
                       onChange={(e) =>
-                        setFormRole(e.target.value as 'user' | 'premium' | 'admin')
+                        setFormRole(e.target.value as 'user' | 'premium' | 'admin' | 'driver')
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm bg-white"
                     >
                       <option value="user">{t('opcaoUser')}</option>
                       <option value="premium">{t('papelPremium')}</option>
+                      <option value="driver">{t('papelMotorista')}</option>
                       <option value="admin">{t('papelAdmin')}</option>
                     </select>
                   </div>
