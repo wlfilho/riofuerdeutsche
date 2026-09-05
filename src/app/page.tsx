@@ -67,6 +67,14 @@ const faqJsonLd = {
     },
     {
       "@type": "Question",
+      name: "Bietet ihr auch Touren während der Frauen-WM 2027 an?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Ja. Die FIFA Frauen-WM 2027 findet vom 24. Juni bis 25. Juli 2027 in Brasilien statt, Eröffnungsspiel und Finale im Maracanã. Wir begleiten dich rund um die Spiele in Rio, auf Deutsch und mit eigenem Fahrer. Mehr dazu: riofuerdeutsche.de/frauen-wm-2027",
+      },
+    },
+    {
+      "@type": "Question",
       name: "Was kostet eine Tour?",
       acceptedAnswer: {
         "@type": "Answer",

@@ -52,6 +52,14 @@ function buildItems(whatsappHref: string, emailHref: string): FaqItem[] {
       a: "Alle Touren sind privat oder in sehr kleinen Gruppen (max. 6 Personen), niemals ein Touristenbus. Du buchst direkt bei mir, nicht über eine Agentur.",
     },
     {
+      q: "Bietet ihr auch Touren während der Frauen-WM 2027 an?",
+      a: "Ja. Die FIFA Frauen-WM 2027 findet vom 24. Juni bis 25. Juli 2027 in Brasilien statt, Eröffnungsspiel und Finale im Maracanã. Wir begleiten dich rund um die Spiele in Rio, auf Deutsch und mit eigenem Fahrer.",
+      cta: {
+        label: "Alles zur Frauen-WM 2027 in Rio →",
+        href: "/frauen-wm-2027",
+      },
+    },
+    {
       q: "Was kostet eine Tour?",
       a: "Der Preis hängt von der Dauer, der Gruppengröße und den gewählten Aktivitäten ab. Schreib mir. Ich erstelle dir ein persönliches Angebot, das zu deinem Budget passt.",
     },
@@ -91,7 +99,7 @@ export default function FaqAccordion({
 
             <div
               className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                isOpen ? "max-h-40 pb-6" : "max-h-0"
+                isOpen ? "max-h-96 pb-6" : "max-h-0"
               }`}
             >
               <p className="text-gray-600 leading-relaxed">
