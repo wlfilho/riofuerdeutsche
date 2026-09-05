@@ -82,6 +82,10 @@ function buildNavLinks(t: (key: string) => string): NavLink[] {
             { href: "/rio-guide/sicherheit/ist-rio-gefaehrlich", label: t("sicherheit") },
         ],
     },
+    // Campanha ativa até jul/2027, no primeiro nível a pedido do Will. Rótulo
+    // curto e gaps apertados na nav para caber ao lado do chip de usuário
+    // logado; o rodapé usa o nome completo.
+    { href: "/frauen-wm-2027", label: t("frauenWm2027") },
     { href: "/ueber-will", label: t("ueberUns") },
     { href: "/bewertungen", label: t("bewertungen") },
     { href: "/kontakt", label: t("kontakt") },
@@ -302,11 +306,15 @@ export default function Navbar({ contact: contactProp }: { contact?: ContactUrls
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <nav className="hidden lg:flex gap-8 items-center" aria-label={t('hauptnavigation')}>
+                    {/* whitespace-nowrap: com usuário logado (nome no HeaderAuth) os
+                        rótulos de duas palavras quebravam em duas linhas. Gaps
+                        apertados para caberem 6 itens (WM 2027 incluso) nos 1216px
+                        úteis do max-w-7xl. */}
+                    <nav className="hidden lg:flex gap-3 xl:gap-5 items-center whitespace-nowrap" aria-label={t('hauptnavigation')}>
                         {navLinks.map((link) => {
                             if (link.subLinks) {
                                 return (
-                                    <div key={link.label} className="relative group p-2">
+                                    <div key={link.label} className="relative group py-2 px-1">
                                         <Link
                                             href={link.href}
                                             className="flex items-center gap-1 text-sm font-medium text-gray-700 group-hover:text-rio-green transition-colors duration-200"
@@ -335,7 +343,7 @@ export default function Navbar({ contact: contactProp }: { contact?: ContactUrls
 
                             if (link.subGroups) {
                                 return (
-                                    <div key={link.label} className="relative group p-2">
+                                    <div key={link.label} className="relative group py-2 px-1">
                                         <button
                                             className="flex items-center gap-1 text-sm font-medium text-gray-700 group-hover:text-rio-green transition-colors duration-200 cursor-default"
                                         >
@@ -407,7 +415,7 @@ export default function Navbar({ contact: contactProp }: { contact?: ContactUrls
                                 <Link
                                     key={link.href}
                                     href={link.href}
-                                    className="p-2 text-sm font-medium text-gray-700 hover:text-rio-green transition-colors duration-200"
+                                    className="py-2 px-1 text-sm font-medium text-gray-700 hover:text-rio-green transition-colors duration-200"
                                 >
                                     {link.label}
                                 </Link>
@@ -418,14 +426,14 @@ export default function Navbar({ contact: contactProp }: { contact?: ContactUrls
                     {/* No mobile o acesso à conta vive dentro do menu: a variante
                         desktop deste bloco tem ~140px e, somada ao logo, empurrava
                         o hambúrguer para fora do viewport em telas < 430px. */}
-                    <div className="hidden lg:flex items-center gap-4">
+                    <div className="hidden lg:flex items-center gap-3">
                         {/* CTA primário do site. Antes da Fase 1 nenhuma das 26 páginas
                             linkava a /anfrage: ela existia, respondia 200 e era
                             inalcançável por navegação. O WhatsApp continua no menu e no
                             rodapé — este botão soma um caminho, não substitui nenhum. */}
                         <Link
                             href="/anfrage?von=site"
-                            className="inline-flex items-center rounded-full bg-rio-green px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-green-700"
+                            className="inline-flex items-center whitespace-nowrap rounded-full bg-rio-green px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-green-700"
                         >
                             {t('tourAnfragen')}
                         </Link>

@@ -9,6 +9,7 @@ import { createClient } from "@/utils/supabase/server";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 import {
   ArrowRight,
+  CalendarDays,
   MapPin,
   HeartHandshake,
   Phone,
@@ -62,6 +63,14 @@ const faqJsonLd = {
       acceptedAnswer: {
         "@type": "Answer",
         text: "Alle Touren sind privat oder in sehr kleinen Gruppen (max. 6 Personen), niemals ein Touristenbus. Du buchst direkt bei mir, nicht über eine Agentur.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Bietet ihr auch Touren während der Frauen-WM 2027 an?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Ja. Die FIFA Frauen-WM 2027 findet vom 24. Juni bis 25. Juli 2027 in Brasilien statt, Eröffnungsspiel und Finale im Maracanã. Wir begleiten dich rund um die Spiele in Rio, auf Deutsch und mit eigenem Fahrer. Mehr dazu: riofuerdeutsche.de/frauen-wm-2027",
       },
     },
     {
@@ -444,6 +453,56 @@ export default async function Home() {
                   );
                 })}
               </div>
+            </div>
+          </section>
+
+          {/* FRAUEN-WM 2027 TEASER */}
+          <section id="wm-2027" className="relative py-24 overflow-hidden bg-gray-900" aria-labelledby="wm-2027-heading">
+            <div className="absolute inset-0">
+              <Image
+                src="/images/wm-2027/bg-wm-2027.webp"
+                alt=""
+                fill
+                sizes="100vw"
+                className="object-cover object-center"
+              />
+              <div className="absolute inset-0 bg-black/55"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
+            </div>
+
+            <div className="relative z-10 max-w-7xl mx-auto px-5 lg:px-8">
+              <FadeIn direction="up">
+                <div className="max-w-3xl space-y-6">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium">
+                    <CalendarDays className="w-4 h-4 text-rio-yellow" />
+                    <span>24. Juni bis 25. Juli 2027</span>
+                  </div>
+
+                  <h2 id="wm-2027-heading" className="text-3xl md:text-5xl font-heading font-bold text-white leading-tight">
+                    Frauen-WM 2027: <span className="text-rio-yellow">Rio wird zur Hauptstadt des Fußballs</span>
+                  </h2>
+
+                  <p className="text-lg text-gray-200 leading-relaxed">
+                    Die FIFA Frauen-Weltmeisterschaft 2027 ist zu Gast in Brasilien. Gespielt wird in acht Städten, und die beiden größten Momente des Turniers, das Eröffnungsspiel und das Finale, steigen im Maracanã. Wenn du zur WM nach Rio kommst, findest du bei uns alles für deine Planung: Spielorte, Termine, Tickets und Touren mit deutschsprachiger Begleitung.
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <Link
+                      href="/frauen-wm-2027"
+                      className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
+                    >
+                      Alles zur Frauen-WM 2027
+                      <ArrowRight className="w-5 h-5" />
+                    </Link>
+                    <Link
+                      href="/touren/fussball"
+                      className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
+                    >
+                      Fußball Tour ansehen
+                    </Link>
+                  </div>
+                </div>
+              </FadeIn>
             </div>
           </section>
 
