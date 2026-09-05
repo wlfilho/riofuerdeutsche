@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { syncTourDatesWithLeadStatus } from '@/lib/tourDates';
+import { updateProposalStatus, type ProposalStatus } from '@/lib/proposals';
 import { NextRequest, NextResponse } from 'next/server';
 
 async function verifyAdmin() {
@@ -14,7 +15,26 @@ async function verifyAdmin() {
   return { authorized: profile?.role === 'admin', supabase };
 }
 
-const VALID_STATUSES = ['new', 'contacted', 'proposal_sent', 'closed', 'lost'];
+const VALID_STATUSES = ['new', 'contacted', 'proposal_sent', 'closed', 'lost', 'completed'];
+
+// Direção CRM → proposta: mover o card no kanban também atualiza a proposta
+// vinculada, pra /admin/crm e /admin/propostas contarem a mesma história.
+// new/contacted ficam de fora: arrastar o card para trás não "desenvia" o que
+// o cliente já recebeu. O trigger price_leads_sync_proposal_status (migrations
+// 20260905100000 + 20260905110000) faz o mesmo mapa direto no banco, inclusive
+// proposal_sent → sent com o congelamento replicado em SQL
+// (freeze_proposal_items_for_send) — se mudar o mapa, mude nos DOIS lugares.
+// Na prática o trigger chega primeiro e isto aqui vira no-op (o shouldFreeze
+// de updateProposalStatus dá false porque a proposta já está 'sent'); a camada
+// TS fica pelo mesmo motivo da corrente proposta → lead: redundância
+// idempotente, documentada em código que quebra build.
+const PROPOSAL_STATUS_BY_LEAD_STATUS: Record<string, ProposalStatus> = {
+  proposal_sent: 'sent',
+  closed: 'accepted',
+  // Concluído não muda o resultado comercial: a proposta segue (ou vira) aceita.
+  completed: 'accepted',
+  lost: 'rejected',
+};
 
 export async function GET(
   _request: NextRequest,
@@ -106,6 +126,18 @@ export async function PATCH(
   if (status !== undefined || proposal_id !== undefined) {
     const syncError = await syncTourDatesWithLeadStatus(supabase, id, lead.status);
     if (syncError) console.error('[leads PATCH] failed to sync tour_dates:', syncError);
+  }
+
+  // Sincroniza a proposta vinculada (best-effort, como o calendário acima).
+  // updateProposalStatus é idempotente e cuida do congelamento na entrada em
+  // 'sent'; a sincronia lead ← proposta que ele refaz por dentro é no-op.
+  const proposalStatus = PROPOSAL_STATUS_BY_LEAD_STATUS[lead.status];
+  if (status !== undefined && lead.proposal_id && proposalStatus) {
+    try {
+      await updateProposalStatus(lead.proposal_id, proposalStatus);
+    } catch (err) {
+      console.error('[leads PATCH] failed to sync linked proposal:', err);
+    }
   }
 
   return NextResponse.json({ lead });

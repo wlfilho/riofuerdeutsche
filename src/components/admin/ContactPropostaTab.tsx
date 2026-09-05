@@ -16,7 +16,7 @@ import type { ProposalEmailStatus } from '@/lib/email/sendProposalEmail';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'lost';
+type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'completed' | 'lost';
 
 /**
  * Lead com o que o cliente preencheu na /anfrage. Campos opcionais porque leads

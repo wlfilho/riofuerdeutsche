@@ -43,7 +43,7 @@ export default function LeadDataCard({ lead }: { lead: Lead & { groups: LeadGrou
     ? `https://wa.me/${lead.phone.replace(/\D/g, '')}?text=${waText}`
     : null;
   const mailUrl = `mailto:${lead.email}?subject=Ihre%20Anfrage%20%E2%80%93%20Rio%20f%C3%BCr%20Deutsche`;
-  const canConvert = lead.status !== 'closed' && lead.status !== 'lost';
+  const canConvert = lead.status !== 'closed' && lead.status !== 'completed' && lead.status !== 'lost';
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">

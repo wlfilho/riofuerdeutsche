@@ -12,7 +12,7 @@ export async function generateMetadata() {
   return { title: t('metaTitle') };
 }
 
-export type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'lost';
+export type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'completed' | 'lost';
 export type LeadSource = 'calculator' | 'email' | 'whatsapp' | 'instagram' | 'referral' | 'other' | 'form';
 
 export interface CrmLead {
@@ -81,10 +81,12 @@ export default async function CrmPage({
   const countContacted = leads.filter(l => l.status === 'contacted').length;
   const countProposal = leads.filter(l => l.status === 'proposal_sent').length;
   const countClosed = leads.filter(l => l.status === 'closed').length;
+  const countCompleted = leads.filter(l => l.status === 'completed').length;
   const countLost = leads.filter(l => l.status === 'lost').length;
   const countArchived = leads.filter(l => l.archiveReason !== null).length;
   const eligible = total - countLost;
-  const conversion = eligible > 0 ? Math.round((countClosed / eligible) * 100) : 0;
+  // Concluído é um fechado que já foi entregue — continua convertido.
+  const conversion = eligible > 0 ? Math.round(((countClosed + countCompleted) / eligible) * 100) : 0;
 
   const metrics = [
     { label: tc('total'), value: total },
@@ -92,6 +94,7 @@ export default async function CrmPage({
     { label: t('emContato'), value: countContacted },
     { label: t('proposta'), value: countProposal },
     { label: t('fechados'), value: countClosed },
+    { label: t('concluidos'), value: countCompleted },
     { label: t('conversao'), value: `${conversion}%` },
     { label: t('arquivados'), value: countArchived, muted: true },
   ];
@@ -107,7 +110,7 @@ export default async function CrmPage({
           <GroupFilter value={group} />
         </div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
           {metrics.map(card => (
             <div
               key={card.label}

@@ -27,7 +27,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from('price_leads')
     .select('id, name, email')
-    .eq('status', 'closed')
+    .in('status', ['closed', 'completed'])
     .not('email', 'is', null)
     .order('created_at', { ascending: false });
 

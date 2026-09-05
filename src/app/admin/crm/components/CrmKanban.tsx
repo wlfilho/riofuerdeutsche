@@ -32,6 +32,8 @@ const COLUMNS: ColumnConfig[] = [
   { id: 'contacted', headerClass: 'bg-blue-50 border-blue-100 text-blue-700', countClass: 'bg-blue-100 text-blue-700' },
   { id: 'proposal_sent', headerClass: 'bg-amber-50 border-amber-100 text-amber-700', countClass: 'bg-amber-100 text-amber-700' },
   { id: 'closed', headerClass: 'bg-green-50 border-green-100 text-green-700', countClass: 'bg-green-100 text-green-700' },
+  // Teal, não verde: "fechado" é dinheiro combinado, "concluído" é tour entregue.
+  { id: 'completed', headerClass: 'bg-teal-50 border-teal-100 text-teal-700', countClass: 'bg-teal-100 text-teal-700' },
   { id: 'lost', headerClass: 'bg-red-50 border-red-100 text-red-700', countClass: 'bg-red-100 text-red-700' },
 ];
 

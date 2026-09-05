@@ -19,13 +19,14 @@ type Interaction = {
   created_at: string;
 };
 
-const STATUS_VALUES: LeadStatus[] = ['new', 'contacted', 'proposal_sent', 'closed', 'lost'];
+const STATUS_VALUES: LeadStatus[] = ['new', 'contacted', 'proposal_sent', 'closed', 'completed', 'lost'];
 
 const STATUS_CLASS: Record<LeadStatus, string> = {
   new: 'bg-gray-100 text-gray-700',
   contacted: 'bg-blue-100 text-blue-700',
   proposal_sent: 'bg-amber-100 text-amber-700',
   closed: 'bg-green-100 text-green-700',
+  completed: 'bg-teal-100 text-teal-700',
   lost: 'bg-red-100 text-red-700',
 };
 
@@ -425,7 +426,7 @@ export default function LeadDrawer({
                   {t('verProposta')}
                 </Link>
               )}
-              {!lead.proposal_id && lead.status !== 'closed' && lead.status !== 'lost' && (
+              {!lead.proposal_id && lead.status !== 'closed' && lead.status !== 'completed' && lead.status !== 'lost' && (
                 <Link
                   href={`/admin/propostas/nova?lead_id=${lead.id}`}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"

@@ -16,7 +16,7 @@ import { fmtDate, fmtDateTime, fmtEur } from '@/lib/adminFormat';
 
 type Tab = 'guide' | 'crm' | 'proposta' | 'emails' | 'dokumente';
 
-type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'lost';
+type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'completed' | 'lost';
 
 interface Profile {
   id: string;
@@ -238,7 +238,12 @@ function LeadFunnel({ status }: { status: LeadStatus }) {
   const t = useTranslations('admin.crm');
   const tStatus = useTranslations('admin.status.lead');
   const isLost = status === 'lost';
-  const currentIdx = isLost ? -1 : FUNNEL_STEPS.findIndex(s => s.key === status);
+  // Concluído fica além do fim do funil: todas as etapas pintadas como feitas.
+  const currentIdx = isLost
+    ? -1
+    : status === 'completed'
+      ? FUNNEL_STEPS.length
+      : FUNNEL_STEPS.findIndex(s => s.key === status);
 
   return (
     <div className="flex items-start gap-1 flex-wrap">
@@ -567,7 +572,7 @@ function EmailsTab({
   // de ser `tour_clients`, aposentada em 31/08/2026: quem recebe a sequência é
   // o lead, e os dados vêm do calendário e da proposta.
   const leadsComSequencia = leads.filter(
-    l => l.status === 'closed' || email_logs.some(log => log.lead_id === l.id),
+    l => l.status === 'closed' || l.status === 'completed' || email_logs.some(log => log.lead_id === l.id),
   );
 
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(
@@ -631,7 +636,9 @@ function EmailsTab({
               <dt className="text-xs text-gray-400 uppercase font-medium">{tCommon('status')}</dt>
               <dd className="mt-0.5">
                 <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
-                  lead.status === 'closed' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                  lead.status === 'closed' || lead.status === 'completed'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 text-gray-600'
                 }`}>
                   {tLeadStatus(lead.status)}
                 </span>
@@ -697,7 +704,7 @@ function EmailsTab({
                 })}
               </ul>
             </div>
-          ) : lead.status === 'closed' ? (
+          ) : lead.status === 'closed' || lead.status === 'completed' ? (
             <StartSequencePanel leadId={lead.id} onStarted={onSequenceStarted} />
           ) : (
             <p className="text-sm text-gray-400 italic">{t('nenhumEmailSequencia')}</p>

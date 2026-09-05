@@ -629,11 +629,20 @@ export async function updateProposalStatus(id: string, status: ProposalStatus): 
   // o mesmo trabalho no banco, para cobrir quem escreve fora do app. As duas
   // escritas são idempotentes, então isto aqui vira no-op — mas se mudar o
   // mapa de status, mude nos DOIS lugares (o trigger não quebra build).
+  //
+  // A direção contrária (CRM → proposta) vive no PATCH de
+  // /api/admin/leads/[id] + trigger price_leads_sync_proposal_status
+  // (migration 20260905100000), com mapas que são pontos fixos mútuos destes
+  // aqui — mexeu num lado, confira o outro.
+  // Lead 'completed' é terminal: o tour já foi feito e nenhum evento da
+  // proposta rebaixa isso (rejected → lost apagaria as datas do histórico).
+  // Só o admin, movendo o card, tira um lead de concluído.
   const leadStatus = LEAD_STATUS_BY_PROPOSAL_STATUS[status];
   const { data: syncedLeads, error: leadError } = await supabase
     .from('price_leads')
     .update({ status: leadStatus })
     .eq('proposal_id', id)
+    .neq('status', 'completed')
     .select('id');
 
   if (leadError) {

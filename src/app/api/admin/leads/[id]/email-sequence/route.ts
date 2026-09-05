@@ -60,7 +60,8 @@ export async function POST(
     .eq('id', id)
     .maybeSingle();
 
-  if (lead?.status !== 'closed') {
+  // Concluído também entra: o pós-tour (avaliação) é justamente dessa fase.
+  if (lead?.status !== 'closed' && lead?.status !== 'completed') {
     return NextResponse.json({ error: 'LEAD_NAO_FECHADO' }, { status: 400 });
   }
 

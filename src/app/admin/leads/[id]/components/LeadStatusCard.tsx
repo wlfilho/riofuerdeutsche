@@ -6,7 +6,7 @@ import { updateLeadStatus, updateLeadNotes, setLeadArchived } from '../actions';
 import type { ArchiveReason } from '@/lib/leadArchive';
 import type { LeadStatus } from '../../page';
 
-const STATUS_VALUES: LeadStatus[] = ['new', 'contacted', 'proposal_sent', 'closed', 'lost'];
+const STATUS_VALUES: LeadStatus[] = ['new', 'contacted', 'proposal_sent', 'closed', 'completed', 'lost'];
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
