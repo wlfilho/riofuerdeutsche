@@ -132,6 +132,7 @@ export default function AnfrageForm({
   const themaLabels: Record<Thema, string> = {
     unterkunft: t('themaUnterkunft'),
     transfer: t('themaTransfer'),
+    'frauen-wm-2027': t('themaFrauenWm2027'),
     'aussicht-natur': t('themaAussichtNatur'),
     'kunst-kultur': t('themaKunstKultur'),
     'postkarten-tour': t('themaPostkartenTour'),

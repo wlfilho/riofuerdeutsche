@@ -18,6 +18,12 @@ export const THEMA_SLUGS = [
   // Serviços
   'unterkunft',
   'transfer',
+  // Campanha Frauen-WM 2027: os CTAs comerciais do hub /frauen-wm-2027 apontam
+  // pra /anfrage com este tema (decisão de 05/09/2026 — a página comercial
+  // /frauen-wm-2027/rio-de-janeiro ainda não existe e o pedido vai direto pro
+  // formulário). Depois da Copa (jul/2027) o slug pode sair daqui, mas os leads
+  // gravados com ele permanecem no banco.
+  'frauen-wm-2027',
   // Os 6 programas da /touren/klassiker. Não são tours próprios — são
   // recortes de interesse dentro do mesmo passeio, que é exatamente o que o
   // multi-select de temas da Fase 2 vai coletar. Por isso reusam `thema` em

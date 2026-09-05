@@ -221,11 +221,15 @@ export default function Page() {
                                 </p>
 
                                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                                    {/* CTA principal vai direto pra /anfrage com thema=frauen-wm-2027
+                                        (decisão de 05/09/2026): a página comercial /rio-de-janeiro
+                                        ainda não existe e apontar pra ela dava 404. Quando ela
+                                        nascer, reavaliar o destino. */}
                                     <Link
-                                        href="/frauen-wm-2027/rio-de-janeiro"
+                                        href="/anfrage?von=site&thema=frauen-wm-2027"
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
                                     >
-                                        Tours in Rio während der WM 2027
+                                        Tour für die WM 2027 anfragen
                                         <ArrowRight className="w-5 h-5" />
                                     </Link>
                                     <Link
@@ -538,15 +542,17 @@ export default function Page() {
 
                         <FadeIn direction="up" className="max-w-[800px] mx-auto mt-12">
                             <p className="text-lg text-gray-600 leading-relaxed">
-                                Alles, was du für deine Reise nach Rio während der WM 2027 brauchst,
-                                findest du gebündelt im Reiseguide für Rio während der WM:
+                                Du planst deine Reise nach Rio während der WM 2027? Erzähl mir kurz,
+                                wann du kommst und was dich interessiert, und du bekommst einen
+                                persönlichen Vorschlag mit Ablauf und Preis, kostenlos und
+                                unverbindlich.
                             </p>
                             <div className="mt-8 text-center">
                                 <Link
-                                    href="/frauen-wm-2027/rio-de-janeiro"
+                                    href="/anfrage?von=site&thema=frauen-wm-2027"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-lg"
                                 >
-                                    Kompletter Reiseguide für Rio während der WM
+                                    Deine WM-Reise mit Will planen
                                     <ArrowRight className="w-5 h-5" />
                                 </Link>
                             </div>
@@ -643,10 +649,10 @@ export default function Page() {
                                 Zum Sicherheits-Guide für Rio
                             </Link>
                             <Link
-                                href="/frauen-wm-2027/rio-de-janeiro"
+                                href="/anfrage?von=site&thema=frauen-wm-2027"
                                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-rio-green text-white rounded-full font-semibold hover:bg-green-700 transition-all"
                             >
-                                Tours in Rio während der WM 2027
+                                Tour für die WM 2027 anfragen
                                 <ArrowRight className="w-5 h-5" />
                             </Link>
                         </FadeIn>
@@ -728,10 +734,10 @@ export default function Page() {
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link
-                                    href="/frauen-wm-2027/rio-de-janeiro"
+                                    href="/anfrage?von=site&thema=frauen-wm-2027"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
                                 >
-                                    Tours in Rio während der WM 2027
+                                    Tour für die WM 2027 anfragen
                                     <ArrowRight className="w-5 h-5" />
                                 </Link>
                                 <Link
