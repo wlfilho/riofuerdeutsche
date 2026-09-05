@@ -72,6 +72,7 @@
         "contacted": "Em contato",
         "proposal_sent": "Proposta enviada",
         "closed": "Fechado",
+        "completed": "Concluído",
         "lost": "Perdido"
       },
       "leadPlural": {
@@ -79,6 +80,7 @@
         "contacted": "Em contato",
         "proposal_sent": "Proposta enviada",
         "closed": "Fechados",
+        "completed": "Concluídos",
         "lost": "Perdidos"
       },
       "proposal": {
@@ -319,6 +321,7 @@
       "novos": "Novos",
       "emContato": "Em contato",
       "fechados": "Fechados",
+      "concluidos": "Concluídos",
       "proposta": "Proposta",
       "conversao": "Conversão",
       "novo": "Novo",
@@ -1023,6 +1026,8 @@
       "toursCount": "{count, plural, one {# tour} other {# tours}}",
       "limparFiltro": "Limpar filtro",
       "nenhumTourPeriodo": "Nenhum tour neste período.",
+      "concluidosTitulo": "Concluídos",
+      "concluidosCount": "{count, plural, one {# tour já realizado} other {# tours já realizados}}",
       "confirmarRemover": "Remover \"{tour}\" de {data}?",
       "anterior": "Anterior",
       "proximo": "Próximo",
@@ -1074,6 +1079,9 @@
       "conflitoOutroClienteTitulo": "Outro cliente já tem tour nestes dias:",
       "conflitoOutroClienteAjuda": "Confira a data antes de gravar: dois clientes no mesmo dia só funcionam com guia parceiro.",
       "salvarMesmoAssim": "Salvar mesmo assim",
+      "itinerarioDia": "Itinerário do dia",
+      "semItinerarioDia": "Sem itinerário na proposta para este dia.",
+      "atividadesCount": "{count, plural, one {# atividade} other {# atividades}}",
       "foraPropostaTitulo": "Estes dias não estão na proposta nem no pedido deste cliente:",
       "foraPropostaDiasCliente": "dias do cliente",
       "foraPropostaAjuda": "Confira se a data está certa. Se for um dia extra combinado fora da proposta, pode continuar.",

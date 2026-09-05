@@ -235,7 +235,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: LeadView[] 
                       </Link>
 
                       {/* Converter em proposta */}
-                      {lead.status !== 'closed' && lead.status !== 'lost' && (
+                      {lead.status !== 'closed' && lead.status !== 'completed' && lead.status !== 'lost' && (
                         <Link
                           href={`/admin/propostas/nova?lead_id=${lead.id}`}
                           title={t('converterProposta')}

@@ -11,7 +11,7 @@ import { fmtDate, fmtEur } from '@/lib/adminFormat';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'lost';
+type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'completed' | 'lost';
 
 interface Lead {
   id: string;
@@ -104,7 +104,9 @@ function FunnelProgress({ status }: { status: LeadStatus }) {
     );
   }
 
-  const currentIdx = FUNNEL_STEPS.findIndex(s => s.key === status);
+  // Concluído fica além do fim do funil: todas as etapas pintadas como feitas.
+  const currentIdx =
+    status === 'completed' ? FUNNEL_STEPS.length : FUNNEL_STEPS.findIndex(s => s.key === status);
 
   return (
     <div className="flex items-start mb-6">

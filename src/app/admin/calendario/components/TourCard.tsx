@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import {
   AlertTriangle,
   Car,
   CheckCircle2,
+  ChevronRight,
   Clock,
   ExternalLink,
   FileText,
@@ -156,6 +158,65 @@ function DriverBadge({ driver }: { driver: NonNullable<TourDate['driver']> }) {
   );
 }
 
+/**
+ * Roteiro do dia, recolhido por padrão. As atividades vêm da proposta que
+ * manda no calendário (price_leads.proposal_id → proposals.items) filtradas
+ * pela data do card; a linha sintética de transporte (day_transport) fica de
+ * fora, não é uma parada. As observações do CRM moram aqui dentro também:
+ * são anotação de bastidor, não algo pra ocupar o card o tempo todo.
+ */
+function DayItinerary({ tour }: { tour: TourDate }) {
+  const t = useTranslations('admin.calendario');
+  const [open, setOpen] = useState(false);
+
+  const activities = (tour.lead?.proposal?.items ?? []).filter(
+    i => i.day === tour.date && i.kind !== 'day_transport',
+  );
+  if (activities.length === 0 && !tour.notes) return null;
+
+  return (
+    <div className="mt-3 pt-2 border-t border-gray-100">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors"
+      >
+        <ChevronRight className={`w-3.5 h-3.5 shrink-0 transition-transform ${open ? 'rotate-90' : ''}`} />
+        {t('itinerarioDia')}
+        {activities.length > 0 && (
+          <span className="font-normal text-gray-400">
+            ({t('atividadesCount', { count: activities.length })})
+          </span>
+        )}
+      </button>
+      {open && (
+        <div className="mt-2 pl-4.5 space-y-1.5">
+          {activities.map((a, i) => (
+            <div key={`${a.service_slug}-${i}`} className="flex items-start gap-2 text-sm text-gray-700">
+              <span className="mt-0.5 w-4 shrink-0 text-right text-[11px] font-semibold text-gray-400">
+                {i + 1}.
+              </span>
+              <span className="min-w-0 break-words">
+                {a.service_name}
+                {a.duration_hours != null && (
+                  <span className="text-gray-400"> · {a.duration_hours}h</span>
+                )}
+              </span>
+            </div>
+          ))}
+          {activities.length === 0 && (
+            <p className="text-sm text-gray-400">{t('semItinerarioDia')}</p>
+          )}
+          {tour.notes && (
+            <p className={`text-sm text-gray-500 italic ${activities.length > 0 ? 'pt-1.5 border-t border-gray-100' : ''}`}>
+              {tour.notes}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Full-width row card used in the tour list. */
 export default function TourCard({
   tour,
@@ -295,9 +356,7 @@ export default function TourCard({
 
       </div>
 
-      {tour.notes && (
-        <p className="mt-3 pt-3 border-t border-gray-100 text-sm text-gray-500 italic">{tour.notes}</p>
-      )}
+      <DayItinerary tour={tour} />
     </div>
   );
 }

@@ -33,6 +33,11 @@ export const KANBAN_COLUMNS: ColumnConfig[] = [
     countClass: 'bg-green-100 text-green-700',
   },
   {
+    id: 'completed',
+    headerClass: 'bg-teal-50 border-teal-100 text-teal-700',
+    countClass: 'bg-teal-100 text-teal-700',
+  },
+  {
     id: 'lost',
     headerClass: 'bg-red-50 border-red-100 text-red-700',
     countClass: 'bg-red-100 text-red-700',

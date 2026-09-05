@@ -55,6 +55,7 @@ const LEAD_STATUS_BAR: Record<LeadStatus, string> = {
   contacted: 'bg-amber-500',
   proposal_sent: 'bg-purple-500',
   closed: 'bg-green-600',
+  completed: 'bg-teal-500',
   lost: 'bg-gray-400',
 };
 
@@ -112,7 +113,9 @@ export default async function DashboardPage() {
     ]),
   ) as Record<LeadStatus, number>;
   const eligible = leads.length - leadCounts.lost;
-  const conversion = eligible > 0 ? Math.round((leadCounts.closed / eligible) * 100) : 0;
+  // Concluído é um fechado que já foi entregue — continua convertido.
+  const conversion =
+    eligible > 0 ? Math.round(((leadCounts.closed + leadCounts.completed) / eligible) * 100) : 0;
   const maxLeadCount = Math.max(1, ...Object.values(leadCounts));
 
   // — Calendário / Tours —

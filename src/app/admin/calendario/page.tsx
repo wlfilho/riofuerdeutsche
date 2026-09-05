@@ -16,13 +16,13 @@ export async function generateMetadata() {
 // PostgREST recusa o embed ambíguo. Aqui queremos sempre a proposta que manda
 // no calendário, que é price_leads.proposal_id.
 const CALENDAR_TOUR_SELECT =
-  '*, lead:price_leads!inner(id, name, email, phone, status, proposal:proposals!price_leads_proposal_id_fkey(id, pdf_url)), driver:profiles!tour_dates_driver_id_fkey(id, first_name, email)';
+  '*, lead:price_leads!inner(id, name, email, phone, status, proposal:proposals!price_leads_proposal_id_fkey(id, pdf_url, items)), driver:profiles!tour_dates_driver_id_fkey(id, first_name, email)';
 
 // Tudo que não está perdido aparece na agenda. Antes o calendário só mostrava
 // proposal_sent/closed, e um dia montado numa proposta ainda em rascunho
 // simplesmente não existia aqui (Lea Schallmo, 09/2026). A diferença de
 // estágio vira cor no selo, não ausência.
-const CALENDAR_LEAD_STATUSES = ['new', 'contacted', 'proposal_sent', 'closed'];
+const CALENDAR_LEAD_STATUSES = ['new', 'contacted', 'proposal_sent', 'closed', 'completed'];
 
 export default async function CalendarioPage() {
   const t = await getAdminTranslations('admin.calendario');

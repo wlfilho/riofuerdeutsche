@@ -174,7 +174,7 @@ export default async function MotoristaPage() {
       'id, date, start_time, tour_name, status, pax, meeting_point, lead:price_leads!inner(id, name, status, proposal:proposals!price_leads_proposal_id_fkey(id, items))',
     )
     .eq('driver_id', user.id)
-    .in('lead.status', ['new', 'contacted', 'proposal_sent', 'closed'])
+    .in('lead.status', ['new', 'contacted', 'proposal_sent', 'closed', 'completed'])
     .order('date', { ascending: true })
     .order('start_time', { ascending: true, nullsFirst: true });
 

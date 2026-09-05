@@ -15,7 +15,7 @@ async function verifyAdmin() {
   return { authorized: profile?.role === 'admin', supabase };
 }
 
-const VALID_STATUSES = ['new', 'contacted', 'proposal_sent', 'closed', 'lost'];
+const VALID_STATUSES = ['new', 'contacted', 'proposal_sent', 'closed', 'lost', 'completed'];
 
 // Direção CRM → proposta: mover o card no kanban também atualiza a proposta
 // vinculada, pra /admin/crm e /admin/propostas contarem a mesma história.
@@ -31,6 +31,8 @@ const VALID_STATUSES = ['new', 'contacted', 'proposal_sent', 'closed', 'lost'];
 const PROPOSAL_STATUS_BY_LEAD_STATUS: Record<string, ProposalStatus> = {
   proposal_sent: 'sent',
   closed: 'accepted',
+  // Concluído não muda o resultado comercial: a proposta segue (ou vira) aceita.
+  completed: 'accepted',
   lost: 'rejected',
 };
 

@@ -25,7 +25,9 @@ export async function GET(request: Request) {
     .select('id, email_number, lead_id, price_leads!inner(status)')
     .eq('status', 'pending')
     .lte('scheduled_date', today)
-    .eq('price_leads.status', 'closed')
+    // Concluído continua na sequência: o e-mail pós-tour (avaliação) sai
+    // justamente depois que o tour aconteceu.
+    .in('price_leads.status', ['closed', 'completed'])
 
   if (fetchError) {
     console.error('[cron] Fehler beim Laden der pendenten E-Mails:', fetchError.message)

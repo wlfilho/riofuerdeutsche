@@ -1,6 +1,9 @@
 // Shared types for tour_dates (calendário de tours)
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+// Só o tipo: proposals.ts importa funções daqui, então importar valor de lá
+// criaria ciclo em runtime. `import type` é apagado na compilação.
+import type { ProposalItem } from '@/lib/proposals';
 
 export type TourDateStatus = 'rascunho' | 'proposta_enviada' | 'fechado';
 
@@ -62,7 +65,9 @@ export interface TourDateLead {
   name: string;
   email: string;
   phone: string | null;
-  proposal: { id: string; pdf_url: string | null } | null;
+  // `items` alimenta o toggle de itinerário do card do calendário (as
+  // atividades do dia vêm de proposals.items filtrado por day = date).
+  proposal: { id: string; pdf_url: string | null; items?: ProposalItem[] | null } | null;
 }
 
 /** Motorista escalado no dia: profile com role='driver'. */
@@ -122,7 +127,7 @@ export interface TourDateInput {
 // PostgREST recusa o embed ambíguo. Aqui queremos sempre a proposta que manda
 // no calendário, que é price_leads.proposal_id.
 export const TOUR_DATE_SELECT =
-  '*, lead:price_leads(id, name, email, phone, proposal:proposals!price_leads_proposal_id_fkey(id, pdf_url)), driver:profiles!tour_dates_driver_id_fkey(id, first_name, email)';
+  '*, lead:price_leads(id, name, email, phone, proposal:proposals!price_leads_proposal_id_fkey(id, pdf_url, items)), driver:profiles!tour_dates_driver_id_fkey(id, first_name, email)';
 
 // ── Hierarquia do dia ────────────────────────────────────────────────────────
 //
@@ -234,6 +239,8 @@ export async function findConflictingTourDates(
 // abaixo); lead perdido apaga as datas pra liberar o dia pra outro cliente.
 export const TOUR_STATUS_BY_LEAD_STATUS: Record<string, TourDateStatus> = {
   closed: 'fechado',
+  // Tour concluído: os dias viram histórico, não somem do banco.
+  completed: 'fechado',
   proposal_sent: 'proposta_enviada',
   // Lead ainda em conversa: se já existe proposta montada, os dias dela vão
   // pro calendário como RASCUNHO. Um dia que só existe no rascunho continua

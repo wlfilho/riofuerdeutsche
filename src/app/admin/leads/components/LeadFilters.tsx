@@ -13,7 +13,7 @@ type Props = {
   hideStatus?: boolean;
 };
 
-const STATUS_VALUES = ['new', 'contacted', 'proposal_sent', 'closed', 'lost'] as const;
+const STATUS_VALUES = ['new', 'contacted', 'proposal_sent', 'closed', 'completed', 'lost'] as const;
 
 // Só valores que price_leads.source pode assumir de verdade. 'site' NÃO entra:
 // ele é canal de chegada (arrival_channel / contacts.source), não de submissão

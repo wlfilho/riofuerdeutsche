@@ -14,7 +14,7 @@ export type ContactListItem = {
   source: string | null;
   created_at: string;
   guide_role?: 'user' | 'premium' | 'admin';
-  lead_status?: 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'lost';
+  lead_status?: 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'completed' | 'lost';
   /**
    * Fechou: lead `closed`, proposta `accepted` ou data `fechado` no calendário.
    * Vem da view `clients_v` — definição única de cliente, ver contatos/page.tsx.
@@ -36,6 +36,7 @@ function getStatusDot(
   if (contact.lead_status === 'proposal_sent') return { color: 'bg-amber-400', title: tLead('proposal_sent') };
   if (contact.lead_status === 'contacted') return { color: 'bg-amber-400', title: tLead('contacted') };
   if (contact.lead_status === 'closed') return { color: 'bg-green-500', title: tLead('closed') };
+  if (contact.lead_status === 'completed') return { color: 'bg-teal-500', title: tLead('completed') };
   if (contact.lead_status === 'lost') return { color: 'bg-red-500', title: tLead('lost') };
   if (contact.lead_status === 'new') return { color: 'bg-gray-300', title: tContatos('novoLead') };
   if (contact.guide_role) return { color: 'bg-gray-300', title: tContatos('usuarioGuide') };

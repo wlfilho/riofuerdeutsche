@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { X } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import {
   TOUR_DATE_STATUS_DOT,
   dayConflictFor,
@@ -54,6 +54,9 @@ export default function CalendarClient({
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<TourDateStatus | null>(null);
   const [modal, setModal] = useState<{ editing?: TourDate; defaultDate?: string } | null>(null);
+  // Seção "Concluídos" (dias que já passaram): fechada por padrão, o histórico
+  // não deve competir com o que ainda vai acontecer.
+  const [showPast, setShowPast] = useState(false);
 
   const anchor = useMemo(() => parseISODate(anchorISO), [anchorISO]);
 
@@ -134,6 +137,13 @@ export default function CalendarClient({
       listTitle: formatWeekRange(weekStart),
     };
   }, [visibleTours, selectedDay, view, anchor, anchorISO]);
+
+  // O que já passou sai da frente e vira a seção "Concluídos", fechada por
+  // padrão. Clique num dia específico mostra tudo daquele dia, passado
+  // incluído: quem clicou no dia quer ver o dia.
+  const todayIso = todayISO();
+  const upcomingTours = selectedDay ? listTours : listTours.filter(t => t.date >= todayIso);
+  const pastTours = selectedDay ? [] : listTours.filter(t => t.date < todayIso);
 
   // Clicking a day filters the list to it; clicking again clears the filter
   const toggleDay = (iso: string) => {
@@ -242,9 +252,9 @@ export default function CalendarClient({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
           <h2 className="text-lg font-bold text-gray-900">{listTitle}</h2>
           <span className="text-sm text-gray-400">
-            {listTours.length === 0
+            {upcomingTours.length === 0
               ? t('nenhumTour')
-              : t('toursCount', { count: listTours.length })}
+              : t('toursCount', { count: upcomingTours.length })}
           </span>
           {selectedDay && (
             <button
@@ -257,7 +267,7 @@ export default function CalendarClient({
           )}
         </div>
 
-        {listTours.length === 0 ? (
+        {upcomingTours.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 p-10 text-center">
             <p className="text-sm text-gray-400 mb-4">{t('nenhumTourPeriodo')}</p>
             <button
@@ -269,12 +279,40 @@ export default function CalendarClient({
           </div>
         ) : (
           <TourList
-            tours={listTours}
+            tours={upcomingTours}
             conflictByTour={conflictByTour}
             groupByMonth={view === 'ano' && !selectedDay}
             onEdit={tour => setModal({ editing: tour })}
             onDelete={handleDelete}
           />
+        )}
+
+        {pastTours.length > 0 && (
+          <div className="mt-8">
+            <button
+              onClick={() => setShowPast(p => !p)}
+              className="w-full flex items-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-left hover:bg-gray-100 transition-colors"
+            >
+              <ChevronDown
+                className={`w-4 h-4 text-gray-400 transition-transform ${showPast ? 'rotate-180' : ''}`}
+              />
+              <span className="text-sm font-semibold text-gray-700">{t('concluidosTitulo')}</span>
+              <span className="text-sm text-gray-400">
+                {t('concluidosCount', { count: pastTours.length })}
+              </span>
+            </button>
+            {showPast && (
+              <div className="mt-3 opacity-75">
+                <TourList
+                  tours={pastTours}
+                  conflictByTour={conflictByTour}
+                  groupByMonth={view === 'ano'}
+                  onEdit={tour => setModal({ editing: tour })}
+                  onDelete={handleDelete}
+                />
+              </div>
+            )}
+          </div>
         )}
       </main>
 

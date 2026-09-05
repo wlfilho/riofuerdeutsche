@@ -12,7 +12,7 @@ export async function generateMetadata() {
   return { title: t('metaTitleLeads') };
 }
 
-export type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'lost';
+export type LeadStatus = 'new' | 'contacted' | 'proposal_sent' | 'closed' | 'completed' | 'lost';
 export type LeadSource = 'calculator' | 'email' | 'whatsapp' | 'instagram' | 'referral' | 'other' | 'form';
 
 export interface Lead {
@@ -87,7 +87,8 @@ export default async function LeadsPage({
   const total = allLeads.length;
   const countNew = allLeads.filter(l => l.status === 'new').length;
   const countContacted = allLeads.filter(l => l.status === 'contacted').length;
-  const countClosed = allLeads.filter(l => l.status === 'closed').length;
+  // Concluído é um fechado que já foi entregue — continua convertido.
+  const countClosed = allLeads.filter(l => l.status === 'closed' || l.status === 'completed').length;
   const countArchived = allLeads.filter(l => l.archiveReason !== null).length;
   const conversionRate = total > 0 ? Math.round((countClosed / total) * 100) : 0;
 
