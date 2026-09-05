@@ -94,6 +94,7 @@ export default function Footer({ contact = FALLBACK_CONTACT }: { contact?: Conta
                                 footer é o único lugar que aparece em toda página. */}
                             <li><Link href="/anfrage?von=site" className="font-semibold text-white hover:text-rio-yellow transition-colors">{t('tourAnfragen')}</Link></li>
                             <li><Link href="/touren" className="hover:text-white transition-colors">{t('tourenUndAusfluege')}</Link></li>
+                            <li><Link href="/frauen-wm-2027" className="hover:text-white transition-colors">{t('frauenWm2027')}</Link></li>
                             <li><Link href="/ueber-will" className="hover:text-white transition-colors">{t('ueberUns')}</Link></li>
                             <li><Link href="/rio-guide/sehenswuerdigkeiten" className="hover:text-white transition-colors">{t('rioGuide')}</Link></li>
                             <li><Link href="/rio-guide/sehenswuerdigkeiten/christus-erloeser" className="hover:text-white transition-colors">{t('christusErloeser')}</Link></li>
