@@ -22,14 +22,17 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-    title: "Frauen WM 2027 in Brasilien · Reiseguide für Rio",
+    // "Fußball" no title é deliberado: o cluster de busca inclui
+    // "handball-wm frauen 2027" (170/mês) e o Google mistura os intents.
+    // Ver Obsidian: WM 2027 — Estratégia SEO e Arquitetura, seção 5.
+    title: "Fußball Frauen WM 2027 in Brasilien · Reiseguide für Rio",
     description:
         "Alles zur FIFA Frauen-Weltmeisterschaft 2027 in Brasilien: Spielorte, Termine, Tickets und dein deutscher Guide in Rio. Eröffnung und Finale im Maracanã.",
     alternates: {
         canonical: "https://riofuerdeutsche.de/frauen-wm-2027",
     },
     openGraph: {
-        title: "Frauen WM 2027 in Brasilien · Reiseguide für Rio",
+        title: "Fußball Frauen WM 2027 in Brasilien · Reiseguide für Rio",
         description:
             "FIFA Frauen-WM 2027: Spielorte, Termine, Tickets und dein deutscher Guide in Rio.",
         url: "https://riofuerdeutsche.de/frauen-wm-2027",
