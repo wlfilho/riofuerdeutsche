@@ -109,6 +109,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.8,
         },
         {
+            url: `${baseUrl}/frauen-wm-2027/deutschland`,
+            lastModified: today,
+            // Página "magnética": atualiza a cada notícia da seleção até o
+            // sorteio (11/12/2026) — weekly de propósito.
+            changeFrequency: "weekly",
+            priority: 0.8,
+        },
+        {
             url: `${baseUrl}/frauen-wm-2027/spielplan`,
             lastModified: today,
             // Semanal até a Auslosung (11/12/2026): a página muda a cada
