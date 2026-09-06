@@ -10,9 +10,9 @@ import {
   WEEKDAY_SHORT_PT,
 } from '@/lib/calendarDates';
 import { fmtEur } from '@/lib/adminFormat';
-import { PARTNER_BADGE, TOUR_DATE_STATUS_BADGE, type TourDateStatus } from '@/lib/tourDates';
+import { competesForDay, PARTNER_BADGE, TOUR_DATE_STATUS_BADGE, type TourDateStatus } from '@/lib/tourDates';
 import type { LeadStatus } from './crm/page';
-import type { ProposalStatus } from '@/lib/proposals';
+import type { ProposalItem, ProposalStatus } from '@/lib/proposals';
 
 export async function generateMetadata() {
   const t = await getAdminTranslations('admin.dashboard');
@@ -31,7 +31,9 @@ interface DashboardTour {
   anzahlung_paid: boolean;
   with_partner: boolean;
   partner_name: string | null;
-  lead: { name: string } | null;
+  // `items` só alimenta competesForDay (dia vazio no roteiro não conta como
+  // conflito); nada disso aparece no dashboard.
+  lead: { name: string; proposal?: { items?: ProposalItem[] | null } | null } | null;
 }
 
 interface DashboardProposal {
@@ -84,7 +86,7 @@ export default async function DashboardPage() {
       supabase.from('price_leads').select('status, created_at'),
       supabase
         .from('tour_dates')
-        .select('id, lead_id, date, start_time, tour_name, status, pax, agreed_price, anzahlung_paid, with_partner, partner_name, lead:price_leads(name)')
+        .select('id, lead_id, date, start_time, tour_name, status, pax, agreed_price, anzahlung_paid, with_partner, partner_name, lead:price_leads(name, proposal:proposals!price_leads_proposal_id_fkey(items))')
         .gte('date', monthStart)
         .order('date', { ascending: true })
         .order('start_time', { ascending: true, nullsFirst: true }),
@@ -129,11 +131,13 @@ export default async function DashboardPage() {
   const pendingAnzahlung = upcomingClosed.filter(t => !t.anzahlung_paid).length;
 
   // Dias com tours de 2+ clientes diferentes ainda por vir — mesma regra do
-  // calendário (ver findConflictingTourDates): um guia só cobre um pack por
-  // dia. Só considera daqui pra frente porque conflito de data passada não
-  // precisa mais ser resolvido.
+  // calendário (ver competesForDay/dayConflictFor): um guia só cobre um pack
+  // por dia, mas dia entregue a parceiro ou vazio no roteiro do lead não
+  // disputa agenda. Só considera daqui pra frente porque conflito de data
+  // passada não precisa mais ser resolvido.
   const conflictDatesCount = new Map<string, Set<string>>();
   for (const t of upcomingTours) {
+    if (!competesForDay(t)) continue;
     const leads = conflictDatesCount.get(t.date) ?? new Set<string>();
     leads.add(t.lead_id);
     conflictDatesCount.set(t.date, leads);

@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { findConflictingTourDates, knownLeadDays, TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
+import { competesForDay, findConflictingTourDates, knownLeadDays, TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
 import { sendDateConflictAlert, type ConflictDateGroup } from '@/lib/email/sendDateConflictAlert';
 
 async function verifyAdmin() {
@@ -156,7 +156,8 @@ export async function POST(request: NextRequest) {
       if (r.with_partner) continue;
       const others = await findConflictingTourDates(supabase, r.date, r.lead_id);
       for (const o of others) {
-        if (o.with_partner) continue;
+        // Parceiro ou dia vazio no roteiro do outro lead: não disputa agenda.
+        if (!competesForDay(o)) continue;
         conflicts.push({
           date: r.date,
           lead_name: o.lead?.name ?? null,
@@ -205,9 +206,10 @@ export async function POST(request: NextRequest) {
   const conflictGroups: ConflictDateGroup[] = [];
   for (const row of inserted) {
     const others = await findConflictingTourDates(supabase, row.date, row.lead_id);
-    // Dia entregue a parceiro não disputa agenda: nem quando é o tour novo que
-    // já nasce com parceiro, nem quando é o outro cliente que já está coberto.
-    if (row.with_partner || !others.some(o => !o.with_partner)) continue;
+    // Dia que não disputa agenda (parceiro, ou vazio no roteiro do outro lead)
+    // não dispara alerta: nem quando é o tour novo que já nasce com parceiro,
+    // nem quando é o outro cliente que não briga por esta data.
+    if (row.with_partner || !others.some(o => competesForDay(o))) continue;
     conflictGroups.push({
       date: row.date,
       tours: [

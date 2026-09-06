@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { findConflictingTourDates, knownLeadDays, TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
+import { competesForDay, findConflictingTourDates, knownLeadDays, TOUR_DATE_SELECT, type TourDate } from '@/lib/tourDates';
 import { sendDateConflictAlert } from '@/lib/email/sendDateConflictAlert';
 
 async function verifyAdmin() {
@@ -88,7 +88,8 @@ export async function PATCH(
       const conflicts = withPartner
         ? []
         : (await findConflictingTourDates(supabase, newDate, current.lead_id))
-            .filter(o => !o.with_partner)
+            // Parceiro ou dia vazio no roteiro do outro lead: não disputa.
+            .filter(o => competesForDay(o))
             .map(o => ({
               date: newDate,
               lead_name: o.lead?.name ?? null,
@@ -124,8 +125,8 @@ export async function PATCH(
   if (updates.date !== undefined && updates.date !== oldDate && !updated.with_partner) {
     const others = await findConflictingTourDates(supabase, updated.date, updated.lead_id);
     // Só alerta se sobrar alguém disputando de verdade: dia do outro cliente
-    // já coberto por parceiro não briga por esta data.
-    if (others.some(o => !o.with_partner)) {
+    // coberto por parceiro, ou vazio no roteiro dele, não briga por esta data.
+    if (others.some(o => competesForDay(o))) {
       await sendDateConflictAlert([{
         date: updated.date,
         tours: [

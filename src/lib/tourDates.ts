@@ -155,27 +155,58 @@ export type DayConflict =
 
 type ConflictCandidate = {
   lead_id: string;
+  date: string;
+  tour_name: string | null;
+  start_time: string | null;
   status: TourDateStatus;
   with_partner: boolean;
-  lead?: { name: string } | null;
+  lead?: {
+    name: string;
+    proposal?: { items?: ProposalItem[] | null } | null;
+  } | null;
 };
+
+/**
+ * Um tour disputa a agenda do dia? Dois casos ficam de fora:
+ *
+ *  - dia entregue a parceiro (a decisão já foi tomada, não consome sua agenda);
+ *  - dia vazio de um roteiro fechado por dia. requested_days guarda os dias que
+ *    o cliente OFERECEU na Anfrage, e todos viram linha em tour_dates quando o
+ *    lead avança (ver createMissingTourDates) — mas quem manda na agenda é a
+ *    proposta. Se ela distribui atividades por dia e não põe nenhuma nesta
+ *    data, a linha é só o rastro da possibilidade, não um compromisso (Matthias
+ *    ofereceu 24–26/10/2026, a proposta marcou só o 24, e os dias 25/26 vazios
+ *    empatavam em vermelho com o tour real do Blank Jürgen).
+ *
+ * Linha preenchida à mão (nome do tour ou horário) continua valendo mesmo fora
+ * do roteiro: o admin gravou de propósito. E lead sem proposta itemizada
+ * (era do PDF, tour avulso) também vale — tour_dates é a única verdade dele.
+ */
+export function competesForDay(t: Omit<ConflictCandidate, 'lead_id' | 'status'>): boolean {
+  if (t.with_partner) return false;
+  if (t.tour_name || t.start_time) return true;
+
+  const itemDays = (t.lead?.proposal?.items ?? []).filter(i => i.day);
+  if (itemDays.length === 0) return true;
+  return itemDays.some(i => i.day === t.date);
+}
 
 /**
  * Situação de UM tour dentro do seu dia. `sameDay` são todos os tours daquela
  * data, incluindo o próprio.
  *
- * Dia coberto por parceiro sai da conta dos dois lados: não recebe alerta (a
- * decisão já foi tomada) e não consome a sua agenda, então deixa de disputar o
- * dia com os outros clientes.
+ * Dia que não disputa agenda (ver competesForDay) sai da conta dos dois lados:
+ * não recebe alerta e não consome a sua agenda, então deixa de disputar o dia
+ * com os outros clientes.
  */
 export function dayConflictFor(
   tour: ConflictCandidate,
   sameDay: ConflictCandidate[],
 ): DayConflict {
-  if (tour.with_partner) return { kind: 'nenhum' };
+  if (!competesForDay(tour)) return { kind: 'nenhum' };
 
   // Vários dias do mesmo cliente não competem entre si.
-  const rivals = sameDay.filter(o => o.lead_id !== tour.lead_id && !o.with_partner);
+  const rivals = sameDay.filter(o => o.lead_id !== tour.lead_id && competesForDay(o));
   if (rivals.length === 0) return { kind: 'nenhum' };
 
   const owner = rivals.reduce((top, r) =>
@@ -193,20 +224,26 @@ export function dayConflictFor(
 
 export interface ConflictingTourDate {
   id: string;
+  date: string;
   tour_name: string | null;
+  start_time: string | null;
   status: TourDateStatus;
   with_partner: boolean;
   partner_name: string | null;
-  lead: { id: string; name: string } | null;
+  lead: {
+    id: string;
+    name: string;
+    proposal?: { items?: ProposalItem[] | null } | null;
+  } | null;
 }
 
 /**
  * Outros tours (de leads diferentes) já agendados no mesmo dia.
  *
- * Devolve TODOS, inclusive os já entregues a um parceiro: quem decide o que é
- * alerta é o chamador (dia coberto por parceiro não consome a agenda do Will,
- * então não deve disparar e-mail, mas serve de contexto quando o e-mail sai).
- * Ver dayConflictFor acima para a hierarquia usada na tela.
+ * Devolve TODOS, inclusive os já entregues a um parceiro ou com o dia vazio no
+ * roteiro: quem decide o que é alerta é o chamador, via competesForDay (dia que
+ * não disputa agenda não deve disparar e-mail, mas serve de contexto quando o
+ * e-mail sai). Ver dayConflictFor acima para a hierarquia usada na tela.
  *
  * tour_dates só existe para leads ativos (proposal_sent/closed — ver
  * syncTourDatesWithLeadStatus, que apaga as linhas quando o lead vira
@@ -217,9 +254,12 @@ export async function findConflictingTourDates(
   date: string,
   excludeLeadId: string,
 ): Promise<ConflictingTourDate[]> {
+  // !price_leads_proposal_id_fkey: mesma desambiguação do TOUR_DATE_SELECT.
   const { data, error } = await supabase
     .from('tour_dates')
-    .select('id, tour_name, status, with_partner, partner_name, lead:price_leads(id, name)')
+    .select(
+      'id, date, tour_name, start_time, status, with_partner, partner_name, lead:price_leads(id, name, proposal:proposals!price_leads_proposal_id_fkey(items))',
+    )
     .eq('date', date)
     .neq('lead_id', excludeLeadId);
 
