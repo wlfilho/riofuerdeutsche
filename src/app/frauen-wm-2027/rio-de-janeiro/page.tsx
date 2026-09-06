@@ -19,6 +19,7 @@ import {
     Plane,
     BedDouble,
     GraduationCap,
+    Camera,
 } from "lucide-react";
 
 // A "página comercial-mãe" da estratégia WM 2027 (Obsidian, seção 4): quem
@@ -80,6 +81,11 @@ const profile = [
         icon: Ticket,
         titel: "Du kommst ohne Ticket",
         text: "Auch ohne Stadionplatz ist Rio während der WM ein Fest: Public Viewing, Fanzonen und eine Stadt, die Fußball atmet.",
+    },
+    {
+        icon: Camera,
+        titel: "Du arbeitest bei der WM",
+        text: "Journalisten, Content-Creator, Delegationen, Sponsoren: Wer zum Arbeiten kommt, braucht Tempo statt Sightseeing. Fahrer, Drehorte, Übersetzung und ein Carioca, der die Stadt kennt.",
     },
 ];
 
@@ -325,7 +331,7 @@ export default function Page() {
                                 Für wen wir die WM-Reise planen
                             </h2>
                             <p className="mt-4 text-gray-600 text-lg leading-relaxed">
-                                Jede WM-Reise ist anders. Diese fünf kommen bei uns am häufigsten
+                                Jede WM-Reise ist anders. Diese sechs kommen bei uns am häufigsten
                                 an, und für jede haben wir einen Plan:
                             </p>
                         </FadeIn>
