@@ -251,10 +251,10 @@ export default function Page() {
                                         <ArrowRight className="w-5 h-5" />
                                     </a>
                                     <Link
-                                        href="/frauen-wm-2027"
+                                        href="/frauen-wm-2027/stadien"
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                     >
-                                        Zur WM-Übersicht
+                                        Stadien & Spielorte
                                     </Link>
                                 </div>
                             </div>
@@ -273,7 +273,15 @@ export default function Page() {
                                 Die FIFA hat den Spielplan der Frauen-WM 2027 offiziell
                                 bekannt gegeben. Jede der acht Städte bekommt mindestens sieben
                                 Spiele und mindestens ein K.-o.-Spiel. Eröffnung und Finale steigen
-                                im Maracanã in Rio de Janeiro.
+                                im Maracanã in Rio de Janeiro. Was jede Stadt neben dem Stadion zu
+                                bieten hat, zeigt unsere Übersicht der{" "}
+                                <Link
+                                    href="/frauen-wm-2027/stadien"
+                                    className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors"
+                                >
+                                    Stadien und Spielorte
+                                </Link>
+                                .
                             </p>
                         </FadeIn>
 
@@ -316,7 +324,14 @@ export default function Page() {
                                 Gespielt wird im gleichen Format wie 2023: 32 Teams, acht Gruppen,
                                 danach K.-o.-Runde ab dem Achtelfinale. Die genauen Termine und
                                 Anstoßzeiten der einzelnen Spiele veröffentlicht die FIFA mit der
-                                Auslosung.
+                                Auslosung. Zu jeder Stadt und jedem Stadion findest du mehr auf der{" "}
+                                <Link
+                                    href="/frauen-wm-2027/stadien"
+                                    className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors"
+                                >
+                                    Spielorte-Seite
+                                </Link>
+                                .
                             </p>
                         </FadeIn>
 

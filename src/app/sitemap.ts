@@ -96,6 +96,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.9,
         },
         {
+            url: `${baseUrl}/frauen-wm-2027/stadien`,
+            lastModified: today,
+            changeFrequency: "monthly",
+            priority: 0.8,
+        },
+        {
             url: `${baseUrl}/frauen-wm-2027/spielplan`,
             lastModified: today,
             // Semanal até a Auslosung (11/12/2026): a página muda a cada
