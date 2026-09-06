@@ -135,7 +135,7 @@ const faqItems = [
     {
         question: "Wann findet die Auslosung der Gruppenphase statt?",
         answer:
-            "Der genaue Termin ist noch nicht offiziell bestätigt. Voraussichtlich findet die Endrundenauslosung Anfang 2027 statt, nach Abschluss der interkontinentalen Play-offs im Februar 2027, wenn alle 32 Teilnehmer feststehen.",
+            "Die Auslosung findet am 11. Dezember 2026 in Rio de Janeiro statt, im Museum für Moderne Kunst. Danach steht der komplette Spielplan mit allen Teams und Spielorten fest.",
     },
     {
         question: "Wer ist als Gastgeber automatisch qualifiziert?",
@@ -574,9 +574,9 @@ export default function Page() {
                             </p>
                             <p className="mt-4 text-gray-600 text-lg leading-relaxed">
                                 Die endgültigen Gruppengegner Deutschlands stehen erst nach der
-                                Endrundenauslosung fest. Diese wird voraussichtlich Anfang 2027
-                                stattfinden, nachdem im Februar 2027 die letzten Startplätze über die
-                                interkontinentalen Play-offs vergeben sind.
+                                Endrundenauslosung fest. Diese findet am 11. Dezember 2026 in Rio de
+                                Janeiro statt. Dann steht auch fest, in welchen Städten die DFB-Frauen
+                                ihre Gruppenspiele bestreiten.
                             </p>
                             <div className="mt-10 text-center">
                                 <Link
