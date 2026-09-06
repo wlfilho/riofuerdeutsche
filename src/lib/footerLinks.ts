@@ -9,15 +9,13 @@ export type FooterColumn = {
 // Faixa sazonal do rodapé. Trocar o objeto ou setar active: false para desligar.
 // Calendário previsto: Karneval em janeiro, cruzeiros de setembro a março,
 // WM de abril a julho de 2027.
+// A faixa inteira é um link único (decisão de 06/09/2026: três links quebravam
+// em três linhas no mobile); as páginas internas do tema ficam na coluna 4.
 export const seasonalBanner = {
   active: true,
   tag: 'WM 2027',
   text: 'Die Frauen-WM 2027 kommt nach Brasilien.',
-  links: [
-    { label: 'Spielplan 2027', href: '/frauen-wm-2027/spielplan' },
-    { label: 'Deutschland bei der WM', href: '/frauen-wm-2027/deutschland' },
-    { label: 'WM 2027 in Rio', href: '/frauen-wm-2027/rio-de-janeiro' },
-  ],
+  href: '/frauen-wm-2027',
 }
 
 // Colunas 1 a 4 do rodapé. A coluna 5 (marca e contato) é montada no JSX

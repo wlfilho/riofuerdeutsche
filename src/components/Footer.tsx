@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { ChevronDown, Instagram, Youtube, Mail, MapPin, Phone, Send } from "lucide-react";
+import { ChevronDown, ChevronRight, Instagram, Youtube, Mail, MapPin, Phone, Send } from "lucide-react";
 import type { ContactUrls } from "@/lib/settings";
 import { FALLBACK_CONTACT } from "@/lib/contactFallback";
 import { seasonalBanner, footerColumns, footerThemes } from "@/lib/footerLinks";
@@ -45,27 +45,21 @@ export default function Footer({ contact = FALLBACK_CONTACT }: { contact?: Conta
         <footer ref={footerRef} className="bg-rfd-green-dark text-white/70">
             <h2 className="sr-only">Fußbereich</h2>
 
-            {/* Faixa 1 — sazonal (configurável em src/lib/footerLinks.ts) */}
+            {/* Faixa 1 — sazonal (configurável em src/lib/footerLinks.ts).
+                A faixa inteira é um único link, alvo de toque generoso no mobile. */}
             {seasonalBanner.active && (
-                <div className="bg-rfd-yellow text-rfd-green-dark">
-                    <div className="max-w-7xl mx-auto px-5 lg:px-8 py-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                <Link
+                    href={seasonalBanner.href}
+                    className="block bg-rfd-yellow text-rfd-green-dark hover:brightness-105 transition-all focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-rfd-green-dark"
+                >
+                    <span className="max-w-7xl mx-auto px-5 lg:px-8 py-3 flex items-center gap-3 text-sm">
                         <span className="shrink-0 rounded-full bg-rfd-green-dark px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-rfd-yellow">
                             {seasonalBanner.tag}
                         </span>
                         <span className="font-semibold">{seasonalBanner.text}</span>
-                        <span className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                            {seasonalBanner.links.map((link) => (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    className={`font-semibold underline underline-offset-4 decoration-rfd-green-dark/40 hover:decoration-rfd-green-dark transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rfd-green-dark`}
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
-                        </span>
-                    </div>
-                </div>
+                        <ChevronRight className="h-4 w-4 shrink-0 ml-auto" aria-hidden="true" />
+                    </span>
+                </Link>
             )}
 
             {/* Faixa 2 — conversão */}
