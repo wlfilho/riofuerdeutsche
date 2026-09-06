@@ -436,7 +436,14 @@ export default function Page() {
                                     de Janeiro ausgelost, im Museum für Moderne Kunst an der
                                     Guanabara-Bucht. Mit der Auslosung steht der komplette Spielplan
                                     fest: welche Teams in welchen Gruppen spielen, in welchen Städten
-                                    ihre Spiele stattfinden und wann Deutschland antritt.
+                                    ihre Spiele stattfinden und wann{" "}
+                                    <Link
+                                        href="/frauen-wm-2027/deutschland"
+                                        className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors"
+                                    >
+                                        Deutschland
+                                    </Link>{" "}
+                                    antritt.
                                 </p>
                                 <p>
                                     Für die Reiseplanung ist das der wichtigste Tag vor dem Turnier.

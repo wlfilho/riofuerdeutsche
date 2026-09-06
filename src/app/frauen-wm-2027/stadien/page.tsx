@@ -417,9 +417,15 @@ export default function Page() {
                                     Partner-Guides.
                                 </p>
                                 <p>
-                                    Nach der Auslosung am 11. Dezember 2026 wissen wir, wo
-                                    Deutschland spielt. Wer sich vorher meldet, bekommt seine
-                                    Planung als Erster.
+                                    Nach der Auslosung am 11. Dezember 2026 wissen wir, wo{" "}
+                                    <Link
+                                        href="/frauen-wm-2027/deutschland"
+                                        className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors"
+                                    >
+                                        Deutschland
+                                    </Link>{" "}
+                                    spielt. Wer sich vorher meldet, bekommt seine Planung als
+                                    Erster.
                                 </p>
                             </div>
                             <div className="mt-8">
