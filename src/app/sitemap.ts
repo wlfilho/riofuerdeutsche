@@ -11,6 +11,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: "weekly",
             priority: 1.0,
         },
+        // /anfrage fica fora do sitemap de propósito: a página é
+        // `robots: noindex` (src/app/anfrage/page.tsx). URL noindex no
+        // sitemap gera aviso no Search Console. Se um dia ela for indexada,
+        // remover o noindex, adicionar canonical auto-referente e recolocar
+        // aqui.
         {
             url: `${baseUrl}/touren`,
             lastModified: today,

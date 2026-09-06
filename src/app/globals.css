@@ -38,6 +38,17 @@
   --rfd-radius-pill:  20px;
 }
 
+/* Expõe os tokens --rfd-* acima como cores do Tailwind (bg-rfd-yellow etc.)
+   sem duplicar os valores hex. Usado no rodapé. */
+@theme inline {
+  --color-rfd-green-dark: var(--rfd-green-dark);
+  --color-rfd-green-mid: var(--rfd-green-mid);
+  --color-rfd-green-light: var(--rfd-green-light);
+  --color-rfd-green-brand: var(--rfd-green-brand);
+  --color-rfd-yellow: var(--rfd-yellow);
+  --color-rfd-cream: var(--rfd-cream);
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
@@ -74,6 +85,57 @@ body {
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+}
+
+/* =============================
+   FOOTER — acordeão <details>/<summary> só com CSS
+   Um único HTML em todos os breakpoints; nada de JS.
+   ============================= */
+
+.footer-acc > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.footer-acc > summary::-webkit-details-marker {
+  display: none;
+}
+
+.footer-acc-chevron {
+  transition: transform 0.2s ease;
+}
+
+.footer-acc[open] > summary .footer-acc-chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-acc-chevron {
+    transition: none;
+  }
+}
+
+/* ≥768px: as colunas ficam sempre abertas e o summary vira um heading
+   estático (o texto precisa continuar visível como título da coluna).
+   O conteúdo de um <details> fechado só é revelável via ::details-content;
+   navegador antigo sem suporte pula o bloco @supports inteiro e mantém o
+   acordeão funcional também no desktop, em vez de esconder links. */
+@media (min-width: 768px) {
+  @supports selector(::details-content) {
+    .footer-acc > summary {
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .footer-acc .footer-acc-chevron {
+      display: none;
+    }
+
+    .footer-acc::details-content {
+      content-visibility: visible;
+      display: block;
+    }
   }
 }
 

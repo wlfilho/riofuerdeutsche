@@ -1,15 +1,16 @@
 'use client'
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { MapPin, Instagram, Youtube, Mail, Send } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { ChevronDown, Instagram, Youtube, Mail, MapPin, Phone, Send } from "lucide-react";
 import type { ContactUrls } from "@/lib/settings";
 import { FALLBACK_CONTACT } from "@/lib/contactFallback";
+import { seasonalBanner, footerColumns, footerThemes } from "@/lib/footerLinks";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
-    <svg 
-        viewBox="0 0 24 24" 
-        fill="currentColor" 
+    <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
         className={className}
         xmlns="http://www.w3.org/2000/svg"
     >
@@ -17,122 +18,233 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+const focusRing = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rfd-yellow";
+
 export default function Footer({ contact = FALLBACK_CONTACT }: { contact?: ContactUrls }) {
-    const t = useTranslations('public.footer');
+    const footerRef = useRef<HTMLElement>(null);
+
+    // Navegador sem ::details-content (Safari ≤18.3, Firefox ≤137) não deixa o
+    // CSS forçar as colunas abertas no desktop. Aqui só ligamos o atributo
+    // `open` acima de 768px; os links já estão todos no HTML servido, então é
+    // neutro para SEO. Onde o CSS resolve, o efeito não faz nada.
+    useEffect(() => {
+        if (typeof CSS !== 'undefined' && CSS.supports('selector(::details-content)')) return;
+        const mq = window.matchMedia('(min-width: 768px)');
+        const sync = () => {
+            if (!mq.matches) return;
+            footerRef.current
+                ?.querySelectorAll<HTMLDetailsElement>('details.footer-acc')
+                .forEach((details) => { details.open = true; });
+        };
+        sync();
+        mq.addEventListener('change', sync);
+        return () => mq.removeEventListener('change', sync);
+    }, []);
 
     return (
-        <footer className="bg-gray-900 text-gray-400 py-12">
-            <div className="max-w-7xl mx-auto px-5 lg:px-8">
-                <div className="grid md:grid-cols-3 gap-8 mb-8 pb-8 border-b border-gray-800">
-                    <div>
-                        <Link href="/" className="font-heading font-black text-2xl tracking-tight text-white flex items-center gap-2 mb-4">
-                            <MapPin className="h-6 w-6 text-rio-yellow" />
-                            <span>Rio<span className="text-rio-blue">FürDeutsche</span></span>
-                        </Link>
-                        <p className="text-sm mb-3">{t('tagline')}</p>
-                        <p className="text-sm mb-6 text-gray-500">RioFürDeutsche bietet deutschsprachige Reiseleitung, Citytouren und Ausflüge in Rio de Janeiro, geführt von einem echten Carioca, der fließend Deutsch spricht.</p>
-                        <div className="flex items-center gap-3">
-                            {contact.instagramHref && (
-                            <a
-                                href={contact.instagramHref}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-rio-green hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-rio-green shadow-lg"
-                            >
-                                <Instagram className="h-[20px] w-[20px]" />
-                                <span className="sr-only">Instagram</span>
-                            </a>
-                            )}
-                            {contact.youtubeHref && (
-                            <a
-                                href={contact.youtubeHref}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-rio-green hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-rio-green shadow-lg"
-                            >
-                                <Youtube className="h-[20px] w-[20px]" />
-                                <span className="sr-only">YouTube</span>
-                            </a>
-                            )}
-                            {contact.whatsappHref && (
-                            <a
-                                href={contact.whatsappHref}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-[#25D366] hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-[#25D366] shadow-lg"
-                            >
-                                <WhatsAppIcon className="h-[20px] w-[20px]" />
-                                <span className="sr-only">WhatsApp</span>
-                            </a>
-                            )}
-                            {contact.telegramHref && (
-                            <a
-                                href={contact.telegramHref}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-[#0088cc] hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-[#0088cc] shadow-lg"
-                            >
-                                <Send className="h-[18px] w-[18px]" />
-                                <span className="sr-only">Telegram</span>
-                            </a>
-                            )}
-                            {contact.emailHref && (
-                            <a
-                                href={contact.emailHref}
-                                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-rio-blue hover:scale-110 transition-all duration-300 border border-gray-700 hover:border-rio-blue shadow-lg"
-                            >
-                                <Mail className="h-[18px] w-[18px]" />
-                                <span className="sr-only">Email</span>
-                            </a>
-                            )}
-                        </div>
-                    </div>
-                    <div>
-                        <h3 className="text-white font-bold mb-4">{t('quickLinks')}</h3>
-                        <ul className="space-y-2 text-sm">
-                            {/* Primeiro da lista de propósito: é o CTA da Fase 1, e o
-                                footer é o único lugar que aparece em toda página. */}
-                            <li><Link href="/anfrage?von=site" className="font-semibold text-white hover:text-rio-yellow transition-colors">{t('tourAnfragen')}</Link></li>
-                            <li><Link href="/touren" className="hover:text-white transition-colors">{t('tourenUndAusfluege')}</Link></li>
-                            <li><Link href="/frauen-wm-2027" className="hover:text-white transition-colors">{t('frauenWm2027')}</Link></li>
-                            <li><Link href="/ueber-will" className="hover:text-white transition-colors">{t('ueberUns')}</Link></li>
-                            <li><Link href="/rio-guide/sehenswuerdigkeiten" className="hover:text-white transition-colors">{t('rioGuide')}</Link></li>
-                            <li><Link href="/rio-guide/sehenswuerdigkeiten/christus-erloeser" className="hover:text-white transition-colors">{t('christusErloeser')}</Link></li>
-                            <li><Link href="/kontakt" className="hover:text-white transition-colors">{t('kontakt')}</Link></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="text-white font-bold mb-4">{t('kontakt')}</h3>
-                        <ul className="space-y-2 text-sm">
-                            {contact.whatsappHref && (
-                            <li className="flex items-center gap-2">
-                                <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
-                                <a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" suppressHydrationWarning>{contact.phone}</a>
-                            </li>
-                            )}
-                            {contact.emailHref && (
-                            <li className="flex items-center gap-2">
-                                <Mail className="h-4 w-4 text-rio-blue" />
-                                <a href={contact.emailHref} className="hover:text-white transition-colors">{contact.email}</a>
-                            </li>
-                            )}
-                            <li className="pt-2 text-rio-yellow">{t('deinBuddyInRio')}</li>
-                        </ul>
+        <footer ref={footerRef} className="bg-rfd-green-dark text-white/70">
+            <h2 className="sr-only">Fußbereich</h2>
+
+            {/* Faixa 1 — sazonal (configurável em src/lib/footerLinks.ts) */}
+            {seasonalBanner.active && (
+                <div className="bg-rfd-yellow text-rfd-green-dark">
+                    <div className="max-w-7xl mx-auto px-5 lg:px-8 py-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                        <span className="shrink-0 rounded-full bg-rfd-green-dark px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-rfd-yellow">
+                            {seasonalBanner.tag}
+                        </span>
+                        <span className="font-semibold">{seasonalBanner.text}</span>
+                        <span className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                            {seasonalBanner.links.map((link) => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className={`font-semibold underline underline-offset-4 decoration-rfd-green-dark/40 hover:decoration-rfd-green-dark transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rfd-green-dark`}
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+                        </span>
                     </div>
                 </div>
-                <div className="flex flex-col md:flex-row justify-between items-center text-xs">
-                    {/* year vai como string: em ICU um número seria formatado com
-                        separador de milhar (2.026), mudando o texto renderizado. */}
-                    <p>{t('copyright', { year: String(new Date().getFullYear()) })}</p>
-                    <div className="flex gap-4 mt-4 md:mt-0">
-                        <Link href="/impressum" className="hover:text-white transition-colors">{t('impressum')}</Link>
-                        <Link href="/datenschutz" className="hover:text-white transition-colors">{t('datenschutz')}</Link>
+            )}
+
+            {/* Faixa 2 — conversão */}
+            <div className="bg-rfd-green-mid">
+                <div className="max-w-7xl mx-auto px-5 lg:px-8 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                    <div>
+                        <p className="font-heading font-black text-2xl md:text-3xl tracking-tight text-white">
+                            Plane deine Tage in Rio mit einem Cariocas.
+                        </p>
+                        <p className="mt-2 text-white/80">
+                            Antwort meist innerhalb von 24 Stunden, auf Deutsch.
+                        </p>
+                    </div>
+                    {/* ?von=site: atribuição do CTA do rodapé, já usada no rodapé anterior. */}
+                    <Link
+                        href="/anfrage?von=site"
+                        className={`shrink-0 self-start md:self-auto rounded-lg bg-rfd-yellow px-6 py-3.5 font-bold text-rfd-green-dark hover:brightness-105 transition-all ${focusRing}`}
+                    >
+                        Unverbindlich anfragen
+                    </Link>
+                </div>
+            </div>
+
+            {/* Faixa 3 — colunas de links. A coluna de marca vem primeiro no DOM
+                (topo no mobile) e vai para a quinta posição no desktop. */}
+            <div className="max-w-7xl mx-auto px-5 lg:px-8 pt-10 pb-8">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-x-8 gap-y-8">
+                    <div className="md:order-last">
+                        <Link
+                            href="/"
+                            className={`inline-flex items-center gap-2 font-heading font-black text-xl tracking-tight text-white ${focusRing}`}
+                        >
+                            <MapPin className="h-5 w-5 text-rfd-yellow" aria-hidden="true" />
+                            <span>Rio für Deutsche</span>
+                        </Link>
+                        <p className="mt-3 text-sm">
+                            Dein Buddy in Rio. Deutschsprachige Privattouren, das ganze Jahr.
+                        </p>
+                        <ul className="mt-4 space-y-1 text-sm">
+                            {contact.phoneHref && (
+                                <li>
+                                    <a href={contact.phoneHref} className={`flex items-center gap-2 py-[9px] hover:text-white transition-colors ${focusRing}`}>
+                                        <Phone className="h-4 w-4 text-rfd-yellow" aria-hidden="true" />
+                                        {contact.phone}
+                                    </a>
+                                </li>
+                            )}
+                            {contact.emailHref && (
+                                <li>
+                                    <a href={contact.emailHref} className={`flex items-center gap-2 py-[9px] hover:text-white transition-colors ${focusRing}`}>
+                                        <Mail className="h-4 w-4 text-rfd-yellow" aria-hidden="true" />
+                                        {contact.email}
+                                    </a>
+                                </li>
+                            )}
+                            <li>
+                                <Link href="/ueber-will" className={`block py-[9px] hover:text-white transition-colors ${focusRing}`}>
+                                    Über Will
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/kontakt" className={`block py-[9px] hover:text-white transition-colors ${focusRing}`}>
+                                    Kontakt
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {footerColumns.map((column) => (
+                        <nav key={column.id} aria-labelledby={`footer-${column.id}-heading`} className="border-b border-white/10 md:border-none">
+                            {/* Coluna 1 (Touren) abre por padrão no mobile; ≥768px o CSS
+                                em globals.css força todas abertas, sem JS. */}
+                            <details className="footer-acc" open={column.id === 'touren'}>
+                                <summary className={`flex items-center justify-between gap-2 py-3 md:py-0 md:mb-4 ${focusRing}`}>
+                                    <h3 id={`footer-${column.id}-heading`} className="font-bold text-white">
+                                        {column.heading}
+                                    </h3>
+                                    <ChevronDown className="footer-acc-chevron h-5 w-5 shrink-0" aria-hidden="true" />
+                                </summary>
+                                <ul className="pb-3 md:pb-0 text-sm">
+                                    {column.links.map((link) => (
+                                        <li key={link.href}>
+                                            <Link href={link.href} className={`block py-[9px] hover:text-white transition-colors ${focusRing}`}>
+                                                {link.label}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </details>
+                        </nav>
+                    ))}
+                </div>
+
+                {/* Linha de temas */}
+                <nav aria-labelledby="footer-themen-heading" className="mt-10">
+                    <h3 id="footer-themen-heading" className="font-bold text-white mb-4">
+                        Weitere Themen
+                    </h3>
+                    <ul className="flex flex-wrap gap-3">
+                        {footerThemes.map((link) => (
+                            <li key={link.href}>
+                                <Link
+                                    href={link.href}
+                                    className={`inline-block rounded-full border border-white/25 px-4 py-2 text-sm hover:border-rfd-yellow hover:text-white transition-colors ${focusRing}`}
+                                >
+                                    {link.label}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+
+                {/* Parágrafo SEO */}
+                <p className="mt-10 max-w-4xl text-sm text-white/60">
+                    Rio für Deutsche ist die deutschsprachige Reiseleitung in Rio de Janeiro: private Touren zu Zuckerhut und Christus-Erlöser, Favela-Tour in der Rocinha, Fußball im Maracanã und Tagesausflüge in den Bundesstaat Rio.
+                </p>
+
+                {/* Barra final */}
+                <div className="mt-8 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+                    <p>© {new Date().getFullYear()} Rio für Deutsche. Alle Rechte vorbehalten.</p>
+                    <div className="flex flex-wrap items-center justify-center gap-4">
+                        <Link href="/impressum" className={`py-[9px] hover:text-white transition-colors ${focusRing}`}>
+                            Impressum
+                        </Link>
+                        <Link href="/datenschutz" className={`py-[9px] hover:text-white transition-colors ${focusRing}`}>
+                            Datenschutz
+                        </Link>
                         <button
                             onClick={() => window.dispatchEvent(new Event('cookie_consent_reset'))}
-                            className="hover:text-white transition-colors cursor-pointer"
+                            className={`py-[9px] hover:text-white transition-colors cursor-pointer ${focusRing}`}
                         >
-                            {t('cookieEinstellungen')}
+                            Cookie-Einstellungen
                         </button>
+                        <span className="flex items-center gap-3">
+                            {contact.instagramHref && (
+                                <a
+                                    href={contact.instagramHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`w-10 h-10 flex items-center justify-center rounded-full border border-white/20 hover:text-white hover:border-rfd-yellow transition-colors ${focusRing}`}
+                                >
+                                    <Instagram className="h-5 w-5" aria-hidden="true" />
+                                    <span className="sr-only">Instagram</span>
+                                </a>
+                            )}
+                            {contact.youtubeHref && (
+                                <a
+                                    href={contact.youtubeHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`w-10 h-10 flex items-center justify-center rounded-full border border-white/20 hover:text-white hover:border-rfd-yellow transition-colors ${focusRing}`}
+                                >
+                                    <Youtube className="h-5 w-5" aria-hidden="true" />
+                                    <span className="sr-only">YouTube</span>
+                                </a>
+                            )}
+                            {contact.whatsappHref && (
+                                <a
+                                    href={contact.whatsappHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`w-10 h-10 flex items-center justify-center rounded-full border border-white/20 hover:text-white hover:border-rfd-yellow transition-colors ${focusRing}`}
+                                >
+                                    <WhatsAppIcon className="h-5 w-5" />
+                                    <span className="sr-only">WhatsApp</span>
+                                </a>
+                            )}
+                            {contact.telegramHref && (
+                                <a
+                                    href={contact.telegramHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`w-10 h-10 flex items-center justify-center rounded-full border border-white/20 hover:text-white hover:border-rfd-yellow transition-colors ${focusRing}`}
+                                >
+                                    <Send className="h-[18px] w-[18px]" aria-hidden="true" />
+                                    <span className="sr-only">Telegram</span>
+                                </a>
+                            )}
+                        </span>
                     </div>
                 </div>
             </div>

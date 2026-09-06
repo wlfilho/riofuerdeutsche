@@ -84,51 +84,11 @@ const faqJsonLd = {
   ],
 };
 
-// JSON-LD structured data is built dynamically inside Home() from settings
-const buildJsonLd = (telephone: string, email: string, instagramHref: string, youtubeHref: string) => ({
+// O nó TravelAgency (@id #business) é emitido pelo FooterServer em toda
+// página; aqui ficam só as touren, que o referenciam por @id.
+const toursJsonLd = {
   "@context": "https://schema.org",
   "@graph": [
-    {
-      "@type": "LocalBusiness",
-      "@id": "https://riofuerdeutsche.de/#business",
-      name: "Rio für Deutsche",
-      description:
-        "Deutschsprachige Stadtführungen und Ausflüge in Rio de Janeiro. Maßgeschneidert, sicher und unvergesslich.",
-      url: "https://riofuerdeutsche.de",
-      telephone,
-      email,
-      image: "/images/rio-background.webp",
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: "Rio de Janeiro",
-        addressCountry: "BR",
-      },
-      geo: {
-        "@type": "GeoCoordinates",
-        latitude: -22.9068,
-        longitude: -43.1729,
-      },
-      priceRange: "$$",
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: "5.0",
-        reviewCount: "3",
-        bestRating: "5",
-      },
-      sameAs: [instagramHref, youtubeHref].filter(Boolean),
-      knowsLanguage: [
-        {
-          "@type": "Language",
-          name: "German",
-          alternateName: "de",
-        },
-        {
-          "@type": "Language",
-          name: "Portuguese",
-          alternateName: "pt",
-        },
-      ],
-    },
     {
       "@type": "TouristTrip",
       name: "Die Klassiker in Rio",
@@ -175,7 +135,7 @@ const buildJsonLd = (telephone: string, email: string, instagramHref: string, yo
       provider: { "@id": "https://riofuerdeutsche.de/#business" },
     },
   ],
-})
+}
 
 const tours = [
   {
@@ -239,7 +199,6 @@ const tours = [
 export default async function Home() {
   const [settings, supabase] = await Promise.all([getSettings(), createClient()])
   const c = buildContactUrls(settings)
-  const jsonLd = buildJsonLd(settings.business_phone || settings.business_whatsapp, settings.business_email, c.instagramHref, c.youtubeHref)
 
   const { data: dbReviews } = await supabase
     .from('reviews')
@@ -255,7 +214,7 @@ export default async function Home() {
       {/* JSON-LD Structured Data */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(toursJsonLd) }}
       />
       <script
         type="application/ld+json"
