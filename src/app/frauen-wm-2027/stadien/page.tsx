@@ -292,7 +292,15 @@ export default function Page() {
                                         Tagesausflügen
                                     </Link>{" "}
                                     nach Búzios oder Ilha Grande. Und hier sind wir zuhause: dein
-                                    deutschsprachiger Guide lebt in dieser Stadt.
+                                    deutschsprachiger Guide lebt in dieser Stadt. Wie deine
+                                    WM-Reise nach Rio aussehen kann, zeigen wir dir auf der Seite{" "}
+                                    <Link
+                                        href="/frauen-wm-2027/rio-de-janeiro"
+                                        className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors"
+                                    >
+                                        Frauen WM 2027 in Rio de Janeiro
+                                    </Link>
+                                    .
                                 </p>
                             </div>
 

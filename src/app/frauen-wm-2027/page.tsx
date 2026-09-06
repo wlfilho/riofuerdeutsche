@@ -542,10 +542,18 @@ export default function Page() {
 
                         <FadeIn direction="up" className="max-w-[800px] mx-auto mt-12">
                             <p className="text-lg text-gray-600 leading-relaxed">
-                                Du planst deine Reise nach Rio während der WM 2027? Erzähl mir kurz,
-                                wann du kommst und was dich interessiert, und du bekommst einen
-                                persönlichen Vorschlag mit Ablauf und Preis, kostenlos und
-                                unverbindlich.
+                                Du planst deine Reise nach Rio während der WM 2027? Alles Wichtige
+                                dazu, von den Spieltagen über Unterkunft bis zu den freien Tagen,
+                                findest du auf unserer Seite{" "}
+                                <Link
+                                    href="/frauen-wm-2027/rio-de-janeiro"
+                                    className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors"
+                                >
+                                    Frauen WM 2027 in Rio de Janeiro
+                                </Link>
+                                . Oder erzähl mir direkt, wann du kommst und was dich interessiert,
+                                und du bekommst einen persönlichen Vorschlag mit Ablauf und Preis,
+                                kostenlos und unverbindlich.
                             </p>
                             <div className="mt-8 text-center">
                                 <Link
