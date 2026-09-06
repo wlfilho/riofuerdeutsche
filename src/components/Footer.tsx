@@ -62,9 +62,12 @@ export default function Footer({ contact = FALLBACK_CONTACT }: { contact?: Conta
                 </Link>
             )}
 
-            {/* Faixa 2 — conversão */}
-            <div className="bg-rfd-green-mid">
-                <div className="max-w-7xl mx-auto px-5 lg:px-8 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            {/* Faixa 2 — conversão, só no desktop. No mobile toda página já
+                chega aqui com o CTA do navbar e o CTA do fim do conteúdo;
+                empilhar um terceiro colado na faixa sazonal era redundante
+                (decisão de 06/09/2026). */}
+            <div className="hidden md:block bg-rfd-green-mid">
+                <div className="max-w-7xl mx-auto px-5 lg:px-8 py-10 flex items-center justify-between gap-6">
                     <div>
                         <p className="font-heading font-black text-2xl md:text-3xl tracking-tight text-white">
                             Plane deine Tage in Rio mit einem Cariocas.
@@ -76,7 +79,7 @@ export default function Footer({ contact = FALLBACK_CONTACT }: { contact?: Conta
                     {/* ?von=site: atribuição do CTA do rodapé, já usada no rodapé anterior. */}
                     <Link
                         href="/anfrage?von=site"
-                        className={`shrink-0 self-start md:self-auto rounded-lg bg-rfd-yellow px-6 py-3.5 font-bold text-rfd-green-dark hover:brightness-105 transition-all ${focusRing}`}
+                        className={`shrink-0 rounded-lg bg-rfd-yellow px-6 py-3.5 font-bold text-rfd-green-dark hover:brightness-105 transition-all ${focusRing}`}
                     >
                         Unverbindlich anfragen
                     </Link>
