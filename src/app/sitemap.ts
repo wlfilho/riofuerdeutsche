@@ -96,6 +96,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.9,
         },
         {
+            url: `${baseUrl}/frauen-wm-2027/rio-de-janeiro`,
+            lastModified: today,
+            // Página comercial-mãe da campanha WM 2027 — prioridade de hub.
+            changeFrequency: "monthly",
+            priority: 0.9,
+        },
+        {
             url: `${baseUrl}/frauen-wm-2027/stadien`,
             lastModified: today,
             changeFrequency: "monthly",

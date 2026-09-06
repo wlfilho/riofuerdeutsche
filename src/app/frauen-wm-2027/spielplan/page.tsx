@@ -442,8 +442,15 @@ export default function Page() {
                                     Für die Reiseplanung ist das der wichtigste Tag vor dem Turnier.
                                     Sobald die Gruppen gelost sind, steigen Nachfrage und Preise für
                                     Flüge und Hotels in den Spielorten der großen Fußballnationen
-                                    spürbar. Wer seine Reise nach Rio schon vorher grob plant, bucht
-                                    nach der Auslosung schneller und günstiger.
+                                    spürbar. Wer seine{" "}
+                                    <Link
+                                        href="/frauen-wm-2027/rio-de-janeiro"
+                                        className="underline decoration-rio-green/40 underline-offset-2 hover:text-rio-green transition-colors"
+                                    >
+                                        Reise nach Rio
+                                    </Link>{" "}
+                                    schon vorher grob plant, bucht nach der Auslosung schneller und
+                                    günstiger.
                                 </p>
                             </div>
                         </FadeIn>
