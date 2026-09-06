@@ -96,6 +96,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.9,
         },
         {
+            url: `${baseUrl}/frauen-wm-2027/spielplan`,
+            lastModified: today,
+            // Semanal até a Auslosung (11/12/2026): a página muda a cada
+            // rodada de play-offs e vira a mais quente do cluster no sorteio.
+            changeFrequency: "weekly",
+            priority: 0.8,
+        },
+        {
             url: `${baseUrl}/rio-guide`,
             lastModified: today,
             changeFrequency: "monthly",
