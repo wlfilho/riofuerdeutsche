@@ -78,16 +78,27 @@ const fahrplan = [
     },
 ];
 
-/** Classificadas até setembro/2026 (14 de 32). Atualizar conforme saem vagas. */
+/**
+ * Classificadas até setembro/2026 (14 de 32). Atualizar conforme saem vagas.
+ * `code` = ISO do país, aponta pro SVG redondo em public/images/flags/
+ * (circle-flags, MIT — https://github.com/HatScripts/circle-flags). Time novo
+ * na lista = baixar a bandeira correspondente pra mesma pasta.
+ */
 const qualifizierte = [
-    { region: "Gastgeber", teams: ["Brasilien"] },
-    { region: "Europa", teams: ["Deutschland", "Spanien", "Frankreich", "Dänemark"] },
-    {
-        region: "Asien",
-        teams: ["Australien", "Japan", "China", "Südkorea", "Nordkorea", "Philippinen"],
-    },
-    { region: "Südamerika", teams: ["Argentinien", "Kolumbien"] },
-    { region: "Ozeanien", teams: ["Neuseeland"] },
+    { name: "Brasilien", code: "br", region: "Gastgeber" },
+    { name: "Deutschland", code: "de", region: "Europa" },
+    { name: "Spanien", code: "es", region: "Europa" },
+    { name: "Frankreich", code: "fr", region: "Europa" },
+    { name: "Dänemark", code: "dk", region: "Europa" },
+    { name: "Australien", code: "au", region: "Asien" },
+    { name: "Japan", code: "jp", region: "Asien" },
+    { name: "China", code: "cn", region: "Asien" },
+    { name: "Südkorea", code: "kr", region: "Asien" },
+    { name: "Nordkorea", code: "kp", region: "Asien" },
+    { name: "Philippinen", code: "ph", region: "Asien" },
+    { name: "Argentinien", code: "ar", region: "Südamerika" },
+    { name: "Kolumbien", code: "co", region: "Südamerika" },
+    { name: "Neuseeland", code: "nz", region: "Ozeanien" },
 ];
 
 const faqItems = [
@@ -350,7 +361,7 @@ export default function Page() {
                 </section>
 
                 {/* SEÇÃO 5 : Mögliche Gegner */}
-                <section className="py-20 bg-gray-50 border-t border-gray-100">
+                <section id="teams" className="py-20 bg-gray-50 border-t border-gray-100">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="max-w-[800px] mx-auto mb-10">
                             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-rio-green/10 text-rio-green mb-6">
@@ -366,31 +377,50 @@ export default function Page() {
                             </p>
                         </FadeIn>
 
-                        <div className="max-w-[800px] mx-auto space-y-4">
-                            {qualifizierte.map((gruppe, index) => (
-                                <FadeIn key={gruppe.region} direction="up" delay={index * 0.05}>
-                                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col sm:flex-row sm:items-center gap-3">
-                                        <p className="sm:w-40 shrink-0 text-xs font-bold uppercase tracking-wider text-rio-green">
-                                            {gruppe.region}
-                                        </p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {gruppe.teams.map((team) => (
-                                                <span
-                                                    key={team}
-                                                    className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${
-                                                        team === "Deutschland"
-                                                            ? "bg-rio-yellow text-gray-900"
-                                                            : "bg-gray-100 text-gray-800"
-                                                    }`}
-                                                >
-                                                    {team}
-                                                </span>
-                                            ))}
+                        {/* Faixa única: bandeira redonda grande, nome embaixo e a
+                            confederação como legenda. flex-wrap: uma linha no desktop,
+                            quebra natural no mobile. */}
+                        <FadeIn direction="up">
+                            <div className="flex flex-wrap justify-center gap-x-3 gap-y-8">
+                                {qualifizierte.map((team) => {
+                                    const istDeutschland = team.name === "Deutschland";
+                                    return (
+                                        <div
+                                            key={team.name}
+                                            className="flex w-[72px] flex-col items-center text-center"
+                                        >
+                                            <div
+                                                className={`relative h-14 w-14 rounded-full shadow-md ${
+                                                    istDeutschland
+                                                        ? "ring-4 ring-rio-yellow"
+                                                        : "ring-1 ring-gray-200"
+                                                }`}
+                                            >
+                                                <Image
+                                                    src={`/images/flags/${team.code}.svg`}
+                                                    alt={`Flagge ${team.name}`}
+                                                    fill
+                                                    unoptimized
+                                                    className="rounded-full"
+                                                />
+                                            </div>
+                                            <p
+                                                className={`mt-2.5 text-xs leading-tight ${
+                                                    istDeutschland
+                                                        ? "font-bold text-gray-900"
+                                                        : "font-semibold text-gray-800"
+                                                }`}
+                                            >
+                                                {team.name}
+                                            </p>
+                                            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                                                {team.region}
+                                            </p>
                                         </div>
-                                    </div>
-                                </FadeIn>
-                            ))}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        </FadeIn>
                     </div>
                 </section>
 
