@@ -392,22 +392,23 @@ export default function Page() {
                             </p>
                         </FadeIn>
 
-                        {/* Grupos por confederação, cada um com as bandeiras redondas
-                            e o nome embaixo. flex-wrap: quebra natural no mobile. */}
-                        <div className="max-w-[900px] mx-auto space-y-4">
+                        {/* Colunas verticais lado a lado, uma por confederação, com as
+                            bandeiras empilhadas dentro. h-full deixa as 5 colunas da
+                            mesma altura (Asien, com 6 times, dita a linha). */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 items-stretch max-w-5xl mx-auto">
                             {qualifizierte.map((gruppe, index) => (
-                                <FadeIn key={gruppe.region} direction="up" delay={index * 0.05}>
-                                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+                                <FadeIn key={gruppe.region} direction="up" delay={index * 0.05} className="h-full">
+                                    <div className="h-full bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col items-center">
                                         <p className="text-xs font-bold uppercase tracking-wider text-rio-green">
                                             {gruppe.region}
                                         </p>
-                                        <div className="mt-5 flex flex-wrap gap-x-4 gap-y-6">
+                                        <div className="mt-5 flex flex-col items-center gap-5">
                                             {gruppe.teams.map((team) => {
                                                 const istDeutschland = team.name === "Deutschland";
                                                 return (
                                                     <div
                                                         key={team.name}
-                                                        className="flex w-[84px] flex-col items-center text-center"
+                                                        className="flex flex-col items-center text-center"
                                                     >
                                                         <div
                                                             className={`relative h-14 w-14 rounded-full shadow-md ${
@@ -425,7 +426,7 @@ export default function Page() {
                                                             />
                                                         </div>
                                                         <p
-                                                            className={`mt-2.5 text-xs leading-tight ${
+                                                            className={`mt-2 text-xs leading-tight ${
                                                                 istDeutschland
                                                                     ? "font-bold text-gray-900"
                                                                     : "font-semibold text-gray-800"
