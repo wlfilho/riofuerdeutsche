@@ -85,20 +85,35 @@ const fahrplan = [
  * na lista = baixar a bandeira correspondente pra mesma pasta.
  */
 const qualifizierte = [
-    { name: "Brasilien", code: "br", region: "Gastgeber" },
-    { name: "Deutschland", code: "de", region: "Europa" },
-    { name: "Spanien", code: "es", region: "Europa" },
-    { name: "Frankreich", code: "fr", region: "Europa" },
-    { name: "Dänemark", code: "dk", region: "Europa" },
-    { name: "Australien", code: "au", region: "Asien" },
-    { name: "Japan", code: "jp", region: "Asien" },
-    { name: "China", code: "cn", region: "Asien" },
-    { name: "Südkorea", code: "kr", region: "Asien" },
-    { name: "Nordkorea", code: "kp", region: "Asien" },
-    { name: "Philippinen", code: "ph", region: "Asien" },
-    { name: "Argentinien", code: "ar", region: "Südamerika" },
-    { name: "Kolumbien", code: "co", region: "Südamerika" },
-    { name: "Neuseeland", code: "nz", region: "Ozeanien" },
+    { region: "Gastgeber", teams: [{ name: "Brasilien", code: "br" }] },
+    {
+        region: "Europa",
+        teams: [
+            { name: "Deutschland", code: "de" },
+            { name: "Spanien", code: "es" },
+            { name: "Frankreich", code: "fr" },
+            { name: "Dänemark", code: "dk" },
+        ],
+    },
+    {
+        region: "Asien",
+        teams: [
+            { name: "Australien", code: "au" },
+            { name: "Japan", code: "jp" },
+            { name: "China", code: "cn" },
+            { name: "Südkorea", code: "kr" },
+            { name: "Nordkorea", code: "kp" },
+            { name: "Philippinen", code: "ph" },
+        ],
+    },
+    {
+        region: "Südamerika",
+        teams: [
+            { name: "Argentinien", code: "ar" },
+            { name: "Kolumbien", code: "co" },
+        ],
+    },
+    { region: "Ozeanien", teams: [{ name: "Neuseeland", code: "nz" }] },
 ];
 
 const faqItems = [
@@ -377,50 +392,55 @@ export default function Page() {
                             </p>
                         </FadeIn>
 
-                        {/* Faixa única: bandeira redonda grande, nome embaixo e a
-                            confederação como legenda. flex-wrap: uma linha no desktop,
-                            quebra natural no mobile. */}
-                        <FadeIn direction="up">
-                            <div className="flex flex-wrap justify-center gap-x-3 gap-y-8">
-                                {qualifizierte.map((team) => {
-                                    const istDeutschland = team.name === "Deutschland";
-                                    return (
-                                        <div
-                                            key={team.name}
-                                            className="flex w-[72px] flex-col items-center text-center"
-                                        >
-                                            <div
-                                                className={`relative h-14 w-14 rounded-full shadow-md ${
-                                                    istDeutschland
-                                                        ? "ring-4 ring-rio-yellow"
-                                                        : "ring-1 ring-gray-200"
-                                                }`}
-                                            >
-                                                <Image
-                                                    src={`/images/flags/${team.code}.svg`}
-                                                    alt={`Flagge ${team.name}`}
-                                                    fill
-                                                    unoptimized
-                                                    className="rounded-full"
-                                                />
-                                            </div>
-                                            <p
-                                                className={`mt-2.5 text-xs leading-tight ${
-                                                    istDeutschland
-                                                        ? "font-bold text-gray-900"
-                                                        : "font-semibold text-gray-800"
-                                                }`}
-                                            >
-                                                {team.name}
-                                            </p>
-                                            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                                                {team.region}
-                                            </p>
+                        {/* Grupos por confederação, cada um com as bandeiras redondas
+                            e o nome embaixo. flex-wrap: quebra natural no mobile. */}
+                        <div className="max-w-[900px] mx-auto space-y-4">
+                            {qualifizierte.map((gruppe, index) => (
+                                <FadeIn key={gruppe.region} direction="up" delay={index * 0.05}>
+                                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+                                        <p className="text-xs font-bold uppercase tracking-wider text-rio-green">
+                                            {gruppe.region}
+                                        </p>
+                                        <div className="mt-5 flex flex-wrap gap-x-4 gap-y-6">
+                                            {gruppe.teams.map((team) => {
+                                                const istDeutschland = team.name === "Deutschland";
+                                                return (
+                                                    <div
+                                                        key={team.name}
+                                                        className="flex w-[84px] flex-col items-center text-center"
+                                                    >
+                                                        <div
+                                                            className={`relative h-14 w-14 rounded-full shadow-md ${
+                                                                istDeutschland
+                                                                    ? "ring-4 ring-rio-yellow"
+                                                                    : "ring-1 ring-gray-200"
+                                                            }`}
+                                                        >
+                                                            <Image
+                                                                src={`/images/flags/${team.code}.svg`}
+                                                                alt={`Flagge ${team.name}`}
+                                                                fill
+                                                                unoptimized
+                                                                className="rounded-full"
+                                                            />
+                                                        </div>
+                                                        <p
+                                                            className={`mt-2.5 text-xs leading-tight ${
+                                                                istDeutschland
+                                                                    ? "font-bold text-gray-900"
+                                                                    : "font-semibold text-gray-800"
+                                                            }`}
+                                                        >
+                                                            {team.name}
+                                                        </p>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        </FadeIn>
+                                    </div>
+                                </FadeIn>
+                            ))}
+                        </div>
                     </div>
                 </section>
 
