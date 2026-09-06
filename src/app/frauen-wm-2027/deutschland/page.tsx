@@ -392,17 +392,16 @@ export default function Page() {
                             </p>
                         </FadeIn>
 
-                        {/* Colunas verticais lado a lado, uma por confederação, com as
-                            bandeiras empilhadas dentro. h-full deixa as 5 colunas da
-                            mesma altura (Asien, com 6 times, dita a linha). */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 items-stretch max-w-5xl mx-auto">
+                        {/* Confederações em 2 colunas; dentro de cada card, os países
+                            também em 2 colunas (bandeira redonda + nome embaixo). */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch max-w-3xl mx-auto">
                             {qualifizierte.map((gruppe, index) => (
                                 <FadeIn key={gruppe.region} direction="up" delay={index * 0.05} className="h-full">
                                     <div className="h-full bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col items-center">
                                         <p className="text-xs font-bold uppercase tracking-wider text-rio-green">
                                             {gruppe.region}
                                         </p>
-                                        <div className="mt-5 flex flex-col items-center gap-5">
+                                        <div className="mt-5 grid grid-cols-2 gap-x-8 gap-y-5 justify-items-center">
                                             {gruppe.teams.map((team) => {
                                                 const istDeutschland = team.name === "Deutschland";
                                                 return (
