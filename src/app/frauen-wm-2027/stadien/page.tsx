@@ -315,7 +315,7 @@ export default function Page() {
                         </FadeIn>
 
                         <FadeIn direction="up">
-                            <div className="relative max-w-[800px] mx-auto h-64 sm:h-80 rounded-3xl overflow-hidden shadow-lg">
+                            <div className="relative max-w-[800px] mx-auto aspect-video rounded-3xl overflow-hidden shadow-lg">
                                 <Image
                                     src="/images/wm-2027/stadien/maracana.webp"
                                     alt="Maracanã in Rio de Janeiro, Stadion von Eröffnungsspiel und Finale der Frauen WM 2027"
@@ -329,7 +329,7 @@ export default function Page() {
                 </section>
 
                 {/* SEÇÃO 3 : As outras 7 cidades */}
-                <section className="py-20 bg-gray-50 border-t border-gray-100">
+                <section id="staedte" className="py-20 bg-gray-50 border-t border-gray-100">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
                         <FadeIn direction="up" className="max-w-[800px] mx-auto mb-12">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
@@ -343,21 +343,30 @@ export default function Page() {
                             </p>
                         </FadeIn>
 
-                        <div className="max-w-[800px] mx-auto space-y-8">
+                        {/* Cards em duas colunas no desktop (foto 16:9 à esquerda,
+                            infos à direita) e empilhados no mobile (foto em cima).
+                            aspect-video em vez de altura fixa: as fotos dos estádios
+                            são 16:9 e a altura fixa as cortava. No desktop a coluna
+                            de texto costuma ser mais alta que a foto — a foto centra
+                            na vertical com o próprio arredondado, de propósito. */}
+                        <div className="max-w-5xl mx-auto space-y-8">
                             {spielorte.map((ort, index) => (
                                 <FadeIn key={ort.stadt} direction="up" delay={index * 0.05}>
-                                    <article className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden hover:border-rio-yellow hover:shadow-md transition-all duration-300">
-                                        <div className="h-52 w-full relative overflow-hidden bg-gray-100">
-                                            <Image
-                                                src={`/images/wm-2027/stadien/${ort.slug}.webp`}
-                                                alt={`${ort.stadion} in ${ort.stadt}, Spielort der Frauen WM 2027`}
-                                                fill
-                                                loading="lazy"
-                                                style={{ objectPosition: (ort as { imgPos?: string }).imgPos }}
-                                                className="object-cover"
-                                            />
+                                    <article className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden hover:border-rio-yellow hover:shadow-md transition-all duration-300 grid md:grid-cols-2 md:items-center md:gap-2">
+                                        <div className="md:p-6">
+                                            <div className="relative aspect-video w-full overflow-hidden bg-gray-100 md:rounded-2xl">
+                                                <Image
+                                                    src={`/images/wm-2027/stadien/${ort.slug}.webp`}
+                                                    alt={`${ort.stadion} in ${ort.stadt}, Spielort der Frauen WM 2027`}
+                                                    fill
+                                                    loading="lazy"
+                                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                                    style={{ objectPosition: (ort as { imgPos?: string }).imgPos }}
+                                                    className="object-cover"
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="p-6 sm:p-8">
+                                        <div className="p-6 sm:p-8 md:pl-2">
                                             <h3 className="text-2xl font-bold font-heading text-gray-900">
                                                 {ort.stadt}
                                             </h3>
