@@ -21,6 +21,7 @@ export const metadata = {
 export default async function IndividuelleTourPage() {
   const settings = await getSettings()
   const { whatsappHref } = buildContactUrls(settings)
+  const anfrageWhatsappHref = `${whatsappHref}?text=${encodeURIComponent('Hallo! Ich interessiere mich für eine individuelle Tour in Rio.')}`
 
     return (
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
@@ -69,12 +70,14 @@ export default async function IndividuelleTourPage() {
                                     {/* Primário passa a ser a Anfrage, com o slug da própria rota:
                                         assim dá pra saber qual página de tour converte. O WhatsApp
                                         continua visível ao lado, nunca escondido. */}
-                                    <Link
-                                        href="/anfrage?von=site&tour=individuell"
+                                    <a
+                                        href={anfrageWhatsappHref}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
                                     >
                                         Tour anfragen
-                                    </Link>
+                                    </a>
                                     <a
                                         href={`${whatsappHref}?text=Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?`}
                                         target="_blank"
@@ -208,12 +211,14 @@ export default async function IndividuelleTourPage() {
                                 Schreib mir per WhatsApp oder E-Mail, was du dir vorstellst. Deinen persönlichen Tourenvorschlag hast du meistens innerhalb von 48 Stunden, kostenlos und unverbindlich.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                <Link
-                                    href="/anfrage?von=site&tour=individuell"
+                                <a
+                                    href={anfrageWhatsappHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
                                 >
                                     Tour anfragen
-                                </Link>
+                                </a>
                                 <a
                                     href={`${whatsappHref}?text=Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?`}
                                     target="_blank"

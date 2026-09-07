@@ -74,6 +74,7 @@ export default async function TagesausfluegePage() {
     const settings = await getSettings()
 
     const { whatsappHref: whatsappLink } = buildContactUrls(settings)
+    const anfrageWhatsappHref = `${whatsappLink}?text=${encodeURIComponent('Hallo! Ich interessiere mich für einen Tagesausflug ab Rio.')}`
     const customWhatsappMsg = encodeURIComponent("Hallo! Ich interessiere mich für einen Tagesausflug ab Rio. Kannst du mir mehr erzählen?");
 
     return (
@@ -123,12 +124,14 @@ export default async function TagesausfluegePage() {
                                     {/* Primário passa a ser a Anfrage, com o slug da própria rota:
                                         assim dá pra saber qual página de tour converte. O WhatsApp
                                         continua visível ao lado, nunca escondido. */}
-                                    <Link
-                                        href="/anfrage?von=site&tour=tagesausfluege"
+                                    <a
+                                        href={anfrageWhatsappHref}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
                                     >
                                         Tour anfragen
-                                    </Link>
+                                    </a>
                                     <a
                                         href={`${whatsappLink}?text=${customWhatsappMsg}`}
                                         target="_blank"
@@ -242,12 +245,14 @@ export default async function TagesausfluegePage() {
                                 Schreib mir per WhatsApp oder E-Mail und wir planen gemeinsam deinen Tagesausflug, von Búzios bis Ilha Grande, alles auf Deutsch und ohne Stress.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                <Link
-                                    href="/anfrage?von=site&tour=tagesausfluege"
+                                <a
+                                    href={anfrageWhatsappHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
                                 >
                                     Tour anfragen
-                                </Link>
+                                </a>
                                 <a
                                     href={`${whatsappLink}?text=${customWhatsappMsg}`}
                                     target="_blank"

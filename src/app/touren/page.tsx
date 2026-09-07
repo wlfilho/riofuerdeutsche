@@ -96,6 +96,7 @@ const itemListSchema = {
 export default async function TourenPage() {
   const settings = await getSettings()
   const { whatsappHref } = buildContactUrls(settings)
+  const anfrageWhatsappHref = `${whatsappHref}?text=${encodeURIComponent('Hallo! Ich interessiere mich für eine Tour in Rio.')}`
 
     return (
         <>
@@ -153,12 +154,14 @@ export default async function TourenPage() {
                                     {/* Primário passa a ser a Anfrage, com o slug da própria rota:
                                         assim dá pra saber qual página de tour converte. O WhatsApp
                                         continua visível ao lado, nunca escondido. */}
-                                    <Link
-                                        href="/anfrage?von=site"
+                                    <a
+                                        href={anfrageWhatsappHref}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
                                     >
                                         Tour anfragen
-                                    </Link>
+                                    </a>
                                     <a
                                         href={whatsappHref}
                                         target="_blank"
@@ -552,12 +555,14 @@ export default async function TourenPage() {
                                 Schreib mir per WhatsApp oder E-Mail und wir stellen gemeinsam dein perfektes Programm zusammen. Auch für <Link href="/kontakt" className="underline decoration-rio-yellow/60 underline-offset-2 hover:text-rio-yellow transition-colors">persönliche Reiseleitung</Link> stehe ich gerne zur Verfügung.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                <Link
-                                    href="/anfrage?von=site"
+                                <a
+                                    href={anfrageWhatsappHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
                                 >
                                     Tour anfragen
-                                </Link>
+                                </a>
                                 <a
                                     href={whatsappHref}
                                     target="_blank"

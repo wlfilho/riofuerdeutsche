@@ -76,13 +76,16 @@ export default function Footer({ contact = FALLBACK_CONTACT }: { contact?: Conta
                             Antwort meist innerhalb von 24 Stunden, auf Deutsch.
                         </p>
                     </div>
-                    {/* ?von=site: atribuição do CTA do rodapé, já usada no rodapé anterior. */}
-                    <Link
-                        href="/anfrage?von=site"
+                    {/* WhatsApp direto: o formulário /anfrage recebia visita mas
+                        quase ninguém concluía (decisão de 07/09/2026). */}
+                    <a
+                        href={`${contact.whatsappHref}?text=${encodeURIComponent('Hallo! Ich interessiere mich für eine Tour in Rio.')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className={`shrink-0 rounded-lg bg-rfd-yellow px-6 py-3.5 font-bold text-rfd-green-dark hover:brightness-105 transition-all ${focusRing}`}
                     >
                         Unverbindlich anfragen
-                    </Link>
+                    </a>
                 </div>
             </div>
 
@@ -228,6 +231,15 @@ export default function Footer({ contact = FALLBACK_CONTACT }: { contact?: Conta
                                 >
                                     <WhatsAppIcon className="h-5 w-5" />
                                     <span className="sr-only">WhatsApp</span>
+                                </a>
+                            )}
+                            {contact.emailHref && (
+                                <a
+                                    href={contact.emailHref}
+                                    className={`w-10 h-10 flex items-center justify-center rounded-full border border-white/20 hover:text-white hover:border-rfd-yellow transition-colors ${focusRing}`}
+                                >
+                                    <Mail className="h-5 w-5" aria-hidden="true" />
+                                    <span className="sr-only">E-Mail</span>
                                 </a>
                             )}
                             {contact.telegramHref && (

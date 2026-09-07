@@ -227,6 +227,7 @@ const programs = [
 export default async function KlassikerTourPage() {
   const settings = await getSettings()
   const { whatsappHref } = buildContactUrls(settings)
+  const anfrageWhatsappHref = `${whatsappHref}?text=${encodeURIComponent('Hallo! Ich interessiere mich für die Klassiker Tour.')}`
 
     return (
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
@@ -276,12 +277,14 @@ export default async function KlassikerTourPage() {
                                     {/* Primário passa a ser a Anfrage, com o slug da própria rota:
                                         assim dá pra saber qual página de tour converte. O WhatsApp
                                         continua visível ao lado, nunca escondido. */}
-                                    <Link
-                                        href="/anfrage?von=site&tour=klassiker"
+                                    <a
+                                        href={anfrageWhatsappHref}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20"
                                     >
                                         Tour anfragen
-                                    </Link>
+                                    </a>
                                     <a
                                         href={whatsappHref}
                                         target="_blank"
@@ -454,16 +457,17 @@ export default async function KlassikerTourPage() {
                                     </ul>
 
                                     <div className="pt-6 border-t border-gray-100 space-y-2">
-                                        {/* Um pedido por programa. O sub-tour vai no `thema`,
-                                            não num campo novo: os 6 são recortes de interesse
-                                            dentro do mesmo passeio — o `tour` continua sendo
-                                            klassiker. */}
-                                        <Link
-                                            href={`/anfrage?von=site&tour=klassiker&thema=${program.thema}`}
+                                        {/* Um pedido por programa: a mensagem leva o título do
+                                            card, então dá pra saber qual dos 6 recortes gerou o
+                                            contato mesmo sem o `thema` da era do formulário. */}
+                                        <a
+                                            href={`${whatsappHref}?text=${encodeURIComponent(`Hallo! Ich interessiere mich für die Tour „${program.title}".`)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                             className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-rio-green text-white rounded-xl font-bold hover:bg-green-700 transition-all hover:scale-[1.01]"
                                         >
                                             Tour anfragen
-                                        </Link>
+                                        </a>
                                         <a
                                             href={`${whatsappHref}?text=${encodeURIComponent(`Hallo! Ich interessiere mich für die Tour „${program.title}". Könnten Sie mir mehr Informationen zu Verfügbarkeit und Preisen geben?`)}`}
                                             target="_blank"
@@ -495,12 +499,14 @@ export default async function KlassikerTourPage() {
                                 Schreib mir per WhatsApp oder E-Mail und wir stellen gemeinsam dein perfektes Programm zusammen.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                <Link
-                                    href="/anfrage?von=site&tour=klassiker"
+                                <a
+                                    href={anfrageWhatsappHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
                                 >
                                     Tour anfragen
-                                </Link>
+                                </a>
                                 <a
                                     href={whatsappHref}
                                     target="_blank"

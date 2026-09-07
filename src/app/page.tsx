@@ -54,7 +54,7 @@ const faqJsonLd = {
       name: "Wie buche ich eine Tour?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Am schnellsten über das Anfrageformular auf riofuerdeutsche.de/anfrage. Dort stehen schon die Fragen, die ich sowieso stellen würde. Lieber direkt? Schreib mir auf WhatsApp oder per E-Mail. Ich antworte meistens innerhalb von 48 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.",
+        text: "Am schnellsten über WhatsApp, schreib mir direkt, ich antworte meistens innerhalb von 48 Stunden. Auch per E-Mail erreichbar. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.",
       },
     },
     {
@@ -199,6 +199,7 @@ const tours = [
 export default async function Home() {
   const [settings, supabase] = await Promise.all([getSettings(), createClient()])
   const c = buildContactUrls(settings)
+  const anfrageWhatsappHref = `${c.whatsappHref}?text=${encodeURIComponent('Hallo! Ich interessiere mich für eine Tour in Rio.')}`
 
   const { data: dbReviews } = await supabase
     .from('reviews')
@@ -265,12 +266,14 @@ export default async function Home() {
                         tráfego real desta home é fundo de funil: gente que já quer um
                         tour. O guia grátis (/rio-guide/sicherheit/ist-rio-gefaehrlich) saiu daqui para não
                         competir com o pedido; continua linkado no corpo da página. */}
-                    <Link
-                      href="/anfrage?von=site"
+                    <a
+                      href={anfrageWhatsappHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-1 px-5 py-4 sm:px-8 bg-rio-yellow text-gray-900 rounded-full font-bold text-base sm:text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-rio-yellow/20 whitespace-nowrap"
                     >
                       Tour anfragen
-                    </Link>
+                    </a>
                     <Link
                       href="#touren"
                       className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
@@ -321,12 +324,14 @@ export default async function Home() {
                     apontando para /anfrage, repetir a isca de topo de funil no meio
                     da página competia com o pedido em vez de somar. */}
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
-                  <Link
-                    href="/anfrage?von=site"
+                  <a
+                    href={anfrageWhatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-green text-white rounded-full font-bold text-base hover:bg-rio-green/90 hover:scale-[1.02] transition-all shadow-lg"
                   >
                     Tour anfragen
-                  </Link>
+                  </a>
                   <Link
                     href="#touren"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-rio-green text-rio-green rounded-full font-bold text-base hover:bg-rio-green/5 transition-all"
@@ -630,12 +635,14 @@ export default async function Home() {
                     para /kontakt. Quem chega ao fim da home leu tudo — é o momento de
                     pedir o pedido, não de oferecer material de leitura. */}
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
-                  <Link
-                    href="/anfrage?von=site"
+                  <a
+                    href={anfrageWhatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-rio-yellow text-gray-900 rounded-full font-bold text-lg hover:bg-yellow-400 hover:scale-[1.02] transition-all shadow-xl shadow-black/10"
                   >
                     Tour anfragen
-                  </Link>
+                  </a>
                   <a
                     href={c.whatsappHref}
                     target="_blank"

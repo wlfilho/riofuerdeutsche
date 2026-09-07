@@ -427,16 +427,25 @@ export default function Navbar({ contact: contactProp }: { contact?: ContactUrls
                         desktop deste bloco tem ~140px e, somada ao logo, empurrava
                         o hambúrguer para fora do viewport em telas < 430px. */}
                     <div className="hidden lg:flex items-center gap-3">
-                        {/* CTA primário do site. Antes da Fase 1 nenhuma das 26 páginas
-                            linkava a /anfrage: ela existia, respondia 200 e era
-                            inalcançável por navegação. O WhatsApp continua no menu e no
-                            rodapé — este botão soma um caminho, não substitui nenhum. */}
-                        <Link
-                            href="/anfrage?von=site"
-                            className="inline-flex items-center whitespace-nowrap rounded-full bg-rio-green px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-green-700"
+                        {/* O formulário /anfrage recebia visita mas quase ninguém
+                            concluía; o CTA do cabeçalho volta a ser contato direto,
+                            WhatsApp e e-mail lado a lado (decisão de 07/09/2026). */}
+                        <a
+                            href={`${contact.whatsappHref}?text=${encodeURIComponent('Hallo! Ich interessiere mich für eine Tour in Rio.')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={t('whatsappSchreiben')}
+                            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#25D366] text-white transition-transform hover:scale-105"
                         >
-                            {t('tourAnfragen')}
-                        </Link>
+                            <WhatsAppIcon className="h-5 w-5" />
+                        </a>
+                        <a
+                            href={contact.emailHref}
+                            aria-label={t('emailSchreiben')}
+                            className="flex h-10 w-10 items-center justify-center rounded-full bg-rio-blue text-white transition-transform hover:scale-105"
+                        >
+                            <Mail className="h-5 w-5" />
+                        </a>
                         <HeaderAuth />
                     </div>
 
@@ -567,26 +576,30 @@ export default function Navbar({ contact: contactProp }: { contact?: ContactUrls
 
                     {/* Rodapé fixo — zona de alcance do polegar */}
                     <div className="shrink-0 border-t border-gray-100 bg-white px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-                        {/* Primário acima do WhatsApp, ambos na zona do polegar: o
-                            handoff é explícito em nunca esconder o WhatsApp. */}
-                        <Link
-                            href="/anfrage?von=site"
-                            onClick={closeMenu}
-                            className="mb-3 flex h-14 w-full items-center justify-center rounded-2xl bg-rio-green text-base font-bold text-white shadow-lg shadow-rio-green/25 transition-transform active:scale-[0.99]"
-                        >
-                            {t('tourAnfragen')}
-                        </Link>
-
+                        {/* WhatsApp como primário: o formulário /anfrage recebia
+                            visita mas quase ninguém concluía (decisão de 07/09/2026).
+                            E-mail entra como secundário no lugar do antigo CTA. */}
                         {contact.whatsappHref && (
                             <a
-                                href={contact.whatsappHref}
+                                href={`${contact.whatsappHref}?text=${encodeURIComponent('Hallo! Ich interessiere mich für eine Tour in Rio.')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={closeMenu}
-                                className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#25D366] text-base font-bold text-white shadow-lg shadow-[#25D366]/25 transition-transform active:scale-[0.99]"
+                                className="mb-3 flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#25D366] text-base font-bold text-white shadow-lg shadow-[#25D366]/25 transition-transform active:scale-[0.99]"
                             >
                                 <WhatsAppIcon className="h-5 w-5" />
                                 {t('whatsappSchreiben')}
+                            </a>
+                        )}
+
+                        {contact.emailHref && (
+                            <a
+                                href={contact.emailHref}
+                                onClick={closeMenu}
+                                className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-rio-blue text-base font-bold text-white shadow-lg shadow-rio-blue/25 transition-transform active:scale-[0.99]"
+                            >
+                                <Mail className="h-5 w-5" />
+                                {t('emailSchreiben')}
                             </a>
                         )}
 

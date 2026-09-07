@@ -31,19 +31,20 @@ function buildItems(whatsappHref: string, emailHref: string): FaqItem[] {
       q: "Wie buche ich eine Tour?",
       a: (
         <>
-          Am schnellsten über das{" "}
-          <Link href="/anfrage?von=site" className={linkClass}>
-            Anfrageformular
-          </Link>
-          . Dort stehen schon die Fragen, die ich sowieso stellen würde. Lieber direkt? Schreib mir auf{" "}
-          <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className={linkClass}>
+          Am schnellsten über{" "}
+          <a
+            href={`${whatsappHref}?text=${encodeURIComponent("Hallo! Ich interessiere mich für eine Tour in Rio.")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={linkClass}
+          >
             WhatsApp
-          </a>{" "}
-          oder per{" "}
+          </a>
+          , schreib mir direkt, ich antworte meistens innerhalb von 48 Stunden. Auch per{" "}
           <a href={emailHref} className={linkClass}>
             E-Mail
-          </a>
-          . Ich antworte meistens innerhalb von 48 Stunden. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.
+          </a>{" "}
+          erreichbar. Wir besprechen deine Wünsche, ich mache dir ein Angebot, und du entscheidest ganz ohne Druck.
         </>
       ),
     },
