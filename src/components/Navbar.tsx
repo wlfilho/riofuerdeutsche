@@ -442,7 +442,7 @@ export default function Navbar({ contact: contactProp }: { contact?: ContactUrls
                         <a
                             href={contact.emailHref}
                             aria-label={t('emailSchreiben')}
-                            className="flex h-10 w-10 items-center justify-center rounded-full bg-rio-blue text-white transition-transform hover:scale-105"
+                            className="flex h-10 w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 transition-transform hover:scale-105 hover:text-rio-green"
                         >
                             <Mail className="h-5 w-5" />
                         </a>

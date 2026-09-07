@@ -5,8 +5,8 @@ import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import {
     ChevronRight,
-    Phone,
     CalendarDays,
+    Mail,
 } from "lucide-react";
 import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
@@ -73,9 +73,8 @@ const tagesausfluegDestinos = [
 export default async function TagesausfluegePage() {
     const settings = await getSettings()
 
-    const { whatsappHref: whatsappLink } = buildContactUrls(settings)
+    const { whatsappHref: whatsappLink, emailHref } = buildContactUrls(settings)
     const anfrageWhatsappHref = `${whatsappLink}?text=${encodeURIComponent('Hallo! Ich interessiere mich für einen Tagesausflug ab Rio.')}`
-    const customWhatsappMsg = encodeURIComponent("Hallo! Ich interessiere mich für einen Tagesausflug ab Rio. Kannst du mir mehr erzählen?");
 
     return (
         <div className="flex flex-col min-h-screen bg-rio-sand selection:bg-rio-green selection:text-white font-sans">
@@ -133,13 +132,11 @@ export default async function TagesausfluegePage() {
                                         Tour anfragen
                                     </a>
                                     <a
-                                        href={`${whatsappLink}?text=${customWhatsappMsg}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                        href={emailHref}
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                     >
-                                        <Phone className="w-5 h-5" />
-                                        Auf WhatsApp schreiben
+                                        <Mail className="w-5 h-5" />
+                                        Per E-Mail schreiben
                                     </a>
                                 </div>
                             </div>
@@ -254,20 +251,12 @@ export default async function TagesausfluegePage() {
                                     Tour anfragen
                                 </a>
                                 <a
-                                    href={`${whatsappLink}?text=${customWhatsappMsg}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    href={emailHref}
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
-                                    <Phone className="w-5 h-5" />
-                                    WhatsApp an uns
+                                    <Mail className="w-5 h-5" />
+                                    Per E-Mail schreiben
                                 </a>
-                                <Link
-                                    href="/kontakt"
-                                    className="inline-flex items-center justify-center px-2 py-4 text-sm text-white/70 underline underline-offset-4 hover:text-white transition-colors"
-                                >
-                                    Lieber per E-Mail?
-                                </Link>
                             </div>
                         </FadeIn>
                     </div>

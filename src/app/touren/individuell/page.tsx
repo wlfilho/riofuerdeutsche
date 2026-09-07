@@ -3,7 +3,7 @@ import Image from "next/image";
 import NavbarServer from "@/components/NavbarServer";
 import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
-import { ChevronRight, Phone, CalendarDays } from "lucide-react";
+import { ChevronRight,CalendarDays, Mail } from "lucide-react";
 import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
 
@@ -20,7 +20,7 @@ export const metadata = {
 
 export default async function IndividuelleTourPage() {
   const settings = await getSettings()
-  const { whatsappHref } = buildContactUrls(settings)
+  const { whatsappHref, emailHref } = buildContactUrls(settings)
   const anfrageWhatsappHref = `${whatsappHref}?text=${encodeURIComponent('Hallo! Ich interessiere mich für eine individuelle Tour in Rio.')}`
 
     return (
@@ -79,13 +79,11 @@ export default async function IndividuelleTourPage() {
                                         Tour anfragen
                                     </a>
                                     <a
-                                        href={`${whatsappHref}?text=Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                        href={emailHref}
                                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                     >
-                                        <Phone className="w-5 h-5" />
-                                        Auf WhatsApp schreiben
+                                        <Mail className="w-5 h-5" />
+                                        Per E-Mail schreiben
                                     </a>
                                 </div>
                             </div>
@@ -220,20 +218,12 @@ export default async function IndividuelleTourPage() {
                                     Tour anfragen
                                 </a>
                                 <a
-                                    href={`${whatsappHref}?text=Hallo! Ich möchte eine individuelle Tour in Rio planen. Kannst du mir helfen?`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    href={emailHref}
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                                 >
-                                    <Phone className="w-5 h-5" />
-                                    WhatsApp an uns
+                                    <Mail className="w-5 h-5" />
+                                    Per E-Mail schreiben
                                 </a>
-                                <Link
-                                    href="/kontakt"
-                                    className="inline-flex items-center justify-center px-2 py-4 text-sm text-white/70 underline underline-offset-4 hover:text-white transition-colors"
-                                >
-                                    Lieber per E-Mail?
-                                </Link>
                             </div>
                         </FadeIn>
                     </div>

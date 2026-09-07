@@ -12,8 +12,8 @@ import {
   CalendarDays,
   MapPin,
   HeartHandshake,
-  Phone,
   User,
+  Mail,
 } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -644,12 +644,11 @@ export default async function Home() {
                     Tour anfragen
                   </a>
                   <a
-                    href={c.whatsappHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={c.emailHref}
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/20 transition-all"
                   >
-                    WhatsApp an uns
+                    <Mail className="w-5 h-5" />
+                    Per E-Mail schreiben
                   </a>
                 </div>
               </FadeIn>
