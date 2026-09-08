@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { CheckCircle2, Clock } from 'lucide-react';
 
@@ -17,10 +18,17 @@ export interface TourDateDeposit {
  *
  * Não renderiza nada sem nenhuma tour_date: sem data marcada não há o que
  * cobrar sinal ainda.
+ *
+ * Marcar o sinal fecha a venda: o trigger `tour_dates_sync_lead_status_upd`
+ * leva o lead pra `closed` e, dali, a proposta pra `accepted` e o calendário
+ * pra `fechado`. Por isso o `router.refresh()` no fim — sem ele o botão fica
+ * verde mas o resto da tela (status do lead, da proposta) continua no estado
+ * velho até um F5.
  */
 export default function AnzahlungToggle({ tourDates }: { tourDates: TourDateDeposit[] }) {
   const [dates, setDates] = useState(tourDates);
   const [saving, setSaving] = useState(false);
+  const router = useRouter();
   const t = useTranslations('admin.calendario');
 
   if (dates.length === 0) return null;
@@ -43,6 +51,7 @@ export default function AnzahlungToggle({ tourDates }: { tourDates: TourDateDepo
         ),
       );
       if (results.some(r => !r.ok)) setDates(previous);
+      else router.refresh();
     } catch {
       setDates(previous);
     } finally {
