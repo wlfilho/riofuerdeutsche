@@ -131,6 +131,15 @@ export async function PATCH(
   const body = await request.json();
   const { email, name, phone, source } = body;
 
+  // Nome, e-mail e telefone também vivem copiados em `price_leads` (a cópia é
+  // mais velha que a tabela `contacts`). Quem espelha a correção nos leads deste
+  // contato é o gatilho contacts_sync_price_leads, no banco — migration
+  // 20260908000000. Não refazer isso aqui: em 08/09/2026 o e-mail da Conny foi
+  // corrigido só no contato e o lead ficou com o endereço errado justamente
+  // porque a sincronia não existia em lugar nenhum; agora que existe, uma
+  // segunda cópia em TypeScript só criaria dois mapas para divergir.
+  // `source` fica de fora de propósito: contato e lead respondem perguntas
+  // diferentes (ver o comentário em src/app/api/anfrage/route.ts).
   const { data, error } = await supabase
     .from('contacts')
     .update({
