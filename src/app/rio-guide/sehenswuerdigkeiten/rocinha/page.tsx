@@ -5,6 +5,7 @@ import FooterServer from "@/components/FooterServer";
 import FadeIn from "@/components/FadeIn";
 import AndereTouren from "@/components/AndereTouren";
 import RocinhaFaq from "@/components/RocinhaFaq";
+import AttractionReviews from "@/components/AttractionReviews";
 import { ChevronRight, Home, ArrowRight, Phone } from "lucide-react";
 
 export const metadata = {
@@ -669,10 +670,18 @@ export default function RocinhaPage() {
                     </div>
                 </section>
 
+                {/* ── Bewertungen zur Rocinha ─────────────────────── */}
+                <AttractionReviews
+                    attraction="Favela Rocinha"
+                    title="Was unsere Gäste über die Rocinha sagen"
+                />
+
                 {/* ── SECÇÃO 7 — Passt gut dazu ───────────────────── */}
                 <section className="py-20 lg:py-24 bg-gray-50 border-t border-gray-100">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
-                        <FadeIn direction="up" className="mb-10">
+                        {/* max-w-[800px] mx-auto: mesma coluna dos textos, do FAQ e das
+                            Bewertungen — a seção acompanha a largura do conteúdo. */}
+                        <FadeIn direction="up" className="max-w-[800px] mx-auto mb-10">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
                                 Passt gut dazu…
                             </h2>
@@ -681,7 +690,7 @@ export default function RocinhaPage() {
                             </p>
                         </FadeIn>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[800px] mx-auto">
 
                             {/* Card 1 — Christus Erlöser */}
                             <FadeIn delay={0} direction="up" className="flex">

@@ -6,6 +6,7 @@ import FadeIn from "@/components/FadeIn";
 import AndereTouren from "@/components/AndereTouren";
 import { ChevronRight, Home, ArrowRight, Phone } from "lucide-react";
 import Faq from "@/components/Faq";
+import AttractionReviews from "@/components/AttractionReviews";
 
 export const metadata = {
     title: {
@@ -784,10 +785,18 @@ export default function MaracanaPage() {
                     </div>
                 </section>
 
+                {/* ── Bewertungen zum Maracanã ────────────────────── */}
+                <AttractionReviews
+                    attraction="Maracanã Stadion & Museum"
+                    title="Was unsere Gäste über das Maracanã sagen"
+                />
+
                 {/* ── SECÇÃO 6 — Passt gut dazu ───────────────────── */}
                 <section className="py-20 lg:py-24 bg-gray-50 border-t border-gray-100">
                     <div className="max-w-7xl mx-auto px-5 lg:px-8">
-                        <FadeIn direction="up" className="mb-10">
+                        {/* max-w-[800px] mx-auto: mesma coluna dos textos, do FAQ e das
+                            Bewertungen — a seção acompanha a largura do conteúdo. */}
+                        <FadeIn direction="up" className="max-w-[800px] mx-auto mb-10">
                             <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
                                 Passt gut dazu…
                             </h2>
@@ -796,7 +805,7 @@ export default function MaracanaPage() {
                             </p>
                         </FadeIn>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[800px] mx-auto">
 
                             {/* Card 1 — Christus Erlöser */}
                             <FadeIn delay={0} direction="up" className="flex">

@@ -440,7 +440,9 @@ export default function SantaMartaPage() {
                     {/* ── Passt gut dazu ─────────────────────────────── */}
                     <section className="py-20 lg:py-24 bg-gray-50 border-t border-gray-100">
                         <div className="max-w-7xl mx-auto px-5 lg:px-8">
-                            <FadeIn direction="up" className="mb-10">
+                            {/* max-w-[800px] mx-auto: mesma coluna dos textos e do FAQ —
+                                a seção acompanha a largura do conteúdo. */}
+                            <FadeIn direction="up" className="max-w-[800px] mx-auto mb-10">
                                 <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
                                     Passt gut dazu…
                                 </h2>
@@ -449,7 +451,7 @@ export default function SantaMartaPage() {
                                 </p>
                             </FadeIn>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[800px] mx-auto">
 
                                 <FadeIn delay={0} direction="up" className="flex">
                                     <Link
