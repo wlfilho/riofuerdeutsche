@@ -1,6 +1,7 @@
 import {
   DEFAULT_PROPOSAL_LOCALE,
   getProposalServiceGroups,
+  getGuideRateTiers,
   getProposalServices,
   getTransportTypes,
 } from '@/lib/proposals';
@@ -59,10 +60,11 @@ export default async function NovaPropostaPage({
 
   // O catálogo já vem resolvido no idioma pré-selecionado; trocar o idioma no
   // builder recarrega a página para que os textos acompanhem.
-  const [services, serviceGroups, transportTypes, settings] = await Promise.all([
+  const [services, serviceGroups, transportTypes, guideRateTiers, settings] = await Promise.all([
     getProposalServices(initialLocale),
     getProposalServiceGroups(),
     getTransportTypes(),
+    getGuideRateTiers(),
     getSettings(),
   ]);
 
@@ -82,6 +84,7 @@ export default async function NovaPropostaPage({
       services={services}
       serviceGroups={serviceGroups}
       transportTypes={transportTypes}
+      guideRateTiers={guideRateTiers}
       defaultGuideRate={settings.guide_rate_eur}
       defaultExchangeRate={settings.default_exchange_rate}
       maxHoursPerDay={settings.max_hours_per_day}

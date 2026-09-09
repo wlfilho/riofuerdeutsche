@@ -253,6 +253,35 @@ export async function getDepositBankInfo(): Promise<DepositBankInfo> {
   };
 }
 
+/**
+ * Honorário do guia por faixa de tamanho de grupo.
+ *
+ * Espelha as faixas de transporte (1–3, 4–5, 6–18) porque é o veículo que faz
+ * o honorário mudar, mas vive em tabela própria: o honorário existe mesmo num
+ * dia a pé, em que não há faixa de veículo. `max_pax` null = sem limite.
+ */
+export interface ProposalGuideRateTier {
+  id: string;
+  min_pax: number;
+  max_pax: number | null;
+  rate_eur: number;
+  sort_order: number;
+}
+
+export async function getGuideRateTiers(): Promise<ProposalGuideRateTier[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('proposal_guide_rate_tiers')
+    .select('id, min_pax, max_pax, rate_eur, sort_order')
+    .order('min_pax');
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(t => ({ ...t, rate_eur: Number(t.rate_eur) }));
+}
+
+// A resolução da faixa por pax vive em @/lib/guideRate (módulo puro, para o
+// builder poder importá-la no browser).
+
 export async function getTransportTypes(): Promise<ProposalTransportType[]> {
   const supabase = await createClient();
   const { data, error } = await supabase

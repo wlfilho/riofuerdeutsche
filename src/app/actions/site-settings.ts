@@ -81,3 +81,94 @@ export async function saveSiteSettings(
   if (error) return { success: false, error: error.message }
   return { success: true }
 }
+
+// ─── Faixas de honorário por tamanho de grupo ────────────────────────────────
+// Vivem em proposal_guide_rate_tiers (tabela própria, ver a migration
+// 20260909100000). O guide_rate_eur acima continua sendo o fallback de pax que
+// não cai em faixa nenhuma.
+
+export type GuideRateTierInput = {
+  // Ausente = linha nova, ainda não gravada.
+  id?: string
+  min_pax: number
+  max_pax: number | null
+  rate_eur: number
+  sort_order: number
+}
+
+// Sobreposição faz findGuideRateTier escolher uma faixa arbitrária entre as
+// candidatas, então é barrada aqui e não só na tela.
+function validateGuideRateTiers(tiers: GuideRateTierInput[]): string | null {
+  for (const t of tiers) {
+    if (!Number.isFinite(t.min_pax) || t.min_pax < 1) return 'Faixa com mínimo de pessoas inválido.'
+    if (t.max_pax !== null && (!Number.isFinite(t.max_pax) || t.max_pax < t.min_pax))
+      return 'Faixa com máximo menor que o mínimo.'
+    if (!Number.isFinite(t.rate_eur) || t.rate_eur < 0) return 'Faixa com honorário inválido.'
+  }
+
+  const sorted = [...tiers].sort((a, b) => a.min_pax - b.min_pax)
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const curMax = sorted[i].max_pax
+    if (curMax === null) return 'Faixa sem limite superior precisa ser a última.'
+    if (sorted[i + 1].min_pax <= curMax) return 'Duas faixas cobrem o mesmo número de pessoas.'
+  }
+  return null
+}
+
+export async function saveGuideRateTiers(
+  tiers: GuideRateTierInput[]
+): Promise<{ success: boolean; error?: string }> {
+  const invalid = validateGuideRateTiers(tiers)
+  if (invalid) return { success: false, error: invalid }
+
+  const supabase = await createClient()
+
+  // Apaga só o que sumiu da tela; o resto é upsert, para as faixas manterem o
+  // id (e não haver janela em que a tabela fica vazia).
+  const { data: existing, error: readError } = await supabase
+    .from('proposal_guide_rate_tiers')
+    .select('id')
+  if (readError) return { success: false, error: readError.message }
+
+  const keep = new Set(tiers.map((t) => t.id).filter(Boolean))
+  const toDelete = (existing ?? []).map((r) => r.id).filter((id) => !keep.has(id))
+
+  const updates = tiers.filter((t) => t.id)
+  const inserts = tiers.filter((t) => !t.id)
+
+  if (updates.length > 0) {
+    const { error } = await supabase.from('proposal_guide_rate_tiers').upsert(
+      updates.map((t) => ({
+        id: t.id,
+        min_pax: t.min_pax,
+        max_pax: t.max_pax,
+        rate_eur: t.rate_eur,
+        sort_order: t.sort_order,
+        updated_at: new Date().toISOString(),
+      }))
+    )
+    if (error) return { success: false, error: error.message }
+  }
+
+  if (inserts.length > 0) {
+    const { error } = await supabase.from('proposal_guide_rate_tiers').insert(
+      inserts.map((t) => ({
+        min_pax: t.min_pax,
+        max_pax: t.max_pax,
+        rate_eur: t.rate_eur,
+        sort_order: t.sort_order,
+      }))
+    )
+    if (error) return { success: false, error: error.message }
+  }
+
+  if (toDelete.length > 0) {
+    const { error } = await supabase
+      .from('proposal_guide_rate_tiers')
+      .delete()
+      .in('id', toDelete)
+    if (error) return { success: false, error: error.message }
+  }
+
+  return { success: true }
+}

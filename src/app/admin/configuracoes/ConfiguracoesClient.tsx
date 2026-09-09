@@ -1,8 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { saveSiteSettings, type SiteSettings } from '@/app/actions/site-settings'
+import {
+  saveGuideRateTiers,
+  saveSiteSettings,
+  type GuideRateTierInput,
+  type SiteSettings,
+} from '@/app/actions/site-settings'
 
 type Tab = 'negocio' | 'proposta' | 'email'
 
@@ -12,25 +17,79 @@ const TAB_KEYS: { id: Tab; labelKey: 'abaNegocio' | 'abaProposta' | 'abaEmail' }
   { id: 'email', labelKey: 'abaEmail' },
 ]
 
-export default function ConfiguracoesClient({ initial }: { initial: SiteSettings }) {
+// Linha do editor de faixas. `_id` é só chave de render: faixa nova ainda não
+// tem id do banco, e usar o índice quebraria o foco ao remover uma linha do meio.
+type TierRow = GuideRateTierInput & { _id: string }
+
+export default function ConfiguracoesClient({
+  initial,
+  initialTiers,
+}: {
+  initial: SiteSettings
+  initialTiers: GuideRateTierInput[]
+}) {
   const t = useTranslations('admin.configuracoes')
   const tCommon = useTranslations('admin.common')
   const [form, setForm] = useState(initial)
+  const [tiers, setTiers] = useState<TierRow[]>(() =>
+    initialTiers.map((t, i) => ({ ...t, _id: t.id ?? `novo-seed-${i}` }))
+  )
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<'success' | 'error' | null>(null)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [showSignaturePreview, setShowSignaturePreview] = useState(false)
   const [tab, setTab] = useState<Tab>('negocio')
 
   const set = (key: keyof SiteSettings, value: string | number) =>
     setForm((prev) => ({ ...prev, [key]: value }))
 
+  // Contador de linha nova: `_id` precisa ser único e estável mesmo depois de
+  // adicionar, remover e adicionar de novo.
+  const nextRowId = useRef(0)
+
+  const setTier = (rowId: string, patch: Partial<TierRow>) =>
+    setTiers((prev) => prev.map((t) => (t._id === rowId ? { ...t, ...patch } : t)))
+
+  const addTier = () => {
+    // Começa depois da última faixa, que é onde uma faixa nova quase sempre vai.
+    const last = [...tiers].sort((a, b) => a.min_pax - b.min_pax).at(-1)
+    setTiers((prev) => [
+      ...prev,
+      {
+        _id: `novo-${nextRowId.current++}`,
+        min_pax: last?.max_pax != null ? last.max_pax + 1 : 1,
+        max_pax: null,
+        rate_eur: form.guide_rate_eur,
+        sort_order: (last?.sort_order ?? -10) + 10,
+      },
+    ])
+  }
+
+  const removeTier = (rowId: string) =>
+    setTiers((prev) => prev.filter((t) => t._id !== rowId))
+
   const handleSave = async () => {
     setSaving(true)
     setToast(null)
-    const result = await saveSiteSettings(form)
+    setErrorMsg(null)
+
+    const [settingsResult, tiersResult] = await Promise.all([
+      saveSiteSettings(form),
+      saveGuideRateTiers(
+        tiers.map(({ _id, ...t }) => ({
+          ...t,
+          // Faixa semeada pela migration entra sem id na tela; sem isso o save
+          // recriaria a linha em vez de atualizá-la.
+          id: _id.startsWith('novo-') ? undefined : t.id,
+        }))
+      ),
+    ])
+
     setSaving(false)
-    setToast(result.success ? 'success' : 'error')
-    if (result.success) setTimeout(() => setToast(null), 3000)
+    const failed = settingsResult.error ?? tiersResult.error ?? null
+    setErrorMsg(failed)
+    setToast(failed ? 'error' : 'success')
+    if (!failed) setTimeout(() => setToast(null), 3000)
   }
 
   return (
@@ -43,7 +102,9 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
             <span className="text-sm text-green-700 font-medium">{t('salvas')}</span>
           )}
           {toast === 'error' && (
-            <span className="text-sm text-red-600 font-medium">{tCommon('erroSalvar')}</span>
+            <span className="text-sm text-red-600 font-medium">
+              {errorMsg ?? tCommon('erroSalvar')}
+            </span>
           )}
           <button
             onClick={handleSave}
@@ -196,6 +257,100 @@ export default function ConfiguracoesClient({ initial }: { initial: SiteSettings
               <p className="text-xs text-gray-400 mt-1">
                 {t('honorarioHint')}
               </p>
+            </div>
+
+            {/* Faixas de honorário por tamanho de grupo. A faixa que bate com o
+                pax da proposta vence o honorário padrão acima. */}
+            <div className="border-t border-gray-100 pt-5">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t('faixasHonorario')}
+                  </label>
+                  <p className="text-xs text-gray-400 mt-1 max-w-lg">
+                    {t('faixasHonorarioHint')}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addTier}
+                  className="shrink-0 text-xs font-semibold text-green-600 hover:text-green-800 transition-colors"
+                >
+                  {t('novaFaixaHonorario')}
+                </button>
+              </div>
+
+              {tiers.length === 0 ? (
+                <p className="text-sm text-gray-400 italic">{t('nenhumaFaixaHonorario')}</p>
+              ) : (
+                <div className="space-y-2">
+                  {[...tiers]
+                    .sort((a, b) => a.min_pax - b.min_pax)
+                    .map((tier) => (
+                      <div
+                        key={tier._id}
+                        className="flex flex-wrap items-center gap-2 bg-gray-50 rounded-lg px-3 py-2"
+                      >
+                        <span className="text-xs text-gray-500">{t('faixaDe')}</span>
+                        <input
+                          type="number"
+                          min={1}
+                          value={tier.min_pax}
+                          onChange={(e) =>
+                            setTier(tier._id, { min_pax: parseInt(e.target.value) || 1 })
+                          }
+                          className="w-16 border border-gray-200 rounded px-2 py-1 text-sm text-center tabular-nums focus:outline-none focus:ring-1 focus:ring-green-500"
+                        />
+                        <span className="text-xs text-gray-500">{t('faixaAte')}</span>
+                        <input
+                          type="number"
+                          min={1}
+                          value={tier.max_pax ?? ''}
+                          disabled={tier.max_pax === null}
+                          onChange={(e) =>
+                            setTier(tier._id, { max_pax: parseInt(e.target.value) || null })
+                          }
+                          className="w-16 border border-gray-200 rounded px-2 py-1 text-sm text-center tabular-nums focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-100 disabled:text-gray-400"
+                        />
+                        <span className="text-xs text-gray-500">{t('faixaPessoas')}</span>
+                        <label className="flex items-center gap-1 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={tier.max_pax === null}
+                            onChange={(e) =>
+                              setTier(tier._id, { max_pax: e.target.checked ? null : tier.min_pax })
+                            }
+                            className="rounded"
+                          />
+                          <span className="text-xs text-gray-500">{t('faixaSemLimite')}</span>
+                        </label>
+
+                        <span className="mx-1 text-gray-300">·</span>
+
+                        <input
+                          type="number"
+                          min={0}
+                          step={0.5}
+                          value={tier.rate_eur}
+                          onChange={(e) =>
+                            setTier(tier._id, { rate_eur: parseFloat(e.target.value) || 0 })
+                          }
+                          className="w-20 border border-gray-200 rounded px-2 py-1 text-sm text-center tabular-nums focus:outline-none focus:ring-1 focus:ring-green-500"
+                        />
+                        <span className="text-xs text-gray-500">€/h</span>
+
+                        <button
+                          type="button"
+                          onClick={() => removeTier(tier._id)}
+                          title={t('removerFaixa')}
+                          className="ml-auto p-1 text-gray-300 hover:text-red-500 transition-colors text-base leading-none"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
 
             <div>

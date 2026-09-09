@@ -3,6 +3,7 @@ import {
   DEFAULT_PROPOSAL_LOCALE,
   getProposalById,
   getProposalServiceGroups,
+  getGuideRateTiers,
   getProposalServices,
   getTransportTypes,
 } from '@/lib/proposals';
@@ -25,13 +26,15 @@ export default async function EditarPropostaPage({
   // preenchida caem no padrão. O catálogo é resolvido nesse mesmo idioma.
   const proposalLocale = proposal.locale ?? DEFAULT_PROPOSAL_LOCALE;
 
-  const [services, serviceGroups, transportTypes, settings, supportedLocales] = await Promise.all([
-    getProposalServices(proposalLocale),
-    getProposalServiceGroups(),
-    getTransportTypes(),
-    getSettings(),
-    getSupportedLocales(),
-  ]);
+  const [services, serviceGroups, transportTypes, guideRateTiers, settings, supportedLocales] =
+    await Promise.all([
+      getProposalServices(proposalLocale),
+      getProposalServiceGroups(),
+      getTransportTypes(),
+      getGuideRateTiers(),
+      getSettings(),
+      getSupportedLocales(),
+    ]);
 
   // Um idioma gravado fora de supported_locales (ex.: removido das configs
   // depois) continua listado, senão o select trocaria o idioma da proposta
@@ -45,6 +48,7 @@ export default async function EditarPropostaPage({
       services={services}
       serviceGroups={serviceGroups}
       transportTypes={transportTypes}
+      guideRateTiers={guideRateTiers}
       defaultGuideRate={settings.guide_rate_eur}
       defaultExchangeRate={settings.default_exchange_rate}
       maxHoursPerDay={settings.max_hours_per_day}

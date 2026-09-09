@@ -6,9 +6,11 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ADMIN_LOCALE, fmtEur, fmtLanguage } from '@/lib/adminFormat';
 import { dayTransportServiceName, resolveDayTransportKey } from '@/lib/dayTransportLabel';
+import { findGuideRateTier, guideRateTierLabel } from '@/lib/guideRate';
 import type {
   Proposal,
   ProposalCurrency,
+  ProposalGuideRateTier,
   ProposalPriceDisplay,
   ProposalService,
   ProposalServiceGroup,
@@ -1845,6 +1847,7 @@ export default function NovaPropostaForm({
   services,
   serviceGroups = [],
   transportTypes,
+  guideRateTiers,
   defaultGuideRate,
   defaultExchangeRate,
   maxHoursPerDay,
@@ -1860,6 +1863,8 @@ export default function NovaPropostaForm({
   // os carregam — quem reusa o form sem grupos não precisa saber deles.
   serviceGroups?: ProposalServiceGroup[];
   transportTypes: ProposalTransportType[];
+  // Faixas de honorário por tamanho de grupo. Vazio = só o padrão global vale.
+  guideRateTiers: ProposalGuideRateTier[];
   defaultGuideRate: number;
   defaultExchangeRate: number;
   maxHoursPerDay: number;
@@ -1956,7 +1961,8 @@ export default function NovaPropostaForm({
   const [internalLabel, setInternalLabel] = useState(initialData?.internal_label ?? '');
   const [clientEmail, setClientEmail] = useState(initialData?.client_email ?? initialLead?.email ?? '');
   const [clientPhone, setClientPhone] = useState(initialData?.client_phone ?? initialLead?.phone ?? '');
-  const [pax, setPax] = useState(initialData?.pax ?? initialLead?.pax ?? 2);
+  const initialPax = initialData?.pax ?? initialLead?.pax ?? 2;
+  const [pax, setPax] = useState(initialPax);
   const [treatment, setTreatment] = useState<ProposalTreatment>(initialData?.treatment ?? 'du-ihr');
   // Idioma e moeda da proposta. O idioma governa em que língua o catálogo é
   // resolvido, então trocá-lo recarrega a página do builder (ver abaixo).
@@ -1967,10 +1973,17 @@ export default function NovaPropostaForm({
   const showTreatment = locale === 'de';
   const effectiveTreatment: ProposalTreatment = showTreatment ? treatment : 'du-ihr';
   const [exchangeRate, setExchangeRate] = useState(initialData?.exchange_rate ?? defaultExchangeRate);
-  // Hourly guide rate: /admin/configuracoes provides the default, but each
-  // proposal can override it; existing proposals keep the rate they were
-  // priced with.
-  const [guideRate, setGuideRate] = useState(initialData?.guide_rate ?? defaultGuideRate);
+  // Honorário por hora. A cascata é: valor gravado na proposta → faixa do
+  // tamanho do grupo → padrão de /admin/configuracoes. Proposta já salva
+  // mantém o valor com que foi precificada.
+  const [guideRate, setGuideRate] = useState(
+    initialData?.guide_rate
+      ?? findGuideRateTier(guideRateTiers, initialPax)?.rate_eur
+      ?? defaultGuideRate,
+  );
+  // Digitou um valor à mão: a faixa para de mandar nesta proposta, e o campo
+  // passa a avisar enquanto estiver divergindo dela.
+  const [guideRateTouched, setGuideRateTouched] = useState(false);
   const [internalNotes, setInternalNotes] = useState(
     initialData?.internal_notes
       ?? ((initialLead?.children ?? 0) > 0
@@ -2097,6 +2110,36 @@ export default function NovaPropostaForm({
     () => vehicleTiers.find(t => pax >= t.min_pax && (t.max_pax === null || pax <= t.max_pax)) ?? null,
     [vehicleTiers, pax],
   );
+
+  const guideRateTier = useMemo(
+    () => findGuideRateTier(guideRateTiers, pax),
+    [guideRateTiers, pax],
+  );
+
+  // Proposta nova: mudar o número de pessoas move o honorário para a faixa
+  // correspondente. Em proposta já salva o valor nunca muda sozinho — é
+  // snapshot de preço de algo que já pode ter sido enviado ao cliente; ali o
+  // aviso abaixo do campo é que sinaliza a divergência.
+  useEffect(() => {
+    if (isEditing || guideRateTouched || !guideRateTier) return;
+    setGuideRate(guideRateTier.rate_eur);
+  }, [guideRateTier, guideRateTouched, isEditing]);
+
+  // Proposta que já saiu para o cliente não se rediscute: o preço ofertado é o
+  // que vale, e ficar avisando que a faixa mudou só atrapalha. O aviso volta se
+  // o grupo mudar de tamanho durante a edição, aí a oferta está mesmo sendo
+  // refeita.
+  const rateWarningApplies =
+    !isEditing || initialData?.status === 'draft' || pax !== initialPax;
+
+  // 'divergente' = existe faixa para este grupo e o campo está com outro valor.
+  // 'sem-faixa'  = há faixas cadastradas, mas nenhuma cobre este número de
+  //                pessoas (grupo maior que a última), então vale o padrão.
+  const guideRateWarning: 'divergente' | 'sem-faixa' | null = !rateWarningApplies
+    ? null
+    : guideRateTier
+      ? (guideRate !== guideRateTier.rate_eur ? 'divergente' : null)
+      : (guideRateTiers.length > 0 ? 'sem-faixa' : null);
 
   // Faixa por pax como default, override da proposta por cima.
   const transportRates: TransportRates = useMemo(() => ({
@@ -2638,7 +2681,18 @@ export default function NovaPropostaForm({
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('honorarioGuia')}
-                <span className="ml-1 text-xs font-normal text-gray-400">{t('padrao', { valor: defaultGuideRate })}</span>
+                <span className="ml-1 text-xs font-normal text-gray-400">
+                  {!rateWarningApplies
+                    ? null
+                    : guideRateTier
+                      ? t('faixaDeHonorario', {
+                          faixa: guideRateTierLabel(guideRateTier),
+                          valor: guideRateTier.rate_eur,
+                        })
+                      : guideRateTiers.length === 0
+                        ? t('padrao', { valor: defaultGuideRate })
+                        : null}
+                </span>
               </label>
               <input
                 type="number"
@@ -2647,10 +2701,34 @@ export default function NovaPropostaForm({
                 value={guideRate}
                 onChange={e => {
                   const v = parseFloat(e.target.value);
+                  setGuideRateTouched(true);
                   setGuideRate(Number.isNaN(v) ? 0 : Math.max(0, v));
                 }}
                 className={INPUT_CLS}
               />
+              {guideRateWarning === 'divergente' && guideRateTier && (
+                <p className="mt-1 text-xs font-medium text-amber-700">
+                  {t('honorarioForaDaFaixa', {
+                    faixa: guideRateTierLabel(guideRateTier),
+                    valor: guideRateTier.rate_eur,
+                  })}{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGuideRate(guideRateTier.rate_eur);
+                      setGuideRateTouched(false);
+                    }}
+                    className="font-semibold underline hover:text-amber-900 transition-colors"
+                  >
+                    {t('aplicarFaixa')}
+                  </button>
+                </p>
+              )}
+              {guideRateWarning === 'sem-faixa' && (
+                <p className="mt-1 text-xs font-medium text-amber-700">
+                  {t('honorarioSemFaixa', { pax })}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
