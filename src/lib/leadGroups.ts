@@ -50,3 +50,48 @@ export function matchesGroup(leadGroups: LeadGroup[], filter: string | undefined
   if (filter === 'none') return leadGroups.length === 0;
   return leadGroups.some(g => g.id === filter);
 }
+
+/**
+ * Etiqueta de uma campanha, criada na hora se ainda não existir.
+ *
+ * O nome bom ("AIDA Karneval 2028") só existe no catálogo em
+ * `src/lib/campaigns.ts`, então quem cria a etiqueta com o rótulo certo é este
+ * caminho, não o trigger `price_leads_sync_lead_group` (migration
+ * `20260908010000`) — o trigger conhece só o slug e cai num nome derivado dele.
+ * Por isso isto roda ANTES de gravar o lead: assim, quando o trigger disparar,
+ * a etiqueta já existe com o nome certo e ele só amarra o lead nela.
+ *
+ * `campaign_slug` é a chave, não o nome: renomear a etiqueta no CRM não pode
+ * fazer a próxima inscrição criar uma segunda.
+ */
+export async function ensureCampaignGroup(
+  supabase: SupabaseClient,
+  slug: string,
+  label: string,
+): Promise<string | null> {
+  const { data: bySlug } = await supabase
+    .from('lead_groups')
+    .select('id')
+    .eq('campaign_slug', slug)
+    .maybeSingle();
+  if (bySlug) return bySlug.id;
+
+  // Etiqueta criada à mão no CRM com o mesmo nome, ou pelo código antigo, que
+  // etiquetava por nome e não gravava o slug: adota em vez de duplicar.
+  const { data: byName } = await supabase
+    .from('lead_groups')
+    .select('id')
+    .eq('name', label)
+    .maybeSingle();
+  if (byName) {
+    await supabase.from('lead_groups').update({ campaign_slug: slug }).eq('id', byName.id);
+    return byName.id;
+  }
+
+  const { data: created } = await supabase
+    .from('lead_groups')
+    .insert({ name: label, campaign_slug: slug })
+    .select('id')
+    .single();
+  return created?.id ?? null;
+}

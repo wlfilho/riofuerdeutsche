@@ -20,6 +20,7 @@ import {
 import { isTourSlug } from '@/lib/tours';
 import { isThema } from '@/lib/themen';
 import { isInteresse, UNENTSCHLOSSEN } from '@/lib/interessen';
+import { ensureCampaignGroup } from '@/lib/leadGroups';
 
 /**
  * Canais de CHEGADA aceitos no `?von=` da /anfrage — de onde a pessoa veio
@@ -250,6 +251,19 @@ export async function POST(request: NextRequest) {
     campaign_data: campaignData,
   };
 
+  // Antes de gravar o lead, e não depois: o trigger `price_leads_sync_lead_group`
+  // etiqueta na hora do insert e, se a etiqueta ainda não existir, inventa um
+  // nome a partir do slug. Criando aqui primeiro, ele encontra a etiqueta com o
+  // rótulo de verdade do catálogo de campanhas.
+  let campaignGroupId: string | null = null;
+  if (campaign) {
+    try {
+      campaignGroupId = await ensureCampaignGroup(supabase, campaign.slug, campaign.label);
+    } catch (err) {
+      console.error('[anfrage] falha ao criar a etiqueta da campanha:', err);
+    }
+  }
+
   // Numa campanha o mesmo interessado costuma reenviar o formulário (mudou o
   // número de pessoas, achou que não tinha ido). Um lead por pessoa mantém a
   // lista de divulgação limpa; fora de campanha, cada Anfrage é uma nova.
@@ -289,27 +303,16 @@ export async function POST(request: NextRequest) {
 
   // Toda campanha também é uma etiqueta (`lead_groups`): o admin vê e filtra o
   // lead da AIDA do mesmo jeito que qualquer grupo manual no CRM, em vez de um
-  // segundo sistema de rótulos paralelo. Best-effort — não deve derrubar o
-  // envio do formulário.
-  if (campaign) {
-    try {
-      const { data: existingGroup } = await supabase
-        .from('lead_groups')
-        .select('id')
-        .eq('name', campaign.label)
-        .maybeSingle();
-      const groupId = existingGroup?.id ?? (
-        await supabase.from('lead_groups').insert({ name: campaign.label }).select('id').single()
-      ).data?.id;
-      if (groupId) {
-        // 23505 = reenvio do formulário, o lead já tinha essa etiqueta — não é erro.
-        const { error: memberError } = await supabase
-          .from('lead_group_members')
-          .insert({ lead_id: leadId, group_id: groupId });
-        if (memberError && memberError.code !== '23505') throw memberError;
-      }
-    } catch (err) {
-      console.error('[anfrage] falha ao etiquetar lead com a campanha:', err);
+  // segundo sistema de rótulos paralelo. O trigger no banco já faz isto; aqui é
+  // redundância idempotente pelo caminho da UI, como no resto das sincronias.
+  // Best-effort: não deve derrubar o envio do formulário.
+  if (campaignGroupId) {
+    // 23505 = reenvio do formulário, o lead já tinha essa etiqueta — não é erro.
+    const { error: memberError } = await supabase
+      .from('lead_group_members')
+      .insert({ lead_id: leadId, group_id: campaignGroupId });
+    if (memberError && memberError.code !== '23505') {
+      console.error('[anfrage] falha ao etiquetar lead com a campanha:', memberError);
     }
   }
 
