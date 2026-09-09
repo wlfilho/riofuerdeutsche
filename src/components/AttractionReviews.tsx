@@ -46,13 +46,18 @@ export default async function AttractionReviews({ attraction, title }: Attractio
                 {/* Mesma coluna de 800px dos textos, do Insider-Tipp e do FAQ
                     destas páginas — a seção acompanha a largura do conteúdo. */}
                 <div className="max-w-[800px] mx-auto">
+                    {/* O título da seção é o <h2>, não o kicker: "Erfahrungen" é
+                        rótulo genérico e a frase de baixo é a que nomeia o ponto
+                        turístico. Trocar as tags não muda nada na tela (as classes
+                        seguem cada uma com o seu texto), só põe a frase certa no
+                        sumário de headings que o Google e o leitor de tela leem. */}
                     <FadeIn direction="up" className="mb-10">
-                        <h2 className="text-xs font-bold tracking-widest uppercase text-rio-green mb-3">
+                        <p className="text-xs font-bold tracking-widest uppercase text-rio-green mb-3">
                             Erfahrungen
-                        </h2>
-                        <p className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
-                            {title}
                         </p>
+                        <h2 className="text-3xl lg:text-4xl font-heading font-bold text-gray-900 leading-tight">
+                            {title}
+                        </h2>
                     </FadeIn>
 
                     <div className={gridClass}>
