@@ -183,7 +183,12 @@ export default async function PropostasPage({
 }: {
   searchParams: Promise<{ group?: string }>;
 }) {
-  const { group } = await searchParams;
+  const { group: groupParam } = await searchParams;
+  // Esta tela abre filtrada em "Sem etiqueta". Campanha etiquetada (AIDA
+  // Karneval 2028) é trabalho de outro ano: o lead entra hoje e ficaria meses
+  // ocupando o topo da fila de quem espera proposta agora. Sem parâmetro na
+  // URL vale o padrão; ?group=all traz tudo de volta.
+  const group = groupParam ?? 'none';
   const t = await getAdminTranslations('admin.propostas');
   const supabase = await createClient();
   const [allProposals, analytics, emailStatuses, { data: pendingLeads }, { data: proposalLeads }, groupsByLead] =
@@ -233,7 +238,7 @@ export default async function PropostasPage({
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
           <div className="flex flex-wrap items-center gap-2">
-            <GroupFilter value={group} />
+            <GroupFilter value={group} defaultValue="none" />
             <AnfrageLinkButton />
             <Link
               href="/admin/propostas/nova"

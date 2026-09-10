@@ -44,9 +44,13 @@ export async function fetchLeadGroupsMap(
  * Regra única do filtro por etiqueta, usada por CRM, leads e propostas — o
  * mesmo papel que `matchesCampaign` tinha antes de a campanha virar etiqueta.
  * Sem filtro devolve tudo; 'none' seleciona quem não está em etiqueta alguma.
+ *
+ * 'all' é o mesmo que sem filtro, mas dito na URL: a página de propostas abre
+ * em 'none' por padrão, então lá "todos os grupos" precisa de um valor
+ * explícito — ausência de parâmetro ali significa o padrão, não "tudo".
  */
 export function matchesGroup(leadGroups: LeadGroup[], filter: string | undefined): boolean {
-  if (!filter) return true;
+  if (!filter || filter === 'all') return true;
   if (filter === 'none') return leadGroups.length === 0;
   return leadGroups.some(g => g.id === filter);
 }
