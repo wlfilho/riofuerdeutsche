@@ -591,6 +591,8 @@
       "abaEnviadas": "Enviadas",
       "abaAceitas": "Aceitas",
       "abaRecusadas": "Recusadas",
+      "abaPassadas": "Passadas",
+      "filtrarPassadasPor": "Status:",
       "buscarCliente": "Buscar cliente…",
       "ordenarPropostas": "Ordenar propostas",
       "ordMaisRecente": "Mais recente",

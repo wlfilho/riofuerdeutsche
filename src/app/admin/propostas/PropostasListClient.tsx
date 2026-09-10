@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -18,6 +18,24 @@ import type { ProposalEmailStatus } from '@/lib/email/sendProposalEmail';
 // chegada/partida são só derivações (primeiro/último dia) e não interessam.
 function getTourDays(p: Proposal): string[] {
   return [...new Set(p.items.map(i => i.day))].sort();
+}
+
+// Hoje em ISO local (YYYY-MM-DD) — comparar com os dias de tour, que também
+// são datas locais sem fuso. `toISOString()` aqui erraria o dia no Brasil.
+function todayISO(): string {
+  const d = new Date();
+  const m = `${d.getMonth() + 1}`.padStart(2, '0');
+  const day = `${d.getDate()}`.padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+// Proposta "passada": o último dia de tour já ficou atrás. Tour que acontece
+// hoje ainda não passou. Proposta sem nenhum dia marcado nunca é passada —
+// não há data para vencer, então ela continua na aba do status dela.
+function isPast(p: Proposal, today: string): boolean {
+  const days = getTourDays(p);
+  if (days.length === 0) return false;
+  return days[days.length - 1] < today;
 }
 
 // Chip curto da tabela do admin (dd/MM); não vai pro texto do cliente.
@@ -220,15 +238,66 @@ function RowActionsMenu({
   );
 }
 
-type StatusTab = 'all' | ProposalStatus;
-const STATUS_TABS: StatusTab[] = ['all', 'draft', 'sent', 'accepted', 'rejected'];
+// 'past' não é status de banco: é um corte por data que atravessa os quatro
+// status. Proposta cujo tour já aconteceu sai da aba do status dela e passa a
+// viver só aqui — uma proposta aceita de ontem não é mais trabalho pendente.
+type StatusTab = 'all' | ProposalStatus | 'past';
+const STATUS_TABS: StatusTab[] = ['all', 'draft', 'sent', 'accepted', 'rejected', 'past'];
 const TAB_LABEL_KEY: Record<StatusTab, string> = {
   all: 'abaTodas',
   draft: 'abaRascunhos',
   sent: 'abaEnviadas',
   accepted: 'abaAceitas',
   rejected: 'abaRecusadas',
+  past: 'abaPassadas',
 };
+// Sub-filtro da aba "Passadas". Mostra só os status que existem no histórico,
+// com a contagem de cada um — um chip zerado não ajudaria a decidir nada.
+// Ordem: aceitas e recusadas primeiro, que é o que se procura num arquivo.
+const PAST_STATUS_ORDER: ProposalStatus[] = ['accepted', 'rejected', 'sent', 'draft'];
+
+function PastStatusChips({
+  counts,
+  value,
+  onChange,
+}: {
+  counts: Record<'all' | ProposalStatus, number>;
+  value: 'all' | ProposalStatus;
+  onChange: (v: 'all' | ProposalStatus) => void;
+}) {
+  const t = useTranslations('admin.propostas');
+  const options: ('all' | ProposalStatus)[] = [
+    'all',
+    ...PAST_STATUS_ORDER.filter(st => counts[st] > 0),
+  ];
+  // Um só status no histórico: o chip "Todas" seria o mesmo recorte duas vezes.
+  if (options.length <= 2) return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 mb-4">
+      <span className="text-xs font-medium text-gray-400 mr-0.5">{t('filtrarPassadasPor')}</span>
+      {options.map(opt => (
+        <button
+          key={opt}
+          type="button"
+          onClick={() => onChange(opt)}
+          aria-pressed={value === opt}
+          className={`px-2.5 py-1 text-xs font-semibold rounded-full border transition-colors ${
+            value === opt
+              ? 'bg-green-600 border-green-600 text-white'
+              : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          {t(TAB_LABEL_KEY[opt])}{' '}
+          <span className={`font-normal tabular-nums ${value === opt ? 'text-green-100' : 'text-gray-400'}`}>
+            {counts[opt]}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 type SortKey = 'recent' | 'oldest' | 'value' | 'tourDate';
 
 // Quantas propostas mostrar de cada vez por aba, antes do "carregar mais" —
@@ -266,11 +335,19 @@ export default function PropostasListClient({
   const [onlyNoEmail, setOnlyNoEmail] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+  // Sub-filtro da aba "Passadas": ela junta os quatro status, e o que se
+  // procura num histórico é quase sempre um deles (tour realizado x perdido).
+  const [pastStatus, setPastStatus] = useState<'all' | ProposalStatus>('all');
+
+  // Fixo no mount: a lista não fica aberta virando o dia, e recalcular a cada
+  // render invalidaria os useMemo sem motivo.
+  const [today] = useState(todayISO);
+
   // Trocar de aba, buscar ou filtrar recomeça a paginação — senão o admin
   // troca pra "Aceitas" e vê uma lista vazia porque o corte ficou lá atrás.
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [tab, search, sortBy, onlyNoEmail]);
+  }, [tab, search, sortBy, onlyNoEmail, pastStatus]);
 
   const clearToast = useCallback(() => setToast(null), []);
 
@@ -327,13 +404,38 @@ export default function PropostasListClient({
   // Contagem por status pro rótulo de cada aba — sempre sobre a lista já
   // filtrada por grupo no servidor, nunca sobre o resultado da busca/filtro.
   const counts = useMemo(() => {
-    const c: Record<StatusTab, number> = { all: proposals.length, draft: 0, sent: 0, accepted: 0, rejected: 0 };
-    for (const p of proposals) c[p.status] += 1;
+    const c: Record<StatusTab, number> = { all: proposals.length, draft: 0, sent: 0, accepted: 0, rejected: 0, past: 0 };
+    for (const p of proposals) {
+      if (isPast(p, today)) c.past += 1;
+      else c[p.status] += 1;
+    }
     return c;
-  }, [proposals]);
+  }, [proposals, today]);
+
+  // Quebra das passadas por status, pros chips do sub-filtro. Só aparece chip
+  // de status que existe aqui — chip zerado é ruído.
+  const pastCounts = useMemo(() => {
+    const c: Record<'all' | ProposalStatus, number> = { all: 0, draft: 0, sent: 0, accepted: 0, rejected: 0 };
+    for (const p of proposals) {
+      if (!isPast(p, today)) continue;
+      c.all += 1;
+      c[p.status] += 1;
+    }
+    return c;
+  }, [proposals, today]);
+
+  // Se o status escolhido deixou de existir entre as passadas (proposta
+  // excluída, por exemplo), o chip dele desaparece e o filtro cairia num vazio
+  // sem controle visível pra desfazer — nesse caso volta pra "Todas".
+  const effectivePastStatus = pastStatus === 'all' || pastCounts[pastStatus] > 0 ? pastStatus : 'all';
 
   const visibleProposals = useMemo(() => {
-    let list = tab === 'all' ? proposals : proposals.filter(p => p.status === tab);
+    let list =
+      tab === 'all'
+        ? proposals
+        : tab === 'past'
+          ? proposals.filter(p => isPast(p, today) && (effectivePastStatus === 'all' || p.status === effectivePastStatus))
+          : proposals.filter(p => p.status === tab && !isPast(p, today));
 
     const q = search.trim().toLowerCase();
     if (q) list = list.filter(p => p.client_name.toLowerCase().includes(q));
@@ -358,7 +460,7 @@ export default function PropostasListClient({
       }
     }
     return sorted;
-  }, [proposals, tab, search, onlyNoEmail, sortBy, emailStatuses]);
+  }, [proposals, tab, search, onlyNoEmail, sortBy, emailStatuses, today, effectivePastStatus]);
 
   const shownProposals = useMemo(
     () => visibleProposals.slice(0, visibleCount),
@@ -384,20 +486,28 @@ export default function PropostasListClient({
     <>
       <div className="flex flex-wrap items-center gap-1 border-b border-gray-200 mb-4">
         {STATUS_TABS.map(key => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setTab(key)}
-            className={`px-3 py-2 text-sm font-semibold border-b-2 -mb-px transition-colors ${
-              tab === key
-                ? 'border-green-600 text-green-700'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {t(TAB_LABEL_KEY[key])} <span className="text-xs font-normal text-gray-400 tabular-nums">{counts[key]}</span>
-          </button>
+          <Fragment key={key}>
+            {/* "Passadas" não é status: o risco separa o arquivo do tour que já
+                aconteceu das abas de trabalho em aberto. */}
+            {key === 'past' && <span aria-hidden className="self-stretch w-px my-1.5 mx-1 bg-gray-200" />}
+            <button
+              type="button"
+              onClick={() => setTab(key)}
+              className={`px-3 py-2 text-sm font-semibold border-b-2 -mb-px transition-colors ${
+                tab === key
+                  ? 'border-green-600 text-green-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {t(TAB_LABEL_KEY[key])} <span className="text-xs font-normal text-gray-400 tabular-nums">{counts[key]}</span>
+            </button>
+          </Fragment>
         ))}
       </div>
+
+      {tab === 'past' && (
+        <PastStatusChips counts={pastCounts} value={effectivePastStatus} onChange={setPastStatus} />
+      )}
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <input
@@ -489,17 +599,22 @@ export default function PropostasListClient({
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={p.status} />
-                      {/* Proposta "enviada" que nunca saiu por e-mail é a que se
-                          perde quando o WhatsApp some — fica marcada aqui. */}
-                      {p.status === 'sent' && !emailStatuses[p.id]?.last_sent_at && (
-                        <span
-                          title={t('emailNuncaEnviado')}
-                          className="block mt-1 text-[11px] font-semibold text-amber-600"
-                        >
-                          {t('semEmailBadge')}
-                        </span>
+                      {/* Cobranças de ação ("está parada", "nunca saiu por
+                          e-mail") só valem enquanto dá pra agir: num tour que
+                          já aconteceu elas viram alarme falso. */}
+                      {!isPast(p, today) && (
+                        <>
+                          {p.status === 'sent' && !emailStatuses[p.id]?.last_sent_at && (
+                            <span
+                              title={t('emailNuncaEnviado')}
+                              className="block mt-1 text-[11px] font-semibold text-amber-600"
+                            >
+                              {t('semEmailBadge')}
+                            </span>
+                          )}
+                          <AgingLabel updatedAt={p.updated_at} />
+                        </>
                       )}
-                      <AgingLabel updatedAt={p.updated_at} />
                     </td>
                     <td className="px-4 py-3">
                       <ViewsBadge proposalId={p.id} summary={analytics[p.id]} />
@@ -560,6 +675,7 @@ export default function PropostasListClient({
             {shownProposals.map(p => {
               const days = getTourDays(p);
               const shownDays = days.slice(0, 2);
+              const rowPast = isPast(p, today);
               return (
                 <div key={p.id} className="p-4">
                   <div className="flex items-start justify-between gap-3">
@@ -590,12 +706,15 @@ export default function PropostasListClient({
                     )}
                   </div>
 
-                  <div className="mt-1 flex items-center gap-2">
-                    {p.status === 'sent' && !emailStatuses[p.id]?.last_sent_at && (
-                      <span className="text-[11px] font-semibold text-amber-600">{t('semEmailBadge')}</span>
-                    )}
-                    <AgingLabel updatedAt={p.updated_at} />
-                  </div>
+                  {/* Mesma regra do desktop: tour passado não cobra ação. */}
+                  {!rowPast && (
+                    <div className="mt-1 flex items-center gap-2">
+                      {p.status === 'sent' && !emailStatuses[p.id]?.last_sent_at && (
+                        <span className="text-[11px] font-semibold text-amber-600">{t('semEmailBadge')}</span>
+                      )}
+                      <AgingLabel updatedAt={p.updated_at} />
+                    </div>
+                  )}
 
                   <div className="mt-3 flex items-center justify-between">
                     <ViewsBadge proposalId={p.id} summary={analytics[p.id]} />
