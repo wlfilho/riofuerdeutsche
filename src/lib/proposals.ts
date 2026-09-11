@@ -137,7 +137,10 @@ export interface ProposalItem {
   uses_driver?: boolean;
   uses_rental_car?: boolean;
   // Só em itens 'day_transport': janela do dia ("HH:MM") que o editor usa como
-  // âncora da grade de horários. É planejamento interno, não sai pro cliente.
+  // âncora da grade de horários. É planejamento interno, não sai pro cliente,
+  // mas desde 09/2026 day_start_time também semeia tour_dates.start_time do
+  // dia que nasce da sincronia e alimenta o aviso de divergência no card do
+  // calendário (proposalDayStartTimes, em @/lib/tourDates).
   // Ausência (propostas antigas) cai no default do editor.
   day_start_time?: string | null;
   day_end_time?: string | null;

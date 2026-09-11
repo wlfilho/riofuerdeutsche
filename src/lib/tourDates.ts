@@ -349,7 +349,7 @@ async function createMissingTourDates(
     .single();
   if (leadError) return leadError.message;
 
-  const itemDays = await proposalItemDays(supabase, lead?.proposal_id);
+  const { days: itemDays, startTimes } = await proposalDayPlan(supabase, lead?.proposal_id);
 
   // Dia pedido na Anfrage só vale sem roteiro montado, e mesmo assim apenas
   // depois que existe proposta enviada ou fechada. Antes disso é intenção do
@@ -395,10 +395,14 @@ async function createMissingTourDates(
   const missingDays = wantedDays.filter(date => !existingDates.has(date));
   if (missingDays.length === 0) return null;
 
+  // Dia que NASCE aqui já chega com o horário montado na proposta. Dia que já
+  // existe nunca é reescrito: horário digitado à mão é combinação fechada com
+  // o cliente, e o aviso de divergência no card do calendário é quem oferece a
+  // troca, com um clique do admin.
   const rows: TourDateInput[] = missingDays.map(date => ({
     lead_id: leadId,
     date,
-    start_time: null,
+    start_time: startTimes[date] ?? null,
     tour_name: null,
     status: tourStatus,
     pax: lead?.pax ?? null,
@@ -415,19 +419,55 @@ async function createMissingTourDates(
   return insertError?.message ?? null;
 }
 
-// Dias com atividade no roteiro da proposta (items[].day, sem duplicatas).
-// Vazio quando não há proposta vinculada ou o roteiro não é itemizado por dia
-// (era do PDF, tour avulso) — aí requested_days segue sendo a única fonte.
+/**
+ * "09:30", "09:30:00" → "09:30". Comparar horário de tabela (time, que volta
+ * com segundos) com horário da proposta (string "HH:MM") só funciona no mesmo
+ * formato; sem isto todo dia pareceria divergente.
+ */
+export function toHHMM(time: string | null | undefined): string | null {
+  if (!time) return null;
+  const match = /^(\d{2}):(\d{2})/.exec(time.trim());
+  return match ? `${match[1]}:${match[2]}` : null;
+}
+
+/**
+ * Horário de início que a proposta define para cada dia do roteiro.
+ *
+ * O editor grava isso na linha sintética `day_transport` de cada dia
+ * (day_start_time), e até 09/2026 o campo não saía de lá: o calendário e a
+ * tela do motorista liam só tour_dates.start_time, então o horário montado na
+ * proposta simplesmente nunca chegava a quem dirige. Heinz Konjer, 12/09: a
+ * proposta dizia 10:00 e o motorista via 08:00, resto de um horário digitado
+ * à mão em agosto, antes da proposta existir.
+ *
+ * Função pura de propósito: o card do calendário já recebe `items` no embed e
+ * precisa do mesmo cálculo no cliente, sem outra ida ao banco.
+ */
+export function proposalDayStartTimes(
+  items: ProposalItem[] | null | undefined,
+): Record<string, string> {
+  const byDay: Record<string, string> = {};
+  for (const item of items ?? []) {
+    const start = toHHMM(item?.day_start_time);
+    if (item?.day && start) byDay[item.day] = start;
+  }
+  return byDay;
+}
+
+// Roteiro da proposta visto pelo calendário: quais dias existem e a que horas
+// cada um começa. Dias vazios quando não há proposta vinculada ou o roteiro
+// não é itemizado por dia (era do PDF, tour avulso) — aí requested_days segue
+// sendo a única fonte.
 //
 // requested_days nunca é reescrito depois da Anfrage — é o registro do que o
 // cliente OFERECEU, não do que foi vendido. O Blank Jürgen (out/2026) pediu só
 // 25/10, a proposta fechou Maracanã no 25 e Rocinha no 26; o Matthias ofereceu
 // 24–26 e a proposta marcou só o 24. Quem manda na agenda é a proposta.
-async function proposalItemDays(
+async function proposalDayPlan(
   supabase: SupabaseClient,
   proposalId: string | null | undefined,
-): Promise<string[]> {
-  if (!proposalId) return [];
+): Promise<{ days: string[]; startTimes: Record<string, string> }> {
+  if (!proposalId) return { days: [], startTimes: {} };
 
   const { data: proposal, error } = await supabase
     .from('proposals')
@@ -438,15 +478,16 @@ async function proposalItemDays(
   if (error) {
     // Best-effort: proposta ilegível não pode impedir que os dias pedidos
     // entrem no calendário.
-    console.error('[proposalItemDays]', error.message);
-    return [];
+    console.error('[proposalDayPlan]', error.message);
+    return { days: [], startTimes: {} };
   }
 
+  const items = (proposal?.items ?? []) as ProposalItem[];
   const days = new Set<string>();
-  for (const item of (proposal?.items ?? []) as { day?: string | null }[]) {
+  for (const item of items) {
     if (item?.day) days.add(item.day);
   }
-  return [...days].sort();
+  return { days: [...days].sort(), startTimes: proposalDayStartTimes(items) };
 }
 
 /**
@@ -471,7 +512,7 @@ export async function knownLeadDays(
   if (error || !lead) return [];
 
   const days = new Set<string>(lead.requested_days ?? []);
-  for (const day of await proposalItemDays(supabase, lead.proposal_id)) days.add(day);
+  for (const day of (await proposalDayPlan(supabase, lead.proposal_id)).days) days.add(day);
   return [...days].sort();
 }
 

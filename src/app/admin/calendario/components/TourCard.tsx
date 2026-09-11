@@ -22,7 +22,14 @@ import {
   Users,
   Wallet,
 } from 'lucide-react';
-import { PARTNER_BADGE, TOUR_DATE_STATUS_BADGE, type DayConflict, type TourDate } from '@/lib/tourDates';
+import {
+  PARTNER_BADGE,
+  TOUR_DATE_STATUS_BADGE,
+  proposalDayStartTimes,
+  toHHMM,
+  type DayConflict,
+  type TourDate,
+} from '@/lib/tourDates';
 import { WEEKDAY_SHORT_PT, formatTime, isPastDay, parseISODate } from '@/lib/calendarDates';
 import { fmtEur } from '@/lib/adminFormat';
 
@@ -217,17 +224,76 @@ function DayItinerary({ tour }: { tour: TourDate }) {
   );
 }
 
+/**
+ * Aviso de horário divergente + botão de aplicar.
+ *
+ * O horário que você monta na proposta (day_start_time, na linha de transporte
+ * de cada dia) NÃO desce sozinho para um dia que já existe no calendário: um
+ * horário digitado aqui é combinação fechada com o cliente, e sobrescrever por
+ * conta própria apagaria isso na primeira vez que a proposta fosse editada. O
+ * dia que nasce da sincronia já vem com o horário certo (ver
+ * createMissingTourDates); este aviso cobre o dia mais velho que a proposta, e
+ * só troca com um clique seu.
+ *
+ * Heinz Konjer, 12/09/2026: proposta às 10:00, calendário com 08:00 de agosto,
+ * e o motorista chegando duas horas antes sem ninguém perceber.
+ */
+function ProposalTimeMismatch({
+  tour,
+  onApplyProposalTime,
+}: {
+  tour: TourDate;
+  onApplyProposalTime: (tour: TourDate, time: string) => Promise<boolean>;
+}) {
+  const t = useTranslations('admin.calendario');
+  const [saving, setSaving] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const proposalStart = proposalDayStartTimes(tour.lead?.proposal?.items)[tour.date];
+  const current = toHHMM(tour.start_time);
+  if (!proposalStart || proposalStart === current) return null;
+
+  const handleApply = async () => {
+    setSaving(true);
+    setFailed(false);
+    const ok = await onApplyProposalTime(tour, proposalStart);
+    setSaving(false);
+    if (!ok) setFailed(true);
+  };
+
+  return (
+    <div className="mt-3 pt-2 border-t border-gray-100 flex flex-wrap items-center gap-x-2 gap-y-1">
+      <span className="inline-flex items-center gap-1.5 text-xs text-amber-800">
+        <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+        {current
+          ? t('horarioDivergente', { proposta: proposalStart, calendario: current })
+          : t('horarioSoNaProposta', { proposta: proposalStart })}
+      </span>
+      <button
+        onClick={handleApply}
+        disabled={saving}
+        className="text-xs font-semibold text-amber-800 underline underline-offset-2 hover:text-amber-900 disabled:opacity-50"
+      >
+        {saving ? t('horarioAplicando') : t('horarioAplicar', { proposta: proposalStart })}
+      </button>
+      {failed && <span className="text-xs text-red-700">{t('horarioFalhaAplicar')}</span>}
+    </div>
+  );
+}
+
 /** Full-width row card used in the tour list. */
 export default function TourCard({
   tour,
   conflict,
   onEdit,
   onDelete,
+  onApplyProposalTime,
 }: {
   tour: TourDate;
   conflict?: DayConflict;
   onEdit: (tour: TourDate) => void;
   onDelete: (tour: TourDate) => void;
+  onApplyProposalTime: (tour: TourDate, time: string) => Promise<boolean>;
 }) {
   const t = useTranslations('admin.calendario');
   const tc = useTranslations('admin.common');
@@ -355,6 +421,8 @@ export default function TourCard({
         </div>
 
       </div>
+
+      <ProposalTimeMismatch tour={tour} onApplyProposalTime={onApplyProposalTime} />
 
       <DayItinerary tour={tour} />
     </div>

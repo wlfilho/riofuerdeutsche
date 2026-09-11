@@ -11,6 +11,7 @@ export default function TourList({
   groupByMonth = false,
   onEdit,
   onDelete,
+  onApplyProposalTime,
 }: {
   tours: TourDate[];
   // Situação por TOUR, não por dia: no mesmo dia, o cliente fechado e a
@@ -19,6 +20,7 @@ export default function TourList({
   groupByMonth?: boolean;
   onEdit: (tour: TourDate) => void;
   onDelete: (tour: TourDate) => void;
+  onApplyProposalTime: (tour: TourDate, time: string) => Promise<boolean>;
 }) {
   const t = useTranslations('admin.calendario');
 
@@ -32,6 +34,7 @@ export default function TourList({
             conflict={conflictByTour?.get(tour.id)}
             onEdit={onEdit}
             onDelete={onDelete}
+            onApplyProposalTime={onApplyProposalTime}
           />
         ))}
       </div>
@@ -67,6 +70,7 @@ export default function TourList({
                 conflict={conflictByTour?.get(tour.id)}
                 onEdit={onEdit}
                 onDelete={onDelete}
+                onApplyProposalTime={onApplyProposalTime}
               />
             ))}
           </div>

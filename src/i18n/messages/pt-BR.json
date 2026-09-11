@@ -1105,7 +1105,12 @@
       "motoristaAjuda": "O motorista escalado vê data, horário, ponto de encontro e roteiro deste dia na área dele (/motorista).",
       "motoristaNome": "Motorista: {nome}",
       "soComParceiro": "Só com parceiro",
-      "diaDisputado": "Dia disputado"
+      "diaDisputado": "Dia disputado",
+      "horarioDivergente": "A proposta começa às {proposta}; o calendário está com {calendario}.",
+      "horarioSoNaProposta": "A proposta começa às {proposta}; este dia está sem horário.",
+      "horarioAplicar": "Usar {proposta}",
+      "horarioAplicando": "Aplicando…",
+      "horarioFalhaAplicar": "Não foi possível aplicar o horário."
     },
     "avaliacoes": {
       "metaTitle": "Avaliações — Admin",

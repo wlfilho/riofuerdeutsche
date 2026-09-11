@@ -176,6 +176,20 @@ export default function CalendarClient({
     }
   };
 
+  // Aplica no dia o horário que a proposta define (ver ProposalTimeMismatch no
+  // TourCard). Só acontece com clique: a sincronia automática nunca reescreve
+  // horário de dia que já existe.
+  const handleApplyProposalTime = async (tour: TourDate, time: string): Promise<boolean> => {
+    const res = await fetch(`/api/admin/tour-dates/${tour.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ start_time: time }),
+    });
+    if (!res.ok) return false;
+    setTours(prev => prev.map(t => (t.id === tour.id ? { ...t, start_time: time } : t)));
+    return true;
+  };
+
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start">
       {/* Sidebar: mini calendar + controls */}
@@ -284,6 +298,7 @@ export default function CalendarClient({
             groupByMonth={view === 'ano' && !selectedDay}
             onEdit={tour => setModal({ editing: tour })}
             onDelete={handleDelete}
+            onApplyProposalTime={handleApplyProposalTime}
           />
         )}
 
@@ -309,6 +324,7 @@ export default function CalendarClient({
                   groupByMonth={view === 'ano'}
                   onEdit={tour => setModal({ editing: tour })}
                   onDelete={handleDelete}
+                  onApplyProposalTime={handleApplyProposalTime}
                 />
               </div>
             )}
