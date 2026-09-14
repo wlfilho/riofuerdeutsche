@@ -1,19 +1,28 @@
 // src/app/api/mcp/[secret]/route.ts
 //
-// Servidor MCP remoto (Model Context Protocol) para o Claude ler e enviar
-// mensagens no WhatsApp através da instância uazapi (`rfd`). Registrado como
-// Custom Connector no Claude, apontando pra
-// https://riofuerdeutsche.de/api/mcp/<MCP_PATH_SECRET>.
+// Servidor MCP remoto (Model Context Protocol) do site. Registrado como Custom
+// Connector no Claude, apontando pra
+// https://riofuerdeutsche.de/api/mcp/<MCP_PATH_SECRET>. Duas famílias de
+// ferramenta hoje:
+//
+//   - WhatsApp, via a API REST da instância uazapi (`rfd`);
+//   - GA4, via a Data API do Google Analytics 4 (conta de serviço ga4-reader).
+//
+// Ferramenta nova aqui aparece sozinha pro Claude já conectado, sem precisar
+// reconectar o connector.
 //
 // A única proteção do endpoint é o segmento `secret` da URL batendo com
 // MCP_PATH_SECRET — não há OAuth. Segredo errado (ou não configurado) responde
-// 404, pra não revelar que a rota existe.
+// 404, pra não revelar que a rota existe. Por isso as ferramentas que escrevem
+// têm trava própria (ver assertKnownContact); as de GA4 são só leitura.
 //
-// Cada ferramenta chama a API REST da instância uazapi diretamente; não há
-// estado em memória entre chamadas (serverless, uma invocação por request).
+// Cada ferramenta chama a API externa diretamente; fora o cliente de auth do
+// Google (cacheado pelo token), não há estado em memória entre chamadas
+// (serverless, uma invocação por request).
 
 import { timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { GoogleAuth } from "google-auth-library";
 import { createMcpHandler } from "mcp-handler";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -87,6 +96,80 @@ async function uazapi(path: string, body: Record<string, unknown>): Promise<unkn
         ? String((data as Record<string, unknown>).message)
         : raw || res.statusText;
     throw new Error(`uazapi respondeu ${res.status}: ${message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Autenticação da GA4 Data API. A chave da conta de serviço vem inteira em
+ * base64 na env (o JSON tem quebras de linha na private_key, que não
+ * sobrevivem bem a uma env var crua). O GoogleAuth fica em cache no módulo
+ * porque ele guarda o access token internamente: numa invocação serverless
+ * quente, chamadas seguidas reaproveitam o mesmo token em vez de bater no
+ * endpoint de OAuth a cada vez.
+ */
+let cachedAuth: GoogleAuth | null = null;
+function ga4Auth(): GoogleAuth {
+  if (cachedAuth) return cachedAuth;
+
+  const keyBase64 = process.env.GA4_SERVICE_ACCOUNT_KEY_BASE64;
+  if (!keyBase64) {
+    throw new Error("GA4 não configurado: defina GA4_SERVICE_ACCOUNT_KEY_BASE64.");
+  }
+
+  let credentials: Record<string, unknown>;
+  try {
+    credentials = JSON.parse(Buffer.from(keyBase64, "base64").toString("utf-8"));
+  } catch {
+    throw new Error(
+      "GA4_SERVICE_ACCOUNT_KEY_BASE64 não é um JSON válido em base64. Regere com: base64 -i <arquivo>.json"
+    );
+  }
+
+  cachedAuth = new GoogleAuth({
+    credentials,
+    scopes: ["https://www.googleapis.com/auth/analytics.readonly"],
+  });
+  return cachedAuth;
+}
+
+/** Chama a Data API do GA4 (runReport). Lança erro claro em caso de falha. */
+async function ga4RunReport(body: Record<string, unknown>): Promise<unknown> {
+  const propertyId = process.env.GA4_PROPERTY_ID;
+  if (!propertyId) {
+    throw new Error("GA4 não configurado: defina GA4_PROPERTY_ID.");
+  }
+
+  const client = await ga4Auth().getClient();
+  const { token } = await client.getAccessToken();
+  if (!token) {
+    throw new Error("Falha ao obter access token do Google: verifique a chave da conta de serviço.");
+  }
+
+  const res = await fetch(
+    `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    }
+  );
+
+  const raw = await res.text();
+  let data: unknown = raw;
+  try {
+    data = raw ? JSON.parse(raw) : null;
+  } catch {
+    // resposta não-JSON — mantém o texto cru
+  }
+
+  if (!res.ok) {
+    const message =
+      data && typeof data === "object" && "error" in (data as Record<string, unknown>)
+        ? JSON.stringify((data as Record<string, unknown>).error)
+        : raw || res.statusText;
+    throw new Error(`GA4 respondeu ${res.status}: ${message}`);
   }
 
   return data;
@@ -206,6 +289,33 @@ const mcpHandler = createMcpHandler(
         }),
       },
       safe(async ({ number }) => uazapi("/chat/read", { number, read: true }))
+    );
+
+    server.registerTool(
+      "ga4_run_report",
+      {
+        title: "Consultar relatório do GA4",
+        description:
+          "Roda um relatório na Data API do Google Analytics 4 do riofuerdeutsche.de. Use nomes oficiais de dimensões/métricas (ex: dimension 'pagePath', 'eventName', 'date', 'sessionSource'; metric 'sessions', 'totalUsers', 'eventCount', 'screenPageViews'). Datas em YYYY-MM-DD ou relativas ('7daysAgo', 'today'). Sem filtro embutido — se precisar excluir tráfego de /admin ou outro padrão, filtre nas linhas retornadas. Atenção: o GA4 só registra quem aceitou o banner de cookies, então os números são piso, não total.",
+        inputSchema: z.object({
+          dimensions: z
+            .array(z.string())
+            .default([])
+            .describe("Ex: ['date', 'pagePath']. Vazio para métrica agregada sem quebra."),
+          metrics: z.array(z.string()).min(1).describe("Ex: ['sessions', 'totalUsers']."),
+          start_date: z.string().default("7daysAgo").describe("Data inicial, YYYY-MM-DD ou relativa."),
+          end_date: z.string().default("today").describe("Data final, YYYY-MM-DD ou relativa."),
+          limit: z.number().int().positive().max(1000).default(50).describe("Máximo de linhas a retornar."),
+        }),
+      },
+      safe(async ({ dimensions, metrics, start_date, end_date, limit }) =>
+        ga4RunReport({
+          dateRanges: [{ startDate: start_date, endDate: end_date }],
+          dimensions: dimensions.map((name) => ({ name })),
+          metrics: metrics.map((name) => ({ name })),
+          limit,
+        })
+      )
     );
   },
   { serverInfo: { name: "rio-fuer-deutsche-whatsapp", version: "1.0.0" } }
