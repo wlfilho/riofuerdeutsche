@@ -131,6 +131,29 @@ export function itemLegs(legs: DayLegs, idx: number, count: number): { to: Leg; 
   };
 }
 
+/**
+ * As horas de deslocamento que cabem a UM item do dia.
+ *
+ * Os trechos das pontas são só dele; os do meio são divididos com o vizinho
+ * que compartilha o mesmo trecho. Sem essa divisão, somar item a item conta
+ * todo trecho intermediário duas vezes — foi exatamente o que aconteceu com
+ * `transport_hours` até 09/2026, inflando a hora do motorista em roteiros de
+ * três paradas ou mais sem nada na tela denunciando.
+ *
+ * Somado sobre todos os itens do dia, isto dá `first + Σ between + last`, que
+ * é o total de deslocamento do dia — a identidade que mantém honorário do
+ * guia, custo do motorista e horas da tela falando do mesmo número.
+ */
+export function sharedLegHours(legs: DayLegs, idx: number, count: number): number {
+  const { to, back } = itemLegs(legs, idx, count);
+  return to.hours * (idx === 0 ? 1 : 0.5) + back.hours * (idx === count - 1 ? 1 : 0.5);
+}
+
+/** Deslocamento total do dia: as pontas inteiras, cada trecho do meio uma vez. */
+export function totalLegHours(legs: DayLegs): number {
+  return legs.first.hours + legs.between.reduce((s, l) => s + l.hours, 0) + legs.last.hours;
+}
+
 /** Um dia inteiro usa tempo real, ou ainda tem trecho no valor fixo? */
 export function allLegsReal(legs: DayLegs, itemCount: number): boolean {
   if (itemCount === 0) return false;

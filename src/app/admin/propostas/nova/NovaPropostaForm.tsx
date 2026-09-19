@@ -11,6 +11,8 @@ import {
   buildDayLegs,
   expandMatrix,
   itemLegs,
+  sharedLegHours,
+  totalLegHours,
   type DayLegs,
   type LegSource,
   type TravelLookup,
@@ -113,10 +115,7 @@ function calcItemGuideHours(
   count: number,
   legs: DayLegs,
 ): number {
-  const { to, back } = itemLegs(legs, idx, count);
-  const toH = to.hours * (idx === 0 ? 1 : 0.5);
-  const backH = back.hours * (idx === count - 1 ? 1 : 0.5);
-  return toH + (item.duration_hours ?? 0) + backH;
+  return sharedLegHours(legs, idx, count) + (item.duration_hours ?? 0);
 }
 
 // Single source of truth for converting one additional-cost line to EUR:
@@ -183,14 +182,15 @@ function calcDayTransport(
   if (dayItems.length === 0) return { status: 'off' };
   if (!toggles.uses_driver && !toggles.uses_rental_car) return { status: 'off' };
 
-  // Motorista é pago pelos trechos inteiros que encostam em cada atividade com
-  // veículo — sem a divisão pela metade que o honorário do guia faz. É o mesmo
-  // critério de antes; só os números é que agora podem ser reais.
-  const hours = dayItems.reduce((sum, item, idx) => {
-    if (!item.uses_vehicle) return sum;
-    const { to, back } = itemLegs(legs, idx, dayItems.length);
-    return sum + to.hours + back.hours;
-  }, 0);
+  // Motorista é pago pelos trechos que encostam em cada atividade com veículo,
+  // rateados com o vizinho exatamente como no honorário do guia. Somar `to` e
+  // `back` inteiros, como se fazia até 09/2026, contava todo trecho do meio
+  // duas vezes: num roteiro de 3 paradas o dia cobrava 1h57 onde o relógio
+  // marcava 1h24, e a tela não mostrava a diferença em lugar nenhum.
+  const hours = dayItems.reduce(
+    (sum, item, idx) => (item.uses_vehicle ? sum + sharedLegHours(legs, idx, dayItems.length) : sum),
+    0,
+  );
   if (rates.carRate === null && rates.driverRate === null) return { status: 'no-rates', hours };
 
   const carAmount = toggles.uses_rental_car ? (rates.carRate ?? 0) : 0;
@@ -360,8 +360,7 @@ function formatGroupHours(hours: number): string {
 function calcDayHours(items: EditableItem[], legs: DayLegs): number {
   if (items.length === 0) return 0;
 
-  const deslocamento =
-    legs.first.hours + legs.between.reduce((s, l) => s + l.hours, 0) + legs.last.hours;
+  const deslocamento = totalLegHours(legs);
   const atividades = items.reduce((s, i) => s + (i.duration_hours ?? 0), 0);
 
   return deslocamento + atividades;
