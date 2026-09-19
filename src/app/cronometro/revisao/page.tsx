@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getDiasComRegistro, getRegistrosDoDia, hojeNoRio } from '@/lib/cronometro/server';
+import { getDiasComRegistro, getParadas, getRegistrosDoDia, hojeNoRio } from '@/lib/cronometro/server';
 import RevisaoClient from './RevisaoClient';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +14,7 @@ export default async function RevisaoPage({
   // Sem ?dia, mostra o último dia COM registro em vez de hoje: revisar quase
   // sempre acontece depois do tour, e abrir num dia vazio esconderia o que há.
   const alvo = dia ?? dias[0] ?? hoje;
-  const registros = await getRegistrosDoDia(alvo);
+  const [registros, paradas] = await Promise.all([getRegistrosDoDia(alvo), getParadas()]);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
@@ -41,7 +41,7 @@ export default async function RevisaoPage({
         </div>
       )}
 
-      <RevisaoClient registros={registros} dia={alvo} />
+      <RevisaoClient registros={registros} paradas={paradas} dia={alvo} />
     </div>
   );
 }

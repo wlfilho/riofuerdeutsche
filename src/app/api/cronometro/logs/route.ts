@@ -191,7 +191,7 @@ export async function PATCH(request: NextRequest) {
 
   const { data: atual, error: erroLeitura } = await supabase
     .from('tour_time_logs')
-    .select('segment_kind, started_at, ended_at, reliable')
+    .select('segment_kind, started_at, ended_at, reliable, from_service_id, to_service_id, tour_date_id')
     .eq('id', id)
     .single();
 
@@ -210,16 +210,36 @@ export async function PATCH(request: NextRequest) {
 
   const kind = atual.segment_kind as SegmentKind;
   const duracao = duracaoSegundos(started, ended);
-  const pedidoRebaixar = corpo.reliable === false;
+
+  // A confiança pode ir nos dois sentidos, com um limite: a regra de duração
+  // absurda não é negociável. Rebaixar é sempre aceito; promover só quando a
+  // duração passa na regra — assim um registro que a máquina reprovou nunca
+  // é branqueado, mas um corte manual bem fundamentado (o horário impresso no
+  // ingresso, por exemplo) pode voltar a contar.
+  const duracaoOk = pareceConfiavel(kind, duracao);
+  const reliable =
+    corpo.reliable === false ? false
+    : corpo.reliable === true ? duracaoOk
+    : duracaoOk && atual.reliable;
 
   const patch: Record<string, unknown> = {
     started_at: started,
     ended_at: ended,
-    reliable: !pedidoRebaixar && pareceConfiavel(kind, duracao),
+    reliable,
   };
   if ('note' in corpo) patch.note = textoOuNull(corpo.note);
-  if ('place_label' in corpo) patch.place_label = textoOuNull(corpo.place_label);
-  if ('to_service_id' in corpo) patch.to_service_id = textoOuNull(corpo.to_service_id);
+
+  // Trocar o lugar à mão. Numa visita, começo e fim são o mesmo lugar por
+  // definição (ver o comentário em types.ts), então o espelhamento acontece
+  // aqui e não depende de a tela lembrar disso.
+  if ('to_service_id' in corpo || 'place_label' in corpo) {
+    const destino = textoOuNull(corpo.to_service_id);
+    patch.to_service_id = destino;
+    // Escolher do catálogo apaga o texto livre e vice-versa: os dois juntos
+    // deixariam a tela mostrando um nome e a comparação usando outro.
+    patch.place_label = destino ? null : textoOuNull(corpo.place_label);
+    if (kind === 'visit') patch.from_service_id = destino;
+  }
 
   const { error } = await supabase.from('tour_time_logs').update(patch).eq('id', id);
   if (error) {
