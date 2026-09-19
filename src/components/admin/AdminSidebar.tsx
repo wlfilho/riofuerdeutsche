@@ -39,6 +39,11 @@ const navItems: NavItem[] = [
     icon: '📅',
   },
   {
+    labelKey: 'analyticsSite',
+    href: '/admin/analytics',
+    icon: '📈',
+  },
+  {
     labelKey: 'conteudoGuide',
     href: '/admin/guide',
     icon: '📖',

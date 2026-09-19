@@ -43,3 +43,6 @@ next-env.d.ts
 
 # supabase
 supabase/.temp/
+
+# notas de planejamento geradas pelo Claude (vivem no Obsidian, não no repo)
+/Claude outputs/
