@@ -776,7 +776,7 @@
       "servicos": "{count, plural, one {# serviço} other {# serviços}}",
       "transporteDoDia": "🚗 Transporte do dia:",
       "diariaCarro": "diária do carro",
-      "horasMotorista": "{horas}h motorista",
+      "horasMotorista": "{horas} de motorista",
       "embutidoHonorario": "(+{valor} embutido no honorário)",
       "semFaixaTransporte": "⚠️ Sem faixa de transporte para {pax} pessoas — defina os valores no bloco Transporte acima.",
       "usaMotorista": "Usa motorista",
@@ -850,7 +850,15 @@
       "calendarioFalhaTrocar": "Não foi possível trocar. Tente de novo.",
       "diaComParceiroDica": "Neste dia quem conduz é um guia parceiro. Avise o cliente.",
       "parceiroADefinirCurto": "parceiro",
-      "avisoDiasComParceiro": "Os dias em cinza vão com guia parceiro. Lembre de avisar o cliente que naquele dia quem conduz não é você."
+      "avisoDiasComParceiro": "Os dias em cinza vão com guia parceiro. Lembre de avisar o cliente que naquele dia quem conduz não é você.",
+      "origem": "Origem do deslocamento",
+      "origemHint": "(hotel, porto ou endereço de onde o dia sai)",
+      "origemBuscando": "Procurando o endereço...",
+      "origemOk": "Tempos reais de carro a partir de: {endereco}",
+      "origemNaoAchou": "Endereço não encontrado. A proposta salva normalmente; a ida e a volta de cada dia ficam no tempo fixo do catálogo.",
+      "origemFalhou": "Não deu para calcular o deslocamento agora. A proposta salva normalmente; a ida e a volta de cada dia ficam no tempo fixo do catálogo.",
+      "trechoCalculado": "Tempo real de carro, calculado entre as duas coordenadas.",
+      "trechoFixo": "Tempo fixo do catálogo: falta coordenada em uma das pontas."
     },
     "atividades": {
       "breadcrumb": "Atividades",

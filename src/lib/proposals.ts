@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { orsGeocodeRio } from '@/lib/ors';
 import { getServiceTranslation, getServicesWithTranslations } from '@/lib/services-i18n';
 import { syncTourDatesWithLeadStatus, syncTourDatesWithProposalDays } from '@/lib/tourDates';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
@@ -194,6 +195,15 @@ export interface Proposal {
   locale?: string | null;
   // Moeda em que o cliente vê os preços. Congelada no envio junto do locale.
   currency?: ProposalCurrency | null;
+  // ── Origem do deslocamento ─────────────────────────────────────────────────
+  // Onde o tour começa e termina todo dia: hotel, porto, endereço. Texto livre
+  // digitado no builder; as coordenadas saem dele por geocodificação. Nulas
+  // quando o endereço não foi preenchido ou não foi encontrado — nesse caso o
+  // primeiro e o último trecho de cada dia caem no tempo fixo do catálogo.
+  origin_label: string | null;
+  origin_latitude: number | null;
+  origin_longitude: number | null;
+  origin_geocoded_at: string | null;
   // Token do link público /angebot/[token] enviado ao cliente.
   public_token: string;
   status: ProposalStatus;
@@ -205,6 +215,9 @@ export interface Proposal {
 
 export interface ProposalFormData {
   client_name: string;
+  // Endereço de origem (hotel/porto). As colunas de coordenada NÃO vêm do
+  // formulário: são derivadas deste texto no servidor, ao salvar.
+  origin_label: string | null;
   internal_label: string | null;
   client_email: string;
   client_phone: string;
@@ -427,6 +440,66 @@ export async function getProposalByPublicToken(token: string): Promise<Proposal 
   return data as Proposal;
 }
 
+// ─── Origem da proposta ───────────────────────────────────────────────────────
+
+/**
+ * Colunas de coordenada a gravar junto da proposta, derivadas de origin_label.
+ *
+ * Devolve {} quando não há o que refazer (endereço igual e já geocodificado),
+ * para não gastar cota nem reescrever a data a cada salvamento.
+ *
+ * Best-effort de propósito: se o ORS falhar ou não achar o endereço, grava
+ * coordenada nula e deixa a proposta salvar. Bloquear o salvamento por causa
+ * de um geocodificador de terceiros seria trocar um número aproximado por um
+ * trabalho perdido — sem coordenada, o deslocamento simplesmente volta ao
+ * tempo fixo do catálogo.
+ */
+async function originColumns(
+  label: string | null | undefined,
+  anterior: { origin_label: string | null; origin_latitude: number | null } | null,
+): Promise<Record<string, unknown>> {
+  const limpo = (label ?? '').trim();
+
+  if (!limpo) {
+    if (!anterior?.origin_label && anterior?.origin_latitude == null) return { origin_label: null };
+    return {
+      origin_label: null,
+      origin_latitude: null,
+      origin_longitude: null,
+      origin_geocoded_at: null,
+    };
+  }
+
+  const inalterado = anterior?.origin_label === limpo && anterior?.origin_latitude != null;
+  if (inalterado) return { origin_label: limpo };
+
+  try {
+    const hit = await orsGeocodeRio(limpo);
+    if (!hit) {
+      return {
+        origin_label: limpo,
+        origin_latitude: null,
+        origin_longitude: null,
+        origin_geocoded_at: null,
+      };
+    }
+    return {
+      origin_label: limpo,
+      origin_latitude: hit.latitude,
+      origin_longitude: hit.longitude,
+      origin_geocoded_at: new Date().toISOString(),
+    };
+  } catch (err) {
+    console.error('[proposals] geocodificação da origem falhou:', (err as Error).message);
+    return {
+      origin_label: limpo,
+      origin_latitude: null,
+      origin_longitude: null,
+      origin_geocoded_at: null,
+    };
+  }
+}
+
 export async function updateProposal(id: string, formData: ProposalFormData): Promise<Proposal> {
   const supabase = await createClient();
   // total_amount é sempre o que o cliente paga: o preço final manual, quando
@@ -434,9 +507,19 @@ export async function updateProposal(id: string, formData: ProposalFormData): Pr
   // pública leem uma coluna só, sem conhecer a regra.
   const total_amount = formData.total_override_amount
     ?? formData.items.reduce((sum, item) => sum + item.total_eur, 0);
+
+  // A geocodificação só roda quando o endereço muda, então precisa do que já
+  // está gravado.
+  const { data: atual } = await supabase
+    .from('proposals')
+    .select('origin_label, origin_latitude')
+    .eq('id', id)
+    .single();
+  const origin = await originColumns(formData.origin_label, atual ?? null);
+
   const { data, error } = await supabase
     .from('proposals')
-    .update({ ...formData, total_amount })
+    .update({ ...formData, ...origin, total_amount })
     .eq('id', id)
     .select()
     .single();
@@ -464,10 +547,13 @@ export async function createProposal(
   const total_amount = formData.total_override_amount
     ?? formData.items.reduce((sum, item) => sum + item.total_eur, 0);
 
+  const origin = await originColumns(formData.origin_label, null);
+
   const { data, error } = await supabase
     .from('proposals')
     .insert({
       ...formData,
+      ...origin,
       lead_id: leadId ?? null,
       total_amount,
       status: 'draft' satisfies ProposalStatus,
@@ -504,6 +590,12 @@ export async function duplicateProposal(id: string): Promise<Proposal> {
       pax: original.pax,
       arrival_date: original.arrival_date,
       departure_date: original.departure_date,
+      // A cópia é da mesma viagem: herda a origem já geocodificada, sem gastar
+      // uma consulta nova para chegar ao mesmo endereço.
+      origin_label: original.origin_label,
+      origin_latitude: original.origin_latitude,
+      origin_longitude: original.origin_longitude,
+      origin_geocoded_at: original.origin_geocoded_at,
       treatment: original.treatment,
       locale: original.locale ?? DEFAULT_PROPOSAL_LOCALE,
       currency: original.currency ?? DEFAULT_PROPOSAL_CURRENCY,

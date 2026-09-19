@@ -7,6 +7,15 @@ import { useTranslations } from 'next-intl';
 import { ADMIN_LOCALE, fmtEur, fmtLanguage } from '@/lib/adminFormat';
 import { dayTransportServiceName, resolveDayTransportKey } from '@/lib/dayTransportLabel';
 import { findGuideRateTier, guideRateTierLabel } from '@/lib/guideRate';
+import {
+  buildDayLegs,
+  expandMatrix,
+  itemLegs,
+  type DayLegs,
+  type LegSource,
+  type TravelLookup,
+  type TravelMatrixPayload,
+} from '@/lib/travel';
 import type {
   Proposal,
   ProposalCurrency,
@@ -94,13 +103,19 @@ function formatDayHeader(iso: string): string {
 
 // Guide hours for one item, sharing adjacent transfers with neighbours to avoid
 // double-counting when multiple activities sit in the same day.
+//
+// Os tempos vêm de `legs` (ver src/lib/travel.ts): deslocamento real quando há
+// coordenada dos dois lados, tempo fixo do catálogo quando não há. A regra de
+// divisão com o vizinho é a mesma nos dois casos.
 function calcItemGuideHours(
   item: EditableItem,
-  isFirst: boolean,
-  isLast: boolean,
+  idx: number,
+  count: number,
+  legs: DayLegs,
 ): number {
-  const toH = (item.transfer_hours_to ?? 0) * (isFirst ? 1 : 0.5);
-  const backH = (item.transfer_hours_back ?? 0) * (isLast ? 1 : 0.5);
+  const { to, back } = itemLegs(legs, idx, count);
+  const toH = to.hours * (idx === 0 ? 1 : 0.5);
+  const backH = back.hours * (idx === count - 1 ? 1 : 0.5);
   return toH + (item.duration_hours ?? 0) + backH;
 }
 
@@ -163,13 +178,19 @@ function calcDayTransport(
   rates: TransportRates,
   exchangeRate: number,
   toggles: DayToggles,
+  legs: DayLegs,
 ): DayTransport {
   if (dayItems.length === 0) return { status: 'off' };
   if (!toggles.uses_driver && !toggles.uses_rental_car) return { status: 'off' };
 
-  const hours = dayItems
-    .filter(i => i.uses_vehicle)
-    .reduce((sum, i) => sum + (i.transfer_hours_to ?? 0) + (i.transfer_hours_back ?? 0), 0);
+  // Motorista é pago pelos trechos inteiros que encostam em cada atividade com
+  // veículo — sem a divisão pela metade que o honorário do guia faz. É o mesmo
+  // critério de antes; só os números é que agora podem ser reais.
+  const hours = dayItems.reduce((sum, item, idx) => {
+    if (!item.uses_vehicle) return sum;
+    const { to, back } = itemLegs(legs, idx, dayItems.length);
+    return sum + to.hours + back.hours;
+  }, 0);
   if (rates.carRate === null && rates.driverRate === null) return { status: 'no-rates', hours };
 
   const carAmount = toggles.uses_rental_car ? (rates.carRate ?? 0) : 0;
@@ -264,10 +285,11 @@ function calcDayItemTotals(
   pax: number,
   exchangeRate: number,
   guideRate: number,
+  legs: DayLegs,
 ): number[] {
   if (dayItems.length === 0) return [];
   const rawHours = dayItems.map((item, idx) =>
-    calcItemGuideHours(item, idx === 0, idx === dayItems.length - 1),
+    calcItemGuideHours(item, idx, dayItems.length, legs),
   );
   const dayRawHours = rawHours.reduce((s, h) => s + h, 0);
   const ceiledGuideFee = Math.ceil(dayRawHours) * guideRate;
@@ -288,10 +310,11 @@ function calcItemTotalEur(
   pax: number,
   exchangeRate: number,
   guideRate: number,
-  isFirst = true,
-  isLast = true,
+  idx: number,
+  count: number,
+  legs: DayLegs,
 ): number {
-  const guideFee = calcItemGuideHours(item, isFirst, isLast) * guideRate;
+  const guideFee = calcItemGuideHours(item, idx, count, legs) * guideRate;
   return guideFee + calcItemAdditionalCosts(item, pax, exchangeRate);
 }
 
@@ -334,26 +357,14 @@ function formatGroupHours(hours: number): string {
   return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, '0')}`;
 }
 
-function calcDayHours(items: EditableItem[]): number {
+function calcDayHours(items: EditableItem[], legs: DayLegs): number {
   if (items.length === 0) return 0;
 
-  let total = 0;
+  const deslocamento =
+    legs.first.hours + legs.between.reduce((s, l) => s + l.hours, 0) + legs.last.hours;
+  const atividades = items.reduce((s, i) => s + (i.duration_hours ?? 0), 0);
 
-  total += items[0].transfer_hours_to ?? 0;
-
-  for (let i = 0; i < items.length; i++) {
-    total += items[i].duration_hours ?? 0;
-
-    if (i < items.length - 1) {
-      const between =
-        ((items[i].transfer_hours_back ?? 0) + (items[i + 1].transfer_hours_to ?? 0)) / 2;
-      total += between;
-    }
-  }
-
-  total += items[items.length - 1].transfer_hours_back ?? 0;
-
-  return total;
+  return deslocamento + atividades;
 }
 
 // ─── Day timeline ─────────────────────────────────────────────────────────────
@@ -362,6 +373,9 @@ type DaySegment = {
   kind: 'transfer' | 'activity';
   label: string;
   hours: number;
+  // Só em trechos: de onde veio o tempo, para a timeline distinguir número
+  // calculado de chute do catálogo.
+  source?: LegSource;
   itemId?: string;
   startMin: number;
   endMin: number;
@@ -405,7 +419,7 @@ const DEFAULT_DAY_END = '20:00';
 // Builds the visual day schedule. Transfers between two activities are merged
 // into a single block of (back + to) / 2 hours so the timeline total matches
 // calcDayHours (and therefore the priced guide hours).
-function buildDaySegments(items: EditableItem[], startTime: string): DaySegment[] {
+function buildDaySegments(items: EditableItem[], startTime: string, legs: DayLegs): DaySegment[] {
   const segs: DaySegment[] = [];
   let t = timeToMinutes(startTime);
 
@@ -415,22 +429,25 @@ function buildDaySegments(items: EditableItem[], startTime: string): DaySegment[
     hours: number,
     itemId?: string,
     insert?: InsertPosition,
+    source?: LegSource,
   ) => {
     const startMin = t;
     t += Math.round(hours * 60);
-    segs.push({ kind, label, hours, itemId, startMin, endMin: t, insert });
+    segs.push({ kind, label, hours, itemId, startMin, endMin: t, insert, source });
   };
 
   items.forEach((item, i) => {
-    if (i === 0 && (item.transfer_hours_to ?? 0) > 0) {
-      push('transfer', 'Transfer', item.transfer_hours_to!, undefined, 'start');
+    if (i === 0 && legs.first.hours > 0) {
+      push('transfer', 'Transfer', legs.first.hours, undefined, 'start', legs.first.source);
     }
     push('activity', item.service_name, item.duration_hours ?? 0, item._id);
     if (i < items.length - 1) {
-      const between = ((item.transfer_hours_back ?? 0) + (items[i + 1].transfer_hours_to ?? 0)) / 2;
-      if (between > 0) push('transfer', 'Transfer', between, undefined, { after: item._id });
-    } else if ((item.transfer_hours_back ?? 0) > 0) {
-      push('transfer', 'Transfer', item.transfer_hours_back!, undefined, 'end');
+      const entre = legs.between[i];
+      if (entre.hours > 0) {
+        push('transfer', 'Transfer', entre.hours, undefined, { after: item._id }, entre.source);
+      }
+    } else if (legs.last.hours > 0) {
+      push('transfer', 'Transfer', legs.last.hours, undefined, 'end', legs.last.source);
     }
   });
 
@@ -1087,6 +1104,7 @@ const PX_PER_HOUR = 48;
 
 function DayScheduleGrid({
   segments,
+  legs,
   startTime,
   endTime,
   items,
@@ -1102,6 +1120,8 @@ function DayScheduleGrid({
   getCatalogDuration,
 }: {
   segments: DaySegment[];
+  // Trechos do dia já resolvidos, para o preço por item bater com a timeline.
+  legs: DayLegs;
   startTime: string;
   endTime: string;
   items: EditableItem[];
@@ -1175,15 +1195,24 @@ function DayScheduleGrid({
           const height = ((seg.endMin - seg.startMin) / 60) * PX_PER_HOUR;
 
           if (seg.kind === 'transfer') {
+            // Tempo calculado de carro ganha barra azul; o tempo fixo do
+            // catálogo fica cinza e com "~". Sem isso não dá para saber se o
+            // número da tela é uma medida ou um palpite.
+            const real = seg.source && seg.source !== 'fallback';
             return (
               <div
                 key={idx}
                 style={{ top, height: Math.max(height, 16) }}
                 className="absolute left-12 right-1"
               >
-                <div className="h-full flex items-center bg-gray-100/90 border-l-4 border-gray-300 rounded-r-md px-2 overflow-hidden">
-                  <p className="text-[10px] text-gray-500 tabular-nums truncate">
-                    🚗 Transfer · {formatHoursShort(seg.hours)}
+                <div
+                  title={real ? t('trechoCalculado') : t('trechoFixo')}
+                  className={`h-full flex items-center rounded-r-md px-2 overflow-hidden border-l-4 ${
+                    real ? 'bg-sky-50/90 border-sky-300' : 'bg-gray-100/90 border-gray-300'
+                  }`}
+                >
+                  <p className={`text-[10px] tabular-nums truncate ${real ? 'text-sky-700' : 'text-gray-500'}`}>
+                    🚗 Transfer · {real ? '' : '~'}{formatHoursShort(seg.hours)}
                   </p>
                 </div>
                 {seg.insert && (
@@ -1206,9 +1235,9 @@ function DayScheduleGrid({
           const isLast = itemIdx === items.length - 1;
           const expanded = expandedId === item._id;
 
-          const guideHours = calcItemGuideHours(item, isFirst, isLast);
+          const guideHours = calcItemGuideHours(item, itemIdx, items.length, legs);
           const guideFee = guideHours * guideRate;
-          const totalEur = calcItemTotalEur(item, pax, exchangeRate, guideRate, isFirst, isLast);
+          const totalEur = calcItemTotalEur(item, pax, exchangeRate, guideRate, itemIdx, items.length, legs);
           const hasBrl = (item.costs ?? []).some(c => c.currency === 'BRL');
 
           const controls = (
@@ -1487,6 +1516,7 @@ function DayScheduleGrid({
 function DayBlock({
   day,
   items,
+  travel,
   services,
   groups,
   transportTypes,
@@ -1514,6 +1544,8 @@ function DayBlock({
 }: {
   day: string;
   items: EditableItem[];
+  // Deslocamento real disponível (matriz + origem). Vazio = tudo no catálogo.
+  travel: TravelLookup;
   services: ProposalService[];
   groups: ResolvedServiceGroup[];
   // Catálogo de tipos de transporte, para o modal da atração coringa.
@@ -1590,16 +1622,17 @@ function DayBlock({
     if (position !== 'end') setPickerFor(position);
   };
 
-  const transport = calcDayTransport(items, transportRates, exchangeRate, toggles);
+  const legs = buildDayLegs(items, travel);
+  const transport = calcDayTransport(items, transportRates, exchangeRate, toggles, legs);
   const { chargeableEur, embeddedEur } = splitTransportCost(transport, embed);
   const dayTotal =
-    applyPriceOverrides(items, calcDayItemTotals(items, pax, exchangeRate, guideRate))
+    applyPriceOverrides(items, calcDayItemTotals(items, pax, exchangeRate, guideRate, legs))
       .reduce((s, v) => s + v, 0)
     + chargeableEur;
-  const dayHours = calcDayHours(items);
+  const dayHours = calcDayHours(items, legs);
   const overloaded = dayHours > maxHoursPerDay;
 
-  const segments = buildDaySegments(items, startTime);
+  const segments = buildDaySegments(items, startTime, legs);
 
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden">
@@ -1626,7 +1659,7 @@ function DayBlock({
             {items.length > 0 && (
               <p className="text-xs text-gray-400 mt-0.5">
                 {t('servicos', { count: items.length })} · {fmtEur(dayTotal)}
-                {dayHours > 0 && ` · ${dayHours}h`}
+                {dayHours > 0 && ` · ${formatGroupHours(dayHours)}`}
               </p>
             )}
             {transport.status === 'ok' && (
@@ -1634,7 +1667,7 @@ function DayBlock({
                 {t('transporteDoDia')}{' '}
                 {[
                   toggles.uses_rental_car && t('diariaCarro'),
-                  toggles.uses_driver && t('horasMotorista', { horas: transport.hours }),
+                  toggles.uses_driver && t('horasMotorista', { horas: formatGroupHours(transport.hours) }),
                 ].filter(Boolean).join(' + ')}
                 {' · '}{fmtEur(chargeableEur)}
                 {embeddedEur > 0 && (
@@ -1728,6 +1761,7 @@ function DayBlock({
       <div className="p-4">
         <DayScheduleGrid
           segments={segments}
+          legs={legs}
           startTime={startTime}
           endTime={endTime}
           items={items}
@@ -1857,6 +1891,7 @@ export default function NovaPropostaForm({
   initialData,
   proposalId,
   initialLead,
+  travelMatrix,
 }: {
   services: ProposalService[];
   // Grupos de atividades (atalhos de montagem): opcional porque só os builders
@@ -1877,6 +1912,9 @@ export default function NovaPropostaForm({
   initialData?: Proposal;
   proposalId?: string;
   initialLead?: InitialLead;
+  // Matriz de deslocamento entre as atrações do catálogo, pré-calculada (ver
+  // scripts/build-travel-matrix.mjs). Vazia = todo trecho cai no tempo fixo.
+  travelMatrix: TravelMatrixPayload;
 }) {
   const t = useTranslations('admin.propostas');
   const tCommon = useTranslations('admin.common');
@@ -1990,6 +2028,16 @@ export default function NovaPropostaForm({
         ? t('grupoComCriancas', { count: initialLead!.children ?? 0 })
         : '')
   );
+  // ── Origem do deslocamento ──────────────────────────────────────────────
+  // Hotel/porto de onde o dia sai e para onde volta. Sem isto, o primeiro e o
+  // último trecho de cada dia continuam no tempo fixo do catálogo.
+  const [originLabel, setOriginLabel] = useState(initialData?.origin_label ?? '');
+  const [originLegs, setOriginLegs] =
+    useState<Record<string, { to: number; from: number }>>({});
+  const [originStatus, setOriginStatus] =
+    useState<'vazio' | 'buscando' | 'ok' | 'nao-achou' | 'falhou'>('vazio');
+  const [originResolved, setOriginResolved] = useState<string | null>(null);
+
   const [items, setItems] = useState<EditableItem[]>(initialItems);
   const [activeDays, setActiveDays] = useState<string[]>(
     initialItems.length > 0
@@ -2083,14 +2131,14 @@ export default function NovaPropostaForm({
   const formSnapshot = useMemo(
     () => JSON.stringify({
       clientName, internalLabel, clientEmail, clientPhone, pax, treatment,
-      locale, currency,
+      originLabel, locale, currency,
       exchangeRate, guideRate, internalNotes, items, activeDays, dayStartTimes,
       dayEndTimes, dayToggles, carRateOverride, driverRateOverride, embedCar,
       embedDriver, priceDisplay, depositAmount, validUntil, totalOverride,
       showRabatt,
     }),
     [clientName, internalLabel, clientEmail, clientPhone, pax, treatment,
-     locale, currency,
+     originLabel, locale, currency,
      exchangeRate, guideRate, internalNotes, items, activeDays, dayStartTimes,
      dayEndTimes, dayToggles, carRateOverride, driverRateOverride, embedCar,
      embedDriver, priceDisplay, depositAmount, validUntil, totalOverride,
@@ -2166,15 +2214,85 @@ export default function NovaPropostaForm({
     [embedCar, embedDriver],
   );
 
+  // ── Deslocamento real ─────────────────────────────────────────────────────
+
+  /**
+   * Busca os tempos de carro entre a origem e TODAS as atrações do catálogo,
+   * não só as que estão no roteiro agora: o dia é reordenado o tempo todo, e
+   * assim o número acompanha o arrasto sem uma ida à rede a cada mudança.
+   *
+   * Passa pela rota porque a chave do ORS não pode sair do servidor. Nada aqui
+   * bloqueia a proposta: sem resposta, os trechos ficam no tempo fixo.
+   */
+  useEffect(() => {
+    const texto = originLabel.trim();
+    if (!texto) {
+      setOriginLegs({});
+      setOriginStatus('vazio');
+      setOriginResolved(null);
+      return;
+    }
+
+    // Proposta salva já traz a coordenada; só texto novo precisa geocodificar.
+    const jaGeocodificado =
+      initialData?.origin_label === texto && initialData.origin_latitude != null
+        ? { latitude: initialData.origin_latitude, longitude: initialData.origin_longitude }
+        : null;
+
+    let cancelado = false;
+    setOriginStatus('buscando');
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/admin/proposals/origin-legs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ origin_label: texto, ...(jaGeocodificado ?? {}) }),
+        });
+        const data = await res.json();
+        if (cancelado) return;
+        if (!res.ok || data.failed) {
+          setOriginLegs({});
+          setOriginResolved(null);
+          setOriginStatus('falhou');
+          return;
+        }
+        if (data.not_found) {
+          setOriginLegs({});
+          setOriginResolved(null);
+          setOriginStatus('nao-achou');
+          return;
+        }
+        const legs = data.legs ?? {};
+        setOriginLegs(legs);
+        setOriginResolved(data.resolved_label ?? null);
+        setOriginStatus(Object.keys(legs).length > 0 ? 'ok' : 'falhou');
+      } catch {
+        if (cancelado) return;
+        setOriginLegs({});
+        setOriginResolved(null);
+        setOriginStatus('falhou');
+      }
+    }, jaGeocodificado ? 0 : 700);
+
+    return () => { cancelado = true; clearTimeout(timer); };
+  }, [originLabel, initialData?.origin_label, initialData?.origin_latitude, initialData?.origin_longitude]);
+
+  const travelLookup = useMemo<TravelLookup>(() => ({
+    origin: originLegs,
+    between: expandMatrix(travelMatrix),
+    idBySlug: Object.fromEntries(services.map(s => [s.slug, s.id])),
+  }), [originLegs, travelMatrix, services]);
+
   const grandTotal = useMemo(
     () => activeDays.reduce((total, day) => {
       const dayItems = items.filter(i => i.day === day);
-      const itemsTotal = applyPriceOverrides(dayItems, calcDayItemTotals(dayItems, pax, exchangeRate, guideRate))
+      const legs = buildDayLegs(dayItems, travelLookup);
+      const itemsTotal = applyPriceOverrides(dayItems, calcDayItemTotals(dayItems, pax, exchangeRate, guideRate, legs))
         .reduce((s, v) => s + v, 0);
-      const transport = calcDayTransport(dayItems, transportRates, exchangeRate, getDayToggles(day));
+      const transport = calcDayTransport(dayItems, transportRates, exchangeRate, getDayToggles(day), legs);
       return total + itemsTotal + splitTransportCost(transport, embedFlags).chargeableEur;
     }, 0),
-    [activeDays, items, pax, exchangeRate, guideRate, transportRates, getDayToggles, embedFlags],
+    [activeDays, items, pax, exchangeRate, guideRate, transportRates, getDayToggles, embedFlags, travelLookup],
   );
 
   // ─── Day handlers ─────────────────────────────────────────────────────────────
@@ -2397,19 +2515,30 @@ export default function NovaPropostaForm({
         // reconstrói (a hidratação parte das atividades) e que a página
         // pública exibiria como dia de tour vazio.
         if (dayItems.length === 0) return [];
+        const legs = buildDayLegs(dayItems, travelLookup);
         const dayTotals = applyPriceOverrides(
           dayItems,
-          calcDayItemTotals(dayItems, pax, exchangeRate, guideRate),
+          calcDayItemTotals(dayItems, pax, exchangeRate, guideRate, legs),
         );
 
         const toggles = getDayToggles(day);
-        const transport = calcDayTransport(dayItems, transportRates, exchangeRate, toggles);
+        const transport = calcDayTransport(dayItems, transportRates, exchangeRate, toggles, legs);
         const { chargeableEur } = splitTransportCost(transport, embedFlags);
 
         const activityRows = dayItems.map((item, idx) => {
           const { _id: _skip, costs, ...rest } = item;
+          // Congela no item salvo o deslocamento que acabou de ser precificado.
+          // Sem isto, a tela de output, a aba do contato e a página pública do
+          // cliente recalculariam o dia pelos tempos fixos do catálogo e
+          // mostrariam um total diferente do que a proposta cobra. A conta de
+          // trecho do meio do dia lá é (back_i + to_i+1) / 2, e como os dois
+          // valores gravados aqui são o mesmo trecho, ela devolve exatamente
+          // este número.
+          const { to, back } = itemLegs(legs, idx, dayItems.length);
           return {
             ...rest,
+            transfer_hours_to: to.hours,
+            transfer_hours_back: back.hours,
             costs: costs.map(cost => ({
               ...cost,
               total_eur: calcCostEur(cost, pax, item.duration_hours ?? 0, exchangeRate),
@@ -2435,7 +2564,7 @@ export default function NovaPropostaForm({
                 total_eur: transport.carCostEur,
               }] : []),
               ...(toggles.uses_driver ? [{
-                description: `Motorista (${transport.hours}h de deslocamento)${embedDriver ? ' — embutido no honorário' : ''}`,
+                description: `Motorista (${formatGroupHours(transport.hours)} de deslocamento)${embedDriver ? ' — embutido no honorário' : ''}`,
                 base_price: transportRates.driverRate ?? 0,
                 currency: transportRates.currency,
                 price_type: 'per_hour' as const,
@@ -2490,6 +2619,7 @@ export default function NovaPropostaForm({
           internal_label: internalLabel.trim() || null,
           client_email: clientEmail.trim(),
           client_phone: clientPhone.trim(),
+          origin_label: originLabel.trim() || null,
           pax,
           lead_id: !isEditing ? initialLead?.id : undefined,
           arrival_date: tourDays[0],
@@ -2632,6 +2762,34 @@ export default function NovaPropostaForm({
                 {t('numeroPessoas')} <span className="text-red-500">*</span>
               </label>
               <input type="number" min="1" value={pax} onChange={e => setPax(Math.max(1, parseInt(e.target.value) || 1))} className={INPUT_CLS} placeholder="2" />
+            </div>
+            {/* Origem do deslocamento: de onde o dia sai e para onde volta. */}
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('origem')}
+                <span className="ml-1 text-xs font-normal text-gray-400">{t('origemHint')}</span>
+              </label>
+              <input
+                type="text"
+                value={originLabel}
+                onChange={e => setOriginLabel(e.target.value)}
+                className={INPUT_CLS}
+                placeholder="Copacabana Palace, Avenida Atlântica 1702"
+              />
+              {originStatus === 'buscando' && (
+                <p className="mt-1 text-xs text-gray-400">{t('origemBuscando')}</p>
+              )}
+              {originStatus === 'ok' && (
+                <p className="mt-1 text-xs text-sky-600">
+                  {t('origemOk', { endereco: originResolved ?? originLabel })}
+                </p>
+              )}
+              {originStatus === 'nao-achou' && (
+                <p className="mt-1 text-xs text-amber-600">{t('origemNaoAchou')}</p>
+              )}
+              {originStatus === 'falhou' && (
+                <p className="mt-1 text-xs text-amber-600">{t('origemFalhou')}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -2924,6 +3082,7 @@ export default function NovaPropostaForm({
 
             {activeDays.map(day => (
               <DayBlock
+                travel={travelLookup}
                 key={day}
                 day={day}
                 items={items.filter(i => i.day === day)}
@@ -2997,10 +3156,11 @@ export default function NovaPropostaForm({
             <div className="space-y-2">
               {activeDays.flatMap(day => {
                 const dayItems = items.filter(i => i.day === day);
+                const legs = buildDayLegs(dayItems, travelLookup);
                 const toggles = getDayToggles(day);
-                const transport = calcDayTransport(dayItems, transportRates, exchangeRate, toggles);
+                const transport = calcDayTransport(dayItems, transportRates, exchangeRate, toggles, legs);
                 const { chargeableEur, embeddedEur } = splitTransportCost(transport, embedFlags);
-                const dayTotals = calcDayItemTotals(dayItems, pax, exchangeRate, guideRate);
+                const dayTotals = calcDayItemTotals(dayItems, pax, exchangeRate, guideRate, legs);
                 const rows = dayItems.map((item, idx) => (
                   <div key={item._id} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2 min-w-0">
@@ -3025,7 +3185,7 @@ export default function NovaPropostaForm({
                 if (transport.status === 'ok' && (chargeableEur > 0 || embeddedEur > 0)) {
                   const parts = [
                     toggles.uses_rental_car && t('diariaCarro'),
-                    toggles.uses_driver && t('horasMotorista', { horas: transport.hours }),
+                    toggles.uses_driver && t('horasMotorista', { horas: formatGroupHours(transport.hours) }),
                   ].filter(Boolean).join(' + ');
                   rows.push(
                     <div key={`${day}-transport`} className="flex items-center justify-between text-sm">

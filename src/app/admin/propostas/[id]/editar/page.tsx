@@ -8,6 +8,7 @@ import {
   getTransportTypes,
 } from '@/lib/proposals';
 import { getSupportedLocales } from '@/lib/services-i18n';
+import { getTravelMatrix } from '@/lib/travelServer';
 import { getSettings } from '@/lib/settings';
 import { redirect } from 'next/navigation';
 import NovaPropostaForm from '../../nova/NovaPropostaForm';
@@ -26,15 +27,18 @@ export default async function EditarPropostaPage({
   // preenchida caem no padrão. O catálogo é resolvido nesse mesmo idioma.
   const proposalLocale = proposal.locale ?? DEFAULT_PROPOSAL_LOCALE;
 
-  const [services, serviceGroups, transportTypes, guideRateTiers, settings, supportedLocales] =
-    await Promise.all([
-      getProposalServices(proposalLocale),
-      getProposalServiceGroups(),
-      getTransportTypes(),
-      getGuideRateTiers(),
-      getSettings(),
-      getSupportedLocales(),
-    ]);
+  const [
+    services, serviceGroups, transportTypes, guideRateTiers, settings, supportedLocales,
+    travelMatrix,
+  ] = await Promise.all([
+    getProposalServices(proposalLocale),
+    getProposalServiceGroups(),
+    getTransportTypes(),
+    getGuideRateTiers(),
+    getSettings(),
+    getSupportedLocales(),
+    getTravelMatrix(),
+  ]);
 
   // Um idioma gravado fora de supported_locales (ex.: removido das configs
   // depois) continua listado, senão o select trocaria o idioma da proposta
@@ -56,6 +60,7 @@ export default async function EditarPropostaPage({
       initialLocale={proposalLocale}
       initialCurrency={proposal.currency ?? DEFAULT_PROPOSAL_CURRENCY}
       initialData={proposal}
+      travelMatrix={travelMatrix}
       proposalId={id}
     />
   );

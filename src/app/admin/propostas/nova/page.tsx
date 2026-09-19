@@ -6,6 +6,7 @@ import {
   getTransportTypes,
 } from '@/lib/proposals';
 import { getDefaultClientLocale, getSupportedLocales } from '@/lib/services-i18n';
+import { getTravelMatrix } from '@/lib/travelServer';
 import { getSettings } from '@/lib/settings';
 import { createClient } from '@/utils/supabase/server';
 import NovaPropostaForm, { type InitialLead } from './NovaPropostaForm';
@@ -60,13 +61,15 @@ export default async function NovaPropostaPage({
 
   // O catálogo já vem resolvido no idioma pré-selecionado; trocar o idioma no
   // builder recarrega a página para que os textos acompanhem.
-  const [services, serviceGroups, transportTypes, guideRateTiers, settings] = await Promise.all([
-    getProposalServices(initialLocale),
-    getProposalServiceGroups(),
-    getTransportTypes(),
-    getGuideRateTiers(),
-    getSettings(),
-  ]);
+  const [services, serviceGroups, transportTypes, guideRateTiers, settings, travelMatrix] =
+    await Promise.all([
+      getProposalServices(initialLocale),
+      getProposalServiceGroups(),
+      getTransportTypes(),
+      getGuideRateTiers(),
+      getSettings(),
+      getTravelMatrix(),
+    ]);
 
   let initialLead: InitialLead | null = null;
   if (lead_id) {
@@ -90,6 +93,7 @@ export default async function NovaPropostaPage({
       maxHoursPerDay={settings.max_hours_per_day}
       supportedLocales={supportedLocales}
       initialLocale={initialLocale}
+      travelMatrix={travelMatrix}
       initialLead={initialLead ?? undefined}
     />
   );
