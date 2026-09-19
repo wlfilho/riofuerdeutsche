@@ -141,10 +141,17 @@ export async function updateSession(request: NextRequest) {
 
     // --- ROTA /cronometro: ferramenta de campo, só admin ---
     // Fora de /admin porque é um app de tela cheia instalado no celular, mas a
-    // regra de acesso é a mesma. O manifest e o service worker moram em
-    // /public e NÃO passam por aqui de propósito: o navegador os busca antes
-    // de haver sessão, e barrá-los quebraria a instalação do PWA.
-    if (pathname.startsWith("/cronometro")) {
+    // regra de acesso é a mesma.
+    //
+    // Compara o caminho EXATO (ou com barra) em vez de usar startsWith solto:
+    // "/cronometro.webmanifest" e "/cronometro-sw.js" também começam com
+    // "/cronometro", e com startsWith os dois eram redirecionados para o
+    // login. O navegador busca esses arquivos fora do contexto normal de
+    // navegação — o registro do service worker que recebe HTML no lugar de
+    // JavaScript falha com erro de MIME type, e o PWA simplesmente não
+    // instala. Nenhum dos dois tem segredo: um lista nome e ícones, o outro é
+    // código de cache genérico.
+    if (pathname === "/cronometro" || pathname.startsWith("/cronometro/")) {
         if (!user) {
             const url = request.nextUrl.clone();
             url.pathname = "/login";
