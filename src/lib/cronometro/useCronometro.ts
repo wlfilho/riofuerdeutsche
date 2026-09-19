@@ -33,10 +33,17 @@ import type { CronometroState, Fix, OpenSegment, Place, Segment, SegmentKind } f
 
 export type Fase = 'carregando' | 'parado' | 'travel' | 'visit';
 
-/** Pergunta pendente de lugar, quando o GPS não identificou sozinho. */
+/**
+ * Pergunta pendente de lugar, quando o GPS não identificou sozinho.
+ *
+ * Carrega o SEGMENTO inteiro, não só o id. A resposta precisa ser aplicada
+ * àquilo sobre o que se perguntou: se a folha ficar aberta e outro toque
+ * acontecer no meio, "o último segmento fechado" já é outro, e o rótulo iria
+ * parar no registro errado — deixando sem lugar exatamente o deslocamento que
+ * a tela de comparação precisa.
+ */
 export type PerguntaLugar = {
-  /** Segmento a rotular quando a resposta vier. */
-  clientEventId: string;
+  segmento: Segment;
   match: PlaceMatch;
 };
 
@@ -55,8 +62,46 @@ function novoId(): string {
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+/**
+ * Teto de espera por uma posição.
+ *
+ * Eram 15 segundos, e isso custou um dia inteiro de medição em 19/09/2026: o
+ * Will guiou sem dados móveis, e sem rede não há A-GPS — o aparelho precisa
+ * procurar satélite do zero, o que leva de 30 a 60 segundos. Todas as oito
+ * marcações do dia estouraram o prazo e foram gravadas sem coordenada.
+ *
+ * Esperar mais não custa nada na mão de quem usa: o toque já foi gravado
+ * antes, e isto roda em segundo plano.
+ */
+const GPS_TIMEOUT_MS = 60_000;
+
+/**
+ * Idade máxima de uma posição para ela ainda valer como "onde estou agora".
+ *
+ * Curto de propósito. Uma posição de um minuto atrás foi tirada com o carro
+ * andando e pode estar a um quilômetro daqui — usá-la para identificar o
+ * lugar produziria um acerto aparente e errado, que é pior do que não
+ * identificar. Abaixo disso, o erro cabe dentro do raio de 300 m.
+ */
+const FIX_FRESCO_MS = 20_000;
+
+/**
+ * Quanto a pergunta do lugar espera pelo GPS antes de aparecer assim mesmo.
+ *
+ * A pergunta NÃO pode ficar refém da posição. Com a permissão ainda pendente
+ * (nem concedida nem negada), `getCurrentPosition` não resolve nunca — o
+ * relógio do timeout só começa depois da resposta do usuário — e a folha de
+ * escolha nunca apareceria. O segmento estaria salvo, mas sem lugar e sem
+ * ninguém perguntando.
+ *
+ * Com o GPS aquecido, a posição quase sempre chega antes desta espera e a
+ * pergunta nem aparece. Quando ela aparece e a posição chega depois, a
+ * identificação automática ainda assume, desde que ninguém tenha respondido.
+ */
+const ESPERA_ANTES_DE_PERGUNTAR_MS = 6_000;
+
 /** Uma leitura de GPS, com teto de tempo. Falhar é normal e não é erro. */
-function lerGPS(timeoutMs = 15_000): Promise<Fix> {
+function lerGPS(timeoutMs = GPS_TIMEOUT_MS): Promise<Fix> {
   return new Promise(resolve => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       resolve({ latitude: null, longitude: null, accuracy: null });
@@ -69,7 +114,7 @@ function lerGPS(timeoutMs = 15_000): Promise<Fix> {
         accuracy: Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : null,
       }),
       () => resolve({ latitude: null, longitude: null, accuracy: null }),
-      { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: 10_000 },
+      { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: FIX_FRESCO_MS },
     );
   });
 }
@@ -83,10 +128,11 @@ export function useCronometro(paradasIniciais: Place[]) {
   const [online, setOnline] = useState(true);
   /** O último envio chegou ao servidor? Null = ainda não houve envio. */
   const [alcance, setAlcance] = useState<boolean | null>(null);
+  /** O GPS já tem posição recente? Alimenta o aviso na tela antes do toque. */
+  const [gpsPronto, setGpsPronto] = useState(false);
 
-  // O último segmento fechado fica à mão para receber a coordenada e o lugar
-  // quando o GPS finalmente responder.
-  const ultimoFechado = useRef<Segment | null>(null);
+  /** Id do segmento cuja pergunta de lugar está aberta e ainda sem resposta. */
+  const perguntaAberta = useRef<string | null>(null);
 
   /**
    * Espelho do estado, sempre atual.
@@ -179,13 +225,76 @@ export function useCronometro(paradasIniciais: Place[]) {
     };
   }, [tentarSincronizar]);
 
+  // ── GPS aquecido ───────────────────────────────────────────────────────────
+  //
+  // Pedir a posição só no toque significa acordar o chip do zero toda vez. Sem
+  // dados móveis isso leva de 30 a 60 segundos, e o lugar do tour acaba sem
+  // identificação — foi o que aconteceu no primeiro dia de uso real.
+  //
+  // Com o watch ligado enquanto o app está na tela, o chip já está procurando
+  // antes do toque, e a posição costuma estar pronta quando o dedo chega. O
+  // resultado não é guardado aqui: quem lê é o getCurrentPosition, que
+  // aproveita o cache do sistema que este watch mantém quente.
+  //
+  // Para na hora em que o app sai da tela. O sistema suspenderia de qualquer
+  // forma, mas parar explicitamente deixa claro que não há rastreamento em
+  // segundo plano — não existe, e não deve existir: o iOS não acorda PWA em
+  // background, então seria uma função que funciona no Android e falha em
+  // silêncio no iPhone.
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+    let id: number | null = null;
+
+    const comecar = () => {
+      if (id !== null) return;
+      id = navigator.geolocation.watchPosition(
+        () => setGpsPronto(true),
+        () => setGpsPronto(false),
+        { enableHighAccuracy: true, maximumAge: FIX_FRESCO_MS, timeout: GPS_TIMEOUT_MS },
+      );
+    };
+    const parar = () => {
+      if (id === null) return;
+      navigator.geolocation.clearWatch(id);
+      id = null;
+    };
+    const aoMudarVisibilidade = () => {
+      if (document.visibilityState === 'visible') comecar();
+      else parar();
+    };
+
+    aoMudarVisibilidade();
+    document.addEventListener('visibilitychange', aoMudarVisibilidade);
+    return () => {
+      document.removeEventListener('visibilitychange', aoMudarVisibilidade);
+      parar();
+    };
+  }, []);
+
   /** Completa o segmento recém-fechado com coordenada e lugar do fim. */
   const completarComGPS = useCallback(async (
     fechado: Segment | null,
     abertoId: string | null,
     identificarLugar: boolean,
   ) => {
-    const fix = await lerGPS();
+    // A posição pode demorar, e pode não vir nunca. Por isso a pergunta do
+    // lugar é disparada por um relógio próprio, e não pelo fim desta espera:
+    // se o GPS ganhar a corrida, ninguém é incomodado; se perder, a pergunta
+    // aparece com o catálogo inteiro e a posição ainda pode assumir depois.
+    const promessaFix = lerGPS();
+
+    if (identificarLugar && fechado) {
+      perguntaAberta.current = fechado.client_event_id;
+      setTimeout(() => {
+        if (perguntaAberta.current !== fechado.client_event_id) return;
+        setPergunta(atual => atual ?? {
+          segmento: fechado,
+          match: { auto: null, motivo: 'sem-coordenada', candidatas: [] },
+        });
+      }, ESPERA_ANTES_DE_PERGUNTAR_MS);
+    }
+
+    const fix = await promessaFix;
 
     // O segmento aberto também quer a coordenada de partida.
     if (abertoId) {
@@ -214,11 +323,16 @@ export function useCronometro(paradasIniciais: Place[]) {
       gps_accuracy_m: fix.accuracy === null ? null : Math.round(fix.accuracy),
       to_service_id: match?.auto?.id ?? fechado.to_service_id,
     };
-    ultimoFechado.current = completo;
     await enfileirar(completo);
 
-    if (match?.auto) {
+    // Uma resposta manual que já tenha chegado manda: quem estava lá sabe
+    // melhor que a coordenada atrasada.
+    const jaRespondeu = perguntaAberta.current !== completo.client_event_id;
+
+    if (match?.auto && !jaRespondeu) {
       // Identificou: o lugar vira também o ponto de partida do próximo trecho.
+      perguntaAberta.current = null;
+      setPergunta(atual => (atual?.segmento.client_event_id === completo.client_event_id ? null : atual));
       await aplicar(prev => ({
         ...prev,
         lastPlaceId: match.auto!.id,
@@ -227,11 +341,13 @@ export function useCronometro(paradasIniciais: Place[]) {
           ? { ...prev.open, from_service_id: match.auto!.id }
           : prev.open,
       }));
-    } else if (identificarLugar) {
+    } else if (identificarLugar && !jaRespondeu) {
       // Não identificou: pergunta, sem bloquear nada. O segmento já está
       // gravado e já vai subir; o rótulo é um complemento que pode chegar
-      // agora, daqui a uma hora ou na tela de revisão.
-      setPergunta({ clientEventId: completo.client_event_id, match: match! });
+      // agora, daqui a uma hora ou na tela de revisão. Se a folha já está na
+      // tela pelo relógio acima, esta chamada só a enriquece com as candidatas
+      // ordenadas, que antes não existiam.
+      setPergunta({ segmento: completo, match: match! });
     }
 
     void tentarSincronizar();
@@ -275,7 +391,6 @@ export function useCronometro(paradasIniciais: Place[]) {
         note: null,
       };
       await enfileirar(fechado);
-      ultimoFechado.current = fechado;
     }
 
     const novoAberto: OpenSegment = {
@@ -325,11 +440,15 @@ export function useCronometro(paradasIniciais: Place[]) {
     void tentarSincronizar();
   }, [aplicar, tentarSincronizar]);
 
-  /** Resposta da pergunta de lugar: uma parada do catálogo, ou um nome digitado. */
-  const responderLugar = useCallback(async (escolha: Place | string) => {
-    const alvo = ultimoFechado.current;
+  /**
+   * Resposta da pergunta de lugar: uma parada do catálogo, ou um nome digitado.
+   *
+   * O alvo vem da própria pergunta, e não do último segmento fechado: entre
+   * abrir a folha e responder, outro toque pode ter fechado outro segmento.
+   */
+  const responderLugar = useCallback(async (alvo: Segment, escolha: Place | string) => {
+    perguntaAberta.current = null;
     setPergunta(null);
-    if (!alvo) return;
 
     const place = typeof escolha === 'string' ? null : escolha;
     const completo: Segment = {
@@ -337,7 +456,6 @@ export function useCronometro(paradasIniciais: Place[]) {
       to_service_id: place?.id ?? null,
       place_label: place ? null : (escolha as string).trim() || null,
     };
-    ultimoFechado.current = completo;
     await enfileirar(completo);
 
     await aplicar(prev => ({
@@ -365,11 +483,15 @@ export function useCronometro(paradasIniciais: Place[]) {
     naFila,
     // Só afirma que está conectado quem tem interface E último envio aceito.
     online: online && alcance !== false,
+    gpsPronto,
     tocar,
     encerrarDia,
     responderLugar,
     escolherTour,
-    descartarPergunta: () => setPergunta(null),
+    descartarPergunta: () => {
+      perguntaAberta.current = null;
+      setPergunta(null);
+    },
     sincronizarAgora: tentarSincronizar,
   };
 }

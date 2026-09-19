@@ -58,7 +58,7 @@ export default function CronometroApp({
   paradas: Place[];
 }) {
   const {
-    fase, estado, pergunta, naFila, online,
+    fase, estado, paradas: catalogo, pergunta, naFila, online, gpsPronto,
     tocar, encerrarDia, responderLugar, escolherTour, descartarPergunta,
   } = useCronometro(paradas);
 
@@ -159,6 +159,12 @@ export default function CronometroApp({
           <p className={online ? 'text-slate-500' : 'text-amber-400'}>
             {online ? 'on-line' : 'sem rede'}
           </p>
+          {/* Sem dados móveis o GPS leva até um minuto para achar satélite.
+              Saber disso ANTES de tocar evita marcar um lugar sem coordenada
+              sem perceber, que foi o que esvaziou o primeiro dia de medição. */}
+          <p className={gpsPronto ? 'text-emerald-400' : 'text-slate-500'}>
+            {gpsPronto ? 'GPS pronto' : 'GPS procurando'}
+          </p>
           {naFila > 0 && <p className="text-slate-500">{naFila} na fila</p>}
         </div>
       </header>
@@ -206,8 +212,9 @@ export default function CronometroApp({
       {pergunta && (
         <EscolhaLugar
           candidatas={pergunta.match.candidatas}
+          catalogo={catalogo}
           motivo={pergunta.match.motivo}
-          onEscolher={escolha => void responderLugar(escolha)}
+          onEscolher={escolha => void responderLugar(pergunta.segmento, escolha)}
           onDescartar={descartarPergunta}
         />
       )}
@@ -218,7 +225,11 @@ export default function CronometroApp({
 const MOTIVO_TEXTO: Record<string, string> = {
   'gps-impreciso': `O GPS está impreciso demais para identificar sozinho (erro acima de 100 m).`,
   'nada-por-perto': `Nenhuma parada do catálogo a menos de ${RAIO_MATCH_M} m.`,
-  'sem-coordenada': 'O aparelho não devolveu coordenada.',
+  // Sem rede o GPS pode levar até um minuto para achar satélite. Escolher da
+  // lista liga o registro ao catálogo igual, e é o que faz a comparação
+  // funcionar depois — por isso o texto empurra para a lista, não para o campo
+  // de digitar.
+  'sem-coordenada': 'Sem posição do GPS ainda. Escolha da lista abaixo.',
   ok: '',
 };
 
@@ -230,16 +241,35 @@ const MOTIVO_TEXTO: Record<string, string> = {
  */
 function EscolhaLugar({
   candidatas,
+  catalogo,
   motivo,
   onEscolher,
   onDescartar,
 }: {
   candidatas: Array<{ place: Place; distancia: number }>;
+  /** Catálogo inteiro, para quando não há posição que permita ordenar. */
+  catalogo: Place[];
   motivo: string;
   onEscolher: (escolha: Place | string) => void;
   onDescartar: () => void;
 }) {
   const [digitado, setDigitado] = useState('');
+  const [busca, setBusca] = useState('');
+
+  // Sem posição não há distância para ordenar, mas o catálogo continua lá. Na
+  // primeira versão esta folha ficava sem lista nenhuma nesse caso e só
+  // oferecia digitar — e o texto digitado não liga ao catálogo, então o dia
+  // 19/09/2026 inteiro foi medido e ficou de fora da tela de comparação. A
+  // lista alfabética resolve: o registro linka igual, só sem a ajuda da
+  // ordenação por proximidade.
+  const semPosicao = candidatas.length === 0;
+  const normaliza = (t: string) =>
+    t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const listaCompleta = semPosicao
+    ? catalogo
+        .filter(p => normaliza(p.name).includes(normaliza(busca)))
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+    : [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/70">
@@ -257,22 +287,51 @@ function EscolhaLugar({
           </button>
         </div>
 
-        <p className="mt-4 text-xs uppercase tracking-wide text-slate-500">Mais perto daqui</p>
+        <p className="mt-4 text-xs uppercase tracking-wide text-slate-500">
+          {semPosicao ? 'Paradas do catálogo' : 'Mais perto daqui'}
+        </p>
+
+        {semPosicao && (
+          <input
+            value={busca}
+            onChange={e => setBusca(e.target.value)}
+            placeholder="Filtrar pelo nome"
+            className="mt-2 w-full rounded-xl bg-slate-700 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+        )}
+
         <div className="mt-2 space-y-2">
-          {candidatas.slice(0, 5).map(({ place, distancia }) => (
-            <button
-              key={place.id}
-              onClick={() => onEscolher(place)}
-              className="flex w-full items-center justify-between gap-3 rounded-xl bg-slate-700 px-4 py-3 text-left active:bg-slate-600"
-            >
-              <span className="min-w-0 truncate">{place.name}</span>
-              <span className="shrink-0 text-sm text-slate-400 tabular-nums">
-                {distancia < 1000 ? `${Math.round(distancia)} m` : `${(distancia / 1000).toFixed(1)} km`}
-              </span>
-            </button>
-          ))}
-          {candidatas.length === 0 && (
-            <p className="text-sm text-slate-400">Nenhuma parada com coordenada no catálogo.</p>
+          {!semPosicao &&
+            candidatas.slice(0, 5).map(({ place, distancia }) => (
+              <button
+                key={place.id}
+                onClick={() => onEscolher(place)}
+                className="flex w-full items-center justify-between gap-3 rounded-xl bg-slate-700 px-4 py-3 text-left active:bg-slate-600"
+              >
+                <span className="min-w-0 truncate">{place.name}</span>
+                <span className="shrink-0 text-sm text-slate-400 tabular-nums">
+                  {distancia < 1000 ? `${Math.round(distancia)} m` : `${(distancia / 1000).toFixed(1)} km`}
+                </span>
+              </button>
+            ))}
+
+          {semPosicao &&
+            listaCompleta.map(place => (
+              <button
+                key={place.id}
+                onClick={() => onEscolher(place)}
+                className="w-full truncate rounded-xl bg-slate-700 px-4 py-3 text-left active:bg-slate-600"
+              >
+                {place.name}
+              </button>
+            ))}
+
+          {semPosicao && listaCompleta.length === 0 && (
+            <p className="text-sm text-slate-400">
+              {catalogo.length === 0
+                ? 'Nenhuma parada com coordenada no catálogo.'
+                : 'Nenhuma parada com esse nome.'}
+            </p>
           )}
         </div>
 
