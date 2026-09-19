@@ -1,0 +1,16 @@
+{
+  "name": "Cronômetro de tour",
+  "short_name": "Cronômetro",
+  "description": "Registro de tempo real de deslocamento e visita durante o tour.",
+  "start_url": "/cronometro",
+  "scope": "/cronometro",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

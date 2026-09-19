@@ -139,6 +139,30 @@ export async function updateSession(request: NextRequest) {
         }
     }
 
+    // --- ROTA /cronometro: ferramenta de campo, só admin ---
+    // Fora de /admin porque é um app de tela cheia instalado no celular, mas a
+    // regra de acesso é a mesma. O manifest e o service worker moram em
+    // /public e NÃO passam por aqui de propósito: o navegador os busca antes
+    // de haver sessão, e barrá-los quebraria a instalação do PWA.
+    if (pathname.startsWith("/cronometro")) {
+        if (!user) {
+            const url = request.nextUrl.clone();
+            url.pathname = "/login";
+            url.searchParams.set("redirect", pathname);
+            return NextResponse.redirect(url);
+        }
+
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+        if (profile?.role !== "admin") {
+            return NextResponse.redirect(new URL("/", request.url));
+        }
+    }
+
     // --- REGRA GERAL: apenas rotas explicitamente protegidas requerem autenticação ---
     // Rotas desconhecidas são deixadas passar para o Next.js renderizar o not-found.tsx
     // /update-password NÃO entra aqui de propósito: sem sessão ela precisa renderizar
