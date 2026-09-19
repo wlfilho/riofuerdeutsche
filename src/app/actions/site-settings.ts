@@ -1,11 +1,13 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { bandStartMinute, parseTrafficBands, type TrafficBand } from '@/lib/travel'
 
 export type SiteSettings = {
   guide_rate_eur: number
   default_exchange_rate: number
   max_hours_per_day: number
+  traffic_factors: TrafficBand[]
   email_assinatura: string
   business_phone: string
   business_whatsapp: string
@@ -26,7 +28,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   const { data } = await supabase
     .from('site_settings')
     .select(
-      'guide_rate_eur, default_exchange_rate, max_hours_per_day, value, business_phone, business_whatsapp, business_email, business_instagram, business_facebook, business_youtube, business_telegram, business_address, bank_account_holder, bank_iban, bank_bic, bank_name'
+      'guide_rate_eur, default_exchange_rate, max_hours_per_day, traffic_factors, value, business_phone, business_whatsapp, business_email, business_instagram, business_facebook, business_youtube, business_telegram, business_address, bank_account_holder, bank_iban, bank_bic, bank_name'
     )
     .eq('key', 'email_assinatura')
     .single()
@@ -35,6 +37,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     guide_rate_eur: Number(data?.guide_rate_eur ?? 40),
     default_exchange_rate: Number(data?.default_exchange_rate ?? 0.17),
     max_hours_per_day: Number(data?.max_hours_per_day ?? 10),
+    traffic_factors: parseTrafficBands(data?.traffic_factors),
     email_assinatura: data?.value ?? '',
     business_phone: data?.business_phone ?? '',
     business_whatsapp: data?.business_whatsapp ?? '',
@@ -51,9 +54,31 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   }
 }
 
+/**
+ * Faixas de trânsito válidas: horário legível, fator positivo, sem dois
+ * inícios iguais (dois inícios no mesmo minuto fariam a escolha da faixa
+ * depender da ordem da lista, que o usuário não controla).
+ */
+function validateTrafficBands(bands: TrafficBand[]): string | null {
+  if (bands.length === 0) return 'Defina ao menos uma faixa de trânsito.'
+  const minutos = new Set<number>()
+  for (const b of bands) {
+    const min = bandStartMinute(b.start)
+    if (min === null) return `Horário de faixa inválido: "${b.start}".`
+    if (!Number.isFinite(b.factor) || b.factor <= 0)
+      return 'Fator de trânsito precisa ser maior que zero.'
+    if (minutos.has(min)) return `Duas faixas começam às ${b.start}.`
+    minutos.add(min)
+  }
+  return null
+}
+
 export async function saveSiteSettings(
   settings: SiteSettings
 ): Promise<{ success: boolean; error?: string }> {
+  const invalidBands = validateTrafficBands(settings.traffic_factors)
+  if (invalidBands) return { success: false, error: invalidBands }
+
   const supabase = await createClient()
   const { error } = await supabase
     .from('site_settings')
@@ -61,6 +86,7 @@ export async function saveSiteSettings(
       guide_rate_eur: settings.guide_rate_eur,
       default_exchange_rate: settings.default_exchange_rate,
       max_hours_per_day: settings.max_hours_per_day,
+      traffic_factors: settings.traffic_factors,
       value: settings.email_assinatura,
       business_phone: settings.business_phone,
       business_whatsapp: settings.business_whatsapp,

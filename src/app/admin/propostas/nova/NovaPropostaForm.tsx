@@ -8,13 +8,16 @@ import { ADMIN_LOCALE, fmtEur, fmtLanguage } from '@/lib/adminFormat';
 import { dayTransportServiceName, resolveDayTransportKey } from '@/lib/dayTransportLabel';
 import { findGuideRateTier, guideRateTierLabel } from '@/lib/guideRate';
 import {
+  allLegsFallback,
+  bandStartMinute,
   buildDayLegs,
   expandMatrix,
   itemLegs,
   sharedLegHours,
   totalLegHours,
   type DayLegs,
-  type LegSource,
+  type Leg,
+  type TrafficBand,
   type TravelLookup,
   type TravelMatrixPayload,
 } from '@/lib/travel';
@@ -372,9 +375,9 @@ type DaySegment = {
   kind: 'transfer' | 'activity';
   label: string;
   hours: number;
-  // Só em trechos: de onde veio o tempo, para a timeline distinguir número
-  // calculado de chute do catálogo.
-  source?: LegSource;
+  // Só em trechos: o trecho resolvido, para a timeline distinguir número
+  // calculado de chute do catálogo e abrir a conta do fator de trânsito.
+  leg?: Leg;
   itemId?: string;
   startMin: number;
   endMin: number;
@@ -391,6 +394,11 @@ function minutesToLabel(min: number): string {
   const h = Math.floor(min / 60) % 24;
   const m = Math.round(min % 60);
   return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+}
+
+/** 1.5 → "1,5"; 1 → "1". O fator é um número que o Will calibra, não moeda. */
+function fmtFactor(factor: number): string {
+  return factor.toLocaleString(ADMIN_LOCALE, { maximumFractionDigits: 2 });
 }
 
 function formatHoursShort(hours: number): string {
@@ -428,25 +436,25 @@ function buildDaySegments(items: EditableItem[], startTime: string, legs: DayLeg
     hours: number,
     itemId?: string,
     insert?: InsertPosition,
-    source?: LegSource,
+    leg?: Leg,
   ) => {
     const startMin = t;
     t += Math.round(hours * 60);
-    segs.push({ kind, label, hours, itemId, startMin, endMin: t, insert, source });
+    segs.push({ kind, label, hours, itemId, startMin, endMin: t, insert, leg });
   };
 
   items.forEach((item, i) => {
     if (i === 0 && legs.first.hours > 0) {
-      push('transfer', 'Transfer', legs.first.hours, undefined, 'start', legs.first.source);
+      push('transfer', 'Transfer', legs.first.hours, undefined, 'start', legs.first);
     }
     push('activity', item.service_name, item.duration_hours ?? 0, item._id);
     if (i < items.length - 1) {
       const entre = legs.between[i];
       if (entre.hours > 0) {
-        push('transfer', 'Transfer', entre.hours, undefined, { after: item._id }, entre.source);
+        push('transfer', 'Transfer', entre.hours, undefined, { after: item._id }, entre);
       }
     } else if (legs.last.hours > 0) {
-      push('transfer', 'Transfer', legs.last.hours, undefined, 'end', legs.last.source);
+      push('transfer', 'Transfer', legs.last.hours, undefined, 'end', legs.last);
     }
   });
 
@@ -1197,7 +1205,16 @@ function DayScheduleGrid({
             // Tempo calculado de carro ganha barra azul; o tempo fixo do
             // catálogo fica cinza e com "~". Sem isso não dá para saber se o
             // número da tela é uma medida ou um palpite.
-            const real = seg.source && seg.source !== 'fallback';
+            const real = !!seg.leg && seg.leg.source !== 'fallback';
+            // Com fator de trânsito aplicado, a dica abre a conta: sem isso o
+            // Will não tem como calibrar os fatores sem ler o banco.
+            const dica = real && seg.leg && seg.leg.factor !== 1
+              ? t('trechoCalculadoComFator', {
+                  base: formatHoursShort(seg.leg.baseHours),
+                  fator: fmtFactor(seg.leg.factor),
+                  inicio: minutesToLabel(seg.startMin),
+                })
+              : real ? t('trechoCalculado') : t('trechoFixo');
             return (
               <div
                 key={idx}
@@ -1205,7 +1222,7 @@ function DayScheduleGrid({
                 className="absolute left-12 right-1"
               >
                 <div
-                  title={real ? t('trechoCalculado') : t('trechoFixo')}
+                  title={dica}
                   className={`h-full flex items-center rounded-r-md px-2 overflow-hidden border-l-4 ${
                     real ? 'bg-sky-50/90 border-sky-300' : 'bg-gray-100/90 border-gray-300'
                   }`}
@@ -1516,6 +1533,7 @@ function DayBlock({
   day,
   items,
   travel,
+  trafficBands,
   services,
   groups,
   transportTypes,
@@ -1545,6 +1563,7 @@ function DayBlock({
   items: EditableItem[];
   // Deslocamento real disponível (matriz + origem). Vazio = tudo no catálogo.
   travel: TravelLookup;
+  trafficBands: TrafficBand[];
   services: ProposalService[];
   groups: ResolvedServiceGroup[];
   // Catálogo de tipos de transporte, para o modal da atração coringa.
@@ -1621,7 +1640,10 @@ function DayBlock({
     if (position !== 'end') setPickerFor(position);
   };
 
-  const legs = buildDayLegs(items, travel);
+  const legs = buildDayLegs(items, travel, {
+    startMinute: bandStartMinute(startTime),
+    bands: trafficBands,
+  });
   const transport = calcDayTransport(items, transportRates, exchangeRate, toggles, legs);
   const { chargeableEur, embeddedEur } = splitTransportCost(transport, embed);
   const dayTotal =
@@ -1630,6 +1652,14 @@ function DayBlock({
     + chargeableEur;
   const dayHours = calcDayHours(items, legs);
   const overloaded = dayHours > maxHoursPerDay;
+
+  // Um trecho cinza é rotina: serviço sem coordenada, atração coringa. O dia
+  // inteiro cinza, com a origem já resolvida, é sintoma — chave do ORS
+  // vencida devolve 200 com `legs: {}`, não erro, e some sem avisar. Só vale
+  // como alarme quando havia tempo real a esperar: sem origem resolvida o
+  // cinza é o estado normal, e o aviso da origem já cobre esse caso.
+  const esperaTempoReal = Object.keys(travel.origin).length > 0;
+  const tudoNoFallback = esperaTempoReal && allLegsFallback(legs, items.length);
 
   const segments = buildDaySegments(items, startTime, legs);
 
@@ -1704,6 +1734,11 @@ function DayBlock({
             {overloaded && (
               <p className="text-xs text-amber-600 font-medium mt-1">
                 {t('maisDeHoras', { horas: maxHoursPerDay })}
+              </p>
+            )}
+            {tudoNoFallback && (
+              <p className="text-xs text-amber-700 font-medium mt-1">
+                {t('avisoFallbackTotal')}
               </p>
             )}
           </div>
@@ -1891,6 +1926,7 @@ export default function NovaPropostaForm({
   proposalId,
   initialLead,
   travelMatrix,
+  trafficBands,
 }: {
   services: ProposalService[];
   // Grupos de atividades (atalhos de montagem): opcional porque só os builders
@@ -1914,6 +1950,9 @@ export default function NovaPropostaForm({
   // Matriz de deslocamento entre as atrações do catálogo, pré-calculada (ver
   // scripts/build-travel-matrix.mjs). Vazia = todo trecho cai no tempo fixo.
   travelMatrix: TravelMatrixPayload;
+  // Fatores de trânsito por faixa de horário, de site_settings. Multiplicam só
+  // o tempo vindo do ORS; o fixo do catálogo já embute trânsito.
+  trafficBands: TrafficBand[];
 }) {
   const t = useTranslations('admin.propostas');
   const tCommon = useTranslations('admin.common');
@@ -2282,16 +2321,27 @@ export default function NovaPropostaForm({
     idBySlug: Object.fromEntries(services.map(s => [s.slug, s.id])),
   }), [originLegs, travelMatrix, services]);
 
+  // O fator de trânsito de cada trecho depende da hora em que ele começa, e a
+  // hora sai do início daquele dia — não de um horário único da proposta. Um
+  // dia que abre às 8h e fecha às 18h cruza três faixas.
+  const dayLegOptions = useCallback(
+    (day: string) => ({
+      startMinute: bandStartMinute(dayStartTimes[day] ?? DEFAULT_DAY_START),
+      bands: trafficBands,
+    }),
+    [dayStartTimes, trafficBands],
+  );
+
   const grandTotal = useMemo(
     () => activeDays.reduce((total, day) => {
       const dayItems = items.filter(i => i.day === day);
-      const legs = buildDayLegs(dayItems, travelLookup);
+      const legs = buildDayLegs(dayItems, travelLookup, dayLegOptions(day));
       const itemsTotal = applyPriceOverrides(dayItems, calcDayItemTotals(dayItems, pax, exchangeRate, guideRate, legs))
         .reduce((s, v) => s + v, 0);
       const transport = calcDayTransport(dayItems, transportRates, exchangeRate, getDayToggles(day), legs);
       return total + itemsTotal + splitTransportCost(transport, embedFlags).chargeableEur;
     }, 0),
-    [activeDays, items, pax, exchangeRate, guideRate, transportRates, getDayToggles, embedFlags, travelLookup],
+    [activeDays, items, pax, exchangeRate, guideRate, transportRates, getDayToggles, embedFlags, travelLookup, dayLegOptions],
   );
 
   // ─── Day handlers ─────────────────────────────────────────────────────────────
@@ -2514,7 +2564,7 @@ export default function NovaPropostaForm({
         // reconstrói (a hidratação parte das atividades) e que a página
         // pública exibiria como dia de tour vazio.
         if (dayItems.length === 0) return [];
-        const legs = buildDayLegs(dayItems, travelLookup);
+        const legs = buildDayLegs(dayItems, travelLookup, dayLegOptions(day));
         const dayTotals = applyPriceOverrides(
           dayItems,
           calcDayItemTotals(dayItems, pax, exchangeRate, guideRate, legs),
@@ -3082,6 +3132,7 @@ export default function NovaPropostaForm({
             {activeDays.map(day => (
               <DayBlock
                 travel={travelLookup}
+                trafficBands={trafficBands}
                 key={day}
                 day={day}
                 items={items.filter(i => i.day === day)}
@@ -3155,7 +3206,7 @@ export default function NovaPropostaForm({
             <div className="space-y-2">
               {activeDays.flatMap(day => {
                 const dayItems = items.filter(i => i.day === day);
-                const legs = buildDayLegs(dayItems, travelLookup);
+                const legs = buildDayLegs(dayItems, travelLookup, dayLegOptions(day));
                 const toggles = getDayToggles(day);
                 const transport = calcDayTransport(dayItems, transportRates, exchangeRate, toggles, legs);
                 const { chargeableEur, embeddedEur } = splitTransportCost(transport, embedFlags);

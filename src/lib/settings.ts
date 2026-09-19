@@ -1,10 +1,13 @@
 import { cache } from 'react'
 import { createClient } from '@/utils/supabase/server'
+import { parseTrafficBands, type TrafficBand } from '@/lib/travel'
 
 export type Settings = {
   guide_rate_eur: number
   default_exchange_rate: number
   max_hours_per_day: number
+  // Faixas de trânsito do gerador de propostas. Ver parseTrafficBands.
+  traffic_factors: TrafficBand[]
   email_assinatura: string
   business_phone: string
   business_whatsapp: string
@@ -31,7 +34,7 @@ export const getSettings = cache(async (): Promise<Settings> => {
       .single(),
     supabase
       .from('site_settings')
-      .select('guide_rate_eur, default_exchange_rate, max_hours_per_day, value')
+      .select('guide_rate_eur, default_exchange_rate, max_hours_per_day, traffic_factors, value')
       .eq('key', 'email_assinatura')
       .single(),
   ])
@@ -47,6 +50,7 @@ export const getSettings = cache(async (): Promise<Settings> => {
     guide_rate_eur: Number(config?.guide_rate_eur ?? 40),
     default_exchange_rate: Number(config?.default_exchange_rate ?? 0.17),
     max_hours_per_day: Number(config?.max_hours_per_day ?? 10),
+    traffic_factors: parseTrafficBands(config?.traffic_factors),
     email_assinatura: config?.value ?? '',
     business_phone: contact?.business_phone ?? '',
     business_whatsapp: contact?.business_whatsapp ?? '',

@@ -94,6 +94,7 @@ export default async function NovaPropostaPage({
       supportedLocales={supportedLocales}
       initialLocale={initialLocale}
       travelMatrix={travelMatrix}
+      trafficBands={settings.traffic_factors}
       initialLead={initialLead ?? undefined}
     />
   );

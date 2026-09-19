@@ -61,6 +61,7 @@ export default async function EditarPropostaPage({
       initialCurrency={proposal.currency ?? DEFAULT_PROPOSAL_CURRENCY}
       initialData={proposal}
       travelMatrix={travelMatrix}
+      trafficBands={settings.traffic_factors}
       proposalId={id}
     />
   );

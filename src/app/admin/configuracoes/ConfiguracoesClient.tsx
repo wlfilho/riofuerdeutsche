@@ -8,6 +8,7 @@ import {
   type GuideRateTierInput,
   type SiteSettings,
 } from '@/app/actions/site-settings'
+import { bandStartMinute, type TrafficBand } from '@/lib/travel'
 
 type Tab = 'negocio' | 'proposta' | 'email'
 
@@ -40,8 +41,25 @@ export default function ConfiguracoesClient({
   const [showSignaturePreview, setShowSignaturePreview] = useState(false)
   const [tab, setTab] = useState<Tab>('negocio')
 
-  const set = (key: keyof SiteSettings, value: string | number) =>
+  const set = (key: keyof SiteSettings, value: string | number | TrafficBand[]) =>
     setForm((prev) => ({ ...prev, [key]: value }))
+
+  // Faixas de trânsito ordenadas pelo início, que é como elas se leem: cada
+  // uma vale até o começo da seguinte, e a última dá a volta na meia-noite.
+  const bandsOrdenadas = [...form.traffic_factors].sort(
+    (a, b) => (bandStartMinute(a.start) ?? 0) - (bandStartMinute(b.start) ?? 0)
+  )
+
+  const setBand = (idx: number, patch: Partial<TrafficBand>) =>
+    set(
+      'traffic_factors',
+      bandsOrdenadas.map((b, i) => (i === idx ? { ...b, ...patch } : b))
+    )
+
+  const addBand = () => set('traffic_factors', [...bandsOrdenadas, { start: '12:00', factor: 1.3 }])
+
+  const removeBand = (idx: number) =>
+    set('traffic_factors', bandsOrdenadas.filter((_, i) => i !== idx))
 
   // Contador de linha nova: `_id` precisa ser único e estável mesmo depois de
   // adicionar, remover e adicionar de novo.
@@ -387,6 +405,60 @@ export default function ConfiguracoesClient({
               <p className="text-xs text-gray-400 mt-1">
                 {t('limiteHorasHint')}
               </p>
+            </div>
+
+            {/* Fatores de trânsito por faixa de horário */}
+            <div className="pt-5 border-t border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-900">{t('transitoTitulo')}</h3>
+              <p className="text-xs text-gray-400 mt-0.5 mb-4">{t('transitoHint')}</p>
+
+              <div className="space-y-2">
+                {bandsOrdenadas.map((band, idx) => {
+                  // O fim de cada faixa é o início da próxima; a última fecha
+                  // na primeira. Mostrado, nunca digitado, para não existir
+                  // buraco nem sobreposição.
+                  const fim = bandsOrdenadas[(idx + 1) % bandsOrdenadas.length]?.start ?? band.start
+                  return (
+                    <div key={idx} className="flex items-center gap-2">
+                      <input
+                        type="time"
+                        value={band.start}
+                        onChange={(e) => e.target.value && setBand(idx, { start: e.target.value })}
+                        className="border border-gray-200 rounded px-2 py-1 text-sm tabular-nums focus:outline-none focus:ring-1 focus:ring-green-500"
+                      />
+                      <span className="text-sm text-gray-400 tabular-nums w-14 text-center">
+                        {bandsOrdenadas.length > 1 ? `– ${fim}` : ''}
+                      </span>
+                      <span className="text-sm text-gray-400">×</span>
+                      <input
+                        type="number"
+                        min={0.1}
+                        step={0.1}
+                        value={band.factor}
+                        onChange={(e) => setBand(idx, { factor: parseFloat(e.target.value) })}
+                        className="w-20 border border-gray-200 rounded px-2 py-1 text-sm text-center tabular-nums focus:outline-none focus:ring-1 focus:ring-green-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeBand(idx)}
+                        disabled={bandsOrdenadas.length <= 1}
+                        title={t('transitoRemover')}
+                        className="p-1 text-gray-300 hover:text-red-500 disabled:opacity-40 disabled:hover:text-gray-300 transition-colors"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={addBand}
+                className="mt-3 text-sm text-green-700 hover:text-green-800 font-medium"
+              >
+                {t('transitoAdicionar')}
+              </button>
             </div>
 
             {/* Dados bancários da Anzahlung */}

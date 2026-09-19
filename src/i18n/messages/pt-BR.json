@@ -858,7 +858,9 @@
       "origemNaoAchou": "Endereço não encontrado. A proposta salva normalmente; a ida e a volta de cada dia ficam no tempo fixo do catálogo.",
       "origemFalhou": "Não deu para calcular o deslocamento agora. A proposta salva normalmente; a ida e a volta de cada dia ficam no tempo fixo do catálogo.",
       "trechoCalculado": "Tempo real de carro, calculado entre as duas coordenadas.",
-      "trechoFixo": "Tempo fixo do catálogo: falta coordenada em uma das pontas."
+      "trechoCalculadoComFator": "Tempo real de carro: {base} no fluxo livre, ×{fator} pela faixa de trânsito das {inicio}.",
+      "trechoFixo": "Tempo fixo do catálogo: falta coordenada em uma das pontas.",
+      "avisoFallbackTotal": "⚠️ Nenhum trecho deste dia tem tempo real de carro. Todos caíram no tempo fixo do catálogo, o que costuma ser sinal de que o cálculo parou de funcionar (chave do OpenRouteService vencida, ou atividades sem coordenada)."
     },
     "atividades": {
       "breadcrumb": "Atividades",
@@ -1306,6 +1308,10 @@
       "taxaCambio": "Taxa de câmbio padrão BRL→EUR",
       "taxaCambioHint": "Fallback usado se a API de cotação falhar ao carregar o formulário de proposta.",
       "limiteHoras": "Limite de horas por dia",
+      "transitoTitulo": "Fatores de trânsito",
+      "transitoHint": "O OpenRouteService calcula em fluxo livre, sem trânsito. Cada faixa multiplica o tempo calculado a partir do horário em que o trecho começa; o tempo fixo do catálogo não é multiplicado, porque já embute trânsito. Cada faixa vale até o início da seguinte, e a última dá a volta na meia-noite.",
+      "transitoAdicionar": "+ Adicionar faixa",
+      "transitoRemover": "Remover faixa",
       "limiteHorasHint": "Acima deste valor, aparece o aviso ⚠️ no itinerário da proposta.",
       "sinalDadosBancarios": "Sinal — dados bancários",
       "sinalDadosHint": "Exibidos no bloco de reserva e sinal da proposta (link e PDF) quando a proposta tiver sinal.",
