@@ -255,14 +255,28 @@ export async function getComparacao(dataISO: string): Promise<Comparacao[]> {
     }
   }
 
-  return registros.map(r => {
+  return registros.map((r, i) => {
     let base_s: number | null = null;
     let previsto_s: number | null = null;
     let fator: number | null = null;
+    let origemDerivada: string | null = null;
 
     if (r.segment_kind === 'travel') {
-      if (r.from_service_id && r.to_service_id) {
-        base_s = entre[betweenKey(r.from_service_id, r.to_service_id)] ?? null;
+      // Um deslocamento começa onde o segmento anterior terminou — isso é da
+      // construção do cronômetro, não um palpite. Vale a pena derivar porque
+      // `from_service_id` só é preenchido quando o GPS identifica o lugar na
+      // hora; corrigido depois na revisão, só o destino é gravado, e sem as
+      // duas pontas não há par na matriz e o trecho fica sem previsão.
+      const anterior = registros[i - 1];
+      const origem = r.from_service_id ?? anterior?.to_service_id ?? null;
+      if (origem && r.to_service_id) {
+        base_s = entre[betweenKey(origem, r.to_service_id)] ?? null;
+      }
+      // A origem derivada também vale para o rótulo: sem isto a tela mostraria
+      // "? → Colombo" ao lado de uma previsão que só existe porque a origem
+      // foi resolvida, o que faria o número parecer vindo do nada.
+      if (!r.from_nome && origem) {
+        origemDerivada = anterior?.to_nome ?? null;
       }
       if (base_s !== null) {
         fator = trafficFactorAt(bands, minutoNoRio(r.started_at));
@@ -274,6 +288,7 @@ export async function getComparacao(dataISO: string): Promise<Comparacao[]> {
 
     return {
       ...r,
+      from_nome: r.from_nome ?? origemDerivada,
       previsto_s,
       base_s,
       fator,
