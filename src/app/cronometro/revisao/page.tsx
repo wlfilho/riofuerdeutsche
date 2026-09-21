@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BOTAO_NAV, chipDia } from '../toque';
 import { getDiasComRegistro, getParadas, getRegistrosDoDia, hojeNoRio } from '@/lib/cronometro/server';
 import RevisaoClient from './RevisaoClient';
 
@@ -20,7 +21,7 @@ export default async function RevisaoPage({
     <div className="mx-auto max-w-2xl px-4 py-6" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-semibold">Revisão do dia</h1>
-        <Link href="/cronometro" className="text-sm text-slate-400 underline-offset-4 hover:underline">
+        <Link href="/cronometro" className={`shrink-0 ${BOTAO_NAV}`}>
           Voltar
         </Link>
       </div>
@@ -31,9 +32,7 @@ export default async function RevisaoPage({
             <Link
               key={d}
               href={`/cronometro/revisao?dia=${d}`}
-              className={`rounded-lg px-3 py-1.5 text-sm ${
-                d === alvo ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-300'
-              }`}
+              className={chipDia(d === alvo)}
             >
               {d.split('-').reverse().slice(0, 2).join('/')}
             </Link>

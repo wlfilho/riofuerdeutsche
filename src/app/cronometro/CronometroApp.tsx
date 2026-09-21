@@ -10,13 +10,26 @@
  *
  * Tudo o que exige decisão (qual lugar era aquele, qual tour é o de hoje) ou
  * aparece ANTES do tour começar, ou DEPOIS do toque, nunca no meio.
+ *
+ * As medidas de alvo saem de `toque.ts` e valem para todo controle desta tela:
+ * o botão principal nunca foi o problema, mas em volta dele havia link de
+ * texto de 20 px de altura, que é alvo de mouse e não de dedo.
  */
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { Car, MapPin } from 'lucide-react';
 import { useCronometro, type Fase } from '@/lib/cronometro/useCronometro';
 import { RAIO_MATCH_M } from '@/lib/cronometro/rules';
 import type { Place } from '@/lib/cronometro/types';
 import type { TourDoDia } from '@/lib/cronometro/server';
+import {
+  BOTAO_ATENCAO,
+  BOTAO_NAV,
+  BOTAO_PRIMARIO,
+  BOTAO_SECUNDARIO,
+  CAMPO,
+  ITEM_LISTA,
+} from './toque';
 
 const ROTULO: Record<Exclude<Fase, 'carregando'>, string> = {
   parado: 'Sair',
@@ -30,10 +43,35 @@ const LEGENDA: Record<Exclude<Fase, 'carregando'>, string> = {
   visit: 'Em visita',
 };
 
+/**
+ * O que está correndo agora, dito dentro do próprio botão.
+ *
+ * A cor já distinguia deslocamento de visita, mas cor sozinha é canal frágil:
+ * no sol, com o brilho no máximo, azul e âmbar encostam um no outro, e quem
+ * está no meio do tour não tem tempo de conferir. O ícone é a redundância.
+ *
+ * Só existe com segmento aberto. Parado não há estado em curso, e inventar um
+ * ícone para o repouso daria três símbolos para distinguir em vez de dois.
+ */
+const ESTADO: Partial<Record<Fase, { Icone: typeof Car; texto: string }>> = {
+  travel: { Icone: Car, texto: 'Em deslocamento' },
+  visit: { Icone: MapPin, texto: 'Em visita' },
+};
+
+/**
+ * Um degrau mais escuro do que o tom natural de cada cor, por contraste.
+ *
+ * Medido no próprio app: sobre os tons -500, o texto branco dava 2,13:1 no
+ * âmbar, 2,47 no verde e 2,71 no azul. O mínimo para texto grande é 3:1, e a
+ * linha de estado, que é menor, pede 4,5:1 — ou seja, nenhum dos três passava,
+ * e o âmbar era o pior justamente na visita, que é onde se fica parado no sol
+ * olhando a tela. Com -600 os três passam, a família de cor não muda, e o
+ * `active:` desce para -700 para o toque continuar dando retorno visível.
+ */
 const COR: Record<Exclude<Fase, 'carregando'>, string> = {
-  parado: 'bg-emerald-500 active:bg-emerald-600',
-  travel: 'bg-sky-500 active:bg-sky-600',
-  visit: 'bg-amber-500 active:bg-amber-600',
+  parado: 'bg-emerald-600 active:bg-emerald-700',
+  travel: 'bg-sky-600 active:bg-sky-700',
+  visit: 'bg-amber-600 active:bg-amber-700',
 };
 
 /** "1h04" / "12min" / "42s" — legível de relance, sem precisar focar. */
@@ -110,8 +148,8 @@ export default function CronometroApp({
   if (precisaEscolherTour) {
     return (
       <div className="min-h-[100dvh] px-5 py-10" style={{ paddingTop: 'max(2.5rem, env(safe-area-inset-top))' }}>
-        <h1 className="text-xl font-semibold">Qual tour é este?</h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <h1 className="text-2xl font-semibold">Qual tour é este?</h1>
+        <p className="mt-1 text-base text-slate-400">
           Há {tours.length} tours em {hoje.split('-').reverse().join('/')}.
         </p>
         <div className="mt-6 space-y-3">
@@ -119,10 +157,12 @@ export default function CronometroApp({
             <button
               key={t.id}
               onClick={() => void escolherTour(t.id)}
-              className="w-full rounded-2xl bg-slate-800 px-5 py-4 text-left active:bg-slate-700"
+              // Bem mais alto que o piso de 48 px: esta escolha acontece com o
+              // carro parado, e errar de tour contamina o dia inteiro.
+              className="w-full touch-manipulation select-none rounded-2xl bg-slate-800 px-5 py-5 text-left active:bg-slate-700"
             >
-              <p className="font-medium">{t.tour_name ?? 'Tour sem nome'}</p>
-              <p className="mt-0.5 text-sm text-slate-400">
+              <p className="text-lg font-medium">{t.tour_name ?? 'Tour sem nome'}</p>
+              <p className="mt-1 text-base text-slate-400">
                 {[t.start_time?.slice(0, 5), t.cliente, t.pax ? `${t.pax} pax` : null]
                   .filter(Boolean)
                   .join(' · ')}
@@ -145,68 +185,87 @@ export default function CronometroApp({
         paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
       }}
     >
-      {/* Cabeçalho: só o que dá contexto de relance. */}
+      {/* Cabeçalho: só o que dá contexto de relance. Nada aqui é tocável, e
+          por isso o tamanho é escolhido por legibilidade no sol — o `text-xs`
+          que estava aqui não se lia em pé, na rua, de óculos de sol. */}
       <header className="flex items-start justify-between gap-3 py-2">
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-slate-300">
+          <p className="truncate text-base font-medium text-slate-200">
             {tourAtual?.tour_name ?? (tours.length === 0 ? 'Sem tour na agenda de hoje' : 'Tour de hoje')}
           </p>
-          <p className="truncate text-xs text-slate-500">
+          <p className="truncate text-sm text-slate-400">
             {estado.lastPlaceLabel ? `Último lugar: ${estado.lastPlaceLabel}` : 'Lugar ainda não identificado'}
           </p>
         </div>
-        <div className="shrink-0 text-right text-xs">
-          <p className={online ? 'text-slate-500' : 'text-amber-400'}>
+        <div className="shrink-0 text-right text-sm">
+          <p className={online ? 'text-slate-400' : 'text-amber-400'}>
             {online ? 'on-line' : 'sem rede'}
           </p>
           {/* Sem dados móveis o GPS leva até um minuto para achar satélite.
               Saber disso ANTES de tocar evita marcar um lugar sem coordenada
               sem perceber, que foi o que esvaziou o primeiro dia de medição. */}
-          <p className={gpsPronto ? 'text-emerald-400' : 'text-slate-500'}>
+          <p className={gpsPronto ? 'text-emerald-400' : 'text-slate-400'}>
             {gpsPronto ? 'GPS pronto' : 'GPS procurando'}
           </p>
-          {naFila > 0 && <p className="text-slate-500">{naFila} na fila</p>}
+          {naFila > 0 && <p className="text-slate-400">{naFila} na fila</p>}
         </div>
       </header>
 
       {/* O botão. Ocupa o resto da tela de propósito: é impossível errar o
           alvo andando, e não há um segundo alvo para errar. */}
-      <main className="flex flex-1 flex-col items-center justify-center gap-6 py-4">
+      <main className="flex flex-1 flex-col items-center justify-center gap-4 py-2">
         <div className="text-center">
-          <p className="text-sm text-slate-400">{LEGENDA[fase]}</p>
+          {/* Com segmento aberto, o estado é dito dentro do botão; repetir aqui
+              só daria ao olho um segundo lugar para procurar a mesma coisa. */}
+          {!aberto && <p className="text-base text-slate-300">{LEGENDA[fase]}</p>}
           {aberto && (
-            <p className="mt-1 font-mono text-4xl tabular-nums text-slate-100">
+            <p className="font-mono text-5xl tabular-nums text-slate-100">
               {duracaoCurta(corridos)}
             </p>
           )}
           {aberto && (
-            <p className="mt-0.5 text-xs text-slate-500">desde {horaCurta(aberto.started_at)}</p>
+            <p className="mt-1 text-sm text-slate-400">desde {horaCurta(aberto.started_at)}</p>
           )}
         </div>
 
         <button
           onClick={() => void tocar()}
-          className={`aspect-square w-full max-w-[22rem] rounded-full text-5xl font-semibold text-white shadow-2xl transition-colors ${COR[fase]}`}
+          // O limite é o MENOR entre a largura confortável e o espaço vertical
+          // que sobra. Preso só à largura, o círculo empurrava o rodapé para
+          // fora da tela no iPhone SE justamente quando ele cresce, que é com
+          // um segmento aberto e a confirmação de encerrar na tela. 45dvh
+          // ainda dá um alvo de ~300 px no menor aparelho.
+          className={`flex aspect-square w-full max-w-[min(22rem,45dvh)] touch-manipulation select-none flex-col items-center justify-center gap-1 rounded-full text-white shadow-2xl transition-colors ${COR[fase]}`}
         >
-          {ROTULO[fase]}
+          {(() => {
+            const estado = ESTADO[fase];
+            if (!estado) return null;
+            const { Icone, texto } = estado;
+            return (
+              <span className="flex items-center gap-2 text-2xl font-semibold">
+                <Icone className="h-8 w-8 shrink-0" strokeWidth={2.5} aria-hidden />
+                {texto}
+              </span>
+            );
+          })()}
+          <span className="text-5xl font-semibold">{ROTULO[fase]}</span>
         </button>
       </main>
 
-      {/* Ações secundárias: discretas de propósito, longe do alvo principal. */}
-      <footer className="flex items-center justify-between py-3 text-sm">
-        <div className="flex gap-4">
-          <Link href="/cronometro/revisao" className="text-slate-400 underline-offset-4 hover:underline">
+      {/* Ações secundárias. Eram três links de texto lado a lado, de ~20 px de
+          altura: alvo de mouse, e o de encerrar o dia grudado nos de navegar.
+          Agora são botões de 48 px, e encerrar mora em fileira própria, longe
+          dos outros dois. */}
+      <footer className="space-y-2 py-3">
+        <div className="grid grid-cols-2 gap-2">
+          <Link href="/cronometro/revisao" className={BOTAO_NAV}>
             Revisão
           </Link>
-          <Link href="/cronometro/comparacao" className="text-slate-400 underline-offset-4 hover:underline">
+          <Link href="/cronometro/comparacao" className={BOTAO_NAV}>
             Comparação
           </Link>
         </div>
-        {aberto && (
-          <button onClick={() => void encerrarDia()} className="text-slate-400 underline-offset-4 hover:underline">
-            Encerrar o dia
-          </button>
-        )}
+        {aberto && <EncerrarDia onEncerrar={() => void encerrarDia()} />}
       </footer>
 
       {pergunta && (
@@ -218,6 +277,48 @@ export default function CronometroApp({
           onDescartar={descartarPergunta}
         />
       )}
+    </div>
+  );
+}
+
+/**
+ * Encerrar o dia, com confirmação em dois toques.
+ *
+ * Fechar o segmento aberto e voltar ao repouso não tem volta pela tela: o
+ * tempo até o próximo toque deixa de ser medido, e o dia fica com um vão que
+ * ninguém sabe explicar depois. Em 20/09/2026 apareceu exatamente um vão
+ * desses, de 11:45 a 12:15, num dia em que este era um link de texto colado
+ * nos dois de navegação.
+ *
+ * Dois toques custam nada aqui, porque encerrar acontece uma vez por dia — ao
+ * contrário do botão grande, onde qualquer atrito seria inaceitável. A janela
+ * se fecha sozinha para o botão não ficar armado no bolso.
+ */
+function EncerrarDia({ onEncerrar }: { onEncerrar: () => void }) {
+  const [confirmando, setConfirmando] = useState(false);
+
+  useEffect(() => {
+    if (!confirmando) return;
+    const t = setTimeout(() => setConfirmando(false), 5_000);
+    return () => clearTimeout(t);
+  }, [confirmando]);
+
+  if (!confirmando) {
+    return (
+      <button onClick={() => setConfirmando(true)} className={`${BOTAO_SECUNDARIO} w-full`}>
+        Encerrar o dia
+      </button>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <button onClick={() => setConfirmando(false)} className={BOTAO_SECUNDARIO}>
+        Cancelar
+      </button>
+      <button onClick={onEncerrar} className={BOTAO_ATENCAO}>
+        Encerrar mesmo
+      </button>
     </div>
   );
 }
@@ -264,7 +365,7 @@ function EscolhaLugar({
   // ordenação por proximidade.
   const semPosicao = candidatas.length === 0;
   const normaliza = (t: string) =>
-    t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const listaCompleta = semPosicao
     ? catalogo
         .filter(p => normaliza(p.name).includes(normaliza(busca)))
@@ -274,20 +375,22 @@ function EscolhaLugar({
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/70">
       <div
-        className="max-h-[80dvh] w-full overflow-y-auto rounded-t-3xl bg-slate-800 p-5"
+        className="max-h-[85dvh] w-full overflow-y-auto rounded-t-3xl bg-slate-800 p-5"
         style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
       >
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold">Onde você está?</h2>
-            <p className="mt-0.5 text-sm text-slate-400">{MOTIVO_TEXTO[motivo] ?? ''}</p>
+          <div className="min-w-0">
+            <h2 className="text-xl font-semibold">Onde você está?</h2>
+            <p className="mt-1 text-sm text-slate-400">{MOTIVO_TEXTO[motivo] ?? ''}</p>
           </div>
-          <button onClick={onDescartar} className="shrink-0 text-sm text-slate-400">
+          {/* "Depois" era texto puro de 20 px, vizinho de nada, no canto que o
+              polegar alcança primeiro ao subir a folha. */}
+          <button onClick={onDescartar} className={`${BOTAO_SECUNDARIO} shrink-0`}>
             Depois
           </button>
         </div>
 
-        <p className="mt-4 text-xs uppercase tracking-wide text-slate-500">
+        <p className="mt-5 text-sm uppercase tracking-wide text-slate-400">
           {semPosicao ? 'Paradas do catálogo' : 'Mais perto daqui'}
         </p>
 
@@ -296,18 +399,14 @@ function EscolhaLugar({
             value={busca}
             onChange={e => setBusca(e.target.value)}
             placeholder="Filtrar pelo nome"
-            className="mt-2 w-full rounded-xl bg-slate-700 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className={`mt-2 ${CAMPO}`}
           />
         )}
 
         <div className="mt-2 space-y-2">
           {!semPosicao &&
             candidatas.slice(0, 5).map(({ place, distancia }) => (
-              <button
-                key={place.id}
-                onClick={() => onEscolher(place)}
-                className="flex w-full items-center justify-between gap-3 rounded-xl bg-slate-700 px-4 py-3 text-left active:bg-slate-600"
-              >
+              <button key={place.id} onClick={() => onEscolher(place)} className={ITEM_LISTA}>
                 <span className="min-w-0 truncate">{place.name}</span>
                 <span className="shrink-0 text-sm text-slate-400 tabular-nums">
                   {distancia < 1000 ? `${Math.round(distancia)} m` : `${(distancia / 1000).toFixed(1)} km`}
@@ -317,17 +416,13 @@ function EscolhaLugar({
 
           {semPosicao &&
             listaCompleta.map(place => (
-              <button
-                key={place.id}
-                onClick={() => onEscolher(place)}
-                className="w-full truncate rounded-xl bg-slate-700 px-4 py-3 text-left active:bg-slate-600"
-              >
-                {place.name}
+              <button key={place.id} onClick={() => onEscolher(place)} className={ITEM_LISTA}>
+                <span className="min-w-0 truncate">{place.name}</span>
               </button>
             ))}
 
           {semPosicao && listaCompleta.length === 0 && (
-            <p className="text-sm text-slate-400">
+            <p className="text-base text-slate-400">
               {catalogo.length === 0
                 ? 'Nenhuma parada com coordenada no catálogo.'
                 : 'Nenhuma parada com esse nome.'}
@@ -335,18 +430,21 @@ function EscolhaLugar({
           )}
         </div>
 
-        <p className="mt-5 text-xs uppercase tracking-wide text-slate-500">Ou escreva o lugar</p>
-        <div className="mt-2 flex gap-2">
+        <p className="mt-6 text-sm uppercase tracking-wide text-slate-400">Ou escreva o lugar</p>
+        {/* Campo e botão empilhados, cada um de largura cheia: lado a lado, o
+            botão comia a largura do campo e os dois ficavam apertados na tela
+            de 375 px. */}
+        <div className="mt-2 space-y-2">
           <input
             value={digitado}
             onChange={e => setDigitado(e.target.value)}
             placeholder="Ex.: restaurante no Cosme Velho"
-            className="min-w-0 flex-1 rounded-xl bg-slate-700 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className={CAMPO}
           />
           <button
             onClick={() => digitado.trim() && onEscolher(digitado)}
             disabled={!digitado.trim()}
-            className="rounded-xl bg-emerald-500 px-5 py-3 font-medium text-white disabled:opacity-40"
+            className={`${BOTAO_PRIMARIO} w-full`}
           >
             Salvar
           </button>

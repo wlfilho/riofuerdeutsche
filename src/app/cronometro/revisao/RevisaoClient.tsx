@@ -6,10 +6,25 @@
  * Nada aqui apaga. Um registro ruim vira `reliable = false` e continua no
  * banco: saber que uma medição existiu e não presta é informação, e apagar
  * deixaria o dia com um buraco que ninguém sabe explicar depois.
+ *
+ * Esta era a tela com os piores alvos do cronômetro: cinco controles de 32 px
+ * embolados numa `flex-wrap`, mais dois links de texto de 16 px. Revisar não
+ * acontece na rua, mas acontece no celular, à noite, cansado, e errar o botão
+ * aqui não é só irritante: o toque vizinho de "Corrigir" era "Não confiável",
+ * que muda o dado. Agora cada controle tem 48 px, os campos têm 16 px de fonte
+ * (abaixo disso o Safari do iPhone dá zoom sozinho ao focar) e as ações estão
+ * separadas por fileira, em vez de disputarem a mesma linha.
  */
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { pareceConfiavel } from '@/lib/cronometro/rules';
+import {
+  BOTAO_ATENCAO,
+  BOTAO_OK,
+  BOTAO_PRIMARIO,
+  BOTAO_SECUNDARIO,
+  CAMPO,
+} from '../toque';
 import type { RegistroMedido } from '@/lib/cronometro/server';
 import type { Place, SegmentKind } from '@/lib/cronometro/types';
 
@@ -182,13 +197,13 @@ export default function RevisaoClient({
   };
 
   if (linhas.length === 0) {
-    return <p className="mt-8 text-sm text-slate-400">Nenhuma medição neste dia.</p>;
+    return <p className="mt-8 text-base text-slate-400">Nenhuma medição neste dia.</p>;
   }
 
   return (
     <>
       {erro && (
-        <p className="mt-4 rounded-lg bg-red-500/15 px-3 py-2 text-sm text-red-300">{erro}</p>
+        <p className="mt-4 rounded-xl bg-red-500/15 px-4 py-3 text-base text-red-300">{erro}</p>
       )}
       <div className="mt-5 space-y-3">
         {linhas.map(r => (
@@ -251,18 +266,18 @@ function Linha({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs uppercase tracking-wide text-slate-500">
+          <p className="text-sm uppercase tracking-wide text-slate-400">
             {registro.segment_kind === 'travel' ? 'Deslocamento' : 'Visita'}
           </p>
-          <p className="mt-0.5 truncate font-medium">{rotulo(registro)}</p>
+          <p className="mt-1 truncate text-base font-medium">{rotulo(registro)}</p>
         </div>
-        <p className="shrink-0 font-mono tabular-nums text-slate-300">
+        <p className="shrink-0 font-mono text-lg tabular-nums text-slate-200">
           {duracaoLonga(registro.duration_seconds)}
         </p>
       </div>
 
       {!registro.reliable && (
-        <p className="mt-2 text-xs text-amber-400">
+        <p className="mt-2 text-sm text-amber-400">
           Marcado como não confiável. Fica no banco, fora das médias.
         </p>
       )}
@@ -271,21 +286,21 @@ function Linha({
       {!editandoLugar ? (
         <button
           onClick={() => setEditandoLugar(true)}
-          className="mt-2 text-xs text-slate-400 underline-offset-4 hover:underline"
+          className={`mt-3 w-full ${BOTAO_SECUNDARIO}`}
         >
           Trocar o lugar
         </button>
       ) : (
-        <div className="mt-3 space-y-2 rounded-lg bg-slate-900/50 p-3">
+        <div className="mt-3 space-y-3 rounded-xl bg-slate-900/50 p-3">
           <select
             value={registro.to_service_id ?? ''}
             onChange={e => {
               onSalvar({ lugar: { serviceId: e.target.value || null, label: null } });
               setEditandoLugar(false);
             }}
-            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-slate-100"
+            className={CAMPO}
           >
-            <option value="">— nenhuma parada do catálogo —</option>
+            <option value="">nenhuma parada do catálogo</option>
             {[...paradas]
               .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
               .map(p => (
@@ -293,64 +308,78 @@ function Linha({
               ))}
           </select>
 
-          <div className="flex gap-2">
-            <input
-              value={digitado}
-              onChange={e => setDigitado(e.target.value)}
-              placeholder="Ou escreva um nome livre"
-              className="min-w-0 flex-1 rounded-lg bg-slate-700 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500"
-            />
-            <button
-              onClick={() => {
-                onSalvar({ lugar: { serviceId: null, label: digitado.trim() || null } });
-                setEditandoLugar(false);
-              }}
-              disabled={salvando}
-              className="rounded-lg bg-slate-600 px-3 py-2 text-sm disabled:opacity-40"
-            >
-              Usar
-            </button>
-          </div>
+          {/* Campo e botão empilhados: lado a lado, o "Usar" comia a largura do
+              campo e sobravam dois alvos apertados na tela de 375 px. */}
+          <input
+            value={digitado}
+            onChange={e => setDigitado(e.target.value)}
+            placeholder="Ou escreva um nome livre"
+            className={CAMPO}
+          />
+          <button
+            onClick={() => {
+              onSalvar({ lugar: { serviceId: null, label: digitado.trim() || null } });
+              setEditandoLugar(false);
+            }}
+            disabled={salvando}
+            className={`w-full ${BOTAO_SECUNDARIO}`}
+          >
+            Usar este nome
+          </button>
 
-          <p className="text-[11px] text-slate-500">
+          <p className="text-sm text-slate-400">
             Escolher do catálogo é o que liga o registro à tela de comparação. Nome livre serve
             para lugar que não existe no catálogo, e fica de fora da comparação.
           </p>
 
-          <button onClick={() => setEditandoLugar(false)} className="text-xs text-slate-400">
+          <button
+            onClick={() => setEditandoLugar(false)}
+            className={`w-full ${BOTAO_SECUNDARIO}`}
+          >
             Cancelar
           </button>
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+      {/* Os horários em fileira própria, cada campo com metade da largura. O
+          traço é intervalo (`von–bis`), não aposto. */}
+      <div className="mt-4 flex items-center gap-2">
         <input
           type="time"
           value={inicio}
           onChange={e => e.target.value && setInicio(e.target.value)}
-          className="rounded-lg bg-slate-700 px-2 py-1.5 tabular-nums text-slate-100"
+          className={`${CAMPO} flex-1 tabular-nums`}
+          aria-label="Início"
         />
-        <span className="text-slate-500">–</span>
+        <span className="shrink-0 text-slate-400">–</span>
         <input
           type="time"
           value={fim}
           onChange={e => e.target.value && setFim(e.target.value)}
-          className="rounded-lg bg-slate-700 px-2 py-1.5 tabular-nums text-slate-100"
+          className={`${CAMPO} flex-1 tabular-nums`}
+          aria-label="Fim"
         />
+      </div>
 
+      {/* Aparece só depois de mexer no horário. Em fileira própria, e não ao
+          lado de "Não confiável" como antes: acertar o botão errado ali muda o
+          dado em vez de salvar a hora. */}
+      {mudou && (
         <button
           onClick={() => onSalvar({ inicio, fim })}
-          disabled={!mudou || salvando}
-          className="rounded-lg bg-emerald-500 px-3 py-1.5 font-medium text-white disabled:opacity-40"
+          disabled={salvando}
+          className={`mt-2 w-full ${BOTAO_PRIMARIO}`}
         >
-          {salvando ? 'Salvando…' : 'Corrigir'}
+          {salvando ? 'Salvando…' : 'Corrigir o horário'}
         </button>
+      )}
 
+      <div className="mt-2 grid grid-cols-2 gap-2">
         {registro.reliable ? (
           <button
             onClick={() => onSalvar({ rebaixar: true })}
             disabled={salvando}
-            className="rounded-lg border border-amber-600/60 px-3 py-1.5 text-amber-300 disabled:opacity-40"
+            className={BOTAO_ATENCAO}
           >
             Não confiável
           </button>
@@ -358,7 +387,7 @@ function Linha({
           <button
             onClick={() => onSalvar({ promover: true })}
             disabled={salvando}
-            className="rounded-lg border border-emerald-600/60 px-3 py-1.5 text-emerald-300 disabled:opacity-40"
+            className={BOTAO_OK}
           >
             Confiável
           </button>
@@ -367,71 +396,77 @@ function Linha({
         <button
           onClick={() => setAbrindoDivisao(v => !v)}
           disabled={salvando}
-          className="rounded-lg border border-slate-600 px-3 py-1.5 text-slate-300 disabled:opacity-40"
+          className={BOTAO_SECUNDARIO}
         >
-          Dividir
+          {abrindoDivisao ? 'Fechar' : 'Dividir'}
         </button>
       </div>
 
       {/* ── Divisão ─────────────────────────────────────────────────────── */}
       {abrindoDivisao && (
-        <div className="mt-3 space-y-3 rounded-lg bg-slate-900/50 p-3">
-          <p className="text-xs text-slate-400">
+        <div className="mt-2 space-y-3 rounded-xl bg-slate-900/50 p-3">
+          <p className="text-sm text-slate-300">
             Um bloco que contém duas coisas — por exemplo o deslocamento que engoliu a visita
             porque a chegada não foi marcada, ou a fila de ingresso somada à visita.
           </p>
 
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="text-slate-400">Cortar às</span>
+          <label className="block">
+            <span className="text-sm text-slate-400">Cortar às</span>
             <input
               type="time"
               value={corte}
               onChange={e => e.target.value && setCorte(e.target.value)}
-              className="rounded-lg bg-slate-700 px-2 py-1.5 tabular-nums text-slate-100"
+              className={`mt-1 ${CAMPO} tabular-nums`}
             />
+          </label>
+
+          <div className="space-y-3">
+            <label className="block">
+              <span className="text-sm text-slate-400">Primeira metade</span>
+              <select
+                value={primeiro}
+                onChange={e => setPrimeiro(e.target.value as SegmentKind)}
+                className={`mt-1 ${CAMPO}`}
+              >
+                <option value="travel">Deslocamento</option>
+                <option value="visit">Visita</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-sm text-slate-400">Segunda metade</span>
+              <select
+                value={segundo}
+                onChange={e => setSegundo(e.target.value as SegmentKind)}
+                className={`mt-1 ${CAMPO}`}
+              >
+                <option value="travel">Deslocamento</option>
+                <option value="visit">Visita</option>
+              </select>
+            </label>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <select
-              value={primeiro}
-              onChange={e => setPrimeiro(e.target.value as SegmentKind)}
-              className="rounded-lg bg-slate-700 px-2 py-1.5 text-slate-100"
-            >
-              <option value="travel">Deslocamento</option>
-              <option value="visit">Visita</option>
-            </select>
-            <span className="text-slate-500">depois</span>
-            <select
-              value={segundo}
-              onChange={e => setSegundo(e.target.value as SegmentKind)}
-              className="rounded-lg bg-slate-700 px-2 py-1.5 text-slate-100"
-            >
-              <option value="travel">Deslocamento</option>
-              <option value="visit">Visita</option>
-            </select>
-          </div>
-
-          <p className="text-[11px] text-slate-500">
+          <p className="text-sm text-slate-400">
             As duas metades nascem como não confiáveis, porque a hora do corte é lembrança e não
             medição. Se o corte for firme (o horário impresso num ingresso, por exemplo), marque
             como confiável depois.
           </p>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                onDividir(corte, primeiro, segundo);
-                setAbrindoDivisao(false);
-              }}
-              disabled={salvando}
-              className="rounded-lg bg-emerald-500 px-3 py-1.5 font-medium text-white disabled:opacity-40"
-            >
-              Dividir aqui
-            </button>
-            <button onClick={() => setAbrindoDivisao(false)} className="text-sm text-slate-400">
-              Cancelar
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              onDividir(corte, primeiro, segundo);
+              setAbrindoDivisao(false);
+            }}
+            disabled={salvando}
+            className={`w-full ${BOTAO_PRIMARIO}`}
+          >
+            Dividir aqui
+          </button>
+          <button
+            onClick={() => setAbrindoDivisao(false)}
+            className={`w-full ${BOTAO_SECUNDARIO}`}
+          >
+            Cancelar
+          </button>
         </div>
       )}
     </div>
