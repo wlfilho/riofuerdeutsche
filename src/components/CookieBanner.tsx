@@ -3,10 +3,26 @@
 import { useEffect, useState } from 'react'
 import { m, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+
+/**
+ * Rotas de trabalho: tudo atrás de login, usado pelo Will e pelos motoristas.
+ *
+ * O banner vive no layout raiz e por isso aparecia também aqui, onde não há
+ * visitante para consentir nada — e no cronômetro ele cobria o rodapé inteiro,
+ * que é onde moram Revisão, Comparação e Encerrar o dia. Numa ferramenta que
+ * se usa em pé, na rua, um aviso de cookie em alemão tapando os botões é o
+ * problema de interface mais caro da tela.
+ *
+ * Sem consentimento nestas rotas o GA4 também não carrega, que é justamente o
+ * que se quer: o próprio dono navegando no admin nunca foi visita.
+ */
+const ROTAS_INTERNAS = ['/admin', '/cronometro', '/motorista']
 
 export default function CookieBanner() {
   const t = useTranslations('public.cta.cookieBanner')
+  const pathname = usePathname()
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -52,6 +68,13 @@ export default function CookieBanner() {
     setVisible(false)
     registrarEscolha('rejected')
   }
+
+  // Depois dos hooks, nunca antes: sair mais cedo mudaria a ordem deles entre
+  // uma rota e outra, que é erro de React e não de interface.
+  const interna = ROTAS_INTERNAS.some(
+    r => pathname === r || pathname.startsWith(`${r}/`) || pathname.includes(`${r}/`) || pathname.endsWith(r),
+  )
+  if (interna) return null
 
   return (
     <AnimatePresence>
