@@ -16,13 +16,19 @@ export default function ContactDeleteConfirm({
   onConfirm,
 }: ContactDeleteConfirmProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const displayName = contactName || contactEmail;
 
+  // Sem este catch a falha ficava invisível: o erro virava unhandled rejection,
+  // o painel voltava ao normal e o contato continuava no banco sem aviso nenhum.
   const handleConfirm = async () => {
     setLoading(true);
+    setError(null);
     try {
       await onConfirm();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Não foi possível remover o contato.');
     } finally {
       setLoading(false);
     }
@@ -60,6 +66,12 @@ export default function ContactDeleteConfirm({
             ⚠ Esta ação não pode ser desfeita. Leads vinculados ficarão sem contato associado.
           </p>
         </div>
+
+        {error && (
+          <div className="w-full max-w-sm p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200 text-left">
+            {error}
+          </div>
+        )}
       </div>
 
       {/* Footer */}

@@ -18,7 +18,9 @@ type PendingLead = {
   email: string;
   phone: string | null;
   notes: string | null;
-  contact_id: string;
+  // Nulo quando o contato foi removido em /admin/contatos: o lead sobrevive
+  // com a própria cópia de nome, e-mail e telefone, mas sem perfil pra abrir.
+  contact_id: string | null;
   pax: number;
   children: number | null;
   requested_days: string[] | null;
@@ -138,12 +140,14 @@ async function PendingLeadsStrip({ leads }: { leads: PendingLead[] }) {
         <div className="mt-2.5 flex flex-wrap items-center gap-2">
           <GroupBadges groups={lead.groups} />
           <div className="ml-auto flex items-center gap-2">
-            <Link
-              href={`/admin/contatos/${lead.contact_id}`}
-              className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors shrink-0"
-            >
-              {t('verPerfil')}
-            </Link>
+            {lead.contact_id && (
+              <Link
+                href={`/admin/contatos/${lead.contact_id}`}
+                className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors shrink-0"
+              >
+                {t('verPerfil')}
+              </Link>
+            )}
             <Link
               href={`/admin/propostas/nova?lead_id=${lead.id}`}
               className="px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shrink-0"
