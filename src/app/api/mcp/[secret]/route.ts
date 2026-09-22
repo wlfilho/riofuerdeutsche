@@ -2,11 +2,12 @@
 //
 // Servidor MCP remoto (Model Context Protocol) do site. Registrado como Custom
 // Connector no Claude, apontando pra
-// https://riofuerdeutsche.de/api/mcp/<MCP_PATH_SECRET>. Duas famílias de
+// https://riofuerdeutsche.de/api/mcp/<MCP_PATH_SECRET>. Três famílias de
 // ferramenta hoje:
 //
 //   - WhatsApp, via a API REST da instância uazapi (`rfd`);
-//   - GA4, via a Data API do Google Analytics 4 (conta de serviço ga4-reader).
+//   - GA4, via a Data API do Google Analytics 4 (conta de serviço ga4-reader);
+//   - Search Console, via a Search Analytics API (mesma conta de serviço).
 //
 // Ferramenta nova aqui aparece sozinha pro Claude já conectado, sem precisar
 // reconectar o connector.
@@ -14,7 +15,8 @@
 // A única proteção do endpoint é o segmento `secret` da URL batendo com
 // MCP_PATH_SECRET — não há OAuth. Segredo errado (ou não configurado) responde
 // 404, pra não revelar que a rota existe. Por isso as ferramentas que escrevem
-// têm trava própria (ver assertKnownContact); as de GA4 são só leitura.
+// têm trava própria (ver assertKnownContact); as de GA4 e Search Console são só
+// leitura.
 //
 // Cada ferramenta chama a API externa diretamente; fora o cliente de auth do
 // Google (cacheado pelo token), não há estado em memória entre chamadas
@@ -27,6 +29,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { ga4RunReport } from "@/lib/ga4";
 import { digitsOnly, phoneTail } from "@/lib/phone";
+import { searchConsoleQuery, toSearchConsoleDate } from "@/lib/search-console";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -243,8 +246,47 @@ const mcpHandler = createMcpHandler(
         })
       )
     );
+
+    server.registerTool(
+      "search_console_query",
+      {
+        title: "Consultar Search Console (cliques, impressões, CTR, posição)",
+        description:
+          "Roda uma consulta de Search Analytics na Search Console do riofuerdeutsche.de (propriedade de domínio, cobre www e subdomínios). Devolve clicks, impressions, ctr e position por dimensão. Diferente do GA4, estes números não dependem do banner de cookies — vêm da própria busca do Google, então são o total real. Em compensação há atraso: os 2 ou 3 dias mais recentes costumam vir vazios. Datas em YYYY-MM-DD (atalhos '7daysAgo'/'today' também são aceitos e convertidos).",
+        inputSchema: z.object({
+          dimensions: z
+            .array(z.enum(["query", "page", "country", "device", "date", "searchAppearance"]))
+            .default(["query"])
+            .describe("Como quebrar as linhas. Ex: ['query'] para termos de busca, ['page'] para páginas, ['date','query'] para evolução por termo."),
+          start_date: z.string().default("28daysAgo").describe("Data inicial, YYYY-MM-DD."),
+          end_date: z.string().default("today").describe("Data final, YYYY-MM-DD."),
+          row_limit: z.number().int().positive().max(25000).default(100).describe("Máximo de linhas a retornar."),
+          page_filter: z
+            .string()
+            .optional()
+            .describe("Restringe a uma página só, pela URL exata e completa (ex: 'https://riofuerdeutsche.de/touren/rocinha')."),
+          query_filter: z
+            .string()
+            .optional()
+            .describe("Restringe aos termos de busca que contenham este texto (ex: 'rocinha')."),
+        }),
+      },
+      safe(async ({ dimensions, start_date, end_date, row_limit, page_filter, query_filter }) => {
+        const filters: { dimension: string; operator: string; expression: string }[] = [];
+        if (page_filter) filters.push({ dimension: "page", operator: "equals", expression: page_filter });
+        if (query_filter) filters.push({ dimension: "query", operator: "contains", expression: query_filter });
+
+        return searchConsoleQuery({
+          startDate: toSearchConsoleDate(start_date),
+          endDate: toSearchConsoleDate(end_date),
+          dimensions,
+          rowLimit: row_limit,
+          ...(filters.length ? { dimensionFilterGroups: [{ filters }] } : {}),
+        });
+      })
+    );
   },
-  { serverInfo: { name: "rio-fuer-deutsche-whatsapp", version: "1.0.0" } }
+  { serverInfo: { name: "rio-fuer-deutsche", version: "1.1.0" } }
 );
 
 async function handleRequest(
