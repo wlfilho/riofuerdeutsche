@@ -37,11 +37,10 @@ const estimatedTourDuration = "8 Stunden";
 const attractions = [
     {
         name: "Christus-Erlöser (Corcovado)",
-        // PENDENTE DE DECISÃO DE PRODUTO (19/09/2026): duração ainda escrita à mão.
-        // O catálogo tem DOIS produtos: cristo-redentor (Auto, 1h) e
-        // cristo-redentor-trenzinho-v2e2g (Zahnradbahn, 2,5h). Este card funde os
-        // dois. Definir qual é, ou separar em dois cards, e então pôr o catalogSlug.
-        time: "~2 Std.",
+        // Decidido em 22/09/2026: a Klassiker sobe de carro, não de Zahnradbahn.
+        // Confere com o horário dos programas, que reservam 2,5h para o Cristo:
+        // é 1h de visita + 0,75h de subida + 0,75h de descida no catálogo.
+        catalogSlug: "cristo-redentor",
         desc: "Das Wahrzeichen Rios thront auf 710 Metern über der Stadt. Von hier oben hast du einen 360°-Blick über die Strände, die Bucht und den Regenwald, ein Moment, den du nie vergisst.",
         tip: "Früh am Morgen oder kurz vor Schließung sind die besten Zeiten: weniger Touristen, besseres Licht für Fotos.",
         effort: "Leicht",
