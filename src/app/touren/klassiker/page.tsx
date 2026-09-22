@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import AndereTouren from "@/components/AndereTouren";
 import { getSettings, buildContactUrls } from "@/lib/settings";
+import { getTourServiceDurations, formatDuration } from "@/lib/tourServices";
 
 export const metadata = {
     title: "Klassiker Tour Rio de Janeiro mit deutschem Guide",
@@ -36,6 +37,10 @@ const estimatedTourDuration = "8 Stunden";
 const attractions = [
     {
         name: "Christus-Erlöser (Corcovado)",
+        // PENDENTE DE DECISÃO DE PRODUTO (19/09/2026): duração ainda escrita à mão.
+        // O catálogo tem DOIS produtos: cristo-redentor (Auto, 1h) e
+        // cristo-redentor-trenzinho-v2e2g (Zahnradbahn, 2,5h). Este card funde os
+        // dois. Definir qual é, ou separar em dois cards, e então pôr o catalogSlug.
         time: "~2 Std.",
         desc: "Das Wahrzeichen Rios thront auf 710 Metern über der Stadt. Von hier oben hast du einen 360°-Blick über die Strände, die Bucht und den Regenwald, ein Moment, den du nie vergisst.",
         tip: "Früh am Morgen oder kurz vor Schließung sind die besten Zeiten: weniger Touristen, besseres Licht für Fotos.",
@@ -47,6 +52,10 @@ const attractions = [
     },
     {
         name: "Zuckerhut (Pão de Açúcar)",
+        // PENDENTE DE DECISÃO DE PRODUTO (19/09/2026): duração ainda escrita à mão.
+        // Site diz 2,5h, catálogo (pao-de-acucar) diz 1,5h. Diferença grande demais
+        // para escolher no escuro, e o card promete pôr do sol lá em cima. Decidir
+        // qual dos dois números é o real antes de ligar.
         time: "~2,5 Std.",
         desc: "Zwei Seilbahnfahrten bringen dich auf den legendären Zuckerhut. Der Blick auf die Guanabara-Bucht, den Corcovado und die Skyline von Rio ist atemberaubend, besonders zum Sonnenuntergang.",
         tip: "Der Sonnenuntergang vom Zuckerhut ist eines der schönsten Erlebnisse in Rio. Ich plane die Tour so, dass wir genau zur richtigen Zeit oben sind.",
@@ -57,7 +66,7 @@ const attractions = [
     },
     {
         name: "Escadaria Selarón",
-        time: "~45 Min.",
+        catalogSlug: "selaron",
         desc: "215 Stufen, bedeckt mit über 2.000 bunten Fliesen aus aller Welt, das Lebenswerk des chilenischen Künstlers Jorge Selarón. Eine der meistfotografierten Treppen der Welt, mitten im Herzen von Lapa.",
         tip: "Frühmorgens hast du die Treppe fast für dich allein, perfekt für Fotos ohne Menschenmassen.",
         effort: "Leicht",
@@ -67,7 +76,7 @@ const attractions = [
     },
     {
         name: "Santa Teresa",
-        time: "~1,5 Std.",
+        catalogSlug: "santa-teresa",
         desc: "Das Künstlerviertel auf dem Hügel: kopfsteingepflasterte Gassen, bunte Häuser, Ateliers und ein Panoramablick über die Stadt. Santa Teresa zeigt dir das kreative, authentische Rio abseits der Touristenpfade.",
         tip: "Wir kombinieren Santa Teresa ideal mit der Escadaria Selarón und den Arcos da Lapa, alles fußläufig erreichbar.",
         effort: "Moderat",
@@ -76,7 +85,7 @@ const attractions = [
     },
     {
         name: "Mirante Dona Marta",
-        time: "~1 Std.",
+        catalogSlug: "mirante-dona-marta-mdmrt",
         desc: "Der vielleicht beste Aussichtspunkt Rios, und kaum ein Tourist kennt ihn. Von hier siehst du den Christus, den Zuckerhut, die Lagoa und die Strände in einem einzigen, spektakulären Panorama.",
         tip: "Dies ist mein persönlicher Lieblingsort in Rio. Der Blick von hier ist besser als vom Corcovado, und es gibt keine Warteschlangen.",
         effort: "Leicht",
@@ -85,7 +94,7 @@ const attractions = [
     },
     {
         name: "Pedra do Arpoador",
-        time: "~1 Std.",
+        catalogSlug: "ipanema-promenade-arpoador-felsen-fhln6",
         desc: "Der Felsen zwischen Copacabana und Ipanema ist der Ort, an dem die Cariocas den Sonnenuntergang feiern, mit Applaus, wenn die Sonne im Meer versinkt. Ein magischer Moment und echtes Rio-Feeling.",
         tip: "Am Abend klatschen die Einheimischen, wenn die Sonne untergeht. Diesen Moment erlebst du nirgendwo sonst auf der Welt.",
         effort: "Leicht",
@@ -95,7 +104,7 @@ const attractions = [
     },
     {
         name: "Tijuca-Regenwald",
-        time: "~3 Std.",
+        catalogSlug: "floresta-da-tijuca-regenwald-g1omv",
         desc: "Der größte urbane Regenwald der Welt, mitten in Rio. Wanderwege, Wasserfälle und eine unglaubliche Artenvielfalt erwarten dich, nur wenige Minuten vom Stadtzentrum entfernt.",
         tip: "Ich kenne Wege und Wasserfälle, die in keinem Reiseführer stehen. Für Naturliebhaber ist die Tijuca ein absolutes Muss.",
         effort: "Moderat",
@@ -104,7 +113,7 @@ const attractions = [
     },
     {
         name: "Botanischer Garten (Jardim Botânico)",
-        time: "~1,5 Std.",
+        catalogSlug: "jardim-botanico-jbrio",
         desc: "140 Hektar tropische Pracht: die berühmte Palmenallee, riesige Seerosen, Orchideen und über 6.500 Pflanzenarten. Ein Ort der Ruhe und Schönheit mitten in der pulsierenden Stadt.",
         tip: "Die Palmenallee am Eingang ist eines der schönsten Fotomotive Rios. Perfekt zum Kombinieren mit Parque Lage nebenan.",
         effort: "Leicht",
@@ -113,7 +122,7 @@ const attractions = [
     },
     {
         name: "Parque Lage",
-        time: "~1 Std.",
+        catalogSlug: "parque-lage-pqlge",
         desc: "Ein historisches Herrenhaus am Fuße des Corcovado, umgeben von üppigem Regenwald. Das Café im Innenhof mit Blick auf den Christus ist einer der instagrammbarsten Orte Rios.",
         tip: "Das Frühstück im Café des Palastes mit Blick auf den Christus ist der perfekte Start in deinen Rio-Tag.",
         effort: "Leicht",
@@ -122,7 +131,7 @@ const attractions = [
     },
     {
         name: "Lagoa Rodrigo de Freitas",
-        time: "~1 Std.",
+        catalogSlug: "lagoa-rodrigo-de-freitas-jbrbw",
         desc: "Die Lagune im Herzen der Südzone, umgeben von Bergen und den Stadtvierteln Ipanema, Leblon und Jardim Botânico. Ideal zum Spazieren, Radfahren oder einfach die Aussicht genießen.",
         tip: "Am späten Nachmittag spiegeln sich die Berge im Wasser, ein großartiger Zwischenstopp auf dem Weg zum Sonnenuntergang am Arpoador.",
         effort: "Leicht",
@@ -131,6 +140,10 @@ const attractions = [
     },
     {
         name: "Urca",
+        // PENDENTE DE DECISÃO DE PRODUTO (19/09/2026): duração ainda escrita à mão.
+        // O card vende o bairro e a Mureta ao pôr do sol. No catálogo esse produto
+        // (urca-bairro-mureta-urcbr) é parada de foto de 15min, e existe ainda o
+        // morro-da-urca-mrurc, de 3h. Decidir o produto antes de ligar.
         time: "~1,5 Std.",
         desc: "Das ruhigste Viertel Rios, direkt am Fuß des Zuckerhuts. Kleine Gassen, historische Häuser und die Mureta da Urca, eine Mauer am Meer, wo Einheimische bei Sonnenuntergang ein kühles Bier genießen.",
         tip: "Die Mureta da Urca bei Sonnenuntergang ist das authentischste Rio-Erlebnis: Bier, Meerblick, Einheimische, kein Tourist weit und breit.",
@@ -140,7 +153,7 @@ const attractions = [
     },
     {
         name: "Arcos da Lapa",
-        time: "~30 Min.",
+        catalogSlug: "arcos-da-lapa-arclp",
         desc: "Das imposante Aquädukt aus dem 18. Jahrhundert ist das Tor zum Stadtviertel Lapa, Rios Zentrum für Nachtleben, Samba und Straßenkunst. Tagsüber ein fotogenes Wahrzeichen, nachts voller Energie.",
         tip: "Perfekt als Ausgangspunkt: Von hier geht es zu Fuß zur Escadaria Selarón oder mit der historischen Straßenbahn hoch nach Santa Teresa.",
         effort: "Leicht",
@@ -226,6 +239,7 @@ const programs = [
 
 export default async function KlassikerTourPage() {
   const settings = await getSettings()
+  const durations = await getTourServiceDurations()
   const { whatsappHref, emailHref } = buildContactUrls(settings)
   const anfrageWhatsappHref = `${whatsappHref}?text=${encodeURIComponent('Hallo! Ich interessiere mich für die Klassiker Tour.')}`
 
@@ -335,6 +349,13 @@ export default async function KlassikerTourPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {attractions.map((attr, index) => {
                                 const hasLink = "guideLink" in attr && !!attr.guideLink;
+                                // Duração vem do catálogo quando a atração tem catalogSlug.
+                                // Se o slug sumir do catálogo, a etiqueta não renderiza:
+                                // ausência é melhor que número errado com cara de verdade.
+                                const catalogSlug = "catalogSlug" in attr ? attr.catalogSlug : undefined;
+                                const timeLabel = catalogSlug
+                                    ? formatDuration(durations.get(catalogSlug)?.durationHours ?? 0)
+                                    : attr.time;
                                 const cardContent = (
                                     <>
                                         <div className="h-56 w-full relative overflow-hidden">
@@ -348,10 +369,12 @@ export default async function KlassikerTourPage() {
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                             <div className="absolute top-3 left-3 flex items-center gap-2">
-                                                <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-gray-700 shadow-sm">
-                                                    <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                                    {attr.time}
-                                                </div>
+                                                {timeLabel && (
+                                                    <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-gray-700 shadow-sm">
+                                                        <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                                        {timeLabel}
+                                                    </div>
+                                                )}
                                                 <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-gray-700 shadow-sm">
                                                     <Activity className="w-3.5 h-3.5 text-gray-400" />
                                                     {attr.effort}
