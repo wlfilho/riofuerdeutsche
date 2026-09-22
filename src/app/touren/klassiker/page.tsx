@@ -51,11 +51,10 @@ const attractions = [
     },
     {
         name: "Zuckerhut (Pão de Açúcar)",
-        // PENDENTE DE DECISÃO DE PRODUTO (19/09/2026): duração ainda escrita à mão.
-        // Site diz 2,5h, catálogo (pao-de-acucar) diz 1,5h. Diferença grande demais
-        // para escolher no escuro, e o card promete pôr do sol lá em cima. Decidir
-        // qual dos dois números é o real antes de ligar.
-        time: "~2,5 Std.",
+        // Decidido em 22/09/2026: 1,5h, o número do catálogo. Confere com o
+        // horário da "Postkarten-Tour", que reserva 3h para o Zuckerhut: é 1,5h
+        // de visita mais 0,75h de subida e 0,75h de descida.
+        catalogSlug: "pao-de-acucar",
         desc: "Zwei Seilbahnfahrten bringen dich auf den legendären Zuckerhut. Der Blick auf die Guanabara-Bucht, den Corcovado und die Skyline von Rio ist atemberaubend, besonders zum Sonnenuntergang.",
         tip: "Der Sonnenuntergang vom Zuckerhut ist eines der schönsten Erlebnisse in Rio. Ich plane die Tour so, dass wir genau zur richtigen Zeit oben sind.",
         effort: "Leicht",
@@ -139,11 +138,9 @@ const attractions = [
     },
     {
         name: "Urca",
-        // PENDENTE DE DECISÃO DE PRODUTO (19/09/2026): duração ainda escrita à mão.
-        // O card vende o bairro e a Mureta ao pôr do sol. No catálogo esse produto
-        // (urca-bairro-mureta-urcbr) é parada de foto de 15min, e existe ainda o
-        // morro-da-urca-mrurc, de 3h. Decidir o produto antes de ligar.
-        time: "~1,5 Std.",
+        // Decidido em 22/09/2026: é a parada do bairro e da Mureta, 15min, não o
+        // morro-da-urca-mrurc de 3h.
+        catalogSlug: "urca-bairro-mureta-urcbr",
         desc: "Das ruhigste Viertel Rios, direkt am Fuß des Zuckerhuts. Kleine Gassen, historische Häuser und die Mureta da Urca, eine Mauer am Meer, wo Einheimische bei Sonnenuntergang ein kühles Bier genießen.",
         tip: "Die Mureta da Urca bei Sonnenuntergang ist das authentischste Rio-Erlebnis: Bier, Meerblick, Einheimische, kein Tourist weit und breit.",
         effort: "Leicht",
@@ -348,13 +345,12 @@ export default async function KlassikerTourPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {attractions.map((attr, index) => {
                                 const hasLink = "guideLink" in attr && !!attr.guideLink;
-                                // Duração vem do catálogo quando a atração tem catalogSlug.
-                                // Se o slug sumir do catálogo, a etiqueta não renderiza:
+                                // Duração vem sempre do catálogo, nunca escrita aqui.
+                                // Se o slug sumir de lá, a etiqueta não renderiza:
                                 // ausência é melhor que número errado com cara de verdade.
-                                const catalogSlug = "catalogSlug" in attr ? attr.catalogSlug : undefined;
-                                const timeLabel = catalogSlug
-                                    ? formatDuration(durations.get(catalogSlug)?.durationHours ?? 0)
-                                    : attr.time;
+                                const timeLabel = formatDuration(
+                                    durations.get(attr.catalogSlug)?.durationHours ?? 0
+                                );
                                 const cardContent = (
                                     <>
                                         <div className="h-56 w-full relative overflow-hidden">
