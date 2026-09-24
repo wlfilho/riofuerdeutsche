@@ -77,11 +77,6 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    labelKey: 'cadastur',
-    href: '/admin/cadastur',
-    icon: '🧭',
-  },
-  {
     labelKey: 'usuarios',
     href: '/admin/users',
     icon: '👤',
