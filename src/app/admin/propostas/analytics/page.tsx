@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import PropostasTabs from '../PropostasTabs';
 import { getAdminTranslations } from '@/i18n/admin';
 import { getProposals, type Proposal, type ProposalStatus } from '@/lib/proposals';
 import {
@@ -100,15 +101,10 @@ export default async function PropostasAnalyticsPage() {
   return (
     <div className="p-4 sm:p-6 md:p-10">
       <div className="max-w-6xl">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('titulo')}</h1>
-          <Link
-            href="/admin/propostas"
-            className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            {t('voltar')}
-          </Link>
-        </div>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">{t('titulo')}</h1>
+
+        <PropostasTabs active="analytics" />
+
         <p className="text-sm text-gray-500 mb-6">{t('subtitulo')}</p>
 
         {/* ── KPIs ── */}

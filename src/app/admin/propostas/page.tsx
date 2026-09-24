@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import PropostasTabs from './PropostasTabs';
 import { getAdminTranslations } from '@/i18n/admin';
 import { getProposals } from '@/lib/proposals';
 import { getProposalAnalyticsSummaries } from '@/lib/proposalAnalytics';
@@ -252,6 +253,8 @@ export default async function PropostasPage({
             </Link>
           </div>
         </div>
+
+        <PropostasTabs active="lista" />
 
         <PendingLeadsStrip leads={leads} />
 

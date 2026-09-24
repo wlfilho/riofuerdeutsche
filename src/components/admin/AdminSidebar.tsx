@@ -7,86 +7,74 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 
-type NavChild = { labelKey: string; href: string };
-type NavItem = {
-  labelKey: string;
-  href: string;
-  icon: string;
-  exact?: boolean;
-  children?: NavChild[];
-};
+type NavLink = { labelKey: string; href: string };
+type NavGroup = { labelKey: string; icon: string; items: NavLink[] };
 
-const navItems: NavItem[] = [
+/** Link solto no topo, fora de categoria. */
+const homeItem = { labelKey: 'visaoGeral', href: '/admin', icon: '📊' };
+
+// Categorias: o cabeçalho só abre e fecha, não tem página própria.
+const navGroups: NavGroup[] = [
   {
-    labelKey: 'visaoGeral',
-    href: '/admin',
-    icon: '📊',
-    exact: true,
-  },
-  {
-    labelKey: 'contatos',
-    href: '/admin/contatos',
-    icon: '👥',
-  },
-  {
-    labelKey: 'crm',
-    href: '/admin/crm',
+    labelKey: 'vendas',
     icon: '🎯',
+    items: [
+      { labelKey: 'crm', href: '/admin/crm' },
+      { labelKey: 'contatos', href: '/admin/contatos' },
+      { labelKey: 'propostas', href: '/admin/propostas' },
+      { labelKey: 'atividades', href: '/admin/propostas/atividades' },
+    ],
   },
   {
-    labelKey: 'calendario',
-    href: '/admin/calendario',
+    labelKey: 'operacao',
     icon: '📅',
-  },
-  {
-    labelKey: 'cronometro',
-    href: '/cronometro',
-    icon: '⏱️',
-  },
-  {
-    labelKey: 'analyticsSite',
-    href: '/admin/analytics',
-    icon: '📈',
-  },
-  {
-    labelKey: 'conteudoGuide',
-    href: '/admin/guide',
-    icon: '📖',
-  },
-  {
-    labelKey: 'avaliacoes',
-    href: '/admin/bewertungen',
-    icon: '⭐',
-  },
-  {
-    labelKey: 'propostas',
-    href: '/admin/propostas',
-    icon: '📋',
-    children: [
-      { labelKey: 'analytics',   href: '/admin/propostas/analytics' },
-      { labelKey: 'atividades',  href: '/admin/propostas/atividades' },
-      { labelKey: 'transportes', href: '/admin/propostas/transportes' },
+    items: [
+      { labelKey: 'calendario', href: '/admin/calendario' },
+      { labelKey: 'cronometro', href: '/cronometro' },
     ],
   },
   {
-    labelKey: 'campanhas',
-    href: '/admin/campanhas',
+    labelKey: 'marketing',
     icon: '📣',
-    children: [
+    items: [
+      { labelKey: 'campanhas', href: '/admin/campanhas' },
       { labelKey: 'templatesEmail', href: '/admin/email-templates' },
+      { labelKey: 'avaliacoes', href: '/admin/bewertungen' },
+      { labelKey: 'analyticsSite', href: '/admin/analytics' },
     ],
   },
   {
-    labelKey: 'usuarios',
-    href: '/admin/users',
-    icon: '👤',
+    labelKey: 'rioGuide',
+    icon: '📖',
+    items: [
+      { labelKey: 'conteudoGuide', href: '/admin/guide' },
+      { labelKey: 'usuarios', href: '/admin/users' },
+    ],
   },
   {
     labelKey: 'configuracoes',
-    href: '/admin/configuracoes',
     icon: '⚙️',
+    items: [
+      { labelKey: 'configuracoesGeral', href: '/admin/configuracoes' },
+      { labelKey: 'transportes', href: '/admin/propostas/transportes' },
+    ],
   },
 ];
+
+/**
+ * Href do item ativo: o mais específico que casa com a rota. Atividades
+ * (/admin/propostas/atividades) mora dentro de /admin/propostas, e sem isso
+ * as duas acenderiam juntas.
+ */
+function activeHref(pathname: string): string | null {
+  const matches = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const candidates = navGroups
+    .flatMap((g) => g.items)
+    .filter((item) => matches(item.href))
+    .map((item) => item.href);
+  if (candidates.length === 0) return null;
+  return candidates.reduce((a, b) => (b.length > a.length ? b : a));
+}
 
 const footerItems = [
   { labelKey: 'irParaSite', href: '/', icon: '🌐' },
@@ -96,83 +84,105 @@ const footerItems = [
 function SidebarNav({
   collapsed,
   onNavigate,
+  onExpand,
 }: {
   collapsed: boolean;
   onNavigate?: () => void;
+  /** Recolhida: clicar no ícone de uma categoria abre a sidebar. */
+  onExpand?: () => void;
 }) {
   const pathname = usePathname();
   const t = useTranslations('admin.nav');
 
-  const isActive = (item: NavItem) => {
-    if (item.exact) return pathname === item.href;
-    return pathname.startsWith(item.href);
-  };
-
-  const isChildActive = (href: string) => pathname.startsWith(href);
-
-  // Sanfona: um grupo aberto por vez. Sem clique manual, abre o grupo da
-  // página atual. O clique manual vale só enquanto a rota não muda, por isso
-  // guarda o pathname junto (derivado no render, sem useEffect).
+  const currentHref = activeHref(pathname);
   const routeGroup =
-    navItems.find(
-      (item) => item.children && (isActive(item) || item.children.some((c) => isChildActive(c.href))),
-    )?.href ?? null;
+    navGroups.find((g) => g.items.some((item) => item.href === currentHref))?.labelKey ?? null;
+
+  // Sanfona: uma categoria aberta por vez. Sem clique manual, abre a da página
+  // atual. O clique manual vale só enquanto a rota não muda, por isso guarda o
+  // pathname junto (derivado no render, sem useEffect).
   const [manual, setManual] = useState<{ path: string; open: string | null } | null>(null);
   const openGroup = manual && manual.path === pathname ? manual.open : routeGroup;
-  const toggleGroup = (href: string) =>
-    setManual({ path: pathname, open: openGroup === href ? null : href });
+
+  const handleGroupClick = (key: string) => {
+    if (collapsed) {
+      // Recolhida: expande já com a categoria clicada aberta.
+      setManual({ path: pathname, open: key });
+      onExpand?.();
+      return;
+    }
+    setManual({ path: pathname, open: openGroup === key ? null : key });
+  };
+
+  const homeActive = pathname === homeItem.href;
 
   return (
     <>
       <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
-        {navItems.map((item) => (
-          <div key={item.href}>
-            <div className="relative">
-              <Link
-                href={item.href}
-                title={collapsed ? t(item.labelKey) : undefined}
-                onClick={onNavigate}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive(item)
+        <Link
+          href={homeItem.href}
+          title={collapsed ? t(homeItem.labelKey) : undefined}
+          onClick={onNavigate}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            homeActive
+              ? 'bg-green-50 text-green-800 border border-green-200'
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+          } ${collapsed ? 'justify-center px-2' : ''}`}
+        >
+          <span className="flex-shrink-0">{homeItem.icon}</span>
+          {!collapsed && <span className="truncate">{t(homeItem.labelKey)}</span>}
+        </Link>
+
+        {navGroups.map((group) => {
+          const isOpen = !collapsed && openGroup === group.labelKey;
+          const hasActive = routeGroup === group.labelKey;
+          return (
+            <div key={group.labelKey}>
+              <button
+                type="button"
+                onClick={() => handleGroupClick(group.labelKey)}
+                title={collapsed ? t(group.labelKey) : undefined}
+                aria-expanded={isOpen}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  collapsed && hasActive
                     ? 'bg-green-50 text-green-800 border border-green-200'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                } ${collapsed ? 'justify-center px-2' : ''} ${!collapsed && item.children ? 'pr-9' : ''}`}
+                    : hasActive
+                      ? 'text-gray-900 hover:bg-gray-50'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                } ${collapsed ? 'justify-center px-2' : ''}`}
               >
-                <span className="flex-shrink-0">{item.icon}</span>
-                {!collapsed && <span className="truncate">{t(item.labelKey)}</span>}
-              </Link>
-              {!collapsed && item.children && (
-                <button
-                  type="button"
-                  onClick={() => toggleGroup(item.href)}
-                  aria-expanded={openGroup === item.href}
-                  aria-label={t(item.labelKey)}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-                >
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${openGroup === item.href ? 'rotate-180' : ''}`}
-                  />
-                </button>
+                <span className="flex-shrink-0">{group.icon}</span>
+                {!collapsed && (
+                  <>
+                    <span className="truncate flex-1 text-left">{t(group.labelKey)}</span>
+                    <ChevronDown
+                      className={`h-4 w-4 flex-shrink-0 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    />
+                  </>
+                )}
+              </button>
+
+              {isOpen && (
+                <div className="mt-0.5 mb-1 space-y-0.5">
+                  {group.items.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={onNavigate}
+                      className={`flex items-center gap-2 ml-6 pl-3 pr-2 py-1.5 rounded-lg text-sm transition-colors ${
+                        item.href === currentHref
+                          ? 'bg-green-50 text-green-800 font-medium'
+                          : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span className="truncate">{t(item.labelKey)}</span>
+                    </Link>
+                  ))}
+                </div>
               )}
             </div>
-
-            {!collapsed && item.children && openGroup === item.href && item.children.map((child) => (
-              <Link
-                key={child.href}
-                href={child.href}
-                onClick={onNavigate}
-                className={`flex items-center gap-2 ml-8 pl-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  isChildActive(child.href)
-                    ? 'text-green-700 bg-green-50'
-                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
-                }`}
-              >
-                <span className="text-gray-300">›</span>
-                <span>{t(child.labelKey)}</span>
-              </Link>
-            ))}
-          </div>
-        ))}
+          );
+        })}
       </nav>
 
       {/* Footer da sidebar */}
@@ -317,7 +327,13 @@ export default function AdminSidebar() {
           </div>
         )}
 
-        <SidebarNav collapsed={collapsed} />
+        <SidebarNav
+          collapsed={collapsed}
+          onExpand={() => {
+            setCollapsed(false);
+            localStorage.setItem('admin-sidebar-collapsed', 'false');
+          }}
+        />
       </aside>
     </>
   );
