@@ -69,14 +69,12 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    labelKey: 'templatesEmail',
-    href: '/admin/email-templates',
-    icon: '✉️',
-  },
-  {
     labelKey: 'campanhas',
     href: '/admin/campanhas',
     icon: '📣',
+    children: [
+      { labelKey: 'templatesEmail', href: '/admin/email-templates' },
+    ],
   },
   {
     labelKey: 'cadastur',
