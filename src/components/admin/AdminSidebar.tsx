@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 
 type NavChild = { labelKey: string; href: string };
 type NavItem = {
@@ -115,26 +115,53 @@ function SidebarNav({
 
   const isChildActive = (href: string) => pathname.startsWith(href);
 
+  // Sanfona: um grupo aberto por vez. Sem clique manual, abre o grupo da
+  // página atual. O clique manual vale só enquanto a rota não muda, por isso
+  // guarda o pathname junto (derivado no render, sem useEffect).
+  const routeGroup =
+    navItems.find(
+      (item) => item.children && (isActive(item) || item.children.some((c) => isChildActive(c.href))),
+    )?.href ?? null;
+  const [manual, setManual] = useState<{ path: string; open: string | null } | null>(null);
+  const openGroup = manual && manual.path === pathname ? manual.open : routeGroup;
+  const toggleGroup = (href: string) =>
+    setManual({ path: pathname, open: openGroup === href ? null : href });
+
   return (
     <>
       <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
         {navItems.map((item) => (
           <div key={item.href}>
-            <Link
-              href={item.href}
-              title={collapsed ? t(item.labelKey) : undefined}
-              onClick={onNavigate}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive(item)
-                  ? 'bg-green-50 text-green-800 border border-green-200'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              } ${collapsed ? 'justify-center px-2' : ''}`}
-            >
-              <span className="flex-shrink-0">{item.icon}</span>
-              {!collapsed && <span className="truncate">{t(item.labelKey)}</span>}
-            </Link>
+            <div className="relative">
+              <Link
+                href={item.href}
+                title={collapsed ? t(item.labelKey) : undefined}
+                onClick={onNavigate}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive(item)
+                    ? 'bg-green-50 text-green-800 border border-green-200'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                } ${collapsed ? 'justify-center px-2' : ''} ${!collapsed && item.children ? 'pr-9' : ''}`}
+              >
+                <span className="flex-shrink-0">{item.icon}</span>
+                {!collapsed && <span className="truncate">{t(item.labelKey)}</span>}
+              </Link>
+              {!collapsed && item.children && (
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(item.href)}
+                  aria-expanded={openGroup === item.href}
+                  aria-label={t(item.labelKey)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                >
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${openGroup === item.href ? 'rotate-180' : ''}`}
+                  />
+                </button>
+              )}
+            </div>
 
-            {!collapsed && item.children && item.children.map((child) => (
+            {!collapsed && item.children && openGroup === item.href && item.children.map((child) => (
               <Link
                 key={child.href}
                 href={child.href}
