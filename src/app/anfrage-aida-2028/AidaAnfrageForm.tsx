@@ -31,6 +31,7 @@ import {
   Stepper,
   WhatsAppCta,
   inputCls,
+  textareaCls,
   toInternationalPhone,
 } from '@/components/anfrage/FormUi';
 import { CAMPAIGNS, type PhoneCountry } from '@/lib/campaigns';
@@ -67,6 +68,7 @@ export default function AidaAnfrageForm({
   const [childrenAges, setChildrenAges] = useState('');
   const [preferredDay, setPreferredDay] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
+  const [wunsch, setWunsch] = useState('');
   const [consent, setConsent] = useState(false);
   const [website, setWebsite] = useState(''); // honeypot
   const [error, setError] = useState<string | null>(null);
@@ -125,6 +127,7 @@ export default function AidaAnfrageForm({
           childrenAges: children > 0 ? childrenAges : '',
           preferredDay,
           interests,
+          wunsch,
           consent,
           source: von,
           website,
@@ -355,6 +358,19 @@ export default function AidaAnfrageForm({
               </OptionTile>
             ))}
           </fieldset>
+
+          <div className="mt-5">
+            <Field label={t('wunschLabel')} hint={t('wunschHint')}>
+              <textarea
+                value={wunsch}
+                onChange={e => setWunsch(e.target.value.slice(0, 300))}
+                rows={3}
+                maxLength={300}
+                placeholder={t('wunschPlaceholder')}
+                className={`${textareaCls()} resize-none`}
+              />
+            </Field>
+          </div>
         </Section>
 
         <div className="pt-7 border-t border-gray-100 space-y-5">
