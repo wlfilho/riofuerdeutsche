@@ -74,6 +74,11 @@ const navItems: NavItem[] = [
     icon: '✉️',
   },
   {
+    labelKey: 'campanhas',
+    href: '/admin/campanhas',
+    icon: '📣',
+  },
+  {
     labelKey: 'cadastur',
     href: '/admin/cadastur',
     icon: '🧭',
