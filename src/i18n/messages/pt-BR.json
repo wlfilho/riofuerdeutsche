@@ -185,7 +185,7 @@
       "templatesEmail": "Templates de e-mail",
       "campanhas": "Campanhas",
       "cadastur": "Cadastur",
-      "usuarios": "Usuários",
+      "usuarios": "Membros",
       "configuracoes": "Configurações",
       "irParaSite": "Ir para o site",
       "previaGuide": "Prévia do Guide",
@@ -1356,8 +1356,8 @@
       }
     },
     "usuarios": {
-      "metaTitle": "Gerenciar usuários — Painel admin",
-      "titulo": "👥 Usuários",
+      "metaTitle": "Membros — Painel admin",
+      "titulo": "👥 Membros",
       "criarUsuario": "+ Criar usuário",
       "gesamt": "Total",
       "buscarEmail": "Buscar e-mail…",
