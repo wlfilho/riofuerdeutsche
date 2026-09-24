@@ -26,9 +26,22 @@ export interface Campaign {
   emailTemplateSlug: string;
 }
 
-/** Interesses são os mesmos independente do ano — só a data do navio muda. */
-const AIDA_INTERESTS = ['sambodromo', 'klassiker', 'blocos', 'strand', 'favela', 'offen'];
-const AIDA_INTEREST_LABELS: Record<string, string> = {
+/**
+ * Todos os interesses que já existiram nos formulários AIDA. Serve de chave
+ * para os rótulos: lead antigo pode ter qualquer um destes em campaign_data.
+ * Os interesses são os mesmos independente do ano — só a data do navio muda.
+ */
+const AIDA_INTERESTS_ALL = ['sambodromo', 'klassiker', 'blocos', 'strand', 'favela', 'offen'] as const;
+
+/**
+ * Interesses oferecidos hoje no formulário. `favela` saiu em 24/09/2026: com
+ * grupo de 60 a 200 pessoas, maioria 60+, a visita não é viável (mototáxi,
+ * terreno, tamanho do grupo) e não entra no pacote. Não apagar de
+ * AIDA_INTERESTS_ALL nem de AIDA_INTEREST_LABELS: leads antigos têm o valor.
+ */
+const AIDA_INTERESTS: string[] = AIDA_INTERESTS_ALL.filter(id => id !== 'favela');
+
+const AIDA_INTEREST_LABELS: Record<(typeof AIDA_INTERESTS_ALL)[number], string> = {
   sambodromo: 'Sambódromo (desfile)',
   klassiker: 'Clássicos: Pão de Açúcar & Cristo',
   blocos: 'Carnaval de rua (blocos)',
