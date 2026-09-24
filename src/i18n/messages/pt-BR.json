@@ -180,7 +180,7 @@
       "avaliacoes": "Avaliações",
       "propostas": "Propostas",
       "analytics": "Analytics",
-      "atividades": "Atividades",
+      "atividades": "Catálogo",
       "transportes": "Transportes",
       "templatesEmail": "Templates de e-mail",
       "campanhas": "Campanhas",
@@ -871,8 +871,8 @@
       "avisoFallbackTotal": "⚠️ Nenhum trecho deste dia tem tempo real de carro. Todos caíram no tempo fixo do catálogo, o que costuma ser sinal de que o cálculo parou de funcionar (chave do OpenRouteService vencida, ou atividades sem coordenada)."
     },
     "atividades": {
-      "breadcrumb": "Atividades",
-      "titulo": "Atividades",
+      "breadcrumb": "Catálogo",
+      "titulo": "Catálogo",
       "novaAtividade": "+ Nova atividade",
       "novaAtividadeTitulo": "Nova atividade",
       "editarAtividade": "Editar atividade",
