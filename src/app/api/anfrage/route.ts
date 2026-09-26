@@ -104,10 +104,6 @@ function buildCampaignData(campaign: Campaign, body: Record<string, unknown>): C
   };
 }
 
-// Colada no Supabase (eu-west-1). No padrão da Vercel (iad1) cada consulta
-// atravessa o Atlântico, e a rota faz várias em sequência antes de responder.
-export const preferredRegion = 'dub1';
-
 export async function POST(request: NextRequest) {
   let body: Record<string, unknown>;
   try {
