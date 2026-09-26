@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { NextRequest, NextResponse } from 'next/server';
+import { after, NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { DEFAULT_EMAIL_LOCALE as EMAIL_LOCALE } from '@/lib/email/render';
 import { sendTemplatedEmail } from '@/lib/email/sendTemplatedEmail';
@@ -104,6 +104,10 @@ function buildCampaignData(campaign: Campaign, body: Record<string, unknown>): C
   };
 }
 
+// Colada no Supabase (eu-west-1). No padrão da Vercel (iad1) cada consulta
+// atravessa o Atlântico, e a rota faz várias em sequência antes de responder.
+export const preferredRegion = 'dub1';
+
 export async function POST(request: NextRequest) {
   let body: Record<string, unknown>;
   try {
@@ -191,18 +195,51 @@ export async function POST(request: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
-  const { data: contact, error: contactError } = await supabase
-    .from('contacts')
-    .upsert(
-      // De propósito o canal de chegada, e não 'form': `contacts.source` conta
-      // por onde a PESSOA apareceu (WhatsApp, e-mail, Instagram) — é ficha de
-      // cadastro, não de pedido. Ver o comentário em leadFields sobre por que
-      // os dois campos divergem para o mesmo lead.
-      { email, name, phone: phone || null, source: arrivalChannel ?? 'other' },
-      { onConflict: 'email' },
-    )
-    .select('id')
-    .single();
+  // Antes de gravar o lead, e não depois: o trigger `price_leads_sync_lead_group`
+  // etiqueta na hora do insert e, se a etiqueta ainda não existir, inventa um
+  // nome a partir do slug. Criando aqui primeiro, ele encontra a etiqueta com o
+  // rótulo de verdade do catálogo de campanhas.
+  //
+  // Numa campanha o mesmo interessado costuma reenviar o formulário (mudou o
+  // número de pessoas, achou que não tinha ido). Um lead por pessoa mantém a
+  // lista de divulgação limpa; fora de campanha, cada Anfrage é uma nova.
+  //
+  // As três consultas não dependem uma da outra: em paralelo, a pessoa espera
+  // uma ida ao banco em vez de três.
+  const [
+    { data: contact, error: contactError },
+    campaignGroupId,
+    existingLeadId,
+  ] = await Promise.all([
+    supabase
+      .from('contacts')
+      .upsert(
+        // De propósito o canal de chegada, e não 'form': `contacts.source` conta
+        // por onde a PESSOA apareceu (WhatsApp, e-mail, Instagram) — é ficha de
+        // cadastro, não de pedido. Ver o comentário em leadFields sobre por que
+        // os dois campos divergem para o mesmo lead.
+        { email, name, phone: phone || null, source: arrivalChannel ?? 'other' },
+        { onConflict: 'email' },
+      )
+      .select('id')
+      .single(),
+    campaign
+      ? ensureCampaignGroup(supabase, campaign.slug, campaign.label).catch(err => {
+          console.error('[anfrage] falha ao criar a etiqueta da campanha:', err);
+          return null;
+        })
+      : Promise.resolve(null),
+    campaign
+      ? supabase
+          .from('price_leads')
+          .select('id')
+          .eq('email', email)
+          .eq('campaign', campaign.slug)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .then(({ data }) => (data?.[0]?.id as string | undefined) ?? null)
+      : Promise.resolve(null),
+  ]);
 
   if (contactError) {
     return NextResponse.json({ error: 'Etwas ist schiefgelaufen. Bitte versuche es später erneut.' }, { status: 500 });
@@ -251,34 +288,7 @@ export async function POST(request: NextRequest) {
     campaign_data: campaignData,
   };
 
-  // Antes de gravar o lead, e não depois: o trigger `price_leads_sync_lead_group`
-  // etiqueta na hora do insert e, se a etiqueta ainda não existir, inventa um
-  // nome a partir do slug. Criando aqui primeiro, ele encontra a etiqueta com o
-  // rótulo de verdade do catálogo de campanhas.
-  let campaignGroupId: string | null = null;
-  if (campaign) {
-    try {
-      campaignGroupId = await ensureCampaignGroup(supabase, campaign.slug, campaign.label);
-    } catch (err) {
-      console.error('[anfrage] falha ao criar a etiqueta da campanha:', err);
-    }
-  }
-
-  // Numa campanha o mesmo interessado costuma reenviar o formulário (mudou o
-  // número de pessoas, achou que não tinha ido). Um lead por pessoa mantém a
-  // lista de divulgação limpa; fora de campanha, cada Anfrage é uma nova.
-  let leadId: string | null = null;
-  if (campaign) {
-    const { data: existing } = await supabase
-      .from('price_leads')
-      .select('id')
-      .eq('email', email)
-      .eq('campaign', campaign.slug)
-      .order('created_at', { ascending: false })
-      .limit(1);
-    leadId = existing?.[0]?.id ?? null;
-  }
-
+  let leadId: string | null = existingLeadId;
   const isReturning = leadId !== null;
 
   if (leadId) {
@@ -301,174 +311,181 @@ export async function POST(request: NextRequest) {
     leadId = lead.id;
   }
 
-  // Toda campanha também é uma etiqueta (`lead_groups`): o admin vê e filtra o
-  // lead da AIDA do mesmo jeito que qualquer grupo manual no CRM, em vez de um
-  // segundo sistema de rótulos paralelo. O trigger no banco já faz isto; aqui é
-  // redundância idempotente pelo caminho da UI, como no resto das sincronias.
-  // Best-effort: não deve derrubar o envio do formulário.
-  if (campaignGroupId) {
-    // 23505 = reenvio do formulário, o lead já tinha essa etiqueta — não é erro.
-    const { error: memberError } = await supabase
-      .from('lead_group_members')
-      .insert({ lead_id: leadId, group_id: campaignGroupId });
-    if (memberError && memberError.code !== '23505') {
-      console.error('[anfrage] falha ao etiquetar lead com a campanha:', memberError);
-    }
-  }
-
-  const paxLabel = `${pax} pax${children > 0 ? ` + ${children} criança${children !== 1 ? 's' : ''}` : ''}`;
-  const interestLabels = (campaignData?.interests ?? []).map(
-    id => campaign!.interestLabels[id] ?? id,
-  );
-  // Telefone fora de DE/AT/CH é sinal de negócio, não detalhe de formulário:
-  // significa interesse vindo de fora do público que a campanha assume.
-  const phoneCountry = campaignData?.phone_country;
-  const outsideDach = phoneCountry === 'other';
-  const leadUrl = `https://riofuerdeutsche.de/admin/leads/${leadId}`;
-  const propostaUrl = `https://riofuerdeutsche.de/admin/propostas/nova?lead_id=${leadId}`;
-
-  // Confirmação para o próprio inscrito. Só no primeiro envio: quem reenvia o
-  // formulário está corrigindo dados, não pedindo outro e-mail.
-  //
-  // Vale por si só num tour que é daqui a dois anos: a pessoa fica com o
-  // registro do que pediu, o bounce revela na hora endereço que não existe, e
-  // o convite a responder cria histórico com o provedor dela antes das
-  // mensagens que realmente importam.
-  if (campaign && !isReturning) {
-    try {
-      const germanDays = campaign.fixedDays.map(formatGermanDay).join(' und ');
-      const paxLabelDe =
-        `${pax} ${pax === 1 ? 'Erwachsener' : 'Erwachsene'}` +
-        (children > 0 ? ` + ${children} ${children === 1 ? 'Kind' : 'Kinder'}` : '');
-
-      const sent = await sendTemplatedEmail({
-        slug: campaign.emailTemplateSlug,
-        to: email,
-        locale: EMAIL_LOCALE,
-        data: {
-          nome: name.trim().split(' ')[0],
-          email,
-          // Sempre os dois dias de escala, mesmo quem marcou preferência: o dia
-          // do tour ainda não está fechado, e devolver a preferência como
-          // "Termin" soaria a confirmação de algo que não existe.
-          termin: germanDays,
-          pax: paxLabelDe,
-          interessen:
-            (campaignData?.interests ?? []).map(interestLabelDe).join(', ') || '—',
-        },
-      });
-
-      // sendTemplatedEmail devolve o erro em vez de lançar: sem este log, uma
-      // falha de envio ficaria invisível nos logs da Vercel.
-      if (!sent.success) {
-        console.error('[anfrage] confirmação não enviada:', email, sent.error);
+  // Daqui para baixo nada muda a resposta: o lead já está gravado. Roda depois
+  // de responder, para quem preencheu não ficar olhando "Wird gesendet…"
+  // enquanto saem a confirmação e a notificação (dois envios pelo Resend e
+  // mais algumas consultas). Na Vercel o `after` segura a função viva até
+  // terminar. Cada passo já é best-effort e não lança.
+  after(async () => {
+    // Toda campanha também é uma etiqueta (`lead_groups`): o admin vê e filtra o
+    // lead da AIDA do mesmo jeito que qualquer grupo manual no CRM, em vez de um
+    // segundo sistema de rótulos paralelo. O trigger no banco já faz isto; aqui é
+    // redundância idempotente pelo caminho da UI, como no resto das sincronias.
+    // Best-effort: não deve derrubar o envio do formulário.
+    if (campaignGroupId) {
+      // 23505 = reenvio do formulário, o lead já tinha essa etiqueta — não é erro.
+      const { error: memberError } = await supabase
+        .from('lead_group_members')
+        .insert({ lead_id: leadId, group_id: campaignGroupId });
+      if (memberError && memberError.code !== '23505') {
+        console.error('[anfrage] falha ao etiquetar lead com a campanha:', memberError);
       }
-
-      // Mesmas colunas do lead da /anfrage: o template é outro, a pergunta
-      // "esta pessoa foi avisada?" é a mesma, e o admin mostra as duas juntas.
-      await recordLeadConfirmation(leadId!, sent);
-    } catch (err) {
-      console.error('[anfrage] confirmação falhou:', email, err);
     }
-  }
 
-  // Confirmação para quem preencheu a /anfrage (fora de campanha).
-  //
-  // NÃO é proposta: responde "chegou?", "o que acontece agora?" e "quando ele
-  // me responde?", sem preço nenhum. Quem sai da página de sucesso hoje fica no
-  // escuro até o Will responder, e isso é experiência do cliente, não
-  // eficiência interna.
-  //
-  // Roda DEPOIS de o lead estar gravado e nunca lança: e-mail que não sai não
-  // pode custar o pedido. A falha vai para `confirmation_error` no lead, que é
-  // o que o admin mostra.
-  if (!campaign) {
-    await sendAnfrageBestaetigung({
-      leadId: leadId!,
-      name,
-      email,
-      pax,
-      children,
-      days,
-      interessen: interessen.length > 0 ? interessen : null,
-      wunsch: wunsch || null,
-    });
-  }
+    const paxLabel = `${pax} pax${children > 0 ? ` + ${children} criança${children !== 1 ? 's' : ''}` : ''}`;
+    const interestLabels = (campaignData?.interests ?? []).map(
+      id => campaign!.interestLabels[id] ?? id,
+    );
+    // Telefone fora de DE/AT/CH é sinal de negócio, não detalhe de formulário:
+    // significa interesse vindo de fora do público que a campanha assume.
+    const phoneCountry = campaignData?.phone_country;
+    const outsideDach = phoneCountry === 'other';
+    const leadUrl = `https://riofuerdeutsche.de/admin/leads/${leadId}`;
+    const propostaUrl = `https://riofuerdeutsche.de/admin/propostas/nova?lead_id=${leadId}`;
 
-  // Best-effort admin notification; the lead is saved either way.
-  try {
-    const { data: settings } = await supabase
-      .from('site_settings')
-      .select('business_email')
-      .limit(1)
-      .single();
-    const to = settings?.business_email || 'will@riofuerdeutsche.de';
+    // Confirmação para o próprio inscrito. Só no primeiro envio: quem reenvia o
+    // formulário está corrigindo dados, não pedindo outro e-mail.
+    //
+    // Vale por si só num tour que é daqui a dois anos: a pessoa fica com o
+    // registro do que pediu, o bounce revela na hora endereço que não existe, e
+    // o convite a responder cria histórico com o provedor dela antes das
+    // mensagens que realmente importam.
+    if (campaign && !isReturning) {
+      try {
+        const germanDays = campaign.fixedDays.map(formatGermanDay).join(' und ');
+        const paxLabelDe =
+          `${pax} ${pax === 1 ? 'Erwachsener' : 'Erwachsene'}` +
+          (children > 0 ? ` + ${children} ${children === 1 ? 'Kind' : 'Kinder'}` : '');
 
-    const daysHtml = days.map(d => `<li>${formatGermanDay(d)}</li>`).join('');
-    const campaignHtml = campaign
-      ? `
-        <p>
-          <strong>Campanha:</strong> ${escapeHtml(campaign.label)}<br/>
-          <strong>Interesses:</strong> ${interestLabels.length > 0 ? escapeHtml(interestLabels.join(', ')) : '—'}<br/>
-          <strong>Dia preferido:</strong> ${campaignData?.preferred_day ? formatGermanDay(campaignData.preferred_day) : 'indiferente'}<br/>
-          <strong>Idade das crianças:</strong> ${escapeHtml(campaignData?.children_ages ?? '') || '—'}<br/>
-          <strong>Telefone (país):</strong> ${phoneCountry ? escapeHtml(PHONE_COUNTRY_LABELS[phoneCountry]) : '—'}
-        </p>
-        ${outsideDach
-          ? `<p style="padding:12px;border-radius:8px;background:#fef3c7;color:#78350f">
-              ⚠️ <strong>Este lead informou um telefone fora de DE/AT/CH.</strong>
-              Vale conferir se o tour em grupo em alemão faz sentido para ele.
-            </p>`
-          : ''}`
-      : '';
+        const sent = await sendTemplatedEmail({
+          slug: campaign.emailTemplateSlug,
+          to: email,
+          locale: EMAIL_LOCALE,
+          data: {
+            nome: name.trim().split(' ')[0],
+            email,
+            // Sempre os dois dias de escala, mesmo quem marcou preferência: o dia
+            // do tour ainda não está fechado, e devolver a preferência como
+            // "Termin" soaria a confirmação de algo que não existe.
+            termin: germanDays,
+            pax: paxLabelDe,
+            interessen:
+              (campaignData?.interests ?? []).map(interestLabelDe).join(', ') || '—',
+          },
+        });
 
-    // Prioridade no ASSUNTO, não só no corpo: é o que decide a ordem em que o
-    // Will abre a caixa. Grupo grande, roteiro longo ou Carnaval não podem ficar
-    // atrás de curioso na fila. Ver src/lib/leadPriority.ts.
-    const priorities = leadPriorityReasons({ pax, children, requested_days: days });
-    const priorityFlag = priorities.length > 0 ? '⭐ ' : '';
-    const priorityHtml =
-      priorities.length > 0
-        ? `<p style="padding:12px;border-radius:8px;background:#ecfdf5;color:#065f46">
-            ⭐ <strong>Lead prioritário:</strong> ${priorities.map(r => PRIORITY_LABELS[r]).join(', ')}.
-          </p>`
+        // sendTemplatedEmail devolve o erro em vez de lançar: sem este log, uma
+        // falha de envio ficaria invisível nos logs da Vercel.
+        if (!sent.success) {
+          console.error('[anfrage] confirmação não enviada:', email, sent.error);
+        }
+
+        // Mesmas colunas do lead da /anfrage: o template é outro, a pergunta
+        // "esta pessoa foi avisada?" é a mesma, e o admin mostra as duas juntas.
+        await recordLeadConfirmation(leadId!, sent);
+      } catch (err) {
+        console.error('[anfrage] confirmação falhou:', email, err);
+      }
+    }
+
+    // Confirmação para quem preencheu a /anfrage (fora de campanha).
+    //
+    // NÃO é proposta: responde "chegou?", "o que acontece agora?" e "quando ele
+    // me responde?", sem preço nenhum. Quem sai da página de sucesso hoje fica no
+    // escuro até o Will responder, e isso é experiência do cliente, não
+    // eficiência interna.
+    //
+    // Roda DEPOIS de o lead estar gravado e nunca lança: e-mail que não sai não
+    // pode custar o pedido. A falha vai para `confirmation_error` no lead, que é
+    // o que o admin mostra.
+    if (!campaign) {
+      await sendAnfrageBestaetigung({
+        leadId: leadId!,
+        name,
+        email,
+        pax,
+        children,
+        days,
+        interessen: interessen.length > 0 ? interessen : null,
+        wunsch: wunsch || null,
+      });
+    }
+
+    // Best-effort admin notification; the lead is saved either way.
+    try {
+      const { data: settings } = await supabase
+        .from('site_settings')
+        .select('business_email')
+        .limit(1)
+        .single();
+      const to = settings?.business_email || 'will@riofuerdeutsche.de';
+
+      const daysHtml = days.map(d => `<li>${formatGermanDay(d)}</li>`).join('');
+      const campaignHtml = campaign
+        ? `
+          <p>
+            <strong>Campanha:</strong> ${escapeHtml(campaign.label)}<br/>
+            <strong>Interesses:</strong> ${interestLabels.length > 0 ? escapeHtml(interestLabels.join(', ')) : '—'}<br/>
+            <strong>Dia preferido:</strong> ${campaignData?.preferred_day ? formatGermanDay(campaignData.preferred_day) : 'indiferente'}<br/>
+            <strong>Idade das crianças:</strong> ${escapeHtml(campaignData?.children_ages ?? '') || '—'}<br/>
+            <strong>Telefone (país):</strong> ${phoneCountry ? escapeHtml(PHONE_COUNTRY_LABELS[phoneCountry]) : '—'}
+          </p>
+          ${outsideDach
+            ? `<p style="padding:12px;border-radius:8px;background:#fef3c7;color:#78350f">
+                ⚠️ <strong>Este lead informou um telefone fora de DE/AT/CH.</strong>
+                Vale conferir se o tour em grupo em alemão faz sentido para ele.
+              </p>`
+            : ''}`
         : '';
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
-      from: 'Rio für Deutsche <will@riofuerdeutsche.de>',
-      to,
-      subject: campaign
-        ? `🚢 ${campaign.label}: ${name} (${paxLabel})${outsideDach ? ' ⚠️ fora do DACH' : ''}`
-        : `${priorityFlag}🔔 Nova solicitação de tour: ${name} (${paxLabel}, ${days.length} dia${days.length !== 1 ? 's' : ''})`,
-      html: `
-        <h2>${campaign ? `Novo interessado — ${escapeHtml(campaign.label)}` : 'Nova solicitação pelo formulário Anfrage'}</h2>
-        ${priorityHtml}
-        <p>
-          <strong>Nome:</strong> ${escapeHtml(name)}<br/>
-          <strong>E-Mail:</strong> ${escapeHtml(email)}<br/>
-          <strong>Telefone:</strong> ${escapeHtml(phone) || '—'}<br/>
-          <strong>Adultos:</strong> ${pax}<br/>
-          <strong>Crianças:</strong> ${children}<br/>
-          <strong>Origem:</strong> formulário${arrivalChannel ? ` (via ${escapeHtml(arrivalChannel)})` : ''}<br/>
-          <strong>Página de tour:</strong> ${tourSlug ? escapeHtml(tourSlug) : '—'}<br/>
-          <strong>Assunto:</strong> ${thema ? escapeHtml(thema) : '—'}<br/>
-          <strong>Interesses:</strong> ${interessen.length > 0 ? escapeHtml(interessen.join(', ')) : '—'}<br/>
-          <strong>Pedido especial:</strong> ${wunsch ? escapeHtml(wunsch) : '—'}
-        </p>
-        ${campaignHtml}
-        <p><strong>Dias desejados:</strong></p>
-        <ul>${daysHtml}</ul>
-        <p>
-          ${campaign
-            ? `<a href="${leadUrl}">Abrir lead</a> · <a href="https://riofuerdeutsche.de/admin/leads?campaign=${campaign.slug}">Ver toda a campanha</a>`
-            : `<a href="${propostaUrl}">Criar proposta agora</a> · <a href="https://riofuerdeutsche.de/admin/crm">Abrir CRM</a>`}
-        </p>
-      `,
-    });
-  } catch {
-    // notification failure must not break the client flow
-  }
+      // Prioridade no ASSUNTO, não só no corpo: é o que decide a ordem em que o
+      // Will abre a caixa. Grupo grande, roteiro longo ou Carnaval não podem ficar
+      // atrás de curioso na fila. Ver src/lib/leadPriority.ts.
+      const priorities = leadPriorityReasons({ pax, children, requested_days: days });
+      const priorityFlag = priorities.length > 0 ? '⭐ ' : '';
+      const priorityHtml =
+        priorities.length > 0
+          ? `<p style="padding:12px;border-radius:8px;background:#ecfdf5;color:#065f46">
+              ⭐ <strong>Lead prioritário:</strong> ${priorities.map(r => PRIORITY_LABELS[r]).join(', ')}.
+            </p>`
+          : '';
+
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({
+        from: 'Rio für Deutsche <will@riofuerdeutsche.de>',
+        to,
+        subject: campaign
+          ? `🚢 ${campaign.label}: ${name} (${paxLabel})${outsideDach ? ' ⚠️ fora do DACH' : ''}`
+          : `${priorityFlag}🔔 Nova solicitação de tour: ${name} (${paxLabel}, ${days.length} dia${days.length !== 1 ? 's' : ''})`,
+        html: `
+          <h2>${campaign ? `Novo interessado — ${escapeHtml(campaign.label)}` : 'Nova solicitação pelo formulário Anfrage'}</h2>
+          ${priorityHtml}
+          <p>
+            <strong>Nome:</strong> ${escapeHtml(name)}<br/>
+            <strong>E-Mail:</strong> ${escapeHtml(email)}<br/>
+            <strong>Telefone:</strong> ${escapeHtml(phone) || '—'}<br/>
+            <strong>Adultos:</strong> ${pax}<br/>
+            <strong>Crianças:</strong> ${children}<br/>
+            <strong>Origem:</strong> formulário${arrivalChannel ? ` (via ${escapeHtml(arrivalChannel)})` : ''}<br/>
+            <strong>Página de tour:</strong> ${tourSlug ? escapeHtml(tourSlug) : '—'}<br/>
+            <strong>Assunto:</strong> ${thema ? escapeHtml(thema) : '—'}<br/>
+            <strong>Interesses:</strong> ${interessen.length > 0 ? escapeHtml(interessen.join(', ')) : '—'}<br/>
+            <strong>Pedido especial:</strong> ${wunsch ? escapeHtml(wunsch) : '—'}
+          </p>
+          ${campaignHtml}
+          <p><strong>Dias desejados:</strong></p>
+          <ul>${daysHtml}</ul>
+          <p>
+            ${campaign
+              ? `<a href="${leadUrl}">Abrir lead</a> · <a href="https://riofuerdeutsche.de/admin/leads?campaign=${campaign.slug}">Ver toda a campanha</a>`
+              : `<a href="${propostaUrl}">Criar proposta agora</a> · <a href="https://riofuerdeutsche.de/admin/crm">Abrir CRM</a>`}
+          </p>
+        `,
+      });
+    } catch {
+      // notification failure must not break the client flow
+    }
+  });
 
   // O id volta pro cliente porque o "Wie hast du uns gefunden?" é respondido
   // DEPOIS do envio, na página de sucesso. O que dá pra fazer com ele está
